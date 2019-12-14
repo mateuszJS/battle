@@ -1,4 +1,4 @@
-import EffectFactory from '~/effects//EffectsFactory';
+import EffectsFactory from '~/effects//EffectsFactory';
 
 const portalProperties = [
   {
@@ -46,7 +46,7 @@ const getPortalSprite = (x, y, angle, sortingLayer: PIXI.display.Group): PIXI.Co
 
 
 
-  const portalFX: any = EffectFactory.createPortalEffect(props.portalEffect.x, props.portalEffect.y);
+  const portalFX: any = EffectsFactory.createPortalEffect(props.portalEffect.x, props.portalEffect.y);
 
   portalFX.height = props.portalEffect.height;
   portalFX.width = props.portalEffect.width;

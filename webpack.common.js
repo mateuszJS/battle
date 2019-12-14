@@ -7,23 +7,22 @@ const webpack = require('webpack');
 
 const HOST = process.env.HOST || "127.0.0.1";
 const PORT = process.env.PORT || "7777";
-
 const devMode = process.env.NODE_ENV !== 'production'
 
 module.exports = {
 	entry: {
 		index: `${__dirname}/src/index.ts`,
-		// vendor: ['pixi.js'],
+		vendor: ['pixi.js'],
 	},
 	output: {
 		path: `${__dirname}/dist`,
-		// publicPath: '/',
-		// filename: '[name].bundle.js'
+		publicPath: '/',
+		filename: '[name].bundle.js'
 	},
 	devtool: 'eval-source-map',
 	resolve: {
-		extensions: ['.js', '.ts']
-		// extensions: ['.js', '.ts', '.wasm']
+		// extensions: ['.js', '.ts'],,
+    extensions: ['.js', '.ts', '.wasm'],
   },
   stats: { // looks like the 'minimal', but with colors
     all: false,
@@ -49,16 +48,7 @@ module.exports = {
 					}
 				]
 			},
-    	]
-	},
-	devServer: {
-		contentBase: "./dist",
-		// enable HMR
-		hot: true,
-		// embed the webpack-dev-server runtime into the bundle
-		inline: true,
-		port: PORT,
-		host: HOST
+    ]
 	},
 	plugins: [
     new WasmPackPlugin({
