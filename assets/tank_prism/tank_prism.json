@@ -1,0 +1,164 @@
+{"frames": {
+
+"_0000_t_p0000.png.png":
+{
+	"frame": {"x":1,"y":556,"w":35,"h":44},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":12,"y":0,"w":35,"h":44},
+	"sourceSize": {"w":51,"h":47}
+},
+"_0001_t_p0001.png.png":
+{
+	"frame": {"x":1,"y":593,"w":35,"h":44},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":14,"y":1,"w":35,"h":44},
+	"sourceSize": {"w":51,"h":47}
+},
+"_0002_t_p0002.png.png":
+{
+	"frame": {"x":1,"y":438,"w":34,"h":46},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":17,"y":1,"w":34,"h":46},
+	"sourceSize": {"w":51,"h":47}
+},
+"_0003_t_p0003.png.png":
+{
+	"frame": {"x":1,"y":474,"w":39,"h":45},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":12,"y":2,"w":39,"h":45},
+	"sourceSize": {"w":51,"h":47}
+},
+"_0004_t_p0004.png.png":
+{
+	"frame": {"x":1,"y":630,"w":43,"h":43},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":8,"y":4,"w":43,"h":43},
+	"sourceSize": {"w":51,"h":47}
+},
+"_0005_t_p0005.png.png":
+{
+	"frame": {"x":1,"y":248,"w":47,"h":39},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":4,"y":8,"w":47,"h":39},
+	"sourceSize": {"w":51,"h":47}
+},
+"_0006_t_p0006.png.png":
+{
+	"frame": {"x":1,"y":69,"w":49,"h":36},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":2,"y":10,"w":49,"h":36},
+	"sourceSize": {"w":51,"h":47}
+},
+"_0007_t_p0007.png.png":
+{
+	"frame": {"x":1,"y":1,"w":51,"h":32},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":0,"y":13,"w":51,"h":32},
+	"sourceSize": {"w":51,"h":47}
+},
+"_0008_t_p0008.png.png":
+{
+	"frame": {"x":1,"y":107,"w":49,"h":34},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":0,"y":11,"w":49,"h":34},
+	"sourceSize": {"w":51,"h":47}
+},
+"_0009_t_p0009.png.png":
+{
+	"frame": {"x":1,"y":213,"w":48,"h":33},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":0,"y":10,"w":48,"h":33},
+	"sourceSize": {"w":51,"h":47}
+},
+"_0010_t_p0010.png.png":
+{
+	"frame": {"x":1,"y":143,"w":49,"h":33},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":0,"y":8,"w":49,"h":33},
+	"sourceSize": {"w":51,"h":47}
+},
+"_0011_t_p0011.png.png":
+{
+	"frame": {"x":1,"y":35,"w":51,"h":32},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":0,"y":6,"w":51,"h":32},
+	"sourceSize": {"w":51,"h":47}
+},
+"_0012_t_p0012.png.png":
+{
+	"frame": {"x":1,"y":178,"w":49,"h":33},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":2,"y":4,"w":49,"h":33},
+	"sourceSize": {"w":51,"h":47}
+},
+"_0013_t_p0013.png.png":
+{
+	"frame": {"x":1,"y":398,"w":46,"h":38},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":5,"y":2,"w":46,"h":38},
+	"sourceSize": {"w":51,"h":47}
+},
+"_0014_t_p0014.png.png":
+{
+	"frame": {"x":1,"y":675,"w":42,"h":41},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":9,"y":2,"w":42,"h":41},
+	"sourceSize": {"w":51,"h":47}
+},
+"_0015_t_p0015.png.png":
+{
+	"frame": {"x":1,"y":515,"w":39,"h":45},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":12,"y":0,"w":39,"h":45},
+	"sourceSize": {"w":51,"h":47}
+},
+"_0016_t_p0016.png.png":
+{
+	"frame": {"x":1,"y":326,"w":34,"h":47},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":17,"y":0,"w":34,"h":47},
+	"sourceSize": {"w":51,"h":47}
+},
+"_0017_t_p0017.png.png":
+{
+	"frame": {"x":1,"y":289,"w":35,"h":47},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":14,"y":0,"w":35,"h":47},
+	"sourceSize": {"w":51,"h":47}
+},
+"_0018_t_p0018.png.png":
+{
+	"frame": {"x":1,"y":362,"w":34,"h":47},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":13,"y":0,"w":34,"h":47},
+	"sourceSize": {"w":51,"h":47}
+}},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "tank_prism.png",
+	"format": "RGBA8888",
+	"size": {"w":53,"h":717},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:fddf7251fda82afc3510348c0b299b55:2f1ba958857e87e61338496ca42e7619:1b1508507357573c07dcc30366cb9acb$"
+}
+}

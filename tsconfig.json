@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "allowSyntheticDefaultImports": true,
+    "sourceMap": true,
+    "module": "commonjs",
+    // "strict": true,
+    "importHelpers": true,
+    "allowJs": true,
+    "baseUrl": "./",
+    "paths": {
+      "~/*": ["./src/*"],
+      "Utils": ["./src/utils/Utils"],
+      "Settings": ["./src/modules/gameSettings"]
+    }
+  },
+  "exclude": ["node_modules"]
+}
