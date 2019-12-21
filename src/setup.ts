@@ -7,8 +7,8 @@ import UnitFactory from '~/units/UnitFactory';
 import influenceController from '~/ai/influenceMap';
 import aiController from '~/ai/ai';
 import Icons from '~/modules/icons';
-
 import getSortableLayer from '~/modules/getSortableLayer';
+import EffectsFactory from '~/effects/EffectsFactory';
 
 import testIt from './modules/testingFunction';
 import createFactories from './createFactories'
@@ -20,11 +20,14 @@ import render from './render';
 window.testIt = testIt;
 
 const setup = (playersList: Array<'HUMANS'>) => {
+  EffectsFactory.initialize();
+
   const factionsCount = playersList.length;
   const createEmptyArr = () => Array.from({ length: factionsCount }, () => [])
 
-  const sortingLayer = getSortableLayer();
-  addBackground();
+  const mapSprite = addBackground();
+  const sortingLayer = getSortableLayer(mapSprite);
+
   UnitFactory.inizializationTypes(sortingLayer);
   influenceController.init(window.mapWidth, window.mapHeight);
   Icons.init();

@@ -1,0 +1,17 @@
+{
+  "presets": ["@babel/preset-env"],
+  "plugins": [
+    "@babel/plugin-syntax-dynamic-import",
+    [
+      "module-resolver",
+      {
+        "root": ["./src"],
+        "alias": {
+          "~": "./src",
+          "Utils": "./src/utils/Utils.ts",
+          "Settings": "./src/modules/gameSettings.ts"
+        }
+      }
+    ]
+  ]
+}

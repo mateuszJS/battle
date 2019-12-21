@@ -3,8 +3,9 @@
     "target": "es5",
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
-    "module": "commonjs",
-    // "strict": true,
+    "module": "ESNext", // Pixi works with commonJS, but dynamic imports works with EXNext </3
+    "moduleResolution": "node", // to fix above comment, no pixi is resolved correctly
+    // ^ also with that we don't have to import PIXI in each file
     "importHelpers": true,
     "allowJs": true,
     "baseUrl": "./",

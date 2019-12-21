@@ -42,8 +42,8 @@ const addBackground = () => {
   const renderTexture = new PIXI.RenderTexture(baseRenderTexture);
   window.app.renderer.render(map, renderTexture);
 
-  const sprite = new PIXI.Sprite(renderTexture);
-  window.app.stage.addChild(sprite);
+  const mapSprite = new PIXI.Sprite(renderTexture);
+  return mapSprite;
   // map.destroy(true);
 }
 
