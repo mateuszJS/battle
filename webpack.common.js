@@ -12,7 +12,6 @@ const devMode = process.env.NODE_ENV !== 'production'
 module.exports = {
 	entry: {
 		index: `${__dirname}/src/index.ts`,
-		vendor: ['pixi.js'],
 	},
 	output: {
 		path: `${__dirname}/dist`,
@@ -21,7 +20,6 @@ module.exports = {
 	},
 	devtool: 'eval-source-map',
 	resolve: {
-		// extensions: ['.js', '.ts'],,
     extensions: ['.js', '.ts', '.wasm'],
   },
   stats: { // looks like the 'minimal', but with colors
@@ -35,6 +33,7 @@ module.exports = {
 			{
 				test: /\.(ts|js)$/,
 				exclude: /node_modules/,
+				// use: ['babel-loader']
 				use: ['babel-loader', 'ts-loader']
 			},
 			{
@@ -59,7 +58,7 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: 'template.html'
     }),
-    new webpack.ProvidePlugin({
+    new webpack.ProvidePlugin({ // FIX: pixi-layers.js throw error ReferenceError: PIXI is not defined
       PIXI: 'pixi.js'
     }),
 	]
