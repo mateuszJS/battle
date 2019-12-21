@@ -12,8 +12,8 @@ class EffectsFactory {
     EffectsFactory.fireEffectFrames = createTexturesList(i => `fireEffect_${i}.png`, 7)
     EffectsFactory.laserEffectFrames = createTexturesList(i => `laserEffect_${i}.png`, 7)
     EffectsFactory.portalEffectFrames = createTexturesList(i => {
-      const index = i < 10 ? `0${i}` : i;
-      `Gate_FX_000${index}.png`
+      const index = i < 10 ? `0${i}` : i
+      return `Gate_FX_000${index}.png`
     }, 97)
   }
 

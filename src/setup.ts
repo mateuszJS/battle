@@ -20,11 +20,14 @@ import render from './render';
 window.testIt = testIt;
 
 const setup = (playersList: Array<'HUMANS'>) => {
+  EffectsFactory.initialize();
+
   const factionsCount = playersList.length;
   const createEmptyArr = () => Array.from({ length: factionsCount }, () => [])
 
-  const sortingLayer = getSortableLayer();
-  addBackground();
+  const mapSprite = addBackground();
+  const sortingLayer = getSortableLayer(mapSprite);
+
   UnitFactory.inizializationTypes(sortingLayer);
   influenceController.init(window.mapWidth, window.mapHeight);
   Icons.init();
@@ -72,8 +75,6 @@ const setup = (playersList: Array<'HUMANS'>) => {
     });
     resCounter.innerHTML = `${factories[0].resources} /+${28 + resX * 7}`;
   }
-
-  EffectsFactory.initialize();
 
   window.app.ticker.add((delta: number) => render(
     delta,
