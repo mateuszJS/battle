@@ -26,7 +26,7 @@ module.exports = {
 	module: {
 		rules: [
 			{
-				test: /\.(ts|js)$/,
+				test: /\.(ts|js)$/, // TODO: remove upon chane all files to ts
 				exclude: /node_modules/,
 				use: ['babel-loader', 'ts-loader']
 			},
