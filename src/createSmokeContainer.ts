@@ -9,9 +9,9 @@ const createSmokeContainer = () => {
       tint: false,
       vertices: false,
     }),
-    elements: []
+    elements: [],
   }
-  window.app.stage.addChild(window.smokeContainer.graphics as PIXI.DisplayObject)
+  window.app.stage.addChild(window.smokeContainer.graphics)
 }
 
 export default createSmokeContainer

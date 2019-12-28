@@ -1,13 +1,8 @@
 "use strict";
 const path = require("path")
-const DashboardPlugin = require('webpack-dashboard/plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const WasmPackPlugin = require("@wasm-tool/wasm-pack-plugin")
 const webpack = require('webpack');
-
-const HOST = process.env.HOST || "127.0.0.1";
-const PORT = process.env.PORT || "7777";
-const devMode = process.env.NODE_ENV !== 'production'
 
 module.exports = {
 	entry: {
@@ -33,7 +28,6 @@ module.exports = {
 			{
 				test: /\.(ts|js)$/,
 				exclude: /node_modules/,
-				// use: ['babel-loader']
 				use: ['babel-loader', 'ts-loader']
 			},
 			{
@@ -54,7 +48,6 @@ module.exports = {
       crateDirectory: path.resolve(__dirname, "crate"),
       extraArgs: "--out-name index",
     }),
-		new DashboardPlugin(),
     new HtmlWebpackPlugin({
       template: 'template.html'
     }),

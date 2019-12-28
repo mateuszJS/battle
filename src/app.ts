@@ -5,25 +5,21 @@ import 'pixi-layers'
 import { memory } from '../crate/pkg/index_bg'
 import { method } from '../crate/pkg/index'
 
-import testIt from './modules/testingFunction';
 import listOfAssets from './listOfAssets'
-import setup from './setup';
+import setup from './setup'
 
-// window.testIt = testIt;
 console.log(method(5))
 // console.log(memory, method(5))
-console.log('fie loaded');
+console.log('fie loaded')
 
 window.startGame = (playersList: Array<'HUMANS'>) => {
   const app = new PIXI.Application({
     width: window.innerWidth,
     height: window.innerHeight,
     backgroundColor: 0x000000,
-  });
-  document.body.appendChild(app.view);
-  window.app = app;
+  })
+  document.body.appendChild(app.view)
+  window.app = app
 
-  app.loader
-    .add(listOfAssets)
-    .load(() => setup(playersList))
+  app.loader.add(listOfAssets).load(() => setup(playersList))
 }
