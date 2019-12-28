@@ -1,11 +1,10 @@
-import Squad from "./src/units/Squad";
-import Unit from "./src/units/Unit";
-import { IIcon } from "./src/modules/icons";
+import Squad from './units/Squad'
+import Unit from './units/Unit'
+import { IIcon } from './modules/icons'
 
 declare global {
   interface Window {
     PIXI: typeof PIXI
-    testIt: any
     app: PIXI.Application
     bulletContainer: any
     squadsWereMoved: Squad[][]
@@ -16,13 +15,13 @@ declare global {
     icons: IIcon[]
     allSelectedUnits: Unit[]
     mapWidth: number
-    mapHeight: number,
-    flamesUpdaters: any[],
+    mapHeight: number
+    flamesUpdaters: any[]
     smokeContainer: {
-      graphics: PIXI.particles.ParticleContainer
+      graphics: PIXI.ParticleContainer
       elements: PIXI.Sprite[]
-    },
-    userIcons: any[],
+    }
+    userIcons: any[]
     map: boolean
     startGame: (playersList: string[]) => void
   }
@@ -47,5 +46,4 @@ declare global {
     drawAndAddProps: () => any
     explosion?: explosion
   }
-
 }

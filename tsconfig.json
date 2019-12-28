@@ -7,13 +7,21 @@
     "moduleResolution": "node", // to fix above comment, no pixi is resolved correctly
     // ^ also with that we don't have to import PIXI in each file
     "importHelpers": true,
-    "allowJs": true,
+    "allowJs": true, // to import web assembly module
     "baseUrl": "./",
     "paths": {
-      "~/*": ["./src/*"],
-      "Utils": ["./src/utils/Utils"],
-      "Settings": ["./src/modules/gameSettings"]
+      "~/*": [
+        "./src/*"
+      ],
+      "Utils": [
+        "./src/utils/Utils"
+      ],
+      "Settings": [
+        "./src/modules/gameSettings"
+      ]
     }
   },
-  "exclude": ["node_modules"]
+  "include": [
+    "src"
+  ]
 }
