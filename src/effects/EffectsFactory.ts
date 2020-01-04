@@ -1,5 +1,5 @@
 import Utils from 'Utils'
-import STATE from '~/modules/consts'
+import { STATE } from 'Consts'
 import createTexturesList from './createTexturesList'
 
 class EffectsFactory {

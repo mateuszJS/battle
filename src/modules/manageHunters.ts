@@ -1,12 +1,10 @@
-import Unit from '~/units/Unit';
-import setDestinationPoint from '~/modules/setDestination';
-import STATE from '~/modules/consts';
-import Utils from 'Utils';
-import Squad from '~/units/Squad';
+import Unit from '~/units/Unit'
+import setDestinationPoint from '~/modules/setDestination'
+import Squad from '~/units/Squad'
 
 interface theSameAim {
-    aim: Squad,
-    units: Unit[]
+  aim: Squad
+  units: Unit[]
 }
 
 const getIndexWithTheSameAim = (arr: theSameAim[], attackAim: Squad) => {
@@ -20,15 +18,15 @@ const getIndexWithTheSameAim = (arr: theSameAim[], attackAim: Squad) => {
 
 export default (hunters: Unit[][]) => {
   hunters.forEach(faction => {
-    if (faction.length === 0) return;
-    const unitsWithSameAim: theSameAim[] = [];
+    if (faction.length === 0) return
+    const unitsWithSameAim: theSameAim[] = []
     faction.forEach(unit => {
       if (unit.squad.aim && unit.squad.aim.members.length > 0) {
         const index = getIndexWithTheSameAim(unitsWithSameAim, unit.squad.aim)
-        if(index === -1) {
+        if (index === -1) {
           unitsWithSameAim.push({
             aim: unit.squad.aim,
-            units: [unit]
+            units: [unit],
           })
         } else {
           unitsWithSameAim[index].units.push(unit)
@@ -36,10 +34,10 @@ export default (hunters: Unit[][]) => {
       } else {
         unit.stay()
       }
-    });
+    })
 
     unitsWithSameAim.forEach(theSameAim => {
-      setDestinationPoint(theSameAim.aim, theSameAim.units, true, false, false);
-    });
-  });
+      setDestinationPoint(theSameAim.aim, theSameAim.units, true, false, false)
+    })
+  })
 }

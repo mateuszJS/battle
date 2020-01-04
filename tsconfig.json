@@ -18,6 +18,9 @@
       ],
       "Settings": [
         "./src/modules/gameSettings"
+      ],
+      "Consts": [
+        "./src/consts/consts.ts"
       ]
     }
   },

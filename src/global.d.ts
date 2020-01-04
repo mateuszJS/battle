@@ -1,6 +1,7 @@
 import Squad from './units/Squad'
 import Unit from './units/Unit'
 import { IIcon } from './modules/icons'
+import { WeaponName } from './weapons/WeaponTypes'
 
 declare global {
   interface Window {
@@ -31,19 +32,18 @@ declare global {
     y: number
   }
 
-  interface explosion {
-    range: number
-    strength: number
-  }
-
-  interface weaponType {
+  interface WeaponType {
     reloadTime: number
     range: number
     speed: number
     scatter: number
     damage: number
     waitReloadingTime: number
-    drawAndAddProps: () => any
-    explosion?: explosion
+    drawAndAddProps: () => void
+    type: WeaponName
+    explosion?: {
+      range: number
+      strength: number
+    }
   }
 }
