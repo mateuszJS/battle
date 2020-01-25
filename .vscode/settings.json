@@ -12,4 +12,7 @@
   "editor.rulers": [
     80
   ],
+  "workbench.colorCustomizations": {
+    "titleBar.activeBackground": "#38403d"
+  }
 }

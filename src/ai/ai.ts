@@ -4,7 +4,7 @@ import Squad from '~/units/Squad';
 import Utils from 'Utils';
 import Unit from '~/units/Unit';
 import setAbility from '~/abilities/setAbilitie';
-import STATE from '~/modules/consts';
+import { STATE } from 'Consts';
 
 interface IArmy {
   squads: Squad[]

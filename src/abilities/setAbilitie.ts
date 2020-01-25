@@ -2,7 +2,7 @@ import Squad from '~/units/Squad';
 import { abilityFactory } from './abilityFactory';
 import setDestinationPoint from '~/modules/setDestination';
 import Utils from 'Utils';
-import STATE from '~/modules/consts';
+import { STATE } from 'Consts';
 import Unit from '~/units/Unit';
 
 const setAbility = (squads: Squad[], target: Point, type: string): void => {

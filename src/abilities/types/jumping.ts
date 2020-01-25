@@ -1,7 +1,7 @@
 import WeaponTypes from '~/weapons/WeaponTypes';
 import EffectsFactory from '~/effects/EffectsFactory';
 import Utils from 'Utils';
-import STATE from '~/modules/consts';
+import { STATE } from 'Consts';
 import Unit from '~/units/Unit';
 import Squad from '~/units/Squad';
 

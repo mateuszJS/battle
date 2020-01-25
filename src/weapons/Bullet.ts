@@ -1,13 +1,22 @@
+import Unit from '~/units/Unit'
+
 class Bullet {
   private x: number
   private y: number
-  private aim: any
+  private aim: Unit
   private angle: number
   private damage: number
-  private graphics: any
+  private graphics: PIXI.Graphics
   private updateBullet: () => any
 
-  constructor({ x, y, angle, aim, speed, damage, drawAndAddProps }) {
+  constructor(
+    x: number,
+    y: number,
+    angle: number,
+    aim: Unit,
+    damage: number,
+    drawAndAddProps: Function,
+  ) {
     this.x = x
     this.y = y
     this.aim = aim
@@ -18,7 +27,6 @@ class Bullet {
 
   update() {
     if (this.updateBullet() === 'DESTROY') {
-      //to allow for Gabarge Collector to remove this objects
       this.aim = undefined
       this.graphics.destroy()
       this.graphics = undefined

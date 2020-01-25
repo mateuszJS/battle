@@ -1,4 +1,4 @@
-import EffectsFactory from '~/effects//EffectsFactory';
+import EffectsFactory from '~/effects//EffectsFactory'
 
 const portalProperties = [
   {
@@ -23,57 +23,59 @@ const portalProperties = [
   },
 ]
 
-const getPortalSprite = (x, y, angle, sortingLayer: PIXI.display.Group): PIXI.Container => {
-  angle -= Math.PI / 8;// + Math.PI / 2;
+const getPortalSprite = (x, y, angle, sortingLayer: PIXI.display.Group) => {
+  angle -= Math.PI / 8 // + Math.PI / 2;
   // angle *=
-  angle = angle < 0 ? angle + Math.PI * 2 : (angle > Math.PI * 2 ? angle - Math.PI * 2 : angle);
-  const _angle = Math.ceil((angle % (Math.PI * 2)) / ((Math.PI * 2) / 8)); // <0, 7>
-  let index = _angle % (8 / 2);
+  angle =
+    angle < 0
+      ? angle + Math.PI * 2
+      : angle > Math.PI * 2
+      ? angle - Math.PI * 2
+      : angle
+  const _angle = Math.ceil((angle % (Math.PI * 2)) / ((Math.PI * 2) / 8)) // <0, 7>
+  let index = _angle % (8 / 2)
   if (index === 1) {
-    index = 3;
+    index = 3
   } else if (index === 3) {
-    index = 1;
+    index = 1
   }
-  const gateBottom: any = new PIXI.Sprite(PIXI.Texture.from(`gate${index}a.png`));
-  const gateTop: any = new PIXI.Sprite(PIXI.Texture.from(`gate${index}b.png`));
+  const gateBottom = new PIXI.Sprite(PIXI.Texture.from(`gate${index}a.png`))
+  const gateTop = new PIXI.Sprite(PIXI.Texture.from(`gate${index}b.png`))
 
-  const props = portalProperties[index];
+  const props = portalProperties[index]
 
-  gateTop.x = props.gateTop.x;
-  gateTop.y = props.gateTop.y;
-  gateBottom.x = props.gateBottom.x;
-  gateBottom.y = props.gateBottom.y;
+  gateTop.x = props.gateTop.x
+  gateTop.y = props.gateTop.y
+  gateBottom.x = props.gateBottom.x
+  gateBottom.y = props.gateBottom.y
 
+  const portalFX = EffectsFactory.createPortalEffect(
+    props.portalEffect.x,
+    props.portalEffect.y,
+  )
 
+  portalFX.height = props.portalEffect.height
+  portalFX.width = props.portalEffect.width
+  portalFX.skew.set(0, props.portalEffect.skewY)
 
-  const portalFX: any = EffectsFactory.createPortalEffect(props.portalEffect.x, props.portalEffect.y);
+  gateTop.anchor.set(0.5, props.gateTop.anchorY)
+  gateBottom.anchor.set(0.5, props.gateBottom.anchorY)
 
-  portalFX.height = props.portalEffect.height;
-  portalFX.width = props.portalEffect.width;
-  portalFX.skew.set(0, props.portalEffect.skewY);
+  gateBottom.parentGroup = sortingLayer
+  portalFX.parentGroup = sortingLayer
+  gateTop.parentGroup = sortingLayer
 
-  gateTop.anchor.set(0.5, props.gateTop.anchorY);
-  gateBottom.anchor.set(0.5, props.gateBottom.anchorY);
+  window.app.stage.addChild(gateBottom)
+  window.app.stage.addChild(portalFX)
+  window.app.stage.addChild(gateTop)
 
-  gateBottom.parentGroup = sortingLayer;
-  portalFX.parentGroup = sortingLayer;
-  gateTop.parentGroup = sortingLayer;
+  portalFX.alpha = 0.9
+  ;[gateBottom, portalFX, gateTop].map(child => {
+    child.x += x
+    child.y += y
+  })
 
-  window.app.stage.addChild(gateBottom);
-  window.app.stage.addChild(portalFX);
-  window.app.stage.addChild(gateTop);
-
-  portalFX.alpha = 0.9;
-
-  [gateBottom, portalFX, gateTop].map(child => {
-    child.x += x;
-    child.y += y;
-  });
-
-  return portalFX;
+  return portalFX
 }
 
-
-
-export default getPortalSprite;
-
+export default getPortalSprite

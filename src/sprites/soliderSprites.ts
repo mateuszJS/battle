@@ -1,6 +1,8 @@
-export default () => {
-  const scale = 0.7;
-  const humanIdleFrames = [];
+import { ModelDetails } from './types'
+
+export default (): (() => ModelDetails) => {
+  const scale = 0.7
+  const humanIdleFrames = []
 
   const framesPeriods = {
     STAY: {
@@ -35,80 +37,90 @@ export default () => {
     },
   }
 
-
-  for (let i = 0; i < framesPeriods.STAY.sides * framesPeriods.STAY.length; i++) {
-    const count = i < 10 ? `0${i}` : i;
-    const texture = `idle_00${count}_solider_run00${count}.png.png`;
-    humanIdleFrames.push(PIXI.Texture.from(texture));
+  for (
+    let i = 0;
+    i < framesPeriods.STAY.sides * framesPeriods.STAY.length;
+    i++
+  ) {
+    const count = i < 10 ? `0${i}` : i
+    const texture = `idle_00${count}_solider_run00${count}.png.png`
+    humanIdleFrames.push(PIXI.Texture.from(texture))
   }
 
-  for (let i = 0; i < framesPeriods.SHOOT.sides * framesPeriods.SHOOT.length; i++) {
-    const count = i < 10 ? `0${i}` : i;
-    const texture = `_00${count}_s_f00${count}.png.png`;
-    humanIdleFrames.push(PIXI.Texture.from(texture));
+  for (
+    let i = 0;
+    i < framesPeriods.SHOOT.sides * framesPeriods.SHOOT.length;
+    i++
+  ) {
+    const count = i < 10 ? `0${i}` : i
+    const texture = `_00${count}_s_f00${count}.png.png`
+    humanIdleFrames.push(PIXI.Texture.from(texture))
   }
 
   for (let i = 0; i < framesPeriods.GO.sides * framesPeriods.GO.length; i++) {
-    let count;
+    let count
     if (i < 10) {
-      count = `00${i}`;
+      count = `00${i}`
     } else if (i < 100) {
-      count = `0${i}`;
+      count = `0${i}`
     } else {
-      count = i;
+      count = i
     }
-    const texture = `_0${count}_s_g0${count}.png.png`;
-    humanIdleFrames.push(PIXI.Texture.from(texture));
+    const texture = `_0${count}_s_g0${count}.png.png`
+    humanIdleFrames.push(PIXI.Texture.from(texture))
   }
 
   for (let i = 0; i < framesPeriods.FLY.sides * framesPeriods.FLY.length; i++) {
-    let count;
+    let count
     if (i < 10) {
-      count = `00${i}`;
+      count = `00${i}`
     } else if (i < 100) {
-      count = `0${i}`;
+      count = `0${i}`
     } else {
-      count = i;
+      count = i
     }
-    const texture = `_0${count}_s_h0${count}.png.png`;
-    humanIdleFrames.push(PIXI.Texture.from(texture));
+    const texture = `_0${count}_s_h0${count}.png.png`
+    humanIdleFrames.push(PIXI.Texture.from(texture))
   }
 
-  for (let i = 0; i < framesPeriods.GETUP.sides * framesPeriods.GETUP.length; i++) {
-    let count;
+  for (
+    let i = 0;
+    i < framesPeriods.GETUP.sides * framesPeriods.GETUP.length;
+    i++
+  ) {
+    let count
     if (i < 10) {
-      count = `00${i}`;
+      count = `00${i}`
     } else if (i < 100) {
-      count = `0${i}`;
+      count = `0${i}`
     } else {
-      count = i;
+      count = i
     }
-    const texture = `_0${count}_s_gu0${count}.png.png`;
-    humanIdleFrames.push(PIXI.Texture.from(texture));
+    const texture = `_0${count}_s_gu0${count}.png.png`
+    humanIdleFrames.push(PIXI.Texture.from(texture))
   }
 
-  const angles = [15, 45, 75, 115, 135, 165, 195, 225, 255, 285, 315, 345];
-  const rifleAngles = [0, 35, 58, 86, 115, 140, 175, 210, 235, 270, 295, 320];
+  const angles = [15, 45, 75, 115, 135, 165, 195, 225, 255, 285, 315, 345]
+  const rifleAngles = [0, 35, 58, 86, 115, 140, 175, 210, 235, 270, 295, 320]
 
   const calculateRiflePosition = () => {
-    return rifleAngles.map((i) => {
+    return rifleAngles.map(i => {
       const radius = 48.5,
-        angle = (i + 90) * Math.PI / 180;
+        angle = ((i + 90) * Math.PI) / 180
 
-      let x = -Math.sin(angle) * radius,
-        y = -Math.cos(angle) * radius;
-      y *= 0.783;
+      const x = -Math.sin(angle) * radius
+      const y = -Math.cos(angle) * radius * 0.783
 
-      return { x, y };
-    });
+      return { x, y }
+    })
   }
 
-  const riflePoints = calculateRiflePosition();
+  const riflePoints = calculateRiflePosition()
 
   return () => {
-    const movieClip = new PIXI.AnimatedSprite(humanIdleFrames);
-    movieClip.animationSpeed = 0.4;
-    movieClip.scale.set(scale);
+    const movieClip = new PIXI.AnimatedSprite(humanIdleFrames)
+    movieClip.animationSpeed = 0.4
+    movieClip.scale.set(scale)
     // movieClip.anchor.set(0.5, 0);
 
     return {
@@ -116,8 +128,8 @@ export default () => {
       riflePoints,
       angles,
       scale,
-      vertialOffset: 23,
-      framesPeriods
-    };
+      verticalOffset: 23,
+      framesPeriods,
+    }
   }
 }

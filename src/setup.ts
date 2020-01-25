@@ -25,7 +25,7 @@ const setup = (playersList: Array<'HUMANS'>) => {
   const mapSprite = addBackground()
   const sortingLayer = getSortableLayer(mapSprite)
 
-  UnitFactory.inizializationTypes(sortingLayer)
+  UnitFactory.initializationTypes(sortingLayer)
   influenceController.init(window.mapWidth, window.mapHeight)
   Icons.init()
 
