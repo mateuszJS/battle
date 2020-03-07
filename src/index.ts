@@ -1,3 +1,3 @@
-import("./app").then(() => {
+import('./app').then(() => {
   console.log('loaded...')
-});
+})
