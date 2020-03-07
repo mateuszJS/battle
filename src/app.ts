@@ -2,15 +2,10 @@ import * as PIXI from 'pixi.js'
 window.PIXI = PIXI
 import 'pixi-layers'
 
-import { memory } from '../crate/pkg/index_bg'
-import { method } from '../crate/pkg/index'
-
 import listOfAssets from './listOfAssets'
 import setup from './setup'
 
-console.log(method(5))
-// console.log(memory, method(5))
-console.log('fie loaded')
+console.log('file loaded')
 
 window.startGame = (playersList: Array<'HUMANS'>) => {
   const app = new PIXI.Application({

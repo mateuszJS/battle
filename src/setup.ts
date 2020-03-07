@@ -1,6 +1,3 @@
-import * as PIXI from 'pixi.js'
-import 'pixi-layers'
-
 import mouseControllerInitialize from '~/modules/mouseController'
 import UnitFactory from '~/units/UnitFactory'
 
@@ -16,9 +13,11 @@ import createSmokeContainer from './createSmokeContainer'
 import addBackground from './addBackground'
 import render from './render'
 
+import { memory } from '../crate/pkg/index_bg'
+import { Universe } from '../crate/pkg/index'
+
 const setup = (playersList: Array<'HUMANS'>) => {
   EffectsFactory.initialize()
-
   const factionsCount = playersList.length
   const createEmptyArr = () => Array.from({ length: factionsCount }, () => [])
 
@@ -68,13 +67,17 @@ const setup = (playersList: Array<'HUMANS'>) => {
   const resCounter = document.querySelector('#res-counter')
   const updateResCounter = () => {
     let resX = 0
-    const increaseFactor = resourcesPoints.map(rp => {
+    resourcesPoints.forEach(rp => {
       if (rp.owner === 0) {
         resX++
       }
     })
     resCounter.innerHTML = `${factories[0].resources} /+${28 + resX * 7}`
   }
+  const universe = Universe.new()
+  const [pointer, length] = universe.get_pointer()
+  const universeData = new Float32Array(memory.buffer, pointer, length)
+  console.log({ universeData })
 
   window.app.ticker.add((delta: number) =>
     render(
