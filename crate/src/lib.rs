@@ -13,47 +13,60 @@ macro_rules! log {
   ($($t:tt)*) => (log(&format!($($t)*)))
 }
 mod faction;
+mod unit_types;
 use faction::Faction;
 mod squad;
 use squad::Squad;
 mod unit;
 use unit::Unit;
-
-// mod unit_types;
-// use unit_types::UnitType;
+mod factory;
+use factory::Factory;
 
 #[wasm_bindgen]
 pub struct Universe {
   factions: Vec<Faction>,
-  // length: u64,
+  factories: Vec<Factory>,
 }
 
 #[wasm_bindgen]
 impl Universe {
   pub fn new() -> Universe {
-    let unit = Unit { hp: 3 };
-    let squad = Squad {
-      members: vec![unit],
-    };
-    let faction = Faction {
-      squads: vec![squad],
-      resources: 1,
-    };
     Universe {
-      factions: vec![faction],
+      factions: vec![],
+      factories: vec![],
     }
   }
 
   pub fn get_pointer(&self) -> js_sys::Array {
-    let mut output: Vec<f32> = vec![];
-    for faction in self.factions.iter() {
-      for squad in faction.squads.iter() {
-        for unit in squad.members.iter() {
-          output.push(f32::from(unit.hp))
-        }
-      }
-    }
-    let x = vec![output.as_ptr() as usize as u32, output.len() as u32];
-    x.into_iter().map(JsValue::from).collect()
+    // let units_representation = self
+    //   .factions
+    //   .iter()
+    //   .flat_map(|faction| {
+    //     faction.squads.iter().flat_map(|squad| {
+    //       squad
+    //         .members
+    //         .iter()
+    //         .flat_map(|unit| vec![unit.id, unit.x, unit.y, unit.angle])
+    //     })
+    //   })
+    //   .collect();
+
+    let factories_representation = self
+      .factories
+      .iter()
+      .flat_map(|factory| vec![factory.id, factory.is_producing()])
+      .collect();
+
+    let all_item_representation: Vec<f32> = factories_representation;
+    log!("all_item_representation: {:?}", all_item_representation);
+    let outputMemLocalization = vec![
+      all_item_representation.as_ptr() as usize as u32,
+      all_item_representation.len() as u32,
+    ];
+
+    outputMemLocalization
+      .into_iter()
+      .map(JsValue::from)
+      .collect()
   }
 }

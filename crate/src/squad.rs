@@ -1,6 +1,4 @@
-use crate::unit::{
-  Unit
-};
+use crate::unit::Unit;
 
 #[derive(Clone)]
 pub struct Squad {
