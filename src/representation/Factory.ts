@@ -23,6 +23,12 @@ const portalProperties = [
   },
 ]
 
+function onFrameChange() {
+  if (this.currentFrame > 70) {
+    this.gotoAndPlay(25)
+  }
+}
+
 class Factory {
   public id: number
   private portalFX: PIXI.AnimatedSprite
@@ -78,17 +84,20 @@ class Factory {
 
     this.id = factoryId
     this.portalFX = portalFX
+    portalFX.onFrameChange = onFrameChange
   }
 
   turnOnProduction() {
     if (!this.portalFX.visible) {
-      console.log('turnOnProduction')
       this.portalFX.visible = true
       this.portalFX.alpha = 1
       this.portalFX.gotoAndPlay(0)
     }
   }
   turnOffProduction() {
+    // it depends on animation but maybe we will need to add some internal status
+    // like "isProduction", and then isProduction is false, then do not repeat
+    // animation in "onFrameChange"
     if (this.portalFX.visible) {
       this.portalFX.visible = false
       this.portalFX.alpha = 0
