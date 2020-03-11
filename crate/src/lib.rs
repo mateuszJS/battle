@@ -12,7 +12,9 @@ extern "C" {
 macro_rules! log {
   ($($t:tt)*) => (log(&format!($($t)*)))
 }
+
 mod faction;
+mod id_generator;
 mod unit_types;
 use faction::Faction;
 mod squad;
@@ -25,16 +27,38 @@ use factory::Factory;
 #[wasm_bindgen]
 pub struct Universe {
   factions: Vec<Faction>,
-  factories: Vec<Factory>,
 }
 
 #[wasm_bindgen]
 impl Universe {
-  pub fn new() -> Universe {
-    Universe {
-      factions: vec![],
-      factories: vec![],
-    }
+  pub fn new(faction_ids: Vec<f32>) -> Universe {
+    let angleDiff: f32 = std::f64::consts::PI as f32 / faction_ids.len() as f32;
+    let factions = faction_ids
+      .iter()
+      .enumerate()
+      .map(|(index, &faction_id)| {
+        Faction::new(
+          faction_id,
+          (index as f32) * 100.0 + 200.0,
+          (index as f32) * 100.0 + 200.0,
+          (index as f32) * angleDiff,
+        )
+      })
+      .collect();
+    Universe { factions }
+  }
+
+  pub fn get_factories_init_data(&self) -> js_sys::Array {
+    self
+      .factions
+      .iter()
+      .flat_map(|faction| {
+        let factory = &faction.factory;
+        vec![faction.id, factory.id, factory.x, factory.y, factory.angle]
+      })
+      .into_iter()
+      .map(JsValue::from)
+      .collect()
   }
 
   pub fn get_pointer(&self) -> js_sys::Array {
@@ -52,19 +76,27 @@ impl Universe {
     //   .collect();
 
     let factories_representation = self
-      .factories
+      .factions
       .iter()
-      .flat_map(|factory| vec![factory.id, factory.is_producing()])
+      .flat_map(|faction| {
+        let factory = &faction.factory;
+        vec![
+          factory.id,
+          factory.x,
+          factory.y,
+          factory.angle,
+          factory.is_producing(),
+        ]
+      })
       .collect();
 
     let all_item_representation: Vec<f32> = factories_representation;
-    log!("all_item_representation: {:?}", all_item_representation);
-    let outputMemLocalization = vec![
+    let output_mem_localization = vec![
       all_item_representation.as_ptr() as usize as u32,
       all_item_representation.len() as u32,
     ];
 
-    outputMemLocalization
+    output_mem_localization
       .into_iter()
       .map(JsValue::from)
       .collect()

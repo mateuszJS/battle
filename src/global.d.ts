@@ -2,6 +2,7 @@ import Squad from './units/Squad'
 import Unit from './units/Unit'
 import { IIcon } from './modules/icons'
 import { WeaponName } from './weapons/WeaponTypes'
+import Factory from '~/representation/Factory'
 
 declare global {
   interface Window {
@@ -25,6 +26,7 @@ declare global {
     userIcons: any[]
     map: boolean
     startGame: (playersList: string[]) => void
+    universeRepresentation: Array<Factory>
   }
 
   interface Point {

@@ -1,4 +1,3 @@
-#[derive(Clone)]
 pub struct Unit {
   pub id: f32,
   pub x: f32,
