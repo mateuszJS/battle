@@ -17,16 +17,17 @@ import { memory } from '../crate/pkg/index_bg'
 import { Universe } from '../crate/pkg/index'
 
 import Factory from '~/representation/Factory'
+import { FACTION_BASE_ID } from '~/constants'
 
 // eslint-disable-next-line prettier/prettier
 const playersList = [
-  100000,
-  100001,
-  100002,
-  100003,
-  100004,
-  100005,
-];
+  FACTION_BASE_ID + 1.0,
+  FACTION_BASE_ID + 2.0,
+  FACTION_BASE_ID + 3.0,
+  FACTION_BASE_ID + 4.0,
+  FACTION_BASE_ID + 5.0,
+  FACTION_BASE_ID + 6.0,
+]
 
 const setup = () => {
   EffectsFactory.initialize()
@@ -87,12 +88,9 @@ const setup = () => {
   //   resCounter.innerHTML = `${factories[0].resources} /+${28 + resX * 7}`
   // }
   window.universeRepresentation = []
-  const universe = Universe.new(Float32Array.from(playersList))
-  const [pointer, length] = universe.get_pointer()
-  const universeData = new Float32Array(memory.buffer, pointer, length)
+  const universe = Universe.new(new Float32Array(playersList))
   const factoriesInitData = universe.get_factories_init_data()
-  // faction.id, factory.id, factory.x, factory.y, factory.angle
-  console.log(factoriesInitData)
+
   for (let i = 0; i < factoriesInitData.length; i += 5) {
     const factoryRepresentation = new Factory(
       factoriesInitData[i], // faction id
@@ -104,19 +102,28 @@ const setup = () => {
     )
     window.universeRepresentation.push(factoryRepresentation)
   }
+  const handledKeyUp = ({ code }: KeyboardEvent) => {
+    if (code === 'KeyC') {
+      universe.create_squad('solider')
+    }
+  }
+  document.addEventListener('keyup', handledKeyUp)
 
-  // window.app.ticker.add((delta: number) =>
-  // render(
-  //   delta,
-  //   universeData,
-  //   // updateStage,
-  //   // factories,
-  //   // getUnitType,
-  //   // updateResCounter,
-  //   // createEmptyArr,
-  //   // resourcesPoints,
-  // ),
-  // )
+  window.app.ticker.add((delta: number) => {
+    const [pointer, length] = universe.get_pointer()
+    const universeData = new Float32Array(memory.buffer, pointer, length)
+
+    render(
+      delta,
+      Array.from(universeData),
+      // updateStage,
+      // factories,
+      // getUnitType,
+      // updateResCounter,
+      // createEmptyArr,
+      // resourcesPoints,
+    )
+  })
 }
 
 export default setup

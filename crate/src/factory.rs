@@ -1,12 +1,13 @@
-use crate::unit_types::UnitType;
+use crate::squad_types::SquadType;
 
 struct ProducedSquad {
-  unit_type: UnitType,
+  squad_type: SquadType,
   current_time: u32,
 }
 
 pub struct Factory {
   pub id: f32,
+  pub hp: f32,
   pub x: f32,
   pub y: f32,
   pub angle: f32,
@@ -17,6 +18,7 @@ impl Factory {
   pub fn new(id: f32, x: f32, y: f32, angle: f32) -> Factory {
     Factory {
       id,
+      hp: 100.0,
       x,
       y,
       angle,
@@ -24,11 +26,11 @@ impl Factory {
     }
   }
 
-  pub fn work(&mut self, create_unit: &dyn Fn(&UnitType) -> ()) {
+  pub fn work(&mut self, create_squad: &dyn Fn(&SquadType) -> ()) {
     for item in self.production_line.iter_mut() {
       item.current_time += 1;
       if (item.current_time == 0) {
-        create_unit(&item.unit_type)
+        create_squad(&item.squad_type)
       }
     }
   }
@@ -39,5 +41,12 @@ impl Factory {
     } else {
       0.0
     }
+  }
+
+  pub fn add_squad_to_production_line(&mut self, squad_type: SquadType) {
+    self.production_line.push(ProducedSquad {
+      squad_type,
+      current_time: 0,
+    });
   }
 }

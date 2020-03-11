@@ -15,7 +15,8 @@ macro_rules! log {
 
 mod faction;
 mod id_generator;
-mod unit_types;
+mod squad_types;
+use crate::squad_types::SquadType;
 use faction::Faction;
 mod squad;
 use squad::Squad;
@@ -45,6 +46,7 @@ impl Universe {
         )
       })
       .collect();
+    log!("{:?}", faction_ids);
     Universe { factions }
   }
 
@@ -75,30 +77,34 @@ impl Universe {
     //   })
     //   .collect();
 
-    let factories_representation = self
+    let universe_representation: Vec<f32> = self
       .factions
       .iter()
       .flat_map(|faction| {
         let factory = &faction.factory;
-        vec![
-          factory.id,
-          factory.x,
-          factory.y,
-          factory.angle,
-          factory.is_producing(),
-        ]
+        vec![faction.id, factory.id, factory.hp, factory.is_producing()]
       })
       .collect();
 
-    let all_item_representation: Vec<f32> = factories_representation;
     let output_mem_localization = vec![
-      all_item_representation.as_ptr() as usize as u32,
-      all_item_representation.len() as u32,
+      universe_representation.as_ptr() as usize as u32,
+      universe_representation.len() as u32,
     ];
 
     output_mem_localization
       .into_iter()
       .map(JsValue::from)
       .collect()
+  }
+
+  pub fn create_squad(&mut self, squad_type_str: &str) {
+    let squad_type = match squad_type_str {
+      "solider" => SquadType::Solider,
+      _ => SquadType::Solider,
+    };
+
+    self.factions[0]
+      .factory
+      .add_squad_to_production_line(squad_type);
   }
 }

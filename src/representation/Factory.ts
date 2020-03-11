@@ -24,6 +24,7 @@ const portalProperties = [
 ]
 
 class Factory {
+  public id: number
   private portalFX: PIXI.AnimatedSprite
 
   constructor(
@@ -73,12 +74,15 @@ class Factory {
       child.y += y
     })
     portalFX.alpha = 0.9
+    portalFX.visible = false
 
+    this.id = factoryId
     this.portalFX = portalFX
   }
 
   turnOnProduction() {
     if (!this.portalFX.visible) {
+      console.log('turnOnProduction')
       this.portalFX.visible = true
       this.portalFX.alpha = 1
       this.portalFX.gotoAndPlay(0)
