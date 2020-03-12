@@ -26,7 +26,6 @@ declare global {
     userIcons: any[]
     map: boolean
     startGame: (playersList: string[]) => void
-    universeRepresentation: Array<Factory>
   }
 
   interface Point {

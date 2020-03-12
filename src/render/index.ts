@@ -1,36 +1,19 @@
-import SETTINGS from 'Settings'
-import EffectsFactory from '~/effects/EffectsFactory'
-import Factory from '~/representation/Factory'
-import manageHunters from '~/modules/manageHunters'
-import ResPoint from './modules/resPoint'
-import influenceController from '~/ai/influenceMap'
-import aiController from '~/ai/ai'
-import Icons from '~/modules/icons'
+// import SETTINGS from 'Settings'
+// import EffectsFactory from '~/effects/EffectsFactory'
+// import manageHunters from '~/modules/manageHunters'
+// import ResPoint from './modules/resPoint'
+// import influenceController from '~/ai/influenceMap'
+// import aiController from '~/ai/ai'
+// import Icons from '~/modules/icons'
+import getRepresentationsDetails from './getRepresentationsDetails'
+import { UniverseRepresentation } from '../setup'
 
-import { REPRESENTATIONS_DETAILS } from '~/constants'
-
-const updateFactory = ([_id, hp, isProducing]: number[]) => {
-  const factory: Factory = window.universeRepresentation.find(
-    ({ id }) => id === _id,
-  )
-  if (!factory) return
-  if (isProducing) {
-    factory.turnOnProduction()
-  } else {
-    factory.turnOffProduction()
-  }
-}
-
-const getUpdater = (type: typeof REPRESENTATIONS_DETAILS[0]['type']) => {
-  switch (type) {
-    case 'factory':
-      return updateFactory
-  }
-}
+const representationsDetails = getRepresentationsDetails()
 
 const render = (
   delta: number,
   universeData: number[],
+  universeRepresentation: UniverseRepresentation,
   // updateStage: Function,
   // factories: Factory[],
   // getUnitType: Function,
@@ -38,20 +21,18 @@ const render = (
   // createEmptyArr: Function,
   // resourcesPoints: ResPoint[],
 ) => {
-  const representationsDetails = REPRESENTATIONS_DETAILS.map(
-    representationDetails => ({
-      ...representationDetails,
-      updater: getUpdater(representationDetails.type),
-    }),
-  )
+  const universeLength = universeData.length
   let index = 0
 
-  while (index < universeData.length) {
+  while (index < universeLength) {
     const itemId = universeData[index]
     const details = representationsDetails.find(({ baseId }) => itemId > baseId)
     const newIndexValue = index + details.length
     if (details.updater) {
-      details.updater(universeData.slice(index, newIndexValue))
+      details.updater(
+        universeRepresentation[itemId],
+        universeData.slice(index + 1, newIndexValue),
+      )
     }
 
     index = newIndexValue

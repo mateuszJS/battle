@@ -1,15 +1,15 @@
-import mouseControllerInitialize from '~/modules/mouseController'
-import UnitFactory from '~/units/UnitFactory'
+// import mouseControllerInitialize from '~/modules/mouseController'
+// import UnitFactory from '~/units/UnitFactory'
 
-import influenceController from '~/ai/influenceMap'
-import aiController from '~/ai/ai'
-import Icons from '~/modules/icons'
+// import influenceController from '~/ai/influenceMap'
+// import aiController from '~/ai/ai'
+// import Icons from '~/modules/icons'
 import getSortableLayer from '~/modules/getSortableLayer'
 import EffectsFactory from '~/effects/EffectsFactory'
 
-import createFactories from './createFactories'
-import addProductionIcons from './addProductionIcons'
-import createSmokeContainer from './createSmokeContainer'
+// import createFactories from './createFactories'
+// import addProductionIcons from './addProductionIcons'
+// import createSmokeContainer from './createSmokeContainer'
 import addBackground from './addBackground'
 import render from './render'
 
@@ -18,6 +18,10 @@ import { Universe } from '../crate/pkg/index'
 
 import Factory from '~/representation/Factory'
 import { FACTION_BASE_ID } from '~/constants'
+
+export type UniverseRepresentation = {
+  [id: number]: Factory
+}
 
 // eslint-disable-next-line prettier/prettier
 const playersList = [
@@ -87,7 +91,8 @@ const setup = () => {
   //   })
   //   resCounter.innerHTML = `${factories[0].resources} /+${28 + resX * 7}`
   // }
-  window.universeRepresentation = []
+  const universeRepresentation: UniverseRepresentation = {}
+
   const universe = Universe.new(new Float32Array(playersList))
   const factoriesInitData = universe.get_factories_init_data()
 
@@ -100,7 +105,7 @@ const setup = () => {
       factoriesInitData[i + 4], // angle
       sortingLayer,
     )
-    window.universeRepresentation.push(factoryRepresentation)
+    universeRepresentation[factoryRepresentation.id] = factoryRepresentation
   }
   const handledKeyUp = ({ code }: KeyboardEvent) => {
     if (code === 'KeyC') {
@@ -115,7 +120,8 @@ const setup = () => {
 
     render(
       delta,
-      Array.from(universeData),
+      Array.from(universeData), // TODO: check how long does it take
+      universeRepresentation,
       // updateStage,
       // factories,
       // getUnitType,
