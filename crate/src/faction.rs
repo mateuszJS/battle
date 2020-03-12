@@ -1,5 +1,6 @@
 use crate::id_generator::IdGenerator;
 use crate::squad::Squad;
+use crate::squad_types::SquadType;
 use crate::Factory;
 
 pub struct Faction {
@@ -19,5 +20,15 @@ impl Faction {
       squads: vec![],
       resources: 0,
     }
+  }
+
+  pub fn update(&self) {
+    &self
+      .factory
+      .work(&|squad_type: &SquadType| self.create_squad(squad_type));
+  }
+
+  pub fn create_squad(&self, squad_type: &SquadType) {
+    log!("create_squad");
   }
 }

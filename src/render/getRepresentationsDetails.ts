@@ -1,10 +1,7 @@
 import { REPRESENTATIONS_DETAILS } from '~/constants'
 import Factory from '~/representation/Factory'
 
-const updateFactory = (
-  factory: Factory,
-  [hp, isProducing]: [number, number],
-) => {
+const updateFactory = (factory: Factory, [hp, isProducing]: number[]) => {
   if (isProducing) {
     factory.turnOnProduction()
   } else {

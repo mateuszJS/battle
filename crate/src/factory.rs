@@ -25,8 +25,8 @@ impl Factory {
       production_line: vec![],
     }
   }
-
-  pub fn work(&mut self, create_squad: &dyn Fn(&SquadType) -> ()) {
+  pub fn work(&mut self, create_squad: &dyn FnOnce(&SquadType) -> ()) {
+    // pub fn work(&mut self, create_squad: Fn(&SquadType) -> ()) {
     for item in self.production_line.iter_mut() {
       item.current_time += 1;
       if (item.current_time == 0) {
