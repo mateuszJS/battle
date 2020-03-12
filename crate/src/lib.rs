@@ -14,16 +14,17 @@ macro_rules! log {
 }
 
 mod faction;
+mod factory;
 mod id_generator;
+mod squad;
 mod squad_types;
+mod unit;
+
 use crate::squad_types::SquadType;
 use faction::Faction;
-mod squad;
-use squad::Squad;
-mod unit;
-use unit::Unit;
-mod factory;
 use factory::Factory;
+use squad::Squad;
+use unit::Unit;
 
 #[wasm_bindgen]
 pub struct Universe {
