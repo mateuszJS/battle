@@ -115,6 +115,7 @@ const setup = () => {
   document.addEventListener('keyup', handledKeyUp)
 
   window.app.ticker.add((delta: number) => {
+    universe.update()
     const [pointer, length] = universe.get_pointer()
     const universeData = new Float32Array(memory.buffer, pointer, length)
 

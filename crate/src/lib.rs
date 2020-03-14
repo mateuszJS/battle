@@ -1,6 +1,5 @@
-#[macro_use]
-extern crate wasm_bindgen;
 extern crate js_sys;
+extern crate wasm_bindgen;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -65,8 +64,10 @@ impl Universe {
       .collect()
   }
 
-  fn update(&self) {
-    for faction in &self.factions {
+  pub fn update(&mut self) {
+    for faction in self.factions.iter_mut() {
+      faction.resources += 1;
+      log!("resources: {}", faction.resources);
       faction.update();
     }
   }

@@ -1,3 +1,5 @@
+use crate::id_generator::IdGenerator;
+
 pub struct Unit {
   pub id: f32,
   pub x: f32,
@@ -6,7 +8,12 @@ pub struct Unit {
 }
 
 impl Unit {
-  pub fn new(id: f32, x: f32, y: f32, angle: f32) -> Unit {
-    Unit { id, x, y, angle }
+  pub fn new(x: f32, y: f32, angle: f32) -> Unit {
+    Unit {
+      id: IdGenerator::generate_unit_id(),
+      x,
+      y,
+      angle,
+    }
   }
 }

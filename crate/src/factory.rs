@@ -1,3 +1,4 @@
+use crate::log;
 use crate::squad_types::SquadType;
 
 struct ProducedSquad {
@@ -25,13 +26,14 @@ impl Factory {
       production_line: vec![],
     }
   }
-  pub fn work(&mut self, create_squad: &dyn FnOnce(&SquadType) -> ()) {
-    // pub fn work(&mut self, create_squad: Fn(&SquadType) -> ()) {
-    for item in self.production_line.iter_mut() {
-      item.current_time += 1;
-      if (item.current_time == 0) {
-        create_squad(&item.squad_type)
-      }
+  pub fn work(&mut self) -> Option<&SquadType> {
+    // let item = &mut self.production_line[0];
+    self.production_line[0].current_time -= 1;
+    if self.production_line[0].current_time == 0 {
+      self.production_line.remove(0);
+      Some(&self.production_line[0].squad_type)
+    } else {
+      None
     }
   }
 
@@ -46,7 +48,7 @@ impl Factory {
   pub fn add_squad_to_production_line(&mut self, squad_type: SquadType) {
     self.production_line.push(ProducedSquad {
       squad_type,
-      current_time: 0,
+      current_time: 200,
     });
   }
 }

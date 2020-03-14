@@ -1,3 +1,5 @@
+#[macro_use]
+use crate::log;
 use crate::id_generator::IdGenerator;
 use crate::squad::Squad;
 use crate::squad_types::SquadType;
@@ -23,12 +25,18 @@ impl Faction {
   }
 
   pub fn update(&self) {
-    &self
-      .factory
-      .work(&|squad_type: &SquadType| self.create_squad(squad_type));
-  }
-
-  pub fn create_squad(&self, squad_type: &SquadType) {
-    log!("create_squad");
+    let read_factory = self.factory;
+    let result: Option<&SquadType> = {
+      let factory = &mut read_factory;
+      *factory.work()
+    };
+    // assign mutable factory  in closure, and the end of closue mut refrence should gone???
+    match result {
+      Some(squad_type) => {
+        let new_squad = Squad::new(&squad_type, self.factory.x, self.factory.y);
+        self.squads.push(new_squad);
+      }
+      None => {}
+    }
   }
 }
