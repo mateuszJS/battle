@@ -24,16 +24,14 @@ impl Faction {
     }
   }
 
-  pub fn update(&self) {
-    let read_factory = self.factory;
-    let result: Option<&SquadType> = {
-      let factory = &mut read_factory;
-      *factory.work()
-    };
-    // assign mutable factory  in closure, and the end of closue mut refrence should gone???
+  pub fn update(&mut self) {
+    let x = self.factory.x;
+    let y = self.factory.y;
+    let result: Option<&SquadType> = self.factory.work();
+
     match result {
       Some(squad_type) => {
-        let new_squad = Squad::new(&squad_type, self.factory.x, self.factory.y);
+        let new_squad = Squad::new(&squad_type, x, y);
         self.squads.push(new_squad);
       }
       None => {}
