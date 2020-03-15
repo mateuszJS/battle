@@ -1,5 +1,6 @@
 // import mouseControllerInitialize from '~/modules/mouseController'
-// import UnitFactory from '~/units/UnitFactory'
+import UnitFactory from '~/representation/UnitFactory'
+import Unit from '~/representation/Unit'
 
 // import influenceController from '~/ai/influenceMap'
 // import aiController from '~/ai/ai'
@@ -17,20 +18,19 @@ import { memory } from '../crate/pkg/index_bg'
 import { Universe } from '../crate/pkg/index'
 
 import Factory from '~/representation/Factory'
-import { FACTION_BASE_ID } from '~/constants'
 
 export type UniverseRepresentation = {
-  [id: number]: Factory
+  [id: number]: Factory | Unit
 }
 
 // eslint-disable-next-line prettier/prettier
 const playersList = [
-  FACTION_BASE_ID + 1.0,
-  FACTION_BASE_ID + 2.0,
-  FACTION_BASE_ID + 3.0,
-  FACTION_BASE_ID + 4.0,
-  FACTION_BASE_ID + 5.0,
-  FACTION_BASE_ID + 6.0,
+  1.0,
+  2.0,
+  3.0,
+  4.0,
+  5.0,
+  6.0,
 ]
 
 const setup = () => {
@@ -40,8 +40,8 @@ const setup = () => {
 
   const mapSprite = addBackground()
   const sortingLayer = getSortableLayer(mapSprite)
+  UnitFactory.initializationTypes(sortingLayer)
 
-  // UnitFactory.initializationTypes(sortingLayer)
   // influenceController.init(window.mapWidth, window.mapHeight)
   // Icons.init()
 
@@ -97,15 +97,15 @@ const setup = () => {
   const factoriesInitData = universe.get_factories_init_data()
 
   for (let i = 0; i < factoriesInitData.length; i += 5) {
+    const factoryId = factoriesInitData[i + 1]
+    const factionId = factoriesInitData[i]
     const factoryRepresentation = new Factory(
-      factoriesInitData[i], // faction id
-      factoriesInitData[i + 1], // id
       factoriesInitData[i + 2], // x
       factoriesInitData[i + 3], // y
       factoriesInitData[i + 4], // angle
       sortingLayer,
     )
-    universeRepresentation[factoryRepresentation.id] = factoryRepresentation
+    universeRepresentation[factoryId] = factoryRepresentation
   }
   const handledKeyUp = ({ code }: KeyboardEvent) => {
     if (code === 'KeyC') {

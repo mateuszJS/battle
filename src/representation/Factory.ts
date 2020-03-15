@@ -30,12 +30,10 @@ function onFrameChange() {
 }
 
 class Factory {
-  public id: number
   private portalFX: PIXI.AnimatedSprite
 
   constructor(
-    factionId: number,
-    factoryId: number,
+    // factionId: number,
     x: number,
     y: number,
     angle: number,
@@ -82,7 +80,6 @@ class Factory {
     portalFX.alpha = 0.9
     portalFX.visible = false
 
-    this.id = factoryId
     this.portalFX = portalFX
     portalFX.onFrameChange = onFrameChange
   }

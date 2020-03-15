@@ -5,10 +5,11 @@
 // import influenceController from '~/ai/influenceMap'
 // import aiController from '~/ai/ai'
 // import Icons from '~/modules/icons'
-import getRepresentationsDetails from './getRepresentationsDetails'
+import * as representationUpdaters from './representationUpdaters'
 import { UniverseRepresentation } from '../setup'
-
-const representationsDetails = getRepresentationsDetails()
+import Factory from '~/representation/Factory'
+import Unit from '~/representation/Unit'
+import UnitsFactory from '~/representation/UnitFactory'
 
 const render = (
   delta: number,
@@ -22,20 +23,56 @@ const render = (
   // resourcesPoints: ResPoint[],
 ) => {
   const universeLength = universeData.length
+  let factionId
   let index = 0
-
+  // 1 100 (blocked here)
   while (index < universeLength) {
-    const itemId = universeData[index]
-    const details = representationsDetails.find(({ baseId }) => itemId > baseId)
-    const newIndexValue = index + details.length
-    if (details.updater) {
-      details.updater(
-        universeRepresentation[itemId],
-        universeData.slice(index + 1, newIndexValue),
-      )
-    }
+    const nextItemType = universeData[index]
 
-    index = newIndexValue
+    switch (nextItemType) {
+      case 0.0: {
+        // faction
+        const indexOfId = index + 1
+        factionId = universeData[indexOfId]
+        index = indexOfId + 1
+        break
+      }
+      case 1.0: {
+        // factory
+        const indexOfId = index + 1
+        const newIndexValue = indexOfId + 2
+        const factoryId = universeData[indexOfId]
+        const factory = universeRepresentation[factoryId]
+        representationUpdaters.updateFactory(
+          factory as Factory,
+          universeData.slice(indexOfId + 1, newIndexValue),
+        )
+        index = newIndexValue
+        break
+      }
+      case 2.0: {
+        // squad -> solider
+        const indexOfId = index + 1
+        const newIndexValue = indexOfId + 3
+        const unitId = universeData[indexOfId]
+        const unit = universeRepresentation[unitId]
+        if (unit) {
+          representationUpdaters.updateUnit(
+            unit as Unit,
+            universeData.slice(indexOfId + 1, newIndexValue),
+          )
+        } else {
+          universeRepresentation[indexOfId] = UnitsFactory.createUnit(
+            universeData[indexOfId + 1],
+            universeData[indexOfId + 2],
+            universeData[indexOfId + 3],
+          )
+        }
+
+        index = newIndexValue
+        break
+      }
+    }
   }
   // updateStage()
   // window.flamesUpdaters.forEach(update => update())

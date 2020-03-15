@@ -67,32 +67,15 @@ impl Universe {
   pub fn update(&mut self) {
     for faction in self.factions.iter_mut() {
       faction.resources += 1;
-      log!("resources: {}", faction.resources);
       faction.update();
     }
   }
 
   pub fn get_pointer(&self) -> js_sys::Array {
-    // let units_representation = self
-    //   .factions
-    //   .iter()
-    //   .flat_map(|faction| {
-    //     faction.squads.iter().flat_map(|squad| {
-    //       squad
-    //         .members
-    //         .iter()
-    //         .flat_map(|unit| vec![unit.id, unit.x, unit.y, unit.angle])
-    //     })
-    //   })
-    //   .collect();
-
     let universe_representation: Vec<f32> = self
       .factions
       .iter()
-      .flat_map(|faction| {
-        let factory = &faction.factory;
-        vec![faction.id, factory.id, factory.hp, factory.is_producing()]
-      })
+      .flat_map(|faction| faction.get_representation())
       .collect();
 
     let output_mem_localization = vec![
@@ -103,7 +86,7 @@ impl Universe {
     output_mem_localization
       .into_iter()
       .map(JsValue::from)
-      .collect()
+      .collect() //try with u16, instead of f32
   }
 
   pub fn create_squad(&mut self, squad_type_str: &str) {

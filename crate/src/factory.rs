@@ -3,7 +3,7 @@ use crate::squad_types::SquadType;
 
 struct ProducedSquad {
   squad_type: SquadType,
-  current_time: u32,
+  current_time: i32,
 }
 
 pub struct Factory {
@@ -26,12 +26,16 @@ impl Factory {
       production_line: vec![],
     }
   }
-  pub fn work(&mut self) -> Option<&SquadType> {
-    // let item = &mut self.production_line[0];
-    self.production_line[0].current_time -= 1;
-    if self.production_line[0].current_time == 0 {
-      self.production_line.remove(0);
-      Some(&self.production_line[0].squad_type)
+  pub fn work(&mut self) -> Option<SquadType> {
+    if self.production_line.len() > 0 {
+      let production_item = &mut self.production_line[0];
+      production_item.current_time -= 1;
+      if production_item.current_time == 0 {
+        let squad_type = self.production_line.remove(0).squad_type;
+        Some(squad_type)
+      } else {
+        None
+      }
     } else {
       None
     }

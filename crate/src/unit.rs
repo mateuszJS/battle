@@ -10,7 +10,7 @@ pub struct Unit {
 impl Unit {
   pub fn new(x: f32, y: f32, angle: f32) -> Unit {
     Unit {
-      id: IdGenerator::generate_unit_id(),
+      id: IdGenerator::generate_id(),
       x,
       y,
       angle,
