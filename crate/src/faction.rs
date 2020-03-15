@@ -33,9 +33,9 @@ impl Faction {
       Some(squad_type) => {
         let new_squad = Squad::new(&squad_type, x, y);
         log!("new squad id: {}", new_squad.id);
-        // self.squads.push(new_squad);
+        self.squads.push(new_squad);
       }
-      None => { log!("None"); }
+      None => {}
     }
   }
   // types of units, factory etc. can be minus, e.g. factory -> -1, soldiers -> -2
@@ -50,18 +50,22 @@ impl Faction {
       self.factory.id,
       self.factory.is_producing(),
     ];
-    start_representation
-    // let units_representation: Vec<f32> = self.squads
-    // .iter()
-    // .flat_map(|squad| {
-    //   let mut units_list: Vec<f32> = squad.members
-    //     .iter().
-    //     flat_map(|unit| vec![unit.id, unit.x, unit.y, unit.angle])
-    //     .collect();
-    //   units_list.insert(0, squad.representation_type);
-    //   units_list
-    // }).collect();
-    // // everything I'm combining into vector, maybe it is possible just with slices?
-    // [&start_representation[..], &units_representation[..]].concat()
+
+    let units_representation: Vec<f32> = self
+      .squads
+      .iter()
+      .flat_map(|squad| {
+        let mut units_list: Vec<f32> = squad
+          .members
+          .iter()
+          .flat_map(|unit| vec![unit.id, unit.x, unit.y, unit.angle])
+          .collect();
+
+        units_list.insert(0, squad.representation_type);
+        units_list
+      }).collect();
+
+    // everything I'm combining into vector, maybe it is possible just with slices?
+    [&start_representation[..], &units_representation[..]].concat()
   }
 }

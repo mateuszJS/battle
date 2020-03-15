@@ -25,6 +25,8 @@ class Unit {
     this.model = model
 
     window.app.stage.addChild(this.graphics)
+    this.graphics.x = x
+    this.graphics.y = y
 
     this.selected = false
   }
