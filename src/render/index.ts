@@ -25,7 +25,7 @@ const render = (
   const universeLength = universeData.length
   let factionId
   let index = 0
-  // 1 100 (blocked here)
+
   while (index < universeLength) {
     const nextItemType = universeData[index]
 
@@ -53,7 +53,7 @@ const render = (
       case 2.0: {
         // squad -> solider
         const indexOfId = index + 1
-        const newIndexValue = indexOfId + 3
+        const newIndexValue = indexOfId + 5
         const unitId = universeData[indexOfId]
         const unit = universeRepresentation[unitId]
         if (unit) {
@@ -66,12 +66,15 @@ const render = (
             universeData[indexOfId + 1],
             universeData[indexOfId + 2],
             universeData[indexOfId + 3],
+            universeData[indexOfId + 4],
           )
         }
 
         index = newIndexValue
         break
       }
+      default:
+        debugger
     }
   }
   // updateStage()

@@ -1,9 +1,8 @@
 import Unit from './Unit'
-import createSoliderSprite from '~/sprites/soliderSprites'
-import { ModelDetails } from '~/sprites/types'
+import createSoliderSprite, { Result } from './getSprites'
 
 class UnitsFactory {
-  private static getSoliderSprite: () => ModelDetails
+  private static getSoliderSprite: () => Result
   private static layerGroup: PIXI.display.Group
 
   static initializationTypes(layerGroup: PIXI.display.Group) {
@@ -11,13 +10,16 @@ class UnitsFactory {
     this.layerGroup = layerGroup
   }
 
-  static createUnit(x: number, y: number, angle: number) {
+  static createUnit(state: number, x: number, y: number, angle: number) {
+    const { movieClip, ...frameUpdaters } = this.getSoliderSprite()
     const graphicParams = {
-      parentGroup: this.layerGroup,
-      unit: new PIXI.Container(),
+      sortingLayer: this.layerGroup,
+      container: new PIXI.Container(),
+      movieClip: movieClip,
+      frameUpdaters,
     }
 
-    return new Unit(x, y, angle, graphicParams, this.getSoliderSprite())
+    return new Unit(x, y, angle, graphicParams)
   }
 }
 

@@ -5,6 +5,7 @@ pub struct Unit {
   pub x: f32,
   pub y: f32,
   pub angle: f32,
+  pub state: f32,
 }
 
 impl Unit {
@@ -14,6 +15,7 @@ impl Unit {
       x,
       y,
       angle,
+      state: 4.0,
     }
   }
 }

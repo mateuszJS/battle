@@ -9,8 +9,6 @@ export const updateFactory = (factory: Factory, [isProducing]: number[]) => {
   }
 }
 
-export const updateUnit = (unit: Unit, [x, y, angle]: number[]) => {
-  // unit.x = x
-  // unit.y = y
-  // unit.angle = angle
+export const updateUnit = (unit: Unit, [state, x, y, angle]: number[]) => {
+  unit.update(state, x, y, angle, false)
 }

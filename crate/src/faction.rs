@@ -58,12 +58,13 @@ impl Faction {
         let mut units_list: Vec<f32> = squad
           .members
           .iter()
-          .flat_map(|unit| vec![unit.id, unit.x, unit.y, unit.angle])
+          .flat_map(|unit| vec![2.0, unit.id, unit.state, unit.x, unit.y, unit.angle])
           .collect();
 
-        units_list.insert(0, squad.representation_type);
+        // units_list.insert(0, squad.representation_type);
         units_list
-      }).collect();
+      })
+      .collect();
 
     // everything I'm combining into vector, maybe it is possible just with slices?
     [&start_representation[..], &units_representation[..]].concat()

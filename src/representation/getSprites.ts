@@ -15,6 +15,15 @@ const addFrames = (
   }
 }
 
+export type Result = {
+  movieClip: PIXI.AnimatedSprite
+  goToStay(angle: number): void
+  goToGo(angle: number): void
+  goToShoot(angle: number): void
+  goToFly(angle: number): void
+  goToGetUp(angle: number): void
+}
+
 export default () => {
   const frames = []
 
@@ -87,12 +96,34 @@ export default () => {
     id => `_${id}_s_gu${id}.png.png`,
   )
 
-  return (): PIXI.AnimatedSprite => {
+  return (): Result => {
     const movieClip = new PIXI.AnimatedSprite(frames)
     movieClip.animationSpeed = 0.4
     movieClip.scale.set(0.7)
     // movieClip.anchor.set(0.5, 0);
 
-    return movieClip
+    return {
+      movieClip,
+      goToStay(angle: number) {
+        movieClip.gotoAndStop(framesPeriods.STAY.first)
+      },
+      goToGo(angle: number) {
+        // repeat
+        movieClip.gotoAndStop(framesPeriods.GO.first)
+      },
+      goToShoot(angle: number) {
+        // stop at end frame
+        // call again if isShoot = true
+        movieClip.gotoAndStop(framesPeriods.SHOOT.first)
+      },
+      goToFly(angle: number) {
+        // stop and last frame
+        movieClip.gotoAndStop(framesPeriods.FLY.first)
+      },
+      goToGetUp(angle: number) {
+        // stop and last frame
+        movieClip.gotoAndStop(framesPeriods.GETUP.first)
+      },
+    }
   }
 }
