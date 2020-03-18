@@ -4,21 +4,20 @@ use crate::unit::Unit;
 
 pub struct Squad {
   pub id: f32,
+  pub squad_type: SquadType,
   pub members: Vec<Unit>,
   pub representation_type: f32,
 }
 
 impl Squad {
-  pub fn new(squad_type: &SquadType, x: f32, y: f32) -> Squad {
+  pub fn new(squad_type: SquadType) -> Squad {
     let details = get_squad_details(&squad_type);
-    let members = [0..details.members_number]
-      .iter()
-      .map(|index| Unit::new(x, y, 0.0))
-      .collect();
+
     Squad {
-      id: IdGenerator::generate_id(), // not sure if needed
-      members,
       representation_type: details.representation_type,
+      id: IdGenerator::generate_id(), // not sure if needed
+      squad_type: squad_type,
+      members: vec![],
     }
   }
 }

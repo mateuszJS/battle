@@ -17,8 +17,8 @@ const addFrames = (
 
 export type Result = {
   movieClip: PIXI.AnimatedSprite
-  goToStay(angle: number): void
-  goToGo(angle: number): void
+  goToIdle(angle: number): void
+  goToRun(angle: number): void
   goToShoot(angle: number): void
   goToFly(angle: number): void
   goToGetUp(angle: number): void
@@ -104,10 +104,10 @@ export default () => {
 
     return {
       movieClip,
-      goToStay(angle: number) {
+      goToIdle(angle: number) {
         movieClip.gotoAndStop(framesPeriods.STAY.first)
       },
-      goToGo(angle: number) {
+      goToRun(angle: number) {
         // repeat
         movieClip.gotoAndStop(framesPeriods.GO.first)
       },

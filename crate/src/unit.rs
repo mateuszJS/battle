@@ -6,6 +6,7 @@ pub struct Unit {
   pub y: f32,
   pub angle: f32,
   pub state: f32,
+  pub get_upping_progress: f32, // <0, 1>, 0 -> start get up, 1 -> change state to IDLE
 }
 
 impl Unit {
@@ -16,6 +17,7 @@ impl Unit {
       y,
       angle,
       state: 4.0,
+      get_upping_progress: 0.0,
     }
   }
 }

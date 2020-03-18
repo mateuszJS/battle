@@ -3,8 +3,8 @@ type PixiUnitStuff = {
   container: PIXI.Container
   movieClip: PIXI.AnimatedSprite
   frameUpdaters: {
-    goToStay(angle: number): void
-    goToGo(angle: number): void
+    goToIdle(angle: number): void
+    goToRun(angle: number): void
     goToShoot(angle: number): void
     goToFly(angle: number): void
     goToGetUp(angle: number): void
@@ -14,10 +14,10 @@ type PixiUnitStuff = {
 enum State {
   ABILITY = 8,
   FLY = 7,
-  GO = 6,
+  RUN = 6,
 
   SHOOT = 5,
-  STAY = 4,
+  IDLE = 4,
   GETUP = 3,
   DIE = 0,
 }
@@ -31,8 +31,8 @@ class Unit {
     angle: number
   }
   private frameUpdaters: {
-    goToStay(angle: number): void
-    goToGo(angle: number): void
+    goToIdle(angle: number): void
+    goToRun(angle: number): void
     goToShoot(angle: number): void
     goToFly(angle: number): void
     goToGetUp(angle: number): void
@@ -65,16 +65,16 @@ class Unit {
 
     // isShoot won't be stored in this.previousState
     switch (state) {
-      case State.STAY: {
-        this.frameUpdaters.goToStay(angle)
+      case State.IDLE: {
+        this.frameUpdaters.goToIdle(angle)
         break
       }
       case State.SHOOT: {
         this.frameUpdaters.goToShoot(angle)
         break
       }
-      case State.GO: {
-        this.frameUpdaters.goToGo(angle)
+      case State.RUN: {
+        this.frameUpdaters.goToRun(angle)
         break
       }
       case State.FLY: {

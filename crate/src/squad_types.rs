@@ -6,7 +6,7 @@ pub struct SquadDetails {
   pub movement_speed: u8,
   pub hp: u8,
   pub production_time: u16,
-  pub members_number: u8,
+  pub members_number: usize,
   pub representation_type: f32,
 }
 
