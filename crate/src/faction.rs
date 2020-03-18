@@ -34,33 +34,10 @@ impl Faction {
     }
   }
 
-  // fn update_squads_in_creation(&mut self) {
-  //   self.squads_during_creation.retain(|creating_squad| {
-  //     creating_squad.next_unit_in_secs += 1;
-
-  //     if creating_squad.next_unit_in_secs >= TIME_BETWEEN_CREATION {
-  //       let unit = Unit::new(200.0, 200.0, 0.0);
-  //       creating_squad.squad.members.push(unit);
-
-  //       let squad_details = get_squad_details(&creating_squad.squad.squad_type);
-
-  //       if creating_squad.squad.members.len() == squad_details.members_number {
-  //         self.squads.push(creating_squad.squad);
-  //         false
-  //       } else {
-  //         creating_squad.next_unit_in_secs = 0;
-  //         true
-  //       }
-  //     } else {
-  //       true
-  //     }
-  //   });
-  // }
-
   fn update_squads_in_creation(&mut self) {
     let mut squad_index: i8 = -1;
-    let squads_during_creation = &mut self.squads_during_creation;
-    for (index, creating_squad) in squads_during_creation.iter_mut().enumerate() {
+
+    for (index, creating_squad) in self.squads_during_creation.iter_mut().enumerate() {
       creating_squad.next_unit_in_secs += 1;
 
       if creating_squad.next_unit_in_secs >= TIME_BETWEEN_CREATION {
@@ -72,29 +49,19 @@ impl Faction {
 
         if creating_squad.squad.members.len() == squad_details.members_number {
           squad_index = index as i8;
-        // self.squads_during_creation = self.squads_during_creation.retain(|)
-        // self
-        //   .squads
-        //   .push(self.squads_during_creation.remove(index).squad);
         } else {
           creating_squad.next_unit_in_secs = 0;
         }
       }
     }
     if squad_index > -1 {
-      self
-        .squads
-        .push(squads_during_creation.remove(squad_index as usize).squad);
+      self.squads.push(
+        self
+          .squads_during_creation
+          .remove(squad_index as usize)
+          .squad,
+      );
     }
-    // squads_during_creation.retain(|creating_squad| {
-    //   let squad_details = get_squad_details(&creating_squad.squad.squad_type);
-    //   if creating_squad.squad.members.len() == squad_details.members_number {
-    //     self.squads.push(creating_squad.squad);
-    //     false
-    //   } else {
-    //     true
-    //   }
-    // });
   }
 
   pub fn update(&mut self) {
