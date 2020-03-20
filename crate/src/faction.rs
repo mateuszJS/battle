@@ -106,10 +106,10 @@ impl Faction {
       .squads
       .iter()
       .flat_map(|squad| {
-        let mut units_list: Vec<f32> = squad
+        let units_list: Vec<f32> = squad
           .members
           .iter()
-          .flat_map(|unit| vec![2.0, unit.id, unit.state, unit.x, unit.y, unit.angle])
+          .flat_map(|unit| vec![2.0, unit.id, unit.state as f32, unit.x, unit.y, unit.angle])
           .collect();
 
         // units_list.insert(0, squad.representation_type);
@@ -121,11 +121,11 @@ impl Faction {
       .squads_during_creation
       .iter()
       .flat_map(|squad_during_creation| {
-        let mut units_list: Vec<f32> = squad_during_creation
+        let units_list: Vec<f32> = squad_during_creation
           .squad
           .members
           .iter()
-          .flat_map(|unit| vec![2.0, unit.id, unit.state, unit.x, unit.y, unit.angle])
+          .flat_map(|unit| vec![2.0, unit.id, unit.state as f32, unit.x, unit.y, unit.angle])
           .collect();
 
         // units_list.insert(0, squad.representation_type);

@@ -23,8 +23,6 @@ mod unit;
 use crate::squad_types::SquadType;
 use faction::Faction;
 use factory::Factory;
-use squad::Squad;
-use unit::Unit;
 
 #[wasm_bindgen]
 pub struct Universe {

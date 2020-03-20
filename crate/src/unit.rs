@@ -2,13 +2,13 @@ use crate::log;
 
 use crate::id_generator::IdGenerator;
 
-const STATE_ABILITY: f32 = 8.0;
-const STATE_FLY: f32 = 7.0;
-const STATE_RUN: f32 = 6.0;
-const STATE_SHOOT: f32 = 5.0;
-const STATE_IDLE: f32 = 4.0;
-const STATE_GETUP: f32 = 3.0;
-const STATE_DIE: f32 = 0.0;
+const STATE_ABILITY: u8 = 8;
+const STATE_FLY: u8 = 7;
+const STATE_RUN: u8 = 6;
+const STATE_SHOOT: u8 = 5;
+const STATE_IDLE: u8 = 4;
+const STATE_GETUP: u8 = 3;
+const STATE_DIE: u8 = 0;
 
 const PORTAL_PRODUCTION_STRENGTH: f32 = 9.0;
 
@@ -18,7 +18,7 @@ pub struct Unit {
   pub y: f32,
   pub z: f32,
   pub angle: f32,
-  pub state: f32,
+  pub state: u8,
   pub get_upping_progress: f32, // <0, 1>, 0 -> start get up, 1 -> change state to IDLE
   mod_x: f32,
   mod_y: f32,
@@ -41,7 +41,7 @@ impl Unit {
     }
   }
 
-  pub fn update_fly(&mut self) {
+  fn update_fly(&mut self) {
     self.x += self.mod_x;
     self.y += self.mod_y;
     self.z += self.mod_z;
@@ -61,13 +61,32 @@ impl Unit {
     }
 
     if self.mod_x == self.mod_y && self.mod_y == self.mod_z && self.mod_z == 0.0 {
-      self.state = STATE_GETUP;
+      self.change_state_to_getup();
     }
+  }
+
+  fn change_state_to_getup(&mut self) {
+    self.state = STATE_GETUP;
+    self.get_upping_progress = 0.0;
+  }
+
+  fn update_getup(&mut self) {
+    self.get_upping_progress += 0.01;
+    if self.get_upping_progress >= 1.0 {
+      self.state = STATE_IDLE;
+    }
+  }
+
+  fn update_idle(&mut self) {
+    // searching for the enemies
+    // check if not too far from squad center point
   }
 
   pub fn update(&mut self) {
     match self.state {
       STATE_FLY => self.update_fly(),
+      STATE_GETUP => self.update_getup(),
+      STATE_IDLE => self.update_idle(),
       _ => {}
     }
   }
