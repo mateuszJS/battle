@@ -20,4 +20,10 @@ impl Squad {
       members: vec![],
     }
   }
+
+  pub fn update(&mut self) {
+    for unit in self.members.iter_mut() {
+      unit.update();
+    }
+  }
 }

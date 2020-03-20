@@ -1,6 +1,6 @@
-#[macro_use]
-use crate::log;
 use crate::id_generator::IdGenerator;
+use crate::log;
+use crate::look_up_table::LookUpTable;
 use crate::squad::Squad;
 use crate::squad_types::{get_squad_details, SquadType};
 use crate::unit::Unit;
@@ -41,7 +41,8 @@ impl Faction {
       creating_squad.next_unit_in_secs += 1;
 
       if creating_squad.next_unit_in_secs >= TIME_BETWEEN_CREATION {
-        let unit = Unit::new(200.0, 200.0, 0.0);
+        let rnd = LookUpTable::generate_id();
+        let unit = Unit::new(200.0 + rnd * 50.0, 200.0 + rnd * 50.0, rnd);
         creating_squad.squad.members.push(unit);
 
         let squad_details = get_squad_details(&creating_squad.squad.squad_type);
@@ -65,6 +66,14 @@ impl Faction {
   }
 
   pub fn update(&mut self) {
+    for squad in self.squads.iter_mut() {
+      squad.update();
+    }
+
+    for squad_during_creation in self.squads_during_creation.iter_mut() {
+      squad_during_creation.squad.update();
+    }
+
     let result: Option<SquadType> = self.factory.work();
 
     match result {

@@ -15,6 +15,7 @@ macro_rules! log {
 mod faction;
 mod factory;
 mod id_generator;
+mod look_up_table;
 mod squad;
 mod squad_types;
 mod unit;
