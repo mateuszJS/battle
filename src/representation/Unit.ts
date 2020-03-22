@@ -1,3 +1,4 @@
+import EffectFactory from './EffectFactory'
 import { FrameUpdaters } from './getSprites'
 
 type PixiUnitStuff = {
@@ -32,16 +33,17 @@ class Unit {
     this.graphics = pixiStuff.container
     this.movieClip = pixiStuff.movieClip
     this.frameUpdaters = pixiStuff.frameUpdaters
+
     this.graphics.addChild(this.movieClip)
-
-    this.graphics.pivot.set(0, this.graphics.height * 0.9)
-
+    this.graphics.pivot.set(0.5, this.graphics.height * 0.9)
     this.graphics.parentGroup = pixiStuff.sortingLayer
 
-    window.app.stage.addChild(this.graphics)
     this.graphics.x = x
     this.graphics.y = y
     this.frameUpdaters.goToFly(angle, Number.MAX_SAFE_INTEGER)
+
+    window.app.stage.addChild(this.graphics)
+    EffectFactory.createBoomEffect(x, y)
   }
 
   goToFrame(frame: number) {

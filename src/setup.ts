@@ -1,12 +1,12 @@
 // import mouseControllerInitialize from '~/modules/mouseController'
 import UnitFactory from '~/representation/UnitFactory'
 import Unit from '~/representation/Unit'
+import EffectsFactory from '~/representation/EffectFactory'
 
 // import influenceController from '~/ai/influenceMap'
 // import aiController from '~/ai/ai'
 // import Icons from '~/modules/icons'
 import getSortableLayer from '~/modules/getSortableLayer'
-import EffectsFactory from '~/effects/EffectsFactory'
 
 // import createFactories from './createFactories'
 // import addProductionIcons from './addProductionIcons'

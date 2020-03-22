@@ -1,4 +1,4 @@
-import EffectsFactory from '~/effects/EffectsFactory'
+import EffectsFactory from '~/representation/EffectFactory'
 
 const portalProperties = [
   {
