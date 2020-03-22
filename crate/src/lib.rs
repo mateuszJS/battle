@@ -19,7 +19,9 @@ mod look_up_table;
 mod squad;
 mod squad_types;
 mod unit;
+mod constants;
 
+use crate::constants::MATH_PI;
 use crate::squad_types::SquadType;
 use faction::Faction;
 use factory::Factory;
@@ -33,7 +35,7 @@ pub struct Universe {
 impl Universe {
   pub fn new(faction_ids: Vec<f32>) -> Universe {
     log!("Create universe");
-    let angle_diff: f32 = std::f64::consts::PI as f32 / faction_ids.len() as f32;
+    let angle_diff: f32 = MATH_PI / faction_ids.len() as f32;
     let factions = faction_ids
       .iter()
       .enumerate()
@@ -42,7 +44,7 @@ impl Universe {
           faction_id,
           (index as f32) * 100.0 + 200.0,
           (index as f32) * 100.0 + 200.0,
-          (index as f32) * angle_diff,
+          (index as f32) * angle_diff + MATH_PI,
         )
       })
       .collect();

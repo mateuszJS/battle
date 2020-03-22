@@ -1,6 +1,7 @@
 use crate::log;
-
 use crate::id_generator::IdGenerator;
+use crate::constants::MATH_PI;
+use crate::look_up_table::LookUpTable;
 
 const STATE_ABILITY: u8 = 8;
 const STATE_FLY: u8 = 7;
@@ -9,10 +10,6 @@ const STATE_SHOOT: u8 = 5;
 const STATE_IDLE: u8 = 4;
 const STATE_GETUP: u8 = 3;
 const STATE_DIE: u8 = 0;
-
-const PORTAL_PRODUCTION_STRENGTH: f32 = 20.0;
-
-const MATH_PI: f32 = 3.141593;
 
 pub struct Unit {
   pub id: f32,
@@ -27,6 +24,9 @@ pub struct Unit {
 
 impl Unit {
   pub fn new(x: f32, y: f32, angle: f32) -> Unit {
+    let seed_throwing_strength = LookUpTable::get_random();
+    let throwing_strength = 8.0 + seed_throwing_strength * 15.0;
+
     Unit {
       id: IdGenerator::generate_id(),
       x,
@@ -34,8 +34,8 @@ impl Unit {
       angle: (angle + MATH_PI) % (MATH_PI * 2.0),
       state: STATE_FLY,
       get_upping_progress: 0.0,
-      mod_x: angle.sin() * PORTAL_PRODUCTION_STRENGTH,
-      mod_y: -angle.cos() * PORTAL_PRODUCTION_STRENGTH,
+      mod_x: angle.sin() * throwing_strength,
+      mod_y: -angle.cos() * throwing_strength,
     }
   }
 

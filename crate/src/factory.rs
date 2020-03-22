@@ -1,5 +1,9 @@
 use crate::log;
 use crate::squad_types::SquadType;
+use crate::look_up_table::LookUpTable;
+use crate::constants::MATH_PI;
+
+const PORTAL_WIDTH: f32 = 400.0;
 
 struct ProducedSquad {
   squad_type: SquadType,
@@ -41,12 +45,12 @@ impl Factory {
     }
   }
 
-  pub fn is_producing(&self) -> f32 {
-    if self.production_line.len() > 0 {
-      1.0
-    } else {
-      0.0
-    }
+  pub fn get_representation(&self, itemsDuringCreation: usize) -> Vec<f32> {
+    vec![
+      1.0, // type -> factory
+      self.id,
+      if itemsDuringCreation > 0 || self.production_line.len() > 0 { 1.0 } else { 0.0 },
+    ]
   }
 
   pub fn add_squad_to_production_line(&mut self, squad_type: SquadType) {
@@ -54,5 +58,15 @@ impl Factory {
       squad_type,
       current_time: 200,
     });
+  }
+
+  pub fn get_creation_point(&self) -> (f32, f32, f32) {
+    let seed_distance = LookUpTable::get_random() - 0.5;
+    let distance = seed_distance * PORTAL_WIDTH;
+    let perpendicular_angle = self.angle + MATH_PI / 2.0;
+    let position_x = self.x + perpendicular_angle.sin() * distance;
+    let position_y = self.y - perpendicular_angle.cos() * distance;
+    let unit_angle = self.angle + seed_distance / 2.0;
+    (position_x, position_y, unit_angle)
   }
 }

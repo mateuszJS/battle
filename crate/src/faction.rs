@@ -6,7 +6,7 @@ use crate::squad_types::{get_squad_details, SquadType};
 use crate::unit::Unit;
 use crate::Factory;
 
-static TIME_BETWEEN_CREATION: u8 = 20;
+static TIME_BETWEEN_CREATION: u8 = 10;
 
 pub struct SquadDuringCreation {
   pub next_unit_in_secs: u8,
@@ -41,8 +41,8 @@ impl Faction {
       creating_squad.next_unit_in_secs += 1;
 
       if creating_squad.next_unit_in_secs >= TIME_BETWEEN_CREATION {
-        let random = LookUpTable::generate_id();
-        let unit = Unit::new(self.factory.x, self.factory.y, random);
+        let (position_x, position_y, unit_angle) = self.factory.get_creation_point();
+        let unit = Unit::new(position_x, position_y, unit_angle);
         creating_squad.squad.members.push(unit);
 
         let squad_details = get_squad_details(&creating_squad.squad.squad_type);
@@ -94,13 +94,11 @@ impl Faction {
   // each array of representation units begin with unit types (length: 1),
   // then all units, and again faction id OR unit type
   pub fn get_representation(&self) -> Vec<f32> {
-    let start_representation = vec![
-      0.0, // type -> faction
-      self.id,
-      1.0, // type -> factory
-      self.factory.id,
-      self.factory.is_producing(),
-    ];
+    let faction_data = vec![0.0, self.id];
+    let start_representation = [
+      &faction_data[..],
+      &self.factory.get_representation(self.squads_during_creation.len())[..],
+    ].concat();
 
     let active_squads_representation: Vec<f32> = self
       .squads
