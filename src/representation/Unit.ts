@@ -51,6 +51,7 @@ class Unit {
     window.app.stage.addChild(this.graphics)
     this.graphics.x = x
     this.graphics.y = y
+    this.frameUpdaters.goToFly(angle, Number.MAX_SAFE_INTEGER)
   }
 
   goToFrame(frame: number) {

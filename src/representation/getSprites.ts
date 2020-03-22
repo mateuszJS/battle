@@ -35,6 +35,14 @@ const getIndexOfStartingFrame = (
   return first + angleOffset * length
 }
 
+const getCallbackStopOnLastFrame = (lastFrame: number) =>
+  function() {
+    if (this.currentFrame >= lastFrame) {
+      this.onFrameChange = null
+      this.gotoAndStop(lastFrame)
+    }
+  }
+
 export type Result = {
   movieClip: PIXI.AnimatedSprite
   goToIdle(angle: number): void
@@ -120,7 +128,8 @@ export default () => {
     const movieClip = new PIXI.AnimatedSprite(frames)
     movieClip.animationSpeed = 0.3
     movieClip.scale.set(0.7)
-    // movieClip.anchor.set(0.5, 0);
+    movieClip.stop()
+    let phase = 0
 
     return {
       movieClip,
@@ -146,28 +155,26 @@ export default () => {
           angle,
           framesPeriods.FLY,
         )
-        // console.log(movieClip.playing);
-        if (movieClip.playing) {
-          if (movieClip.currentFrame > indexOfStartingFrame + framesPeriods.FLY.length / 2 - 1) {
-            if (movieClip.onFrameChange === undefined) {
-              movieClip.stop()
-            }
-          }
-        } else if (
-          movieClip.currentFrame >= framesPeriods.FLY.first &&
-          movieClip.currentFrame <= framesPeriods.FLY.last
+
+        const { currentFrame } = movieClip
+        if (
+          currentFrame < framesPeriods.FLY.first ||
+          currentFrame > framesPeriods.FLY.last
         ) {
-          if (flyingProgress <= 4 && movieClip.onFrameChange === undefined) {
-            movieClip.play()
-            movieClip.onFrameChange = () => {
-              if (movieClip.currentFrame >= indexOfStartingFrame + framesPeriods.FLY.length - 1) {
-                movieClip.stop()
-              }
-            }
-          }
-        } else {
+          phase = 1
           movieClip.gotoAndPlay(indexOfStartingFrame)
-          movieClip.onFrameChange = undefined
+        } else if (
+          phase === 1 &&
+          currentFrame > indexOfStartingFrame + framesPeriods.FLY.length / 2 - 1
+        ) {
+          phase = 2
+          movieClip.stop()
+        } else if (flyingProgress <= 4 && phase === 2) {
+          phase = 3
+          movieClip.play()
+          movieClip.onFrameChange = getCallbackStopOnLastFrame(
+            indexOfStartingFrame + framesPeriods.FLY.length - 1,
+          )
         }
       },
       goToGetUp(angle: number, getUppingProgress: number) {
@@ -177,7 +184,7 @@ export default () => {
         )
         const indexOfCurrentFrame =
           indexOfStartingFrame +
-          Math.floor(getUppingProgress * framesPeriods.GETUP.length)
+          Math.floor(getUppingProgress * (framesPeriods.GETUP.length - 1))
         movieClip.gotoAndStop(indexOfCurrentFrame)
       },
     }
