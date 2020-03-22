@@ -53,7 +53,7 @@ const render = (
       case 2.0: {
         // squad -> solider
         const indexOfId = index + 1
-        const newIndexValue = indexOfId + 5
+        const newIndexValue = indexOfId + 6
         const unitId = universeData[indexOfId]
         const unit = universeRepresentation[unitId]
         if (unit) {

@@ -13,7 +13,7 @@ pub struct SquadDetails {
 const SOLIDER_DETAILS: SquadDetails = SquadDetails {
   movement_speed: 2,
   hp: 100,
-  production_time: 120,
+  production_time: 30,
   members_number: 6,
   representation_type: 2.0,
 };

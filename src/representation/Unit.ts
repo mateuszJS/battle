@@ -6,8 +6,8 @@ type PixiUnitStuff = {
     goToIdle(angle: number): void
     goToRun(angle: number): void
     goToShoot(angle: number): void
-    goToFly(angle: number): void
-    goToGetUp(angle: number): void
+    goToFly(angle: number, flyingProgress: number): void
+    goToGetUp(angle: number, getUppingProgress: number): void
   }
 }
 
@@ -34,8 +34,8 @@ class Unit {
     goToIdle(angle: number): void
     goToRun(angle: number): void
     goToShoot(angle: number): void
-    goToFly(angle: number): void
-    goToGetUp(angle: number): void
+    goToFly(angle: number, flyingProgress: number): void
+    goToGetUp(angle: number, getUppingProgress: number): void
   }
 
   constructor(x: number, y: number, angle: number, pixiStuff: PixiUnitStuff) {
@@ -59,7 +59,13 @@ class Unit {
     }
   }
 
-  update(state: State, x: number, y: number, angle: number, isShoot: boolean) {
+  update(
+    state: State,
+    x: number,
+    y: number,
+    angle: number,
+    firstStateParam: number,
+  ) {
     this.graphics.x = x
     this.graphics.y = y
 
@@ -78,11 +84,11 @@ class Unit {
         break
       }
       case State.FLY: {
-        this.frameUpdaters.goToFly(angle)
+        this.frameUpdaters.goToFly(angle, firstStateParam)
         break
       }
       case State.GETUP: {
-        this.frameUpdaters.goToGetUp(angle)
+        this.frameUpdaters.goToGetUp(angle, firstStateParam)
         break
       }
     }

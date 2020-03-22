@@ -6,7 +6,7 @@ use crate::squad_types::{get_squad_details, SquadType};
 use crate::unit::Unit;
 use crate::Factory;
 
-static TIME_BETWEEN_CREATION: u8 = 240;
+static TIME_BETWEEN_CREATION: u8 = 20;
 
 pub struct SquadDuringCreation {
   pub next_unit_in_secs: u8,
@@ -41,8 +41,8 @@ impl Faction {
       creating_squad.next_unit_in_secs += 1;
 
       if creating_squad.next_unit_in_secs >= TIME_BETWEEN_CREATION {
-        let rnd = LookUpTable::generate_id();
-        let unit = Unit::new(200.0 + rnd * 50.0, 200.0 + rnd * 50.0, rnd);
+        let random = LookUpTable::generate_id();
+        let unit = Unit::new(self.factory.x, self.factory.y, random);
         creating_squad.squad.members.push(unit);
 
         let squad_details = get_squad_details(&creating_squad.squad.squad_type);
@@ -105,32 +105,13 @@ impl Faction {
     let active_squads_representation: Vec<f32> = self
       .squads
       .iter()
-      .flat_map(|squad| {
-        let units_list: Vec<f32> = squad
-          .members
-          .iter()
-          .flat_map(|unit| vec![2.0, unit.id, unit.state as f32, unit.x, unit.y, unit.angle])
-          .collect();
-
-        // units_list.insert(0, squad.representation_type);
-        units_list
-      })
+      .flat_map(|squad| squad.get_representation())
       .collect();
 
     let squads_during_creation_representation: Vec<f32> = self
       .squads_during_creation
       .iter()
-      .flat_map(|squad_during_creation| {
-        let units_list: Vec<f32> = squad_during_creation
-          .squad
-          .members
-          .iter()
-          .flat_map(|unit| vec![2.0, unit.id, unit.state as f32, unit.x, unit.y, unit.angle])
-          .collect();
-
-        // units_list.insert(0, squad.representation_type);
-        units_list
-      })
+      .flat_map(|squad_during_creation| squad_during_creation.squad.get_representation())
       .collect();
 
     // everything I'm combining into vector, maybe it is possible just with slices?

@@ -15,26 +15,46 @@ const addFrames = (
   }
 }
 
+const getAngleOffsetInFrames = (angle: number, numberOfSides: number) => {
+  const oneAngleSlice = (2 * Math.PI) / numberOfSides
+  const centeredAngle = angle - oneAngleSlice / 2
+
+  const positiveCenteredAngle =
+    centeredAngle < 0 ? centeredAngle + Math.PI * 2 : centeredAngle
+  const framesAngle =
+    Math.abs(positiveCenteredAngle - 2 * Math.PI) + 2 * Math.PI * 0.75
+  const preparedAngle = framesAngle % (Math.PI * 2)
+  return Math.floor(preparedAngle / oneAngleSlice)
+}
+
+const getIndexOfStartingFrame = (
+  angle,
+  { first, sides, length }: { first: number; sides: number; length: number },
+) => {
+  const angleOffset = getAngleOffsetInFrames(angle, sides)
+  return first + angleOffset * length
+}
+
 export type Result = {
   movieClip: PIXI.AnimatedSprite
   goToIdle(angle: number): void
   goToRun(angle: number): void
   goToShoot(angle: number): void
-  goToFly(angle: number): void
-  goToGetUp(angle: number): void
+  goToFly(angle: number, flyingProgress: number): void
+  goToGetUp(angle: number, getUppingProgress: number): void
 }
 
 export default () => {
   const frames = []
 
-  // [{ sides: 12, lenght: 6}].map((item, index, arr) => ({
+  // [{ sides: 12, length: 6}].map((item, index, arr) => ({
   //   ...item,
   //   first:
   //   last:
   // }))
 
   const framesPeriods = {
-    STAY: {
+    IDLE: {
       first: 0,
       sides: 12,
       length: 1,
@@ -46,7 +66,7 @@ export default () => {
       length: 6,
       last: 12 * 6 + 12 - 1,
     },
-    GO: {
+    RUN: {
       first: 72 + 12,
       sides: 12,
       length: 16,
@@ -68,7 +88,7 @@ export default () => {
 
   addFrames(
     frames,
-    framesPeriods.STAY.sides * framesPeriods.STAY.length,
+    framesPeriods.IDLE.sides * framesPeriods.IDLE.length,
     id => `idle_${id}_solider_run${id}.png.png`,
   )
 
@@ -80,7 +100,7 @@ export default () => {
 
   addFrames(
     frames,
-    framesPeriods.GO.sides * framesPeriods.GO.length,
+    framesPeriods.RUN.sides * framesPeriods.RUN.length,
     id => `_${id}_s_g${id}.png.png`,
   )
 
@@ -98,31 +118,67 @@ export default () => {
 
   return (): Result => {
     const movieClip = new PIXI.AnimatedSprite(frames)
-    movieClip.animationSpeed = 0.4
+    movieClip.animationSpeed = 0.3
     movieClip.scale.set(0.7)
     // movieClip.anchor.set(0.5, 0);
 
     return {
       movieClip,
       goToIdle(angle: number) {
-        movieClip.gotoAndStop(framesPeriods.STAY.first)
+        const indexOfStartingFrame = getIndexOfStartingFrame(
+          angle,
+          framesPeriods.IDLE,
+        )
+        movieClip.gotoAndStop(indexOfStartingFrame)
       },
       goToRun(angle: number) {
         // repeat
-        movieClip.gotoAndStop(framesPeriods.GO.first)
+        movieClip.gotoAndStop(framesPeriods.RUN.first)
       },
       goToShoot(angle: number) {
         // stop at end frame
         // call again if isShoot = true
         movieClip.gotoAndStop(framesPeriods.SHOOT.first)
       },
-      goToFly(angle: number) {
+      goToFly(angle: number, flyingProgress: number) {
         // stop and last frame
-        movieClip.gotoAndStop(framesPeriods.FLY.first)
+        const indexOfStartingFrame = getIndexOfStartingFrame(
+          angle,
+          framesPeriods.FLY,
+        )
+        // console.log(movieClip.playing);
+        if (movieClip.playing) {
+          if (movieClip.currentFrame > indexOfStartingFrame + framesPeriods.FLY.length / 2 - 1) {
+            if (movieClip.onFrameChange === undefined) {
+              movieClip.stop()
+            }
+          }
+        } else if (
+          movieClip.currentFrame >= framesPeriods.FLY.first &&
+          movieClip.currentFrame <= framesPeriods.FLY.last
+        ) {
+          if (flyingProgress <= 4 && movieClip.onFrameChange === undefined) {
+            movieClip.play()
+            movieClip.onFrameChange = () => {
+              if (movieClip.currentFrame >= indexOfStartingFrame + framesPeriods.FLY.length - 1) {
+                movieClip.stop()
+              }
+            }
+          }
+        } else {
+          movieClip.gotoAndPlay(indexOfStartingFrame)
+          movieClip.onFrameChange = undefined
+        }
       },
-      goToGetUp(angle: number) {
-        // stop and last frame
-        movieClip.gotoAndStop(framesPeriods.GETUP.first)
+      goToGetUp(angle: number, getUppingProgress: number) {
+        const indexOfStartingFrame = getIndexOfStartingFrame(
+          angle,
+          framesPeriods.GETUP,
+        )
+        const indexOfCurrentFrame =
+          indexOfStartingFrame +
+          Math.floor(getUppingProgress * framesPeriods.GETUP.length)
+        movieClip.gotoAndStop(indexOfCurrentFrame)
       },
     }
   }

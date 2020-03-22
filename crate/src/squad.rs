@@ -26,4 +26,12 @@ impl Squad {
       unit.update();
     }
   }
+
+  pub fn get_representation(&self) -> Vec<f32> {
+    self
+      .members
+      .iter()
+      .flat_map(|unit| unit.get_representation())
+      .collect()
+  }
 }
