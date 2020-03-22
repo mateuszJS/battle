@@ -1,14 +1,10 @@
+import { FrameUpdaters } from './getSprites'
+
 type PixiUnitStuff = {
   sortingLayer: PIXI.display.Group
   container: PIXI.Container
   movieClip: PIXI.AnimatedSprite
-  frameUpdaters: {
-    goToIdle(angle: number): void
-    goToRun(angle: number): void
-    goToShoot(angle: number): void
-    goToFly(angle: number, flyingProgress: number): void
-    goToGetUp(angle: number, getUppingProgress: number): void
-  }
+  frameUpdaters: FrameUpdaters
 }
 
 enum State {
@@ -25,17 +21,11 @@ enum State {
 class Unit {
   public graphics: PIXI.Container
   public movieClip: PIXI.AnimatedSprite
+  private frameUpdaters: FrameUpdaters
   public previousFramesFactors: {
     // has impact of current frame
     state: State
     angle: number
-  }
-  private frameUpdaters: {
-    goToIdle(angle: number): void
-    goToRun(angle: number): void
-    goToShoot(angle: number): void
-    goToFly(angle: number, flyingProgress: number): void
-    goToGetUp(angle: number, getUppingProgress: number): void
   }
 
   constructor(x: number, y: number, angle: number, pixiStuff: PixiUnitStuff) {

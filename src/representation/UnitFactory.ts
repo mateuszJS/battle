@@ -1,8 +1,8 @@
 import Unit from './Unit'
-import createSoliderSprite, { Result } from './getSprites'
+import createSoliderSprite from './getSprites'
 
 class UnitsFactory {
-  private static getSoliderSprite: () => Result
+  private static getSoliderSprite: ReturnType<typeof createSoliderSprite>
   private static layerGroup: PIXI.display.Group
 
   static initializationTypes(layerGroup: PIXI.display.Group) {
