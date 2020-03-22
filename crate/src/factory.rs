@@ -45,11 +45,11 @@ impl Factory {
     }
   }
 
-  pub fn get_representation(&self, itemsDuringCreation: usize) -> Vec<f32> {
+  pub fn get_representation(&self, items_during_creation: usize) -> Vec<f32> {
     vec![
       1.0, // type -> factory
       self.id,
-      if itemsDuringCreation > 0 || self.production_line.len() > 0 { 1.0 } else { 0.0 },
+      if items_during_creation > 0 || self.production_line.len() > 0 { 1.0 } else { 0.0 },
     ]
   }
 
