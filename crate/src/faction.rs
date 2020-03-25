@@ -97,8 +97,11 @@ impl Faction {
     let faction_data = vec![0.0, self.id];
     let start_representation = [
       &faction_data[..],
-      &self.factory.get_representation(self.squads_during_creation.len())[..],
-    ].concat();
+      &self
+        .factory
+        .get_representation(self.squads_during_creation.len())[..],
+    ]
+    .concat();
 
     let active_squads_representation: Vec<f32> = self
       .squads

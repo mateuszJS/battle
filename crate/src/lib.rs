@@ -12,6 +12,9 @@ macro_rules! log {
   ($($t:tt)*) => (log(&format!($($t)*)))
 }
 
+const INDEX_OF_USER_FACTION: usize = 0;
+
+mod constants;
 mod faction;
 mod factory;
 mod id_generator;
@@ -19,7 +22,6 @@ mod look_up_table;
 mod squad;
 mod squad_types;
 mod unit;
-mod constants;
 
 use crate::constants::MATH_PI;
 use crate::squad_types::SquadType;
@@ -90,14 +92,9 @@ impl Universe {
       .collect() //try with u16, instead of f32
   }
 
-  pub fn create_squad(&mut self, squad_type_str: &str) {
-    let squad_type = match squad_type_str {
-      "solider" => SquadType::Solider,
-      _ => SquadType::Solider,
-    };
-
-    self.factions[0]
+  pub fn create_squad(&mut self, squad_type_representation: u8) -> bool {
+    self.factions[INDEX_OF_USER_FACTION]
       .factory
-      .add_squad_to_production_line(squad_type);
+      .add_squad_to_production_line(squad_type_representation)
   }
 }

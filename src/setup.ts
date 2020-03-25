@@ -23,6 +23,13 @@ export type UniverseRepresentation = {
   [id: number]: Factory | Unit
 }
 
+const mapIconToRepresentationType = (icon: 'solider') => {
+  switch (icon) {
+    case 'solider':
+      return 2
+  }
+}
+
 // eslint-disable-next-line prettier/prettier
 const playersList = [
   1.0,
@@ -109,7 +116,7 @@ const setup = () => {
   }
   const handledKeyUp = ({ code }: KeyboardEvent) => {
     if (code === 'KeyC') {
-      universe.create_squad('solider')
+      universe.create_squad(mapIconToRepresentationType('solider'))
     }
   }
   document.addEventListener('keyup', handledKeyUp)
