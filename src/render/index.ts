@@ -40,7 +40,7 @@ const render = (
       case 1.0: {
         // factory
         const indexOfId = index + 1
-        const newIndexValue = indexOfId + 2
+        const newIndexValue = indexOfId + 7
         const factoryId = universeData[indexOfId]
         const factory = universeRepresentation[factoryId]
         representationUpdaters.updateFactory(

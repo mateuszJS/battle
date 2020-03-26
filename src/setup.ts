@@ -116,7 +116,7 @@ const setup = () => {
   }
   const handledKeyUp = ({ code }: KeyboardEvent) => {
     if (code === 'KeyC') {
-      universe.create_squad(mapIconToRepresentationType('solider'))
+      console.log(universe.create_squad(mapIconToRepresentationType('solider')))
     }
   }
   document.addEventListener('keyup', handledKeyUp)

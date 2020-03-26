@@ -29,8 +29,16 @@ function onFrameChange() {
   }
 }
 
+type ProductionItem = {
+  id: number
+  icon: PIXI.Sprite
+}
+
 class Factory {
+  private x: number
+  private y: number
   private portalFX: PIXI.AnimatedSprite
+  private productionLine: ProductionItem[]
 
   constructor(
     // factionId: number,
@@ -83,6 +91,16 @@ class Factory {
 
     this.portalFX = portalFX
     portalFX.onFrameChange = onFrameChange
+
+    this.x = x
+    this.y = y
+    this.productionLine = [
+      { id: 0, icon: null },
+      { id: 0, icon: null },
+      { id: 0, icon: null },
+      { id: 0, icon: null },
+      { id: 0, icon: null },
+    ]
   }
 
   turnOnProduction() {
@@ -100,6 +118,51 @@ class Factory {
       this.portalFX.visible = false
       this.portalFX.alpha = 0
       this.portalFX.stop()
+    }
+  }
+
+  updateProductionLine(progress: number, data: number[]) {
+    for (let i = 0; i < data.length; i++) {
+      const representationItem = this.productionLine[i]
+      if ((representationItem && representationItem.id) !== data[i]) {
+        if (data[i]) {
+          const avatar = new PIXI.Sprite(
+            window.app.loader.resources[
+              'assets/soliderRegularAvatar.png'
+            ].texture,
+          )
+          avatar.width = 60
+          avatar.height = 60
+          avatar.x = this.x
+          avatar.y = this.y + i * 60
+          window.app.stage.addChild(avatar)
+          // avatar.interactive = true
+          // avatar.buttonMode = true
+          // const onButtonDown = () => {
+          //   if (factories[0].resources >= 1000) {
+          //     factories[0].buySquad(avatarInfo.unit)
+          //   }
+          // }
+          // avatar.on('pointerdown', onButtonDown)
+          // window.app.stage.addChild(avatar)
+          // window.userIcons.push(avatar)
+
+          this.productionLine[i] = {
+            id: data[i],
+            icon: avatar,
+          }
+        } else {
+          window.app.stage.removeChild(this.productionLine[i].icon)
+          this.productionLine[i] = {
+            id: 0,
+            icon: null,
+          }
+        }
+      }
+    }
+
+    if (progress !== 0) {
+      this.productionLine[0].icon.alpha = progress
     }
   }
 }
