@@ -1,7 +1,7 @@
 use crate::constants::MATH_PI;
 use crate::log;
 use crate::look_up_table::LookUpTable;
-use crate::squad_types::{SquadType, get_squad_details};
+use crate::squad_types::{get_squad_details, SquadType};
 
 const PORTAL_WIDTH: f32 = 400.0;
 const MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE: usize = 5;
@@ -21,10 +21,11 @@ pub struct Factory {
   pub y: f32,
   pub angle: f32,
   production_line: Vec<ProducedSquad>,
+  owner_user: bool,
 }
 
 impl Factory {
-  pub fn new(id: f32, x: f32, y: f32, angle: f32) -> Factory {
+  pub fn new(id: f32, x: f32, y: f32, angle: f32, owner_user: bool) -> Factory {
     Factory {
       id,
       hp: 100.0,
@@ -32,6 +33,7 @@ impl Factory {
       y,
       angle,
       production_line: vec![],
+      owner_user,
     }
   }
   pub fn work(&mut self) -> Option<SquadType> {
@@ -51,11 +53,13 @@ impl Factory {
 
   pub fn get_representation(&self, items_during_creation: usize) -> Vec<f32> {
     let factory_representation = vec![
-      1.0, // type -> factory
+      if self.owner_user { 3.0 } else { 1.0 }, // type -> factory
       self.id,
-      if self.production_line.len() > 0 {
+      if self.owner_user && self.production_line.len() > 0 {
         self.production_line[0].current_time as f32 / self.production_line[0].total_time as f32
-      } else { 0.0 },
+      } else {
+        0.0
+      },
     ];
     let production_line_representation: Vec<f32> = self
       .production_line
@@ -63,13 +67,18 @@ impl Factory {
       .map(|produced_item| produced_item.squad_type_representation as f32)
       .collect();
 
-    let representation = [
-      &factory_representation[..],
-      &production_line_representation[..],
-      &vec![0.0; 5 - production_line_representation.len()][..]
-    ]
-    .concat();
-    
+    let representation = if self.owner_user {
+      [
+        &factory_representation[..],
+        &production_line_representation[..],
+        &vec![0.0; 5 - production_line_representation.len()][..],
+      ]
+      .concat()
+    } else {
+      let items_list = vec![self.production_line.len() as f32];
+      [&factory_representation[..], &items_list[..]].concat()
+    };
+
     representation
   }
 

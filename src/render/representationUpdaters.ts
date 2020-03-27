@@ -11,7 +11,10 @@ export const updateFactory = (
     factory.turnOffProduction()
   }
 
-  factory.updateProductionLine(progress, items)
+  if (items.length > 1) {
+    // it's user factory
+    factory.updateProductionLine(progress, items)
+  }
 }
 
 export const updateUnit = (

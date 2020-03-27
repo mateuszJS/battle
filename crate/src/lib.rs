@@ -47,6 +47,7 @@ impl Universe {
           (index as f32) * 100.0 + 200.0,
           (index as f32) * 100.0 + 200.0,
           (index as f32) * angle_diff + MATH_PI,
+          index == INDEX_OF_USER_FACTION,
         )
       })
       .collect();

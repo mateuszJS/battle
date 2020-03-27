@@ -22,9 +22,15 @@ pub struct Faction {
 }
 
 impl Faction {
-  pub fn new(id: f32, factory_x: f32, factory_y: f32, factory_angle: f32) -> Faction {
+  pub fn new(
+    id: f32,
+    factory_x: f32,
+    factory_y: f32,
+    factory_angle: f32,
+    is_user: bool,
+  ) -> Faction {
     let factory_id = IdGenerator::generate_id();
-    let factory = Factory::new(factory_id, factory_x, factory_y, factory_angle);
+    let factory = Factory::new(factory_id, factory_x, factory_y, factory_angle, is_user);
     Faction {
       id,
       factory,

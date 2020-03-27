@@ -38,9 +38,9 @@ const render = (
         break
       }
       case 1.0: {
-        // factory
+        //  factory
         const indexOfId = index + 1
-        const newIndexValue = indexOfId + 7
+        const newIndexValue = indexOfId + 3
         const factoryId = universeData[indexOfId]
         const factory = universeRepresentation[factoryId]
         representationUpdaters.updateFactory(
@@ -70,6 +70,19 @@ const render = (
           )
         }
 
+        index = newIndexValue
+        break
+      }
+      case 3.0: {
+        // user factory
+        const indexOfId = index + 1
+        const newIndexValue = indexOfId + 7
+        const factoryId = universeData[indexOfId]
+        const factory = universeRepresentation[factoryId]
+        representationUpdaters.updateFactory(
+          factory as Factory,
+          universeData.slice(indexOfId + 1, newIndexValue),
+        )
         index = newIndexValue
         break
       }
