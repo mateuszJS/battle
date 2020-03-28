@@ -1,5 +1,9 @@
 extern crate js_sys;
 extern crate wasm_bindgen;
+
+#[macro_use]
+extern crate lazy_static;
+
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
