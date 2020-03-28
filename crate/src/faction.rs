@@ -1,3 +1,4 @@
+use crate::constants::MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE;
 use crate::id_generator::IdGenerator;
 use crate::look_up_table::LookUpTable;
 use crate::squad::Squad;
@@ -42,8 +43,6 @@ impl Faction {
   }
 
   fn update_squads_during_creation(&mut self) {
-    let factory = &mut self.factory;
-
     // FYI:
     // was fighting really long with implementation of that method, but without success :(
     // in this method all I need to do is
@@ -55,46 +54,38 @@ impl Faction {
     //   3.3. compare number of units in squad with squad limit, if is equal then {
     //      3.3.1. remove currently evaluated item from self.squads_during_creation and push value from field "squad" to self.squads vector
 
-    let mut squad_index: i8 = -1;
+    // This method seems to be pretty complicated, but have no idea how to improve that
 
-    // 1. loop over self.squads_during_creation
+    let factory = &mut self.factory;
+    let mut squad_index: usize = MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE;
+    // this value is impossible to reach ^ in for_each below
+
     self
       .squads_during_creation
       .iter_mut()
       .enumerate()
       .for_each(|(index, creating_squad)| {
-        // .for_each(|(index, creating_squad)| {
-        // 2. increment time_to_create_another_unit + 1
         creating_squad.time_to_create_another_unit += 1;
 
-        // 3. if increment time_to_create_another_unit == TIME_BETWEEN_CREATION then {
         if creating_squad.time_to_create_another_unit == TIME_BETWEEN_CREATION {
-          // 3.1. set time_to_create_another_unit = 0
           creating_squad.time_to_create_another_unit = 0;
 
           let (position_x, position_y, unit_angle) = factory.get_creation_point();
           let unit = Unit::new(position_x, position_y, unit_angle);
-          // 3.2. add new unit to squad
           creating_squad.squad.members.push(unit);
 
           let squad_details = get_squad_details(&creating_squad.squad.squad_type);
-          // 3.3. compare number of units in squad with squad limit, if is equal then {
           if creating_squad.squad.members.len() == squad_details.members_number {
-            // save index of item for 3.3.1.
-            squad_index = index as i8;
+            squad_index = index;
           } else {
             creating_squad.time_to_create_another_unit = 0;
           }
         }
       });
-    if squad_index > -1 {
-      // 3.3.1. remove currently evaluated item from self.squads_during_creation and push value from field "squad" to self.squads vector
-      self.squads.push(
-        self
-          .squads_during_creation
-          .remove(squad_index as usize)
-          .squad,
-      );
+
+    if squad_index != MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE {
+      let squad = self.squads_during_creation.remove(squad_index).squad;
+      self.squads.push(squad);
     }
   }
 

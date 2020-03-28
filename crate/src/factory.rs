@@ -1,10 +1,10 @@
-use crate::constants::MATH_PI;
+use crate::constants::{MATH_PI, MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE};
 use crate::id_generator::IdGenerator;
 use crate::look_up_table::LookUpTable;
 use crate::squad_types::{get_squad_details, SquadType};
 
 const PORTAL_WIDTH: f32 = 400.0;
-const MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE: usize = 5;
+
 const SOLIDER_REPRESENTATION_ID: u8 = 2;
 
 struct ProducedSquad {
@@ -27,7 +27,6 @@ pub struct Factory {
 // 1.
 impl Factory {
   pub fn new(x: f32, y: f32, angle: f32, owner_user: bool) -> Factory {
-    log!("new");
     Factory {
       id: IdGenerator::generate_id(),
       hp: 100.0,
@@ -73,7 +72,7 @@ impl Factory {
       [
         &factory_representation[..],
         &production_line_representation[..],
-        &vec![0.0; 5 - production_line_representation.len()][..],
+        &vec![0.0; MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE - production_line_representation.len()][..],
       ]
       .concat()
     } else {
