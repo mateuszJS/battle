@@ -53,34 +53,30 @@ impl Factory {
   }
 
   pub fn get_representation(&self) -> Vec<f32> {
-    let factory_representation = vec![
-      if self.owner_user { 3.0 } else { 1.0 }, // type -> factory
-      self.id,
-      if self.owner_user && self.production_line.len() > 0 {
-        self.production_line[0].current_time as f32 / self.production_line[0].total_time as f32
-      } else {
-        0.0
-      },
-    ];
-    let production_line_representation: Vec<f32> = self
-      .production_line
-      .iter()
-      .map(|produced_item| produced_item.squad_type_representation as f32)
-      .collect();
+    let factory_type = if self.owner_user { 3.0 } else { 1.0 };
+    let progress = if self.owner_user && self.production_line.len() > 0 {
+      self.production_line[0].current_time as f32 / self.production_line[0].total_time as f32
+    } else {
+      0.0
+    };
+    let factory_representation = [factory_type, self.id, progress];
 
-    let representation = if self.owner_user {
+    if self.owner_user {
+      let production_line_representation: Vec<f32> = self
+        .production_line
+        .iter()
+        .map(|produced_item| produced_item.squad_type_representation as f32)
+        .collect();
       [
         &factory_representation[..],
-        &production_line_representation[..],
-        &vec![0.0; MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE - production_line_representation.len()][..],
+        &production_line_representation,
+        &vec![0.0; MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE - production_line_representation.len()],
       ]
       .concat()
     } else {
       let items_list = vec![self.production_line.len() as f32];
-      [&factory_representation[..], &items_list[..]].concat()
-    };
-
-    representation
+      [&factory_representation[..], &items_list].concat()
+    }
   }
 
   pub fn add_squad_to_production_line(&mut self, squad_type_representation: u8) -> bool {

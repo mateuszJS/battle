@@ -1,5 +1,4 @@
 use crate::constants::MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE;
-use crate::id_generator::IdGenerator;
 use crate::look_up_table::LookUpTable;
 use crate::squad::Squad;
 use crate::squad_types::{get_squad_details, SquadType};
@@ -99,6 +98,7 @@ impl Faction {
 
     match result {
       Some(squad_type) => {
+        // if result contains enum, then add site to self.squads_during_creation
         let new_squad = SquadDuringCreation {
           squad: Squad::new(squad_type),
           time_to_create_another_unit: 0,
@@ -121,8 +121,7 @@ impl Faction {
   // each array of representation units begin with unit types (length: 1),
   // then all units, and again faction id OR unit type
   pub fn get_representation(&self) -> Vec<f32> {
-    let faction_data = vec![0.0, self.id];
-    let start_representation = [&faction_data[..], &self.factory.get_representation()[..]].concat();
+    let start_representation = [&[0.0, self.id], &self.factory.get_representation()[..]].concat();
 
     let active_squads_representation: Vec<f32> = self
       .squads
