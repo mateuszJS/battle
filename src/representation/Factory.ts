@@ -31,7 +31,7 @@ function onFrameChange() {
 
 type ProductionItem = {
   id: number
-  icon: PIXI.Sprite
+  node: HTMLButtonElement | null
 }
 
 class Factory {
@@ -48,7 +48,6 @@ class Factory {
     sortingLayer: PIXI.display.Group,
   ) {
     const safeAngle = (angle + 2 * Math.PI * 0.75) % (Math.PI * 2)
-    console.log(angle, safeAngle, angle % (Math.PI * 2))
     // index = 0, 1, 2, 3
     const index = Math.floor(safeAngle / ((2 * Math.PI) / 8)) % 4
     const gateBottom = new PIXI.Sprite(PIXI.Texture.from(`gate${index}a.png`))
@@ -95,11 +94,11 @@ class Factory {
     this.x = x
     this.y = y
     this.productionLine = [
-      { id: 0, icon: null },
-      { id: 0, icon: null },
-      { id: 0, icon: null },
-      { id: 0, icon: null },
-      { id: 0, icon: null },
+      { id: 0, node: null },
+      { id: 0, node: null },
+      { id: 0, node: null },
+      { id: 0, node: null },
+      { id: 0, node: null },
     ]
   }
 
@@ -126,43 +125,30 @@ class Factory {
       const representationItem = this.productionLine[i]
       if ((representationItem && representationItem.id) !== data[i]) {
         if (data[i]) {
-          const avatar = new PIXI.Sprite(
-            window.app.loader.resources[
-              'assets/soliderRegularAvatar.png'
-            ].texture,
-          )
-          avatar.width = 60
-          avatar.height = 60
-          avatar.x = this.x
-          avatar.y = this.y + i * 60
-          window.app.stage.addChild(avatar)
-          // avatar.interactive = true
-          // avatar.buttonMode = true
-          // const onButtonDown = () => {
-          //   if (factories[0].resources >= 1000) {
-          //     factories[0].buySquad(avatarInfo.unit)
-          //   }
-          // }
-          // avatar.on('pointerdown', onButtonDown)
-          // window.app.stage.addChild(avatar)
-          // window.userIcons.push(avatar)
+          const button = document.createElement('button')
+          button.className = 'solider'
 
           this.productionLine[i] = {
             id: data[i],
-            icon: avatar,
+            node: button,
           }
+          document
+            .getElementById('factory-list')
+            .appendChild(this.productionLine[i].node)
         } else {
-          window.app.stage.removeChild(this.productionLine[i].icon)
+          document
+            .getElementById('factory-list')
+            .removeChild(this.productionLine[i].node)
           this.productionLine[i] = {
             id: 0,
-            icon: null,
+            node: null,
           }
         }
       }
     }
 
     if (progress !== 0) {
-      this.productionLine[0].icon.alpha = progress
+      this.productionLine[0].node.style.opacity = `${progress}`
     }
   }
 }

@@ -114,12 +114,15 @@ const setup = () => {
     )
     universeRepresentation[factoryId] = factoryRepresentation
   }
-  const handledKeyUp = ({ code }: KeyboardEvent) => {
-    if (code === 'KeyC') {
-      console.log(universe.create_squad(mapIconToRepresentationType('solider')))
-    }
+  const handledKeyUp = () => {
+    console.log(universe.create_squad(mapIconToRepresentationType('solider')))
   }
-  document.addEventListener('keyup', handledKeyUp)
+
+  const button = document.createElement('button')
+  button.className = 'solider-product'
+  button.addEventListener('click', handledKeyUp)
+
+  document.getElementById('shop-list').appendChild(button)
 
   window.app.ticker.add((delta: number) => {
     universe.update()
