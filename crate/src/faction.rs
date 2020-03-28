@@ -1,24 +1,26 @@
 use crate::id_generator::IdGenerator;
-use crate::log;
 use crate::look_up_table::LookUpTable;
 use crate::squad::Squad;
 use crate::squad_types::{get_squad_details, SquadType};
 use crate::unit::Unit;
 use crate::Factory;
 
-static TIME_BETWEEN_CREATION: u8 = 10;
+const TIME_BETWEEN_CREATION: u8 = 10;
 
+// FYI:
+// This is struct which contains squad during process creation (when squad is really created, but units are throwing from factory)
 pub struct SquadDuringCreation {
-  pub next_unit_in_secs: u8,
+  pub time_to_create_another_unit: u8, // when create & throw & add another unit to the squad
   pub squad: Squad,
 }
 
 pub struct Faction {
   pub id: f32,
-  pub resources: u32,
-  pub squads: Vec<Squad>,
+  pub resources: u32,     // not used right now
+  pub squads: Vec<Squad>, // when all units fro squad are crated,
+  // then struct SquadDuringCreation is removed, and squad is pushed into this vector
   pub factory: Factory,
-  pub squads_during_creation: Vec<SquadDuringCreation>,
+  pub squads_during_creation: Vec<SquadDuringCreation>, // list of squads in the production line
 }
 
 impl Faction {
@@ -29,8 +31,7 @@ impl Faction {
     factory_angle: f32,
     is_user: bool,
   ) -> Faction {
-    let factory_id = IdGenerator::generate_id();
-    let factory = Factory::new(factory_id, factory_x, factory_y, factory_angle, is_user);
+    let factory = Factory::new(factory_x, factory_y, factory_angle, is_user);
     Faction {
       id,
       factory,
@@ -40,28 +41,54 @@ impl Faction {
     }
   }
 
-  fn update_squads_in_creation(&mut self) {
+  fn update_squads_during_creation(&mut self) {
+    let factory = &mut self.factory;
+
+    // FYI:
+    // was fighting really long with implementation of that method, but without success :(
+    // in this method all I need to do is
+    // 1. loop over self.squads_during_creation
+    // 2. increment time_to_create_another_unit + 1
+    // 3. if increment time_to_create_another_unit == TIME_BETWEEN_CREATION then {
+    //   3.1. set time_to_create_another_unit = 0
+    //   3.2. add new unit to squad
+    //   3.3. compare number of units in squad with squad limit, if is equal then {
+    //      3.3.1. remove currently evaluated item from self.squads_during_creation and push value from field "squad" to self.squads vector
+
     let mut squad_index: i8 = -1;
 
-    for (index, creating_squad) in self.squads_during_creation.iter_mut().enumerate() {
-      creating_squad.next_unit_in_secs += 1;
+    // 1. loop over self.squads_during_creation
+    self
+      .squads_during_creation
+      .iter_mut()
+      .enumerate()
+      .for_each(|(index, creating_squad)| {
+        // .for_each(|(index, creating_squad)| {
+        // 2. increment time_to_create_another_unit + 1
+        creating_squad.time_to_create_another_unit += 1;
 
-      if creating_squad.next_unit_in_secs >= TIME_BETWEEN_CREATION {
-        let (position_x, position_y, unit_angle) = self.factory.get_creation_point();
-        let unit = Unit::new(position_x, position_y, unit_angle);
-        creating_squad.squad.members.push(unit);
+        // 3. if increment time_to_create_another_unit == TIME_BETWEEN_CREATION then {
+        if creating_squad.time_to_create_another_unit == TIME_BETWEEN_CREATION {
+          // 3.1. set time_to_create_another_unit = 0
+          creating_squad.time_to_create_another_unit = 0;
 
-        let squad_details = get_squad_details(&creating_squad.squad.squad_type);
-        creating_squad.next_unit_in_secs = 0;
+          let (position_x, position_y, unit_angle) = factory.get_creation_point();
+          let unit = Unit::new(position_x, position_y, unit_angle);
+          // 3.2. add new unit to squad
+          creating_squad.squad.members.push(unit);
 
-        if creating_squad.squad.members.len() == squad_details.members_number {
-          squad_index = index as i8;
-        } else {
-          creating_squad.next_unit_in_secs = 0;
+          let squad_details = get_squad_details(&creating_squad.squad.squad_type);
+          // 3.3. compare number of units in squad with squad limit, if is equal then {
+          if creating_squad.squad.members.len() == squad_details.members_number {
+            // save index of item for 3.3.1.
+            squad_index = index as i8;
+          } else {
+            creating_squad.time_to_create_another_unit = 0;
+          }
         }
-      }
-    }
+      });
     if squad_index > -1 {
+      // 3.3.1. remove currently evaluated item from self.squads_during_creation and push value from field "squad" to self.squads vector
       self.squads.push(
         self
           .squads_during_creation
@@ -72,28 +99,31 @@ impl Faction {
   }
 
   pub fn update(&mut self) {
-    for squad in self.squads.iter_mut() {
-      squad.update();
-    }
+    // FYI:
+    // this method propagate update on factory, squads
 
-    for squad_during_creation in self.squads_during_creation.iter_mut() {
-      squad_during_creation.squad.update();
-    }
-
-    let result: Option<SquadType> = self.factory.work();
+    // FYI:
+    // sometimes as the result of factory update is returned enum SquadType
+    let result: Option<SquadType> = self.factory.update();
 
     match result {
       Some(squad_type) => {
-        let new_squad = Squad::new(squad_type);
-        self.squads_during_creation.push(SquadDuringCreation {
-          squad: new_squad,
-          next_unit_in_secs: 0,
-        });
+        let new_squad = SquadDuringCreation {
+          squad: Squad::new(squad_type),
+          time_to_create_another_unit: 0,
+        };
+        self.squads_during_creation.push(new_squad);
       }
       None => {}
     }
 
-    self.update_squads_in_creation();
+    self.squads.iter_mut().for_each(|squad| squad.update());
+    self
+      .squads_during_creation
+      .iter_mut()
+      .for_each(|squad_during_creation| squad_during_creation.squad.update());
+
+    self.update_squads_during_creation();
   }
   // types of units, factory etc. can be minus, e.g. factory -> -1, soldiers -> -2
   // id is just from 1
@@ -101,13 +131,7 @@ impl Faction {
   // then all units, and again faction id OR unit type
   pub fn get_representation(&self) -> Vec<f32> {
     let faction_data = vec![0.0, self.id];
-    let start_representation = [
-      &faction_data[..],
-      &self
-        .factory
-        .get_representation(self.squads_during_creation.len())[..],
-    ]
-    .concat();
+    let start_representation = [&faction_data[..], &self.factory.get_representation()[..]].concat();
 
     let active_squads_representation: Vec<f32> = self
       .squads

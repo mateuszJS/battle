@@ -1,6 +1,5 @@
-use crate::log;
-use crate::id_generator::IdGenerator;
 use crate::constants::MATH_PI;
+use crate::id_generator::IdGenerator;
 use crate::look_up_table::LookUpTable;
 
 const STATE_ABILITY: u8 = 8;
@@ -10,6 +9,8 @@ const STATE_SHOOT: u8 = 5;
 const STATE_IDLE: u8 = 4;
 const STATE_GETUP: u8 = 3;
 const STATE_DIE: u8 = 0;
+
+const REPRESENTATION_LENGTH: usize = 7;
 
 pub struct Unit {
   pub id: f32,
@@ -77,13 +78,22 @@ impl Unit {
     }
   }
 
-  pub fn get_representation(&self) -> Vec<f32> {
-    let mut representation: Vec<f32> = vec![2.0, self.id, self.x, self.y, self.angle, self.state as f32];
+  pub fn get_representation(&self) -> [f32; REPRESENTATION_LENGTH] {
+    let mut representation: [f32; REPRESENTATION_LENGTH] = [
+      2.0,
+      self.id,
+      self.x,
+      self.y,
+      self.angle,
+      self.state as f32,
+      0.0,
+    ];
+
     match self.state {
-      STATE_FLY => representation.push(self.mod_x.hypot(self.mod_y)),
-      STATE_GETUP => representation.push(self.get_upping_progress),
-      STATE_IDLE => representation.push(0.0),
-      _ => representation.push(0.0)
+      STATE_FLY => representation[REPRESENTATION_LENGTH - 1] = self.mod_x.hypot(self.mod_y),
+      STATE_GETUP => representation[REPRESENTATION_LENGTH - 1] = self.get_upping_progress,
+      STATE_IDLE => {}
+      _ => {}
     }
     representation
   }

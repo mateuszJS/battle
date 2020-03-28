@@ -1,6 +1,4 @@
 use crate::js_sys;
-use crate::lazy_static;
-use crate::log;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 const LUT_LENGTH: usize = 256;
@@ -12,9 +10,10 @@ pub struct LookUpTable {}
 impl LookUpTable {
   pub fn get_random() -> f32 {
     lazy_static! {
+      // https://stackoverflow.com/questions/27791532/how-do-i-create-a-global-mutable-singleton
       static ref LUT: Vec<f32> = {
         (0..LUT_LENGTH)
-          .map(|zero| js_sys::Math::random() as f32)
+          .map(|_| js_sys::Math::random() as f32)
           .collect()
       };
     }

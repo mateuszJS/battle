@@ -1,5 +1,5 @@
 use crate::constants::MATH_PI;
-use crate::log;
+use crate::id_generator::IdGenerator;
 use crate::look_up_table::LookUpTable;
 use crate::squad_types::{get_squad_details, SquadType};
 
@@ -23,11 +23,13 @@ pub struct Factory {
   production_line: Vec<ProducedSquad>,
   owner_user: bool,
 }
-
+// FYI: the main think that factory does is create unit, this is how it looks like
+// 1.
 impl Factory {
-  pub fn new(id: f32, x: f32, y: f32, angle: f32, owner_user: bool) -> Factory {
+  pub fn new(x: f32, y: f32, angle: f32, owner_user: bool) -> Factory {
+    log!("new");
     Factory {
-      id,
+      id: IdGenerator::generate_id(),
       hp: 100.0,
       x,
       y,
@@ -36,7 +38,7 @@ impl Factory {
       owner_user,
     }
   }
-  pub fn work(&mut self) -> Option<SquadType> {
+  pub fn update(&mut self) -> Option<SquadType> {
     if self.production_line.len() > 0 {
       let production_item = &mut self.production_line[0];
       production_item.current_time -= 1;
@@ -51,7 +53,7 @@ impl Factory {
     }
   }
 
-  pub fn get_representation(&self, items_during_creation: usize) -> Vec<f32> {
+  pub fn get_representation(&self) -> Vec<f32> {
     let factory_representation = vec![
       if self.owner_user { 3.0 } else { 1.0 }, // type -> factory
       self.id,

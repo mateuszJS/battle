@@ -22,16 +22,18 @@ impl Squad {
   }
 
   pub fn update(&mut self) {
-    for unit in self.members.iter_mut() {
-      unit.update();
-    }
+    self.members.iter_mut().for_each(|unit| unit.update());
   }
 
   pub fn get_representation(&self) -> Vec<f32> {
+    // QUESTION:
+    // am I able to return array without known the size during code compilation?
+    // in this case I can return array from "unit.get_representation" because length of the array is known
+    // but number of units can change, so in this method, I don't know how the size of array
     self
       .members
       .iter()
-      .flat_map(|unit| unit.get_representation())
+      .flat_map(|unit| unit.get_representation().to_vec())
       .collect()
   }
 }
