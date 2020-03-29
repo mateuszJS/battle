@@ -114,15 +114,27 @@ const setup = () => {
     )
     universeRepresentation[factoryId] = factoryRepresentation
   }
-  const handledKeyUp = () => {
+  const onClickCreateUnit = () => {
     console.log(universe.create_squad(mapIconToRepresentationType('solider')))
   }
 
   const button = document.createElement('button')
   button.className = 'solider-product'
-  button.addEventListener('click', handledKeyUp)
+  button.addEventListener('click', onClickCreateUnit)
 
   document.getElementById('shop-list').appendChild(button)
+
+  const onClickCanvas = (e: MouseEvent) => {
+    const x = e.clientX
+    const y = e.clientY
+    const result = universe.get_selected_units_ids(x, y, true)
+    console.log(result)
+    result.forEach(id => {
+      const unit = universeRepresentation[id] as Unit
+      unit.select()
+    })
+  }
+  window.app.view.addEventListener('click', onClickCanvas)
 
   window.app.ticker.add((delta: number) => {
     universe.update()

@@ -7,6 +7,7 @@ pub struct Squad {
   pub squad_type: SquadType,
   pub members: Vec<Unit>,
   pub representation_type: f32,
+  pub center_point: (f32, f32)
 }
 
 impl Squad {
@@ -18,11 +19,20 @@ impl Squad {
       id: IdGenerator::generate_id(), // not sure if needed
       squad_type: squad_type,
       members: vec![],
+      center_point: (0.0, 0.0),
     }
   }
 
   pub fn update(&mut self) {
-    self.members.iter_mut().for_each(|unit| unit.update());
+    let mut sum_x: f32 = 0.0;
+    let mut sum_y: f32 = 0.0;
+    self.members.iter_mut().for_each(|unit| {
+      unit.update();
+      sum_x += unit.x;
+      sum_y += unit.y;
+    });
+    self.center_point.0 = sum_x / self.members.len() as f32;
+    self.center_point.1 = sum_y / self.members.len() as f32;
   }
 
   pub fn get_representation(&self) -> Vec<f32> {

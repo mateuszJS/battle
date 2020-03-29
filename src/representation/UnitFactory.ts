@@ -1,5 +1,6 @@
 import Unit from './Unit'
 import createSoliderSprite from './getSprites'
+import getMySelection from './getMySelection'
 
 class UnitsFactory {
   private static getSoliderSprite: ReturnType<typeof createSoliderSprite>
@@ -17,6 +18,7 @@ class UnitsFactory {
       container: new PIXI.Container(),
       movieClip: movieClip,
       frameUpdaters,
+      selectionSprite: getMySelection(),
     }
 
     return new Unit(x, y, angle, graphicParams)
