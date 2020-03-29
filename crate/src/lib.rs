@@ -21,7 +21,7 @@ mod unit;
 // it's a good practise to add modules in the root of crate
 // and then in other modules just use "use crate::module_name"?
 
-use crate::constants::{MATH_PI, MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS, UNIT_VISUAL_SIZE_RADIUS};
+use crate::constants::{MATH_PI, MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS};
 use crate::squad_types::SquadType;
 use faction::Faction;
 use factory::Factory;
@@ -136,24 +136,21 @@ impl Universe {
       .add_squad_to_production_line(squad_type_representation)
   }
 
-  pub fn get_selected_units_ids(&self, x: f32, y: f32, select_our: bool) -> js_sys::Array {
+  pub fn get_selected_units_ids(&self, start_x: f32, end_x: f32, start_y: f32, end_y: f32, select_our: bool) -> js_sys::Array {
     let mut selected_units_ids: Vec<Vec<f32>> = vec![];
     self.factions.iter().enumerate().for_each(|(index, faction)| {
       if index == INDEX_OF_USER_FACTION {
         faction.squads.iter().for_each(|squad| {
-          let squad_distance = (x - squad.center_point.0).hypot(y - squad.center_point.1);
-          if (squad_distance < MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS) {
-            for unit in squad.members.iter() {
-              let unit_distance = (x - unit.x).hypot(y - (unit.y - UNIT_VISUAL_SIZE_RADIUS));
-              if unit_distance < UNIT_VISUAL_SIZE_RADIUS {
-                selected_units_ids.push(squad.members.iter().map(|unit| unit.id).collect());
-                break;
-              }
+          for unit in squad.members.iter() {
+            if unit.x > start_x && unit.x < end_x && unit.y > start_y && unit.y < end_y {
+              selected_units_ids.push(squad.members.iter().map(|unit| unit.id).collect());
+              break;
             }
           }
         })
       }
     });
+
     selected_units_ids
       .into_iter()
       .flat_map(|array| array.into_iter())

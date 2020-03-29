@@ -30,6 +30,8 @@ const mapIconToRepresentationType = (icon: 'solider') => {
   }
 }
 
+const HALF_UNIT_HEIGHT = 20
+
 // eslint-disable-next-line prettier/prettier
 const playersList = [
   1.0,
@@ -125,21 +127,73 @@ const setup = () => {
   document.getElementById('shop-list').appendChild(button)
 
   let selectedUnits = []
+  let startPoint = null
+  const selectionRectangle = new PIXI.Graphics()
 
-  const onClickCanvas = (e: MouseEvent) => {
-    const x = e.clientX
-    const y = e.clientY
+  window.app.stage.addChild(selectionRectangle)
+
+  const onMouseDown = (e: MouseEvent) => {
     selectedUnits.forEach(unit => unit.deselect())
     selectedUnits = []
-    const result = universe.get_selected_units_ids(x, y, true)
-    console.log(result)
+    startPoint = {
+      x: e.clientX,
+      y: e.clientY,
+    }
+  }
+
+  const onMouseMove = (e: MouseEvent) => {
+    if (!startPoint) return
+    const endX = e.clientX
+    const endY = e.clientY
+    const result = universe.get_selected_units_ids(
+      Math.min(startPoint.x, endX),
+      Math.max(startPoint.x, endX),
+      Math.min(startPoint.y, endY),
+      Math.max(startPoint.y, endY),
+      true,
+    )
+    selectedUnits.forEach(unit => unit.deselect())
+    selectedUnits = []
     result.forEach(id => {
       const unit = universeRepresentation[id] as Unit
       unit.select()
       selectedUnits.push(unit)
     })
+
+    selectionRectangle.clear()
+    selectionRectangle.lineStyle(2, 0x00ff00, 1)
+    selectionRectangle.beginFill(0x00ff00, 0.2)
+    selectionRectangle.drawRect(
+      startPoint.x,
+      startPoint.y,
+      endX - startPoint.x,
+      endY - startPoint.y,
+    )
+    selectionRectangle.endFill()
   }
-  window.app.view.addEventListener('click', onClickCanvas)
+
+  const onMouseUp = () => {
+    selectionRectangle.clear()
+    if (selectedUnits.length === 0) {
+      const result = universe.get_selected_units_ids(
+        startPoint.x - 20,
+        startPoint.x + 20,
+        startPoint.y - 20 + HALF_UNIT_HEIGHT,
+        startPoint.y + 20 + HALF_UNIT_HEIGHT,
+        true,
+      )
+
+      result.forEach(id => {
+        const unit = universeRepresentation[id] as Unit
+        unit.select()
+        selectedUnits.push(unit)
+      })
+    }
+    startPoint = null
+  }
+  window.app.view.addEventListener('mousedown', onMouseDown)
+  window.app.view.addEventListener('mouseup', onMouseUp)
+  window.app.view.addEventListener('mousemove', onMouseMove)
 
   window.app.ticker.add((delta: number) => {
     universe.update()
