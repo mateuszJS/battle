@@ -124,14 +124,19 @@ const setup = () => {
 
   document.getElementById('shop-list').appendChild(button)
 
+  let selectedUnits = []
+
   const onClickCanvas = (e: MouseEvent) => {
     const x = e.clientX
     const y = e.clientY
+    selectedUnits.forEach(unit => unit.deselect())
+    selectedUnits = []
     const result = universe.get_selected_units_ids(x, y, true)
     console.log(result)
     result.forEach(id => {
       const unit = universeRepresentation[id] as Unit
       unit.select()
+      selectedUnits.push(unit)
     })
   }
   window.app.view.addEventListener('click', onClickCanvas)

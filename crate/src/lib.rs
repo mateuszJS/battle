@@ -137,24 +137,26 @@ impl Universe {
   }
 
   pub fn get_selected_units_ids(&self, x: f32, y: f32, select_our: bool) -> js_sys::Array {
-    let mut selected_units_ids: Vec<f32> = vec![];
+    let mut selected_units_ids: Vec<Vec<f32>> = vec![];
     self.factions.iter().enumerate().for_each(|(index, faction)| {
       if index == INDEX_OF_USER_FACTION {
         faction.squads.iter().for_each(|squad| {
           let squad_distance = (x - squad.center_point.0).hypot(y - squad.center_point.1);
           if (squad_distance < MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS) {
-            squad.members.iter().for_each(|unit| {
+            for unit in squad.members.iter() {
               let unit_distance = (x - unit.x).hypot(y - (unit.y - UNIT_VISUAL_SIZE_RADIUS));
               if unit_distance < UNIT_VISUAL_SIZE_RADIUS {
-                selected_units_ids.push(unit.id);
+                selected_units_ids.push(squad.members.iter().map(|unit| unit.id).collect());
+                break;
               }
-            })
+            }
           }
         })
       }
     });
     selected_units_ids
       .into_iter()
+      .flat_map(|array| array.into_iter())
       .map(JsValue::from)
       .collect()
   }
