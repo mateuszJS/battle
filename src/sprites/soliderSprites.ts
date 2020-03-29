@@ -2,7 +2,7 @@ import { ModelDetails } from './types'
 
 export default (): (() => ModelDetails) => {
   const scale = 0.7
-  const humanIdleFrames = []
+  const frames = []
 
   const framesPeriods = {
     STAY: {
@@ -44,7 +44,7 @@ export default (): (() => ModelDetails) => {
   ) {
     const count = i < 10 ? `0${i}` : i
     const texture = `idle_00${count}_solider_run00${count}.png.png`
-    humanIdleFrames.push(PIXI.Texture.from(texture))
+    frames.push(PIXI.Texture.from(texture))
   }
 
   for (
@@ -54,7 +54,7 @@ export default (): (() => ModelDetails) => {
   ) {
     const count = i < 10 ? `0${i}` : i
     const texture = `_00${count}_s_f00${count}.png.png`
-    humanIdleFrames.push(PIXI.Texture.from(texture))
+    frames.push(PIXI.Texture.from(texture))
   }
 
   for (let i = 0; i < framesPeriods.GO.sides * framesPeriods.GO.length; i++) {
@@ -67,7 +67,7 @@ export default (): (() => ModelDetails) => {
       count = i
     }
     const texture = `_0${count}_s_g0${count}.png.png`
-    humanIdleFrames.push(PIXI.Texture.from(texture))
+    frames.push(PIXI.Texture.from(texture))
   }
 
   for (let i = 0; i < framesPeriods.FLY.sides * framesPeriods.FLY.length; i++) {
@@ -80,7 +80,7 @@ export default (): (() => ModelDetails) => {
       count = i
     }
     const texture = `_0${count}_s_h0${count}.png.png`
-    humanIdleFrames.push(PIXI.Texture.from(texture))
+    frames.push(PIXI.Texture.from(texture))
   }
 
   for (
@@ -97,7 +97,7 @@ export default (): (() => ModelDetails) => {
       count = i
     }
     const texture = `_0${count}_s_gu0${count}.png.png`
-    humanIdleFrames.push(PIXI.Texture.from(texture))
+    frames.push(PIXI.Texture.from(texture))
   }
 
   const angles = [15, 45, 75, 115, 135, 165, 195, 225, 255, 285, 315, 345]
@@ -118,7 +118,7 @@ export default (): (() => ModelDetails) => {
   const riflePoints = calculateRiflePosition()
 
   return () => {
-    const movieClip = new PIXI.AnimatedSprite(humanIdleFrames)
+    const movieClip = new PIXI.AnimatedSprite(frames)
     movieClip.animationSpeed = 0.4
     movieClip.scale.set(scale)
     // movieClip.anchor.set(0.5, 0);
