@@ -129,6 +129,7 @@ const setup = () => {
   document.getElementById('shop-list').appendChild(button)
 
   let selectedUnits = []
+  // TODO: Add another array with list of ids of squads!
   let startPoint = null
   const selectionRectangle = new PIXI.Graphics()
 

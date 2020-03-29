@@ -158,7 +158,12 @@ impl Universe {
       .collect()
   }
 
-  pub fn move_units(&mut self, units_ids: Vec<f32>) {
+  pub fn move_units(&mut self, units_ids: Vec<f32>, target_x: f32, target_y: f32) {
     log!("{:?}", units_ids);
+    self.factions[INDEX_OF_USER_FACTION].squads.iter().for_each(|squad| {
+      if units_ids.contains(squad.id) {
+        squad.add_target(target_x, target_y);
+      }
+    })
   }
 }

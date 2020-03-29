@@ -63,7 +63,6 @@ const render = (
           )
         } else {
           universeRepresentation[unitId] = UnitsFactory.createUnit(
-            unitId,
             universeData[indexOfId + 1],
             universeData[indexOfId + 2],
             universeData[indexOfId + 3],

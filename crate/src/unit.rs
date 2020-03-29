@@ -11,6 +11,7 @@ const STATE_GETUP: u8 = 3;
 const STATE_DIE: u8 = 0;
 
 const REPRESENTATION_LENGTH: usize = 7;
+const UNIT_MOVE_SPEED: f32 = 2.0;
 
 pub struct Unit {
   pub id: f32,
@@ -21,6 +22,8 @@ pub struct Unit {
   pub get_upping_progress: f32, // <0, 1>, 0 -> start get up, 1 -> change state to IDLE
   mod_x: f32,
   mod_y: f32,
+  target_x: f32,
+  target_y: f32,
 }
 
 impl Unit {
@@ -37,6 +40,8 @@ impl Unit {
       get_upping_progress: 0.0,
       mod_x: angle.sin() * throwing_strength,
       mod_y: -angle.cos() * throwing_strength,
+      target_x: 0.0,
+      target_y: 0.0,
     }
   }
 
@@ -64,6 +69,20 @@ impl Unit {
     }
   }
 
+  fn change_state_to_run(&mut self, target_x: f32, target_y: f32) {
+    self.state = STATE_RUN;
+    self.target_x = target_x;
+    self.target_y = target_y;
+    let angle = (self.x - target_x).atan2(self.y - target_y);
+    self.mod_x = angle.sin() * UNIT_MOVE_SPEED;
+    self.mod_y = -angle.cos() * UNIT_MOVE_SPEED;
+  }
+
+  fn update_run(&mut self) {
+    self.x += self.mod_x;
+    self.y += self.mod_y;
+  }
+
   fn update_idle(&mut self) {
     // searching for the enemies
     // check if not too far from squad center point
@@ -73,6 +92,7 @@ impl Unit {
     match self.state {
       STATE_FLY => self.update_fly(),
       STATE_GETUP => self.update_getup(),
+      STATE_RUN => self.update_run(),
       STATE_IDLE => self.update_idle(),
       _ => {}
     }
@@ -92,6 +112,7 @@ impl Unit {
     match self.state {
       STATE_FLY => representation[REPRESENTATION_LENGTH - 1] = self.mod_x.hypot(self.mod_y),
       STATE_GETUP => representation[REPRESENTATION_LENGTH - 1] = self.get_upping_progress,
+      STATE_RUN => {}
       STATE_IDLE => {}
       _ => {}
     }
