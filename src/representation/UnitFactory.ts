@@ -11,7 +11,13 @@ class UnitsFactory {
     this.layerGroup = layerGroup
   }
 
-  static createUnit(x: number, y: number, angle: number, state: number) {
+  static createUnit(
+    id: number,
+    x: number,
+    y: number,
+    angle: number,
+    state: number,
+  ) {
     const { movieClip, ...frameUpdaters } = this.getSoliderSprite()
     const graphicParams = {
       sortingLayer: this.layerGroup,
@@ -21,7 +27,7 @@ class UnitsFactory {
       selectionSprite: getMySelection(),
     }
 
-    return new Unit(x, y, angle, graphicParams)
+    return new Unit(id, x, y, angle, graphicParams)
   }
 }
 

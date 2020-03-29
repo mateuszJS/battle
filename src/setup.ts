@@ -30,6 +30,8 @@ const mapIconToRepresentationType = (icon: 'solider') => {
   }
 }
 
+const MOUSE_LEFT_BUTTON = 0
+const MOUSE_RIGHT_BUTTON = 2
 const HALF_UNIT_HEIGHT = 20
 
 // eslint-disable-next-line prettier/prettier
@@ -133,11 +135,15 @@ const setup = () => {
   window.app.stage.addChild(selectionRectangle)
 
   const onMouseDown = (e: MouseEvent) => {
-    selectedUnits.forEach(unit => unit.deselect())
-    selectedUnits = []
-    startPoint = {
-      x: e.clientX,
-      y: e.clientY,
+    if (e.button === MOUSE_LEFT_BUTTON) {
+      selectedUnits.forEach(unit => unit.deselect())
+      selectedUnits = []
+      startPoint = {
+        x: e.clientX,
+        y: e.clientY,
+      }
+    } else if (e.button === MOUSE_RIGHT_BUTTON) {
+      universe.move_units(Float32Array.from(selectedUnits.map(({ id }) => id)))
     }
   }
 

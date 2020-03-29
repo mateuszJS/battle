@@ -157,4 +157,8 @@ impl Universe {
       .map(JsValue::from)
       .collect()
   }
+
+  pub fn move_units(&mut self, units_ids: Vec<f32>) {
+    log!("{:?}", units_ids);
+  }
 }
