@@ -69,13 +69,14 @@ impl Unit {
     }
   }
 
-  fn change_state_to_run(&mut self, target_x: f32, target_y: f32) {
+  pub fn change_state_to_run(&mut self, target_x: f32, target_y: f32) {
     self.state = STATE_RUN;
     self.target_x = target_x;
     self.target_y = target_y;
-    let angle = (self.x - target_x).atan2(self.y - target_y);
+    let angle = (target_x - self.x).atan2(self.y - target_y);
     self.mod_x = angle.sin() * UNIT_MOVE_SPEED;
     self.mod_y = -angle.cos() * UNIT_MOVE_SPEED;
+    self.angle = angle;
   }
 
   fn update_run(&mut self) {

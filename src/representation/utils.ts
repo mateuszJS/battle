@@ -43,3 +43,13 @@ export const getCallbackStopOnLastFrame = (lastFrame: number) =>
       this.gotoAndStop(lastFrame)
     }
   }
+
+export const getCallbackGoToFirstOnLastFrame = (
+  firstFrame: number,
+  lastFrame: number,
+) =>
+  function() {
+    if (this.currentFrame >= lastFrame) {
+      this.gotoAndPlay(firstFrame)
+    }
+  }

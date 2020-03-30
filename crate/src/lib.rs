@@ -136,34 +136,52 @@ impl Universe {
       .add_squad_to_production_line(squad_type_representation)
   }
 
-  pub fn get_selected_units_ids(&self, start_x: f32, end_x: f32, start_y: f32, end_y: f32, select_our: bool) -> js_sys::Array {
+  pub fn get_selected_units_ids(
+    &self,
+    start_x: f32,
+    end_x: f32,
+    start_y: f32,
+    end_y: f32,
+    select_our: bool,
+  ) -> js_sys::Array {
     let mut selected_units_ids: Vec<Vec<f32>> = vec![];
-    self.factions.iter().enumerate().for_each(|(index, faction)| {
-      if index == INDEX_OF_USER_FACTION {
-        faction.squads.iter().for_each(|squad| {
-          for unit in squad.members.iter() {
-            if unit.x > start_x && unit.x < end_x && unit.y > start_y && unit.y < end_y {
-              selected_units_ids.push(squad.members.iter().map(|unit| unit.id).collect());
-              break;
+    let mut selected_squads_ids: Vec<f32> = vec![0.0];
+    self
+      .factions
+      .iter()
+      .enumerate()
+      .for_each(|(index, faction)| {
+        if index == INDEX_OF_USER_FACTION {
+          faction.squads.iter().for_each(|squad| {
+            for unit in squad.members.iter() {
+              if unit.x > start_x && unit.x < end_x && unit.y > start_y && unit.y < end_y {
+                selected_units_ids.push(squad.members.iter().map(|unit| unit.id).collect());
+                selected_squads_ids.push(squad.id);
+                break;
+              }
             }
-          }
-        })
-      }
-    });
+          })
+        }
+      });
 
-    selected_units_ids
+    let mut x: Vec<f32> = selected_units_ids
       .into_iter()
       .flat_map(|array| array.into_iter())
-      .map(JsValue::from)
-      .collect()
+      .collect();
+    x.extend(&selected_squads_ids);
+    // x.extend(selected_squads_ids.iter().cloned());
+
+    x.into_iter().map(JsValue::from).collect()
   }
 
-  pub fn move_units(&mut self, units_ids: Vec<f32>, target_x: f32, target_y: f32) {
-    log!("{:?}", units_ids);
-    self.factions[INDEX_OF_USER_FACTION].squads.iter().for_each(|squad| {
-      if units_ids.contains(squad.id) {
-        squad.add_target(target_x, target_y);
-      }
-    })
+  pub fn move_units(&mut self, squads_ids: Vec<f32>, target_x: f32, target_y: f32) {
+    self.factions[INDEX_OF_USER_FACTION]
+      .squads
+      .iter_mut()
+      .for_each(|squad| {
+        if squads_ids.contains(&squad.id) {
+          squad.add_target(target_x, target_y);
+        }
+      })
   }
 }

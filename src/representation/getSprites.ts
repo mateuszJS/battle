@@ -2,6 +2,7 @@ import {
   getFrames,
   getIndexOfStartingFrame,
   getCallbackStopOnLastFrame,
+  getCallbackGoToFirstOnLastFrame,
 } from './utils'
 
 type FramesPeriods = {
@@ -74,7 +75,7 @@ const getSprites = () => {
     movieClip.animationSpeed = 0.3
     movieClip.scale.set(0.7)
     movieClip.stop()
-    let phase = 0
+    let phase = '0' // TODO: describe phase, or even better, create enum (or string better to include rotation)
 
     return {
       movieClip,
@@ -86,8 +87,22 @@ const getSprites = () => {
         movieClip.gotoAndStop(indexOfStartingFrame)
       },
       goToRun(angle: number) {
-        // repeat
-        movieClip.gotoAndStop(framesPeriods.RUN.first)
+        if (phase !== 'run') {
+          // TODO: use angle also!
+          movieClip.gotoAndStop(framesPeriods.RUN.first)
+          const indexOfStartingFrame = getIndexOfStartingFrame(
+            angle,
+            framesPeriods.RUN,
+          )
+          const indexOfLastFrame =
+            indexOfStartingFrame + framesPeriods.RUN.length
+          movieClip.gotoAndPlay(indexOfStartingFrame)
+          movieClip.onFrameChange = getCallbackGoToFirstOnLastFrame(
+            indexOfStartingFrame,
+            indexOfLastFrame,
+          )
+          phase = 'run'
+        }
       },
       goToShoot(angle: number) {
         // stop at end frame
@@ -106,16 +121,16 @@ const getSprites = () => {
           currentFrame < framesPeriods.FLY.first ||
           currentFrame > framesPeriods.FLY.last
         ) {
-          phase = 1
+          phase = '1'
           movieClip.gotoAndPlay(indexOfStartingFrame)
         } else if (
-          phase === 1 &&
+          phase === '1' &&
           currentFrame > indexOfStartingFrame + framesPeriods.FLY.length / 2 - 1
         ) {
-          phase = 2
+          phase = '2'
           movieClip.stop()
-        } else if (flyingProgress <= 4 && phase === 2) {
-          phase = 3
+        } else if (flyingProgress <= 4 && phase === '2') {
+          phase = '3'
           movieClip.play()
           movieClip.onFrameChange = getCallbackStopOnLastFrame(
             indexOfStartingFrame + framesPeriods.FLY.length - 1,

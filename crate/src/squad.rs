@@ -7,7 +7,7 @@ pub struct Squad {
   pub squad_type: SquadType,
   pub members: Vec<Unit>,
   pub representation_type: f32,
-  pub center_point: (f32, f32)
+  pub center_point: (f32, f32),
 }
 
 impl Squad {
@@ -45,5 +45,12 @@ impl Squad {
       .iter()
       .flat_map(|unit| unit.get_representation().to_vec())
       .collect()
+  }
+
+  pub fn add_target(&mut self, target_x: f32, target_y: f32) {
+    self
+      .members
+      .iter_mut()
+      .for_each(|unit| unit.change_state_to_run(target_x, target_y))
   }
 }
