@@ -87,8 +87,9 @@ const getSprites = () => {
         movieClip.gotoAndStop(indexOfStartingFrame)
       },
       goToRun(angle: number) {
-        if (phase !== 'run') {
-          // TODO: use angle also!
+        const correctPhase = `run${Math.round(angle)}`
+        if (phase !== correctPhase) {
+          movieClip.onFrameChange = null
           movieClip.gotoAndStop(framesPeriods.RUN.first)
           const indexOfStartingFrame = getIndexOfStartingFrame(
             angle,
@@ -101,7 +102,7 @@ const getSprites = () => {
             indexOfStartingFrame,
             indexOfLastFrame,
           )
-          phase = 'run'
+          phase = correctPhase
         }
       },
       goToShoot(angle: number) {
@@ -121,7 +122,7 @@ const getSprites = () => {
           currentFrame < framesPeriods.FLY.first ||
           currentFrame > framesPeriods.FLY.last
         ) {
-          phase = '1'
+          phase = '1' // TODO: use correct names, and assign to consts
           movieClip.gotoAndPlay(indexOfStartingFrame)
         } else if (
           phase === '1' &&

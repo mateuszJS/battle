@@ -11,7 +11,7 @@ const STATE_GETUP: u8 = 3;
 const STATE_DIE: u8 = 0;
 
 const REPRESENTATION_LENGTH: usize = 7;
-const UNIT_MOVE_SPEED: f32 = 2.0;
+const UNIT_MOVE_SPEED: f32 = 2.5;
 
 pub struct Unit {
   pub id: f32,
@@ -82,6 +82,16 @@ impl Unit {
   fn update_run(&mut self) {
     self.x += self.mod_x;
     self.y += self.mod_y;
+
+    if (self.x - self.target_x).hypot(self.y - self.target_y) < 2.0 * UNIT_MOVE_SPEED {
+      self.change_state_to_idle();
+    }
+  }
+
+  fn change_state_to_idle(&mut self) {
+    self.mod_x = 0.0;
+    self.mod_y = 0.0;
+    self.state = STATE_IDLE;
   }
 
   fn update_idle(&mut self) {
