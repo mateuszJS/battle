@@ -3,6 +3,7 @@ use crate::look_up_table::LookUpTable;
 use crate::squad::Squad;
 use crate::squad_types::{get_squad_details, SquadType};
 use crate::unit::Unit;
+use crate::utils::Utils;
 use crate::Factory;
 
 const TIME_BETWEEN_CREATION: u8 = 10;
@@ -142,5 +143,17 @@ impl Faction {
       &squads_during_creation_representation[..],
     ]
     .concat()
+  }
+
+  pub fn move_squads(&mut self, squads_ids: Vec<f32>, target_x: f32, target_y: f32) {
+    let position = Utils::get_circular_position(squads_ids.len(), target_x, target_y, 140.0);
+    let mut index = 0;
+    self.squads.iter_mut().for_each(|squad| {
+      if squads_ids.contains(&squad.id) {
+        let squad_target = position[index];
+        squad.add_target(squad_target.0, squad_target.1);
+        index += 1;
+      }
+    })
   }
 }

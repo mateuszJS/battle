@@ -1,6 +1,7 @@
 use crate::id_generator::IdGenerator;
 use crate::squad_types::{get_squad_details, SquadType};
 use crate::unit::Unit;
+use crate::utils::Utils;
 
 pub struct Squad {
   pub id: f32,
@@ -48,9 +49,12 @@ impl Squad {
   }
 
   pub fn add_target(&mut self, target_x: f32, target_y: f32) {
-    self
-      .members
-      .iter_mut()
-      .for_each(|unit| unit.change_state_to_run(target_x, target_y))
+    let position = Utils::get_circular_position(self.members.len(), target_x, target_y, 50.0);
+    let mut index = 0;
+    self.members.iter_mut().for_each(|unit| {
+      let unit_target = position[index];
+      unit.change_state_to_run(unit_target.0, unit_target.1);
+      index += 1;
+    })
   }
 }

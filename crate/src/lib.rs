@@ -18,6 +18,7 @@ mod look_up_table;
 mod squad;
 mod squad_types;
 mod unit;
+mod utils;
 // it's a good practise to add modules in the root of crate
 // and then in other modules just use "use crate::module_name"?
 
@@ -175,13 +176,6 @@ impl Universe {
   }
 
   pub fn move_units(&mut self, squads_ids: Vec<f32>, target_x: f32, target_y: f32) {
-    self.factions[INDEX_OF_USER_FACTION]
-      .squads
-      .iter_mut()
-      .for_each(|squad| {
-        if squads_ids.contains(&squad.id) {
-          squad.add_target(target_x, target_y);
-        }
-      })
+    self.factions[INDEX_OF_USER_FACTION].move_squads(squads_ids, target_x, target_y);
   }
 }
