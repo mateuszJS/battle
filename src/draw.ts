@@ -1,23 +1,24 @@
 type Obstacle = Point & { radius: number }
 
 const coords = [
-  { x: 1100, y: 350, radius: 50 },
-  { x: 1200, y: 700, radius: 50 },
+  { x: 800, y: 200 },
+  { x: 1100, y: 200 },
+  { x: 1100, y: 400 },
+  { x: 800, y: 400 },
 ]
-const extraSpace = 18
 
-function polygon(src: Obstacle) {
-  const res = []
-  const n = 8 // Change me!
-  const r = (src.radius + extraSpace) / Math.cos(Math.PI / n)
-  for (let t = 0; t < n; t++) {
-    res.push({
-      x: src.x + Math.round((r + 0.5) * Math.cos((2 * Math.PI * t) / n)),
-      y: src.y + Math.round((r + 0.5) * Math.sin((2 * Math.PI * t) / n)),
-    })
-  }
-  return res
-}
+// function polygon(src: Obstacle) {
+//   const res = []
+//   const n = 8 // Change me!
+//   const r = (src.radius + extraSpace) / Math.cos(Math.PI / n)
+//   for (let t = 0; t < n; t++) {
+//     res.push({
+//       x: src.x + Math.round((r + 0.5) * Math.cos((2 * Math.PI * t) / n)),
+//       y: src.y + Math.round((r + 0.5) * Math.sin((2 * Math.PI * t) / n)),
+//     })
+//   }
+//   return res
+// }
 
 export const drawPolygons = () => {
   coords.forEach(c => {
@@ -113,20 +114,21 @@ function buildGraph() {
   // Add edge from each vertex to all visible vertex
   const allVertices = coords
     .map(dst => polygon(dst))
-    .reduce((a, b) => [...a, ...b])
+    .reduce((a, b) => [...a, ...b]) // just list with all points
 
   const graph = {}
   coords.forEach(src => {
     const srcPoly = polygon(src)
 
     // Centers can also reach any visible vertices
-    srcPoly.push(src)
+    srcPoly.push(src) // not needed for us, we cannot reahc the center
 
     srcPoly.forEach(srcP => {
       allVertices
         .filter(c => c.x !== srcP.x || c.y !== srcP.y)
         .forEach(c => {
           if (directPath(srcP, c)) {
+            // push new point to graph object
             const key = `${srcP.x} ${srcP.y}`
             if (graph[key] == null) {
               graph[key] = []
@@ -205,6 +207,9 @@ function shortestPath(graph, srcNode, dstNode) {
 
 export const drawGraph = () => {
   const graph = buildGraph()
+  {
+    [`${x} ${y}`]: [{ x, y }, { x, y }] // where has direct path
+  }
   Object.entries(graph).forEach(([src, dst]: [string, Point[]]) => {
     dst.forEach(d => {
       const line = new PIXI.Graphics()
@@ -219,3 +224,4 @@ export const drawGraph = () => {
   })
   // shortestPath(graph)
 }
+

@@ -19,6 +19,7 @@ mod squad;
 mod squad_types;
 mod unit;
 mod utils;
+mod point;
 // it's a good practise to add modules in the root of crate
 // and then in other modules just use "use crate::module_name"?
 
