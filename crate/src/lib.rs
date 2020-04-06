@@ -19,7 +19,6 @@ mod squad;
 mod squad_types;
 mod unit;
 mod utils;
-mod point;
 // it's a good practise to add modules in the root of crate
 // and then in other modules just use "use crate::module_name"?
 
@@ -27,6 +26,7 @@ use crate::constants::{MATH_PI, MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS};
 use crate::squad_types::SquadType;
 use faction::Faction;
 use factory::Factory;
+use utils::Utils;
 use wasm_bindgen::prelude::*;
 
 const INDEX_OF_USER_FACTION: usize = 0;
@@ -178,5 +178,9 @@ impl Universe {
 
   pub fn move_units(&mut self, squads_ids: Vec<f32>, target_x: f32, target_y: f32) {
     self.factions[INDEX_OF_USER_FACTION].move_squads(squads_ids, target_x, target_y);
+  }
+
+  pub fn get_graph_preview() -> js_sys::Array {
+    Utils::get_graph().into_iter().map(JsValue::from).collect()
   }
 }

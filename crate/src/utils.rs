@@ -1,10 +1,17 @@
 use crate::constants::MATH_PI;
 use crate::squad::Squad;
 use crate::point::Point;
+use crate::id_generator::IdGenerator;
+
+pub struct Point {
+  pub id: u32,
+  pub x: f32,
+  pub y: f32,
+}
 
 struct Line {
-  pub p1: Point
-  pub p2: Point
+  pub p1: &Point,
+  pub p2: &Point,
 }
 
 pub struct Utils {}
@@ -51,21 +58,58 @@ impl Utils {
   //   is_point_inside_triangle([react[2], react[3], react[0]], point])
   // }
 
-  pub fn get_graph(source: Point, desctination: Point) {
-    let obstalce: [4; Point] = [
-      Point { x: 800, y: 200 },
-      Point { x: 1100, y: 200 },
-      Point { x: 1100, y: 400 },
-      Point { x: 800, y: 400 },
+  pub fn calculate_graph(
+    track_boundaries: [Point; 2],
+    obstalces_points: Vec<Point>,
+    obtacles_lines: Vec<Line>
+  ) -> Vec<Line> {
+    let mut result: Vec<Line> = vec![];
+    track_boundaries.iter().for_each(|track_point| {
+      obstalces_points.for_each(|obstalce_point| {
+        let new_line = Line { p1: track_point, p2: obstalce_point };
+        let mut is_intersect: bool = false;
+        obtacles_lines.iter().for_each(|obstacle_line| {
+          if check_intersection(new_line, obstacle_line) {
+            is_intersect = true;
+          };
+        });
+        if !is_intersect {
+          result.push(new_line);
+        }
+      });
+    });
+
+    [
+      &result[..],
+      &obtacles_lines[..],
+    ]
+    .concat()
+  }
+
+  pub fn get_graph(source_x: f32, source_y: f32, destination_x: f32, destination_y: f32) -> Vec<f32> {
+    let track_boundaries: [Point; 2] = [
+      Point { id: IdGenerator::generate_id() as u32, x: source_x, y: source_y },
+      Point { id: IdGenerator::generate_id() as u32, x: destination_x, y: destination_y },
     ];
 
-    let mut graph: Vec<(Point, Point)> = vec![
-      (obstalce[0], obstalce[1]),
-      (obstalce[1], obstalce[2]),
-      (obstalce[2], obstalce[3]),
-      (obstalce[3], obstalce[0]),
+    let obstalces_points: Vec<Point> = vec![
+      Point { id: IdGenerator::generate_id() as u32, x: 800.0, y: 200.0 },
+      Point { id: IdGenerator::generate_id() as u32, x: 1100.0, y: 200.0 },
+      Point { id: IdGenerator::generate_id() as u32, x: 1100.0, y: 400.0 },
+      Point { id: IdGenerator::generate_id() as u32, x: 800.0, y: 400.0 },
     ];
 
+    let obtacles_lines: Vec<Line> = vec![
+      Line { p1: obstalce[0], p2: obstalce[1] },
+      Line { p1: obstalce[1], p2: obstalce[2] },
+      Line { p1: obstalce[2], p2: obstalce[3] },
+      Line { p1: obstalce[3], p2: obstalce[0] },
+    ];
+
+    let graph = calculate_graph(track_boundaries, obstalces_points, obtacles_lines)
+    graph.iter().flat_map(|line| {
+      [line.p1.x, line.p1.y, line.p2.x, line.2.y]
+    }).collect()
     // key -> point id
     // value -> Vec<(&Point, distance)>
     // ? maybe each point should have id?
@@ -90,7 +134,7 @@ impl Utils {
     }
  }
  
- fn is_intersect(l1: &Line, l2: &Line) -> bool {
+ fn check_intersection(l1: &Line, l2: &Line) -> bool {
     //four direction for two lines and points of other line
     let dir1: u8 = Utils::direction(l1.p1, l1.p2, l2.p1);
     let dir2: u8 = Utils::direction(l1.p1, l1.p2, l2.p2);
