@@ -19,7 +19,6 @@ import { Universe } from '../crate/pkg/index'
 
 import Factory from '~/representation/Factory'
 import initializeMouseController from './mouseController'
-import { drawPolygons, drawGraph } from './draw'
 
 export type UniverseRepresentation = {
   [id: number]: Factory | Unit
@@ -127,9 +126,6 @@ const setup = () => {
   document.getElementById('shop-list').appendChild(button)
 
   initializeMouseController(universe, universeRepresentation)
-
-  drawPolygons()
-  drawGraph()
 
   window.app.ticker.add((delta: number) => {
     universe.update()

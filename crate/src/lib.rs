@@ -180,7 +180,15 @@ impl Universe {
     self.factions[INDEX_OF_USER_FACTION].move_squads(squads_ids, target_x, target_y);
   }
 
-  pub fn get_graph_preview() -> js_sys::Array {
-    Utils::get_graph().into_iter().map(JsValue::from).collect()
+  pub fn get_graph_preview(
+    source_x: f32,
+    source_y: f32,
+    destination_x: f32,
+    destination_y: f32,
+  ) -> js_sys::Array {
+    Utils::get_graph(source_x, source_y, destination_x, destination_y)
+      .into_iter()
+      .map(JsValue::from)
+      .collect()
   }
 }
