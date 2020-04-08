@@ -176,11 +176,17 @@ impl Universe {
     x.into_iter().map(JsValue::from).collect()
   }
 
-  pub fn move_units(&mut self, squads_ids: Vec<f32>, target_x: f32, target_y: f32) {
-    self.factions[INDEX_OF_USER_FACTION].move_squads(squads_ids, target_x, target_y);
+  pub fn move_units(
+    &mut self,
+    squads_ids: Vec<f32>,
+    target_x: f32,
+    target_y: f32,
+  ) -> js_sys::Array {
+    let (x, y) = self.factions[INDEX_OF_USER_FACTION].move_squads(squads_ids, target_x, target_y);
+    Universe::get_graph_preview(x, y, target_x, target_y)
   }
 
-  pub fn get_graph_preview(
+  fn get_graph_preview(
     source_x: f32,
     source_y: f32,
     destination_x: f32,

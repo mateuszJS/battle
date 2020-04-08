@@ -8,7 +8,7 @@ pub struct Point {
   pub y: f32,
 }
 
-struct Line<'a> {
+pub struct Line<'a> {
   pub p1: &'a Point,
   pub p2: &'a Point,
 }
@@ -57,11 +57,12 @@ impl Utils {
   //   is_point_inside_triangle([react[2], react[3], react[0]], point])
   // }
 
-  pub fn calculate_graph<'a>(
+  pub fn calculate_graph(
     track_boundaries: [Point; 2],
-    obstalces_points: Vec<Point>,
+    obstalces_points: &Vec<Point>,
     obtacles_lines: Vec<Line>,
-  ) -> Vec<Line<'a>> {
+    result: &mut Vec<Line>,
+  ) -> Vec<f32> {
     let mut result: Vec<Line> = vec![];
     track_boundaries.iter().for_each(|track_point| {
       obstalces_points.iter().for_each(|obstalce_point| {
@@ -77,13 +78,20 @@ impl Utils {
         });
         if !is_intersect {
           result.push(new_line);
+          log!("is NOT intersect");
+        } else {
+          log!("is intersect");
         }
       });
     });
+    // log!("calculate_graph result before extends: {}", result.len());
     result.extend(obtacles_lines);
+    // log!("calculate_graph result after extends: {}", result.len());
+
     result
-    // [&result[..], &obtacles_lines[..]].concat()
-    // [&result[..], &obtacles_lines[..]].concat()
+      .iter()
+      .flat_map(|line| vec![line.p1.x, line.p1.y, line.p2.x, line.p2.y])
+      .collect()
   }
 
   pub fn get_graph(
@@ -104,7 +112,13 @@ impl Utils {
         y: destination_y,
       },
     ];
-
+    log!(
+      "x1: {}, y1: {}, x2: {}, y2: {}",
+      track_boundaries[0].x,
+      track_boundaries[0].y,
+      track_boundaries[1].x,
+      track_boundaries[1].y
+    );
     let obstalces_points: Vec<Point> = vec![
       Point {
         id: IdGenerator::generate_id() as u32,
@@ -147,13 +161,15 @@ impl Utils {
       },
     ];
 
-    'a: {
-      let graph = Utils::calculate_graph<'a>(track_boundaries, &obstalces_points, obtacles_lines);
-      graph
-        .iter()
-        .flat_map(|line| vec![line.p1.x, line.p1.y, line.p2.x, line.p2.y])
-        .collect()
-    }
+    let mut result: Vec<Line> = vec![];
+    Utils::calculate_graph(
+      track_boundaries,
+      &obstalces_points,
+      obtacles_lines,
+      &mut result,
+    ) // I don't knwo why Line doesn't require lifetime parameter,
+      // and how to do that with lifetime parameter, to return vector from calculate_graph
+
     // key -> point id
     // value -> Vec<(&Point, distance)>
     // ? maybe each point should have id?
@@ -180,22 +196,29 @@ impl Utils {
 
   fn check_intersection(l1: &Line, l2: &Line) -> bool {
     //four direction for two lines and points of other line
+    log!(
+      "check_intersection {} {} {} {}",
+      l1.p1.x,
+      l1.p1.y,
+      l1.p2.x,
+      l1.p2.y,
+    );
     let dir1: u8 = Utils::direction(l1.p1, l1.p2, l2.p1);
     let dir2: u8 = Utils::direction(l1.p1, l1.p2, l2.p2);
     let dir3: u8 = Utils::direction(l2.p1, l2.p2, l1.p1);
     let dir4: u8 = Utils::direction(l2.p1, l2.p2, l1.p2);
     if dir1 != dir2 && dir3 != dir4 {
       true //they are intersecting
-    } else if dir1 == 0 && Utils::on_line(l1, l2.p1) {
+    } else if dir1 == 0 && Utils::on_line(l1, l2.p2) {
       //when p2 of line2 are on the line1
       true
-    } else if dir2 == 0 && Utils::on_line(l1, l2.p2) {
+    } else if dir2 == 0 && Utils::on_line(l1, l2.p1) {
       //when p1 of line2 are on the line1
       true
-    } else if dir3 == 0 && Utils::on_line(l2, l1.p1) {
+    } else if dir3 == 0 && Utils::on_line(l2, l1.p2) {
       //when p2 of line1 are on the line2
       true
-    } else if dir4 == 0 && Utils::on_line(l2, l1.p2) {
+    } else if dir4 == 0 && Utils::on_line(l2, l1.p1) {
       //when p1 of line1 are on the line2
       true
     } else {

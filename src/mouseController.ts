@@ -15,6 +15,14 @@ const initializeMouseController = (
 
   let startPoint = null
   const selectionRectangle = new PIXI.Graphics()
+  const graph = new PIXI.Graphics()
+  window.app.stage.addChild(graph)
+
+  const drawPath = (path: number[]) => {
+    graph.lineStyle(3, 0xffffff)
+    graph.moveTo(path[0], path[1])
+    graph.lineTo(path[2], path[3])
+  }
 
   const selectUnits = (x1: number, x2: number, y1: number, y2: number) => {
     const result = universe.get_selected_units_ids(x1, x2, y1, y2, true)
@@ -41,11 +49,15 @@ const initializeMouseController = (
         y: e.clientY,
       }
     } else if (e.button === MOUSE_RIGHT_BUTTON) {
-      universe.move_units(
+      const result = universe.move_units(
         Float32Array.from(selectedSquads),
         e.clientX,
         e.clientY,
       )
+      for (let i = 0; i < result.length; i += 4) {
+        drawPath(result.slice(i, i + 5))
+      }
+      // console.log(result)
     }
   }
 
