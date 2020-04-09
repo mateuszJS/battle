@@ -64,26 +64,38 @@ impl Utils {
     result: &mut Vec<Line>,
   ) -> Vec<f32> {
     let mut result: Vec<Line> = vec![];
-    track_boundaries.iter().for_each(|track_point| {
-      obstalces_points.iter().for_each(|obstalce_point| {
-        let new_line = Line {
-          p1: track_point,
-          p2: obstalce_point,
-        };
-        let mut is_intersect: bool = false;
-        obtacles_lines.iter().for_each(|obstacle_line| {
-          if Utils::check_intersection(&new_line, obstacle_line) {
-            is_intersect = true;
-          };
-        });
-        if !is_intersect {
-          result.push(new_line);
-          log!("is NOT intersect");
-        } else {
-          log!("is intersect");
-        }
-      });
+    let direct_connection_line = Line { p1: &track_boundaries[0], p2: &track_boundaries[1] };
+    let mut is_possible_direct_connection = true;
+    obtacles_lines.iter().for_each(|obstacle_line| {
+      if Utils::check_intersection(&direct_connection_line, obstacle_line) {
+        is_possible_direct_connection = false;
+      };
     });
+
+    if is_possible_direct_connection {
+      result.push(direct_connection_line);
+    } else {
+      track_boundaries.iter().for_each(|track_point| {
+        obstalces_points.iter().for_each(|obstalce_point| {
+          let new_line = Line {
+            p1: track_point,
+            p2: obstalce_point,
+          };
+          let mut is_intersect: bool = false;
+          obtacles_lines.iter().for_each(|obstacle_line| {
+            if obstacle_line.p1.id != obstalce_point.id && obstacle_line.p2.id != obstalce_point.id &&  Utils::check_intersection(&new_line, obstacle_line) {
+              is_intersect = true;
+            };
+          });
+          if !is_intersect {
+            result.push(new_line);
+            log!("is NOT intersect");
+          } else {
+            log!("is intersect");
+          }
+        });
+      });
+    }
     // log!("calculate_graph result before extends: {}", result.len());
     result.extend(obtacles_lines);
     // log!("calculate_graph result after extends: {}", result.len());
@@ -161,6 +173,35 @@ impl Utils {
       },
     ];
 
+    let pp1a = Point { id: IdGenerator::generate_id() as u32, x: 1.0, y: 5.0 };
+    let pp2a = Point { id: IdGenerator::generate_id() as u32, x: 4.0, y: 5.0 };
+    let pp1b = Point { id: IdGenerator::generate_id() as u32, x: 5.0, y: 1.0 };
+    let pp2b = Point { id: IdGenerator::generate_id() as u32, x: 5.0, y: 11.0 };
+    let lineA = Line {
+      p1: &pp1a,
+      p2: &pp2a,
+    };
+    let lineB = Line {
+      p1: &pp1b,
+      p2: &pp2b,
+    };
+
+    log!("lines A-B, is intersetion? {}", Utils::check_intersection(&lineA, &lineB));
+
+    let p1a = Point { id: IdGenerator::generate_id() as u32, x: 8.0, y: 1.0 };
+    let p2a = Point { id: IdGenerator::generate_id() as u32, x: 5.0, y: 11.0 };
+    let p1b = Point { id: IdGenerator::generate_id() as u32, x: 5.0, y: 1.0 };
+    let p2b = Point { id: IdGenerator::generate_id() as u32, x: 5.0, y: 21.0 };
+    let lineC = Line {
+      p1: &p1a,
+      p2: &p2a,
+    };
+    let lineD = Line {
+      p1: &p1b,
+      p2: &p2b,
+    };
+    log!("lines C-D, is intersetion? {}", Utils::check_intersection(&lineC, &lineD));
+
     let mut result: Vec<Line> = vec![];
     Utils::calculate_graph(
       track_boundaries,
@@ -196,13 +237,13 @@ impl Utils {
 
   fn check_intersection(l1: &Line, l2: &Line) -> bool {
     //four direction for two lines and points of other line
-    log!(
-      "check_intersection {} {} {} {}",
-      l1.p1.x,
-      l1.p1.y,
-      l1.p2.x,
-      l1.p2.y,
-    );
+    // log!(
+    //   "check_intersection {} {} {} {}",
+    //   l1.p1.x,
+    //   l1.p1.y,
+    //   l1.p2.x,
+    //   l1.p2.y,
+    // );
     let dir1: u8 = Utils::direction(l1.p1, l1.p2, l2.p1);
     let dir2: u8 = Utils::direction(l1.p1, l1.p2, l2.p2);
     let dir3: u8 = Utils::direction(l2.p1, l2.p2, l1.p1);
