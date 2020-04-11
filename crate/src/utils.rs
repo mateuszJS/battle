@@ -1,6 +1,7 @@
 use crate::constants::MATH_PI;
 use crate::id_generator::IdGenerator;
 use crate::squad::Squad;
+use std::collections::HashMap;
 
 pub struct Point {
   pub id: u32,
@@ -11,6 +12,13 @@ pub struct Point {
 pub struct Line<'a> {
   pub p1: &'a Point,
   pub p2: &'a Point,
+}
+
+struct QueueItem<'a> {
+  point: &'a Point,
+  parent: &'a Point,
+  current_length: f32,
+  heuristic: f32,
 }
 
 pub struct Utils {}
@@ -37,21 +45,6 @@ impl Utils {
     result
   }
 
-  // fn get_sign(p1: Point, p2: Point, p3: Point) -> f32 {
-  //   (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y)
-  // }
-
-  // fn is_point_inside_triangle(triangle: &[3; Point], point: Point) -> bool {
-  //   let mut d1: f32 = get_sign(point, triangle[0], triangle[1]);
-  //   let mut d2: f32 = get_sign(point, triangle[1], triangle[2]);
-  //   let mut d3: f32 = get_sign(point, triangle[2], triangle[0]);
-
-  //   let has_neg: bool = (d1 < 0) || (d2 < 0) || (d3 < 0);
-  //   let has_pos: bool = (d1 > 0) || (d2 > 0) || (d3 > 0);
-
-  //   !(has_neg && has_pos)
-  // }
-
   // fn is_point_inside_polygon(rect: &[4; Point], point: Point) -> bool {
   //   is_point_inside_triangle([react[0], react[1], react[2]], point]) ||
   //   is_point_inside_triangle([react[2], react[3], react[0]], point])
@@ -64,7 +57,10 @@ impl Utils {
     result: &mut Vec<Line>,
   ) -> Vec<f32> {
     let mut result: Vec<Line> = vec![];
-    let direct_connection_line = Line { p1: &track_boundaries[0], p2: &track_boundaries[1] };
+    let direct_connection_line = Line {
+      p1: &track_boundaries[0],
+      p2: &track_boundaries[1],
+    };
     let mut is_possible_direct_connection = true;
     obtacles_lines.iter().for_each(|obstacle_line| {
       if Utils::check_intersection(&direct_connection_line, obstacle_line) {
@@ -83,15 +79,15 @@ impl Utils {
           };
           let mut is_intersect: bool = false;
           obtacles_lines.iter().for_each(|obstacle_line| {
-            if obstacle_line.p1.id != obstalce_point.id && obstacle_line.p2.id != obstalce_point.id &&  Utils::check_intersection(&new_line, obstacle_line) {
+            if obstacle_line.p1.id != obstalce_point.id
+              && obstacle_line.p2.id != obstalce_point.id
+              && Utils::check_intersection(&new_line, obstacle_line)
+            {
               is_intersect = true;
             };
           });
           if !is_intersect {
             result.push(new_line);
-            log!("is NOT intersect");
-          } else {
-            log!("is intersect");
           }
         });
       });
@@ -99,6 +95,12 @@ impl Utils {
     // log!("calculate_graph result before extends: {}", result.len());
     result.extend(obtacles_lines);
     // log!("calculate_graph result after extends: {}", result.len());
+
+    // result
+    // let graph: HashMap<u32, Vec<&Point>> = [()]
+    // TODO: change current implementions of Vec<&Line> to HashMap, mayeb we could remove Line type at all!
+
+    Utils::shortest_path(graph, &track_boundaries[0], &track_boundaries[1]);
 
     result
       .iter()
@@ -124,13 +126,30 @@ impl Utils {
         y: destination_y,
       },
     ];
-    log!(
-      "x1: {}, y1: {}, x2: {}, y2: {}",
-      track_boundaries[0].x,
-      track_boundaries[0].y,
-      track_boundaries[1].x,
-      track_boundaries[1].y
-    );
+
+    // [PointId]: vec![Points | PointId]
+    // let mut open_nodes = vec![startNode];
+    // let mut closed_nodes = vec![];
+    // loop over open_nodes  {
+    //   current_node = node with lowest cost in open_nodes
+    //   move current_node from open_nodes to closed_nodes
+    //   if current_node is target, WIN!
+    //   loop over neighbour of current_node {
+    //     if neighbour_node is in closed {
+    //       continue();
+    //     }
+    //     if new path to neighbour_node is shorter ot neighbour_node is not in open_nodes {
+    //       set cost of neighbour_node
+    //       set parent of neighbour_node to current_node
+    //       if neighbour_node is not in open_nodes {
+    //         open_nodes.push(neighbour_node)
+    //       }
+    //     }
+    //   }
+    // }
+
+    // let mut book_reviews = HashMap::new();
+
     let obstalces_points: Vec<Point> = vec![
       Point {
         id: IdGenerator::generate_id() as u32,
@@ -173,35 +192,6 @@ impl Utils {
       },
     ];
 
-    let pp1a = Point { id: IdGenerator::generate_id() as u32, x: 1.0, y: 5.0 };
-    let pp2a = Point { id: IdGenerator::generate_id() as u32, x: 4.0, y: 5.0 };
-    let pp1b = Point { id: IdGenerator::generate_id() as u32, x: 5.0, y: 1.0 };
-    let pp2b = Point { id: IdGenerator::generate_id() as u32, x: 5.0, y: 11.0 };
-    let lineA = Line {
-      p1: &pp1a,
-      p2: &pp2a,
-    };
-    let lineB = Line {
-      p1: &pp1b,
-      p2: &pp2b,
-    };
-
-    log!("lines A-B, is intersetion? {}", Utils::check_intersection(&lineA, &lineB));
-
-    let p1a = Point { id: IdGenerator::generate_id() as u32, x: 8.0, y: 1.0 };
-    let p2a = Point { id: IdGenerator::generate_id() as u32, x: 5.0, y: 11.0 };
-    let p1b = Point { id: IdGenerator::generate_id() as u32, x: 5.0, y: 1.0 };
-    let p2b = Point { id: IdGenerator::generate_id() as u32, x: 5.0, y: 21.0 };
-    let lineC = Line {
-      p1: &p1a,
-      p2: &p2a,
-    };
-    let lineD = Line {
-      p1: &p1b,
-      p2: &p2b,
-    };
-    log!("lines C-D, is intersetion? {}", Utils::check_intersection(&lineC, &lineD));
-
     let mut result: Vec<Line> = vec![];
     Utils::calculate_graph(
       track_boundaries,
@@ -210,19 +200,15 @@ impl Utils {
       &mut result,
     ) // I don't knwo why Line doesn't require lifetime parameter,
       // and how to do that with lifetime parameter, to return vector from calculate_graph
-
-    // key -> point id
-    // value -> Vec<(&Point, distance)>
-    // ? maybe each point should have id?
   }
 
   // https://www.tutorialspoint.com/Check-if-two-line-segments-intersect
-  fn on_line(line: &Line, point: &Point) -> bool {
-    //check whether p is on the line or not
-    point.x <= line.p1.x.max(line.p2.x)
-      && point.x <= line.p1.x.min(line.p2.x)
-      && (point.y <= line.p1.y.max(line.p2.y) && point.y <= line.p1.y.min(line.p2.y))
-  }
+  // fn on_line(line: &Line, point: &Point) -> bool {
+  //   //check whether p is on the line or not
+  //   point.x <= line.p1.x.max(line.p2.x)
+  //     && point.x <= line.p1.x.min(line.p2.x)
+  //     && (point.y <= line.p1.y.max(line.p2.y) && point.y <= line.p1.y.min(line.p2.y))
+  // }
 
   fn direction(a: &Point, b: &Point, c: &Point) -> u8 {
     let val: f32 = (b.y - a.y) * (c.x - b.x) - (b.x - a.x) * (c.y - b.y);
@@ -234,36 +220,99 @@ impl Utils {
       1 //clockwise direction
     }
   }
-
+  // deploy#2020-04-07T12:39:12.760Z
+  // site#a859e1fe-7f91-4bef-a5b9-ff6072dacfdf
   fn check_intersection(l1: &Line, l2: &Line) -> bool {
-    //four direction for two lines and points of other line
-    // log!(
-    //   "check_intersection {} {} {} {}",
-    //   l1.p1.x,
-    //   l1.p1.y,
-    //   l1.p2.x,
-    //   l1.p2.y,
-    // );
     let dir1: u8 = Utils::direction(l1.p1, l1.p2, l2.p1);
     let dir2: u8 = Utils::direction(l1.p1, l1.p2, l2.p2);
     let dir3: u8 = Utils::direction(l2.p1, l2.p2, l1.p1);
     let dir4: u8 = Utils::direction(l2.p1, l2.p2, l1.p2);
     if dir1 != dir2 && dir3 != dir4 {
       true //they are intersecting
-    } else if dir1 == 0 && Utils::on_line(l1, l2.p2) {
-      //when p2 of line2 are on the line1
-      true
-    } else if dir2 == 0 && Utils::on_line(l1, l2.p1) {
-      //when p1 of line2 are on the line1
-      true
-    } else if dir3 == 0 && Utils::on_line(l2, l1.p2) {
-      //when p2 of line1 are on the line2
-      true
-    } else if dir4 == 0 && Utils::on_line(l2, l1.p1) {
-      //when p1 of line1 are on the line2
-      true
+           // } else if dir1 == 0 && Utils::on_line(l1, l2.p2) {
+           //   //when p2 of line2 are on the line1
+           //   true
+           // } else if dir2 == 0 && Utils::on_line(l1, l2.p1) {
+           //   //when p1 of line2 are on the line1
+           //   true
+           // } else if dir3 == 0 && Utils::on_line(l2, l1.p2) {
+           //   //when p2 of line1 are on the line2
+           //   true
+           // } else if dir4 == 0 && Utils::on_line(l2, l1.p1) {
+           //   //when p1 of line1 are on the line2
+           //   true
     } else {
       false
+    }
+  }
+
+  fn get_sorted_index(list: &Vec<QueueItem>, value: f32) -> usize {
+    let mut low: usize = 0;
+    let mut high: usize = list.len();
+
+    while low < high {
+      let mid: usize = (low + high) >> 1; // should be >>>
+      if list[mid].heuristic < value {
+        low = mid + 1;
+      } else {
+        high = mid;
+      }
+    }
+    low
+  }
+
+  fn shortest_path(
+    graph: HashMap<u32, Vec<&Point>>,
+    source_node: &Point,
+    destination_node: &Point,
+  ) {
+    // graph: HashMap<PointId, Vector<&Point>>
+    // queue:
+    // every insert to queue has to be sorted
+    let mut q: Vec<QueueItem> = vec![QueueItem {
+      point: source_node,
+      parent: source_node,
+      current_length: 0.0,
+      heuristic: 0.0,
+    }];
+    // q, is
+    let mut visited: Vec<&u32> = vec![];
+    while q.len() > 0 {
+      // q.sort((a, b) => a.heuristic - b.heuristic) // this should be a queue
+      let current_node = q.pop().unwrap();
+
+      let direct_path_to_destination: bool = graph
+        .get(&current_node.point.id)
+        .unwrap()
+        .iter()
+        .any(|point| point.id == destination_node.id);
+      if direct_path_to_destination {
+        log!("path was found!");
+        // return [...current_node.path, destination_node]
+      }
+      visited.push(&current_node.point.id);
+      let neighbours = graph.get(&current_node.point.id).unwrap();
+      // if neighbours.len() > 0 { // we assume that each point always has at least one neighbour
+      //   continue;
+      // }
+      neighbours
+        .iter()
+        .filter(|neighbour| !visited.contains(&&neighbour.id))
+        .for_each(|neighbour| {
+          let dist_to_neighbour =
+            (neighbour.x - current_node.point.x).hypot(neighbour.y - current_node.point.y);
+          let current_length = current_node.current_length + dist_to_neighbour;
+          let heuristic = current_length
+            + (neighbour.x - destination_node.x).hypot(neighbour.y - destination_node.y);
+          let index = Utils::get_sorted_index(&q, heuristic);
+          let new_node = QueueItem {
+            point: neighbour,
+            parent: current_node.point,
+            current_length,
+            heuristic,
+          };
+          q.insert(index, new_node);
+        });
     }
   }
 }
