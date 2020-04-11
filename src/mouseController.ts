@@ -18,12 +18,6 @@ const initializeMouseController = (
   const graph = new PIXI.Graphics()
   window.app.stage.addChild(graph)
 
-  const drawPath = (path: number[]) => {
-    graph.lineStyle(3, 0xffffff)
-    graph.moveTo(path[0], path[1])
-    graph.lineTo(path[2], path[3])
-  }
-
   const selectUnits = (x1: number, x2: number, y1: number, y2: number) => {
     const result = universe.get_selected_units_ids(x1, x2, y1, y2, true)
 
@@ -54,8 +48,10 @@ const initializeMouseController = (
         e.clientX,
         e.clientY,
       )
-      for (let i = 0; i < result.length; i += 4) {
-        drawPath(result.slice(i, i + 5))
+      graph.lineStyle(3, 0xffffff)
+      graph.moveTo(result[0], result[1])
+      for (let i = 2; i < result.length; i += 2) {
+        graph.lineTo(result[i], result[i + 1])
       }
       // console.log(result)
     }

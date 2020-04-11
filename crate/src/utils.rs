@@ -16,7 +16,7 @@ pub struct Line<'a> {
 
 struct QueueItem<'a> {
   point: &'a Point,
-  parent: &'a Point,
+  path: Vec<&'a Point>,
   current_length: f32,
   heuristic: f32,
 }
@@ -54,9 +54,7 @@ impl Utils {
     track_boundaries: [Point; 2],
     obstalces_points: &Vec<Point>,
     obtacles_lines: Vec<Line>,
-    result: &mut Vec<Line>,
   ) -> Vec<f32> {
-    let mut result: Vec<Line> = vec![];
     let direct_connection_line = Line {
       p1: &track_boundaries[0],
       p2: &track_boundaries[1],
@@ -68,8 +66,31 @@ impl Utils {
       };
     });
 
-    if is_possible_direct_connection {
-      result.push(direct_connection_line);
+    let mut graph: HashMap<u32, Vec<&Point>> = HashMap::new();
+    obtacles_lines.iter().for_each(|line| {
+      let graph_item = graph.get_mut(&line.p1.id);
+      match graph_item {
+        Some(connected_points_list) => {
+          connected_points_list.push(&line.p2);
+        }
+        None => {
+          graph.insert(line.p1.id, vec![&line.p2]);
+        }
+      };
+      let graph_item_2 = graph.get_mut(&line.p2.id);
+      match graph_item_2 {
+        Some(connected_points_list) => {
+          connected_points_list.push(&line.p1);
+        }
+        None => {
+          graph.insert(line.p2.id, vec![&line.p1]);
+        }
+      };
+    });
+    graph.insert(track_boundaries[0].id, vec![]);
+
+    let result: Vec<&Point> = if is_possible_direct_connection {
+      vec![&track_boundaries[0], &track_boundaries[1]]
     } else {
       track_boundaries.iter().for_each(|track_point| {
         obstalces_points.iter().for_each(|obstalce_point| {
@@ -87,25 +108,32 @@ impl Utils {
             };
           });
           if !is_intersect {
-            result.push(new_line);
+            if graph.contains_key(&track_point.id) {
+              let graph_item = graph.get_mut(&track_point.id).unwrap();
+              graph_item.push(&obstalce_point);
+            } else {
+              let graph_item = graph.get_mut(&obstalce_point.id).unwrap();
+              graph_item.push(&track_point);
+            }
           }
         });
       });
-    }
+
+      Utils::shortest_path(graph, &track_boundaries[0], &track_boundaries[1])
+
+    };
+    result
+      .iter()
+      .flat_map(|point| vec![point.x, point.y])
+      .collect()
     // log!("calculate_graph result before extends: {}", result.len());
-    result.extend(obtacles_lines);
     // log!("calculate_graph result after extends: {}", result.len());
 
     // result
     // let graph: HashMap<u32, Vec<&Point>> = [()]
     // TODO: change current implementions of Vec<&Line> to HashMap, mayeb we could remove Line type at all!
 
-    Utils::shortest_path(graph, &track_boundaries[0], &track_boundaries[1]);
 
-    result
-      .iter()
-      .flat_map(|line| vec![line.p1.x, line.p1.y, line.p2.x, line.p2.y])
-      .collect()
   }
 
   pub fn get_graph(
@@ -192,12 +220,10 @@ impl Utils {
       },
     ];
 
-    let mut result: Vec<Line> = vec![];
     Utils::calculate_graph(
       track_boundaries,
       &obstalces_points,
       obtacles_lines,
-      &mut result,
     ) // I don't knwo why Line doesn't require lifetime parameter,
       // and how to do that with lifetime parameter, to return vector from calculate_graph
   }
@@ -252,7 +278,7 @@ impl Utils {
 
     while low < high {
       let mid: usize = (low + high) >> 1; // should be >>>
-      if list[mid].heuristic < value {
+      if list[mid].heuristic > value {
         low = mid + 1;
       } else {
         high = mid;
@@ -261,25 +287,31 @@ impl Utils {
     low
   }
 
-  fn shortest_path(
-    graph: HashMap<u32, Vec<&Point>>,
-    source_node: &Point,
-    destination_node: &Point,
-  ) {
+  fn shortest_path<'a>(
+    graph: HashMap<u32, Vec<&'a Point>>,
+    source_node: &'a Point,
+    destination_node: &'a Point,
+  // fn shortest_path(
+  //   graph: HashMap<u32, Vec<&Point>>,
+  //   source_node: &Point,
+  //   destination_node: &Point,
+  ) -> Vec<&'a Point> {
+    log!("working");
     // graph: HashMap<PointId, Vector<&Point>>
     // queue:
     // every insert to queue has to be sorted
     let mut q: Vec<QueueItem> = vec![QueueItem {
       point: source_node,
-      parent: source_node,
+      path: vec![source_node],
       current_length: 0.0,
       heuristic: 0.0,
     }];
-    // q, is
+
     let mut visited: Vec<&u32> = vec![];
+    let mut full_path: Vec<&Point> = vec![];
     while q.len() > 0 {
-      // q.sort((a, b) => a.heuristic - b.heuristic) // this should be a queue
       let current_node = q.pop().unwrap();
+      // let current_node = q.pop().unwrap();
 
       let direct_path_to_destination: bool = graph
         .get(&current_node.point.id)
@@ -288,7 +320,12 @@ impl Utils {
         .any(|point| point.id == destination_node.id);
       if direct_path_to_destination {
         log!("path was found!");
-        // return [...current_node.path, destination_node]
+        full_path = current_node.path.clone();
+        full_path.push(destination_node);
+        full_path.iter().for_each(|node| {
+          log!("point: {}", node.id);
+        });
+        break;
       }
       visited.push(&current_node.point.id);
       let neighbours = graph.get(&current_node.point.id).unwrap();
@@ -300,19 +337,22 @@ impl Utils {
         .filter(|neighbour| !visited.contains(&&neighbour.id))
         .for_each(|neighbour| {
           let dist_to_neighbour =
-            (neighbour.x - current_node.point.x).hypot(neighbour.y - current_node.point.y);
-          let current_length = current_node.current_length + dist_to_neighbour;
+            (neighbour.x - &current_node.point.x).hypot(neighbour.y - &current_node.point.y);
+          let current_length = &current_node.current_length + dist_to_neighbour;
           let heuristic = current_length
             + (neighbour.x - destination_node.x).hypot(neighbour.y - destination_node.y);
           let index = Utils::get_sorted_index(&q, heuristic);
+          let mut path = current_node.path.clone();
+          path.push(neighbour);
           let new_node = QueueItem {
             point: neighbour,
-            parent: current_node.point,
+            path,
             current_length,
             heuristic,
           };
           q.insert(index, new_node);
         });
     }
+    full_path
   }
 }
