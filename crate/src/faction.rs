@@ -10,28 +10,28 @@ const TIME_BETWEEN_CREATION: u8 = 10;
 
 // FYI:
 // This is struct which contains squad during process creation (when squad is really created, but units are throwing from factory)
-pub struct SquadDuringCreation {
+pub struct SquadDuringCreation<'a> {
   pub time_to_create_another_unit: u8, // when create & throw & add another unit to the squad
-  pub squad: Squad,
+  pub squad: Squad<'a>,
 }
 
-pub struct Faction {
+pub struct Faction<'a> {
   pub id: f32,
   pub resources: u32,     // not used right now
-  pub squads: Vec<Squad>, // when all units fro squad are crated,
+  pub squads: Vec<Squad<'a>>, // when all units fro squad are crated,
   // then struct SquadDuringCreation is removed, and squad is pushed into this vector
   pub factory: Factory,
-  pub squads_during_creation: Vec<SquadDuringCreation>, // list of squads in the production line
+  pub squads_during_creation: Vec<SquadDuringCreation<'a>>, // list of squads in the production line
 }
 
-impl Faction {
+impl Faction<'_> {
   pub fn new(
     id: f32,
     factory_x: f32,
     factory_y: f32,
     factory_angle: f32,
     is_user: bool,
-  ) -> Faction {
+  ) -> Faction + 'static {
     let factory = Factory::new(factory_x, factory_y, factory_angle, is_user);
     Faction {
       id,
@@ -71,8 +71,7 @@ impl Faction {
           creating_squad.time_to_create_another_unit = 0;
 
           let (position_x, position_y, unit_angle) = factory.get_creation_point();
-          let unit = Unit::new(position_x, position_y, unit_angle);
-          creating_squad.squad.members.push(unit);
+          creating_squad.squad.add_member(position_x, position_y, unit_angle);
 
           let squad_details = get_squad_details(&creating_squad.squad.squad_type);
           if creating_squad.squad.members.len() == squad_details.members_number {

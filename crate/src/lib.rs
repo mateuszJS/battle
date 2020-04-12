@@ -32,8 +32,8 @@ use wasm_bindgen::prelude::*;
 const INDEX_OF_USER_FACTION: usize = 0;
 
 #[wasm_bindgen]
-pub struct Universe {
-  factions: Vec<Faction>,
+pub struct Universe<'a> {
+  factions: Vec<Faction<'a>>,
 }
 
 #[wasm_bindgen]
@@ -186,9 +186,9 @@ impl Universe {
     let list_of_numbers: Vec<f32> = self.factions[INDEX_OF_USER_FACTION].squads
       .iter()
       .flat_map(|squad| {
-        let path_to_destination = squad.path_to_destination.iter().flat_map(|point| {
+        let mut path_to_destination: Vec<f32> = squad.path_to_destination.iter().flat_map(|point| {
           vec![point.0, point.1]
-        });
+        }).collect();
         path_to_destination.push(-1.0);
         path_to_destination
       })
