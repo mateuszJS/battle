@@ -182,19 +182,35 @@ impl Universe {
     target_x: f32,
     target_y: f32,
   ) -> js_sys::Array {
-    let (x, y) = self.factions[INDEX_OF_USER_FACTION].move_squads(squads_ids, target_x, target_y);
-    Universe::get_graph_preview(x, y, target_x, target_y)
-  }
+    self.factions[INDEX_OF_USER_FACTION].move_squads(squads_ids, target_x, target_y);
+    let list_of_numbers: Vec<f32> = self.factions[INDEX_OF_USER_FACTION].squads
+      .iter()
+      .flat_map(|squad| {
+        let path_to_destination = squad.path_to_destination.iter().flat_map(|point| {
+          vec![point.0, point.1]
+        });
+        path_to_destination.push(-1.0);
+        path_to_destination
+      })
+      .collect();
 
-  fn get_graph_preview(
-    source_x: f32,
-    source_y: f32,
-    destination_x: f32,
-    destination_y: f32,
-  ) -> js_sys::Array {
-    Utils::get_graph(source_x, source_y, destination_x, destination_y)
+    list_of_numbers
       .into_iter()
       .map(JsValue::from)
       .collect()
+    // TODO: iterate over all squads, and return their path_to_destination
+    // Universe::get_graph_preview(x, y, target_x, target_y)
   }
+
+  // fn get_graph_preview(
+  //   source_x: f32,
+  //   source_y: f32,
+  //   destination_x: f32,
+  //   destination_y: f32,
+  // ) -> js_sys::Array {
+  //   Utils::get_graph(source_x, source_y, destination_x, destination_y)
+  //     .into_iter()
+  //     .map(JsValue::from)
+  //     .collect()
+  // }
 }

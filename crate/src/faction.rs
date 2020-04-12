@@ -145,20 +145,15 @@ impl Faction {
     .concat()
   }
 
-  pub fn move_squads(&mut self, squads_ids: Vec<f32>, target_x: f32, target_y: f32) -> (f32, f32) {
+  pub fn move_squads(&mut self, squads_ids: Vec<f32>, target_x: f32, target_y: f32) {
     let position = Utils::get_circular_position(squads_ids.len(), target_x, target_y, 140.0);
     let mut index = 0;
-    let mut result: (f32, f32) = (0.0, 0.0);
     self.squads.iter_mut().for_each(|squad| {
       if squads_ids.contains(&squad.id) {
         let squad_target = position[index];
         squad.add_target(squad_target.0, squad_target.1);
-        if index == 0 {
-          result = (squad.center_point.0, squad.center_point.1);
-        }
         index += 1;
       }
     });
-    result
   }
 }

@@ -9,6 +9,7 @@ pub struct Squad {
   pub members: Vec<Unit>,
   pub representation_type: f32,
   pub center_point: (f32, f32),
+  pub path_to_destination: Vec<(f32, f32)>,
 }
 
 impl Squad {
@@ -21,6 +22,7 @@ impl Squad {
       squad_type: squad_type,
       members: vec![],
       center_point: (0.0, 0.0),
+      path_to_destination: vec![],
     }
   }
 
@@ -48,13 +50,16 @@ impl Squad {
       .collect()
   }
 
-  pub fn add_target(&mut self, target_x: f32, target_y: f32) {
-    let position = Utils::get_circular_position(self.members.len(), target_x, target_y, 50.0);
-    let mut index = 0;
-    self.members.iter_mut().for_each(|unit| {
-      let unit_target = position[index];
-      unit.change_state_to_run(unit_target.0, unit_target.1);
-      index += 1;
-    })
+  pub fn add_target(&mut self, destination_x: f32, destination_y: f32) {
+    // let position = Utils::get_circular_position(self.members.len(), target_x, target_y, 50.0);
+    // Utils::get_graph(source_x, source_y, destination_x, destination_y);
+
+    self.path_to_destination = Utils::get_graph(self.center_point.0, self.center_point.1, destination_x, destination_y)
+    // let mut index = 0;
+    // self.members.iter_mut().for_each(|unit| {
+    //   let unit_target = position[index];
+    //   unit.change_state_to_run(unit_target.0, unit_target.1);
+    //   index += 1;
+    // })
   }
 }

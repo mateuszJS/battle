@@ -51,7 +51,8 @@ const initializeMouseController = (
       graph.lineStyle(3, 0xffffff)
       graph.moveTo(result[0], result[1])
       for (let i = 2; i < result.length; i += 2) {
-        graph.lineTo(result[i], result[i + 1])
+        const operation = result[i] === -1 ? 'moveTo' : 'lineTo'
+        graph[operation](result[i], result[i + 1])
       }
       // console.log(result)
     }

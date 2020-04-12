@@ -54,7 +54,7 @@ impl Utils {
     track_boundaries: [Point; 2],
     obstalces_points: &Vec<Point>,
     obtacles_lines: Vec<Line>,
-  ) -> Vec<f32> {
+  ) -> Vec<(f32, f32)> {
     let direct_connection_line = Line {
       p1: &track_boundaries[0],
       p2: &track_boundaries[1],
@@ -124,7 +124,7 @@ impl Utils {
     };
     result
       .iter()
-      .flat_map(|point| vec![point.x, point.y])
+      .map(|point| (point.x, point.y))
       .collect()
     // log!("calculate_graph result before extends: {}", result.len());
     // log!("calculate_graph result after extends: {}", result.len());
@@ -141,7 +141,7 @@ impl Utils {
     source_y: f32,
     destination_x: f32,
     destination_y: f32,
-  ) -> Vec<f32> {
+  ) -> Vec<(f32, f32)> {
     let track_boundaries: [Point; 2] = [
       Point {
         id: IdGenerator::generate_id() as u32,
