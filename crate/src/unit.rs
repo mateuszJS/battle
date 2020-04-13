@@ -31,7 +31,7 @@ pub struct Unit<'a> {
 }
 
 impl Unit<'_> {
-  pub fn new(x: f32, y: f32, angle: f32, squad: &'static Squad) -> Unit + 'static {
+  pub fn new<'a>(x: f32, y: f32, angle: f32, squad: &'a Squad) -> Unit<'a> {
     let seed_throwing_strength = LookUpTable::get_random();
     let throwing_strength = 8.0 + seed_throwing_strength * 15.0;
 

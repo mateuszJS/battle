@@ -32,8 +32,8 @@ use wasm_bindgen::prelude::*;
 const INDEX_OF_USER_FACTION: usize = 0;
 
 #[wasm_bindgen]
-pub struct Universe<'a> {
-  factions: Vec<Faction<'a>>,
+pub struct Universe {
+  factions: Vec<Faction>,
 }
 
 #[wasm_bindgen]
@@ -111,6 +111,7 @@ impl Universe {
       universe_representation.as_ptr() as usize as u32,
       universe_representation.len() as u32,
     ];
+    // 2.
     // QUESTION:
     // as you can see firstly I'm creating vector here output_mem_localization
     // can I omit it somehow? like with range I can do (0..5).map(JsValue::from).collect()
@@ -183,21 +184,21 @@ impl Universe {
     target_y: f32,
   ) -> js_sys::Array {
     self.factions[INDEX_OF_USER_FACTION].move_squads(squads_ids, target_x, target_y);
-    let list_of_numbers: Vec<f32> = self.factions[INDEX_OF_USER_FACTION].squads
+    let list_of_numbers: Vec<f32> = self.factions[INDEX_OF_USER_FACTION]
+      .squads
       .iter()
       .flat_map(|squad| {
-        let mut path_to_destination: Vec<f32> = squad.path_to_destination.iter().flat_map(|point| {
-          vec![point.0, point.1]
-        }).collect();
+        let mut path_to_destination: Vec<f32> = squad
+          .path_to_destination
+          .iter()
+          .flat_map(|point| vec![point.0, point.1])
+          .collect();
         path_to_destination.push(-1.0);
         path_to_destination
       })
       .collect();
 
-    list_of_numbers
-      .into_iter()
-      .map(JsValue::from)
-      .collect()
+    list_of_numbers.into_iter().map(JsValue::from).collect()
     // TODO: iterate over all squads, and return their path_to_destination
     // Universe::get_graph_preview(x, y, target_x, target_y)
   }

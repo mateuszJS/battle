@@ -3,17 +3,17 @@ use crate::squad_types::{get_squad_details, SquadType};
 use crate::unit::Unit;
 use crate::utils::Utils;
 
-pub struct Squad<'a> {
+pub struct Squad {
   pub id: f32,
   pub squad_type: SquadType,
-  pub members: Vec<Unit<'a>>,
+  pub members: Vec<Unit>,
   pub representation_type: f32,
   pub center_point: (f32, f32),
   pub path_to_destination: Vec<(f32, f32)>,
 }
 
-impl Squad<'_> {
-  pub fn new(squad_type: SquadType) -> Squad + 'static {
+impl Squad {
+  pub fn new(squad_type: SquadType) -> Squad {
     let squad_details = get_squad_details(&squad_type);
 
     Squad {
@@ -61,17 +61,15 @@ impl Squad<'_> {
   }
 
   fn recalculate_members_positions(&mut self) {
-    let positions_list = Utils::get_circular_position(
-      self.members.len(), 
-      0.0, 
-      0.0, 
-      50.0,
-    );
+    let positions_list = Utils::get_circular_position(self.members.len(), 0.0, 0.0, 50.0);
 
-    positions_list.into_iter().enumerate().for_each(|(index, position)| {
-      let unit = &mut self.members[index];
-      unit.set_position_offset(position.0, position.1);
-    })
+    positions_list
+      .into_iter()
+      .enumerate()
+      .for_each(|(index, position)| {
+        let unit = &mut self.members[index];
+        unit.set_position_offset(position.0, position.1);
+      })
   }
 
   pub fn add_target(&mut self, destination_x: f32, destination_y: f32) {
@@ -79,9 +77,9 @@ impl Squad<'_> {
     // Utils::get_graph(source_x, source_y, destination_x, destination_y);
 
     self.path_to_destination = Utils::get_graph(
-      self.center_point.0, 
-      self.center_point.1, 
-      destination_x, 
+      self.center_point.0,
+      self.center_point.1,
+      destination_x,
       destination_y,
     );
     // let mut index = 0;
