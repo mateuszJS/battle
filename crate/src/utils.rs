@@ -122,18 +122,7 @@ impl Utils {
       Utils::shortest_path(graph, &track_boundaries[0], &track_boundaries[1])
 
     };
-    result
-      .iter()
-      .map(|point| (point.x, point.y))
-      .collect()
-    // log!("calculate_graph result before extends: {}", result.len());
-    // log!("calculate_graph result after extends: {}", result.len());
-
-    // result
-    // let graph: HashMap<u32, Vec<&Point>> = [()]
-    // TODO: change current implementions of Vec<&Line> to HashMap, mayeb we could remove Line type at all!
-
-
+    result.iter().map(|point| (point.x, point.y)).collect()
   }
 
   pub fn get_graph(
@@ -154,29 +143,6 @@ impl Utils {
         y: destination_y,
       },
     ];
-
-    // [PointId]: vec![Points | PointId]
-    // let mut open_nodes = vec![startNode];
-    // let mut closed_nodes = vec![];
-    // loop over open_nodes  {
-    //   current_node = node with lowest cost in open_nodes
-    //   move current_node from open_nodes to closed_nodes
-    //   if current_node is target, WIN!
-    //   loop over neighbour of current_node {
-    //     if neighbour_node is in closed {
-    //       continue();
-    //     }
-    //     if new path to neighbour_node is shorter ot neighbour_node is not in open_nodes {
-    //       set cost of neighbour_node
-    //       set parent of neighbour_node to current_node
-    //       if neighbour_node is not in open_nodes {
-    //         open_nodes.push(neighbour_node)
-    //       }
-    //     }
-    //   }
-    // }
-
-    // let mut book_reviews = HashMap::new();
 
     let obstalces_points: Vec<Point> = vec![
       Point {
@@ -224,8 +190,7 @@ impl Utils {
       track_boundaries,
       &obstalces_points,
       obtacles_lines,
-    ) // I don't knwo why Line doesn't require lifetime parameter,
-      // and how to do that with lifetime parameter, to return vector from calculate_graph
+    )
   }
 
   // https://www.tutorialspoint.com/Check-if-two-line-segments-intersect
@@ -291,16 +256,8 @@ impl Utils {
     graph: HashMap<u32, Vec<&'a Point>>,
     source_node: &'a Point,
     destination_node: &'a Point,
-  // fn shortest_path(
-  //   graph: HashMap<u32, Vec<&Point>>,
-  //   source_node: &Point,
-  //   destination_node: &Point,
   ) -> Vec<&'a Point> {
-    log!("working");
-    // graph: HashMap<PointId, Vector<&Point>>
-    // queue:
-    // every insert to queue has to be sorted
-    let mut q: Vec<QueueItem> = vec![QueueItem {
+    let mut queue: Vec<QueueItem> = vec![QueueItem {
       point: source_node,
       path: vec![source_node],
       current_length: 0.0,
@@ -308,10 +265,10 @@ impl Utils {
     }];
 
     let mut visited: Vec<&u32> = vec![];
-    let mut full_path: Vec<&Point> = vec![];
-    while q.len() > 0 {
-      let current_node = q.pop().unwrap();
-      // let current_node = q.pop().unwrap();
+    let mut full_path: Vec<&Point> = vec![];;
+
+    while queue.len() > 0 {
+      let current_node = queue.pop().unwrap();
 
       let direct_path_to_destination: bool = graph
         .get(&current_node.point.id)
@@ -329,9 +286,6 @@ impl Utils {
       }
       visited.push(&current_node.point.id);
       let neighbours = graph.get(&current_node.point.id).unwrap();
-      // if neighbours.len() > 0 { // we assume that each point always has at least one neighbour
-      //   continue;
-      // }
       neighbours
         .iter()
         .filter(|neighbour| !visited.contains(&&neighbour.id))
@@ -341,7 +295,7 @@ impl Utils {
           let current_length = &current_node.current_length + dist_to_neighbour;
           let heuristic = current_length
             + (neighbour.x - destination_node.x).hypot(neighbour.y - destination_node.y);
-          let index = Utils::get_sorted_index(&q, heuristic);
+          let index = Utils::get_sorted_index(&queue, heuristic);
           let mut path = current_node.path.clone();
           path.push(neighbour);
           let new_node = QueueItem {
@@ -350,7 +304,7 @@ impl Utils {
             current_length,
             heuristic,
           };
-          q.insert(index, new_node);
+          queue.insert(index, new_node);
         });
     }
     full_path

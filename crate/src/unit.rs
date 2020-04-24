@@ -1,7 +1,7 @@
 use crate::constants::MATH_PI;
 use crate::id_generator::IdGenerator;
 use crate::look_up_table::LookUpTable;
-use crate::squad::Squad;
+use crate::squad::SquadUnitShared;
 
 const STATE_ABILITY: u8 = 8;
 const STATE_FLY: u8 = 7;
@@ -14,7 +14,7 @@ const STATE_DIE: u8 = 0;
 const REPRESENTATION_LENGTH: usize = 7;
 const UNIT_MOVE_SPEED: f32 = 2.5;
 
-pub struct Unit<'a> {
+pub struct Unit {
   pub id: f32,
   pub x: f32,
   pub y: f32,
@@ -27,11 +27,11 @@ pub struct Unit<'a> {
   target_y: f32,
   position_offset_x: f32,
   position_offset_y: f32,
-  squad: &'a Squad,
+  track_index: usize,
 }
 
-impl Unit<'_> {
-  pub fn new<'a>(x: f32, y: f32, angle: f32, squad: &'a Squad) -> Unit<'a> {
+impl Unit {
+  pub fn new(x: f32, y: f32, angle: f32) -> Unit {
     let seed_throwing_strength = LookUpTable::get_random();
     let throwing_strength = 8.0 + seed_throwing_strength * 15.0;
 
@@ -48,7 +48,7 @@ impl Unit<'_> {
       target_y: 0.0,
       position_offset_x: 0.0,
       position_offset_y: 0.0,
-      squad,
+      track_index: 0,
     }
   }
 
@@ -76,28 +76,39 @@ impl Unit<'_> {
     }
   }
 
-  pub fn change_state_to_run(&mut self, target_x: f32, target_y: f32) {
+  pub fn change_state_to_run(&mut self, squadSharedInfo: &SquadUnitShared) {
+  // pub fn change_state_to_run(&mut self, target_x: f32, target_y: f32) {
     // when this method will be called
     // 1. When unit need to run by path described in squad, from point to point (some index would be necessary, to keep current point)
     // 2. When units in squad are too far from each other, and need to be closer, in the center on the squad
     // 3. When unit by FLY state runs out of weapon range, and need to get closer, to use weapon again (not sure if then just 2. point is not enough)
 
     self.state = STATE_RUN;
+    self.track_index = 0;
     // TODO: add that offset only in some cases
-    self.target_x = target_x + self.position_offset_x;
-    self.target_y = target_y + self.position_offset_y;
-    let angle = (target_x - self.x).atan2(self.y - target_y);
+    self.set_next_target(squadSharedInfo);
+  }
+
+  fn set_next_target(&mut self, squadSharedInfo: &SquadUnitShared) {
+    self.target_x = squadSharedInfo.track[self.track_index].0 + self.position_offset_x;
+    self.target_y = squadSharedInfo.track[self.track_index].1 + self.position_offset_y;
+    let angle = (self.target_x - self.x).atan2(self.y - self.target_y);
     self.mod_x = angle.sin() * UNIT_MOVE_SPEED;
     self.mod_y = -angle.cos() * UNIT_MOVE_SPEED;
     self.angle = angle;
   }
 
-  fn update_run(&mut self) {
+  fn update_run(&mut self, squadSharedInfo: &SquadUnitShared) {
     self.x += self.mod_x;
     self.y += self.mod_y;
 
-    if (self.x - self.target_x).hypot(self.y - self.target_y) < 2.0 * UNIT_MOVE_SPEED {
-      self.change_state_to_idle();
+    if (self.x - self.target_x).hypot(self.y - self.target_y) < UNIT_MOVE_SPEED {
+      if squadSharedInfo.track.len() - 1 == self.track_index {
+        self.change_state_to_idle();
+      } else {
+        self.track_index += 1;
+        self.set_next_target(squadSharedInfo);
+      }
     }
   }
 
@@ -112,11 +123,11 @@ impl Unit<'_> {
     // check if not too far from squad center point
   }
 
-  pub fn update(&mut self) {
+  pub fn update(&mut self, squadSharedInfo: &SquadUnitShared) {
     match self.state {
       STATE_FLY => self.update_fly(),
       STATE_GETUP => self.update_getup(),
-      STATE_RUN => self.update_run(),
+      STATE_RUN => self.update_run(squadSharedInfo),
       STATE_IDLE => self.update_idle(),
       _ => {}
     }

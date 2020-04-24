@@ -19,8 +19,6 @@ mod squad;
 mod squad_types;
 mod unit;
 mod utils;
-// it's a good practise to add modules in the root of crate
-// and then in other modules just use "use crate::module_name"?
 
 use crate::constants::{MATH_PI, MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS};
 use crate::squad_types::SquadType;
@@ -189,7 +187,7 @@ impl Universe {
       .iter()
       .flat_map(|squad| {
         let mut path_to_destination: Vec<f32> = squad
-          .path_to_destination
+          .shared.track
           .iter()
           .flat_map(|point| vec![point.0, point.1])
           .collect();

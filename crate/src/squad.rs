@@ -3,13 +3,17 @@ use crate::squad_types::{get_squad_details, SquadType};
 use crate::unit::Unit;
 use crate::utils::Utils;
 
+pub struct SquadUnitShared {
+  pub center_point: (f32, f32),
+  pub track: Vec<(f32, f32)>,
+}
+
 pub struct Squad {
   pub id: f32,
   pub squad_type: SquadType,
   pub members: Vec<Unit>,
   pub representation_type: f32,
-  pub center_point: (f32, f32),
-  pub path_to_destination: Vec<(f32, f32)>,
+  pub shared: SquadUnitShared,
 }
 
 impl Squad {
@@ -21,21 +25,24 @@ impl Squad {
       id: IdGenerator::generate_id(), // not sure if needed
       squad_type: squad_type,
       members: vec![],
-      center_point: (0.0, 0.0),
-      path_to_destination: vec![],
+      shared: SquadUnitShared {
+        center_point: (0.0, 0.0),
+        track: vec![],
+      }
     }
   }
 
   pub fn update(&mut self) {
     let mut sum_x: f32 = 0.0;
     let mut sum_y: f32 = 0.0;
+    let shared = &self.shared;
     self.members.iter_mut().for_each(|unit| {
-      unit.update();
+      unit.update(shared);
       sum_x += unit.x;
       sum_y += unit.y;
     });
-    self.center_point.0 = sum_x / self.members.len() as f32;
-    self.center_point.1 = sum_y / self.members.len() as f32;
+    self.shared.center_point.0 = sum_x / self.members.len() as f32;
+    self.shared.center_point.1 = sum_y / self.members.len() as f32;
   }
 
   pub fn get_representation(&self) -> Vec<f32> {
@@ -51,7 +58,7 @@ impl Squad {
   }
 
   pub fn add_member(&mut self, position_x: f32, position_y: f32, unit_angle: f32) {
-    let unit = Unit::new(position_x, position_y, unit_angle, &self);
+    let unit = Unit::new(position_x, position_y, unit_angle);
     self.members.push(unit);
 
     let squad_details = get_squad_details(&self.squad_type);
@@ -76,12 +83,17 @@ impl Squad {
     // let position = Utils::get_circular_position(self.members.len(), target_x, target_y, 50.0);
     // Utils::get_graph(source_x, source_y, destination_x, destination_y);
 
-    self.path_to_destination = Utils::get_graph(
-      self.center_point.0,
-      self.center_point.1,
+    self.shared.track = Utils::get_graph(
+      self.shared.center_point.0,
+      self.shared.center_point.1,
       destination_x,
       destination_y,
     );
+    let shared = &self.shared;
+
+    self.members.iter_mut().for_each(|unit| {
+      unit.change_state_to_run(shared)
+    });
     // let mut index = 0;
     // self.members.iter_mut().for_each(|unit| {
     //   let unit_target = position[index];
