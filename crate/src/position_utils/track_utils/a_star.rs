@@ -1,7 +1,5 @@
-use crate::constants::MATH_PI;
-use crate::id_generator::IdGenerator;
 use std::collections::HashMap;
-use super::basic_utils::{Point,BasicUtils};
+use super::super::basic_utils::{Point,BasicUtils};
 
 struct QueueItem<'a> {
   point: &'a Point,
@@ -10,9 +8,9 @@ struct QueueItem<'a> {
   heuristic: f32,
 }
 
-pub struct AlgorithmUtils {}
+pub struct AStar {}
 
-impl AlgorithmUtils {
+impl AStar {
   fn get_sorted_index(list: &Vec<QueueItem>, value: f32) -> usize {
     let mut low: usize = 0;
     let mut high: usize = list.len();
@@ -64,7 +62,7 @@ impl AlgorithmUtils {
           let dist_to_neighbor = BasicUtils::distance(neighbor, &current_node.point);
           let current_length = &current_node.current_length + dist_to_neighbor;
           let heuristic = current_length + BasicUtils::distance(neighbor, destination_node);
-          let index = AlgorithmUtils::get_sorted_index(&queue, heuristic);
+          let index = AStar::get_sorted_index(&queue, heuristic);
           let mut path = current_node.path.clone();
           path.push(neighbor);
           let new_node = QueueItem {

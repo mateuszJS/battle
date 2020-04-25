@@ -19,9 +19,9 @@ pub static RAW_POINTS: [(f32, f32); 9] = [
   // end here
 ];
 
-pub struct GetLazyStatics {}
+pub struct GetObstacleDetails {}
 
-impl GetLazyStatics {
+impl GetObstacleDetails {
   fn insert_lines_to_graph<'a>(
     ref_graph: &mut HashMap<u32, Vec<&'a Point>>,
     point_a: &'a Point,
@@ -82,8 +82,8 @@ impl GetLazyStatics {
     let mut graph: HashMap<u32, Vec<&Point>> = HashMap::new();
 
     obstacles_lines.iter().for_each(|line| {
-      GetLazyStatics::insert_lines_to_graph(&mut graph, &line.p1, &line.p2);
-      GetLazyStatics::insert_lines_to_graph(&mut graph, &line.p2, &line.p1);
+      GetObstacleDetails::insert_lines_to_graph(&mut graph, &line.p1, &line.p2);
+      GetObstacleDetails::insert_lines_to_graph(&mut graph, &line.p2, &line.p1);
     });
 
     let mut obstacle_index = 0;
