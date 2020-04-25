@@ -28,11 +28,11 @@ pub static RAW_POINTS: [(f32, f32); 9] = [
   (900.0, 300.0),
   (600.0, 300.0),
   // end here
-  (1100.0, 400.0),
-  (1400.0, 400.0),
-  (1400.0, 600.0),
-  (1100.0, 600.0),
-  (1000.0, 500.0),
+  (700.0, 400.0),
+  (900.0, 400.0),
+  (900.0, 600.0),
+  (700.0, 600.0),
+  (600.0, 500.0),
   // end here
 ];
 
@@ -132,30 +132,57 @@ impl Utils {
         });
 
 
-        OBSTACLES_POINTS.iter().enumerate().for_each(|(index_a, point_a)| {
-          for index_b in index_a + 1..OBSTACLES_POINTS.len() {
-            let point_b = &OBSTACLES_POINTS[index_b];
-            let new_line = Line {
-              p1: point_a,
-              p2: point_a,
-            };
-            let mut is_intersect = false;
-            OBSTACLES_LINES.iter().for_each(|obstacle_line| {
-              if obstacle_line.p1.id != point_a.id
-                && obstacle_line.p2.id != point_b.id
-                && Utils::check_intersection(&new_line, obstacle_line)
-              {
-                is_intersect = true;
-              };
-            });
-            if !is_intersect {
-              log!("create connection");
-              graph.get_mut(&point_a.id).unwrap().push(&point_a);
-              graph.get_mut(&point_a.id).unwrap().push(&point_a);
-            }
-          }
-        });
 
+        let mut obstacle_index = 0;
+        let mut obstacle_start_point_index = 0;
+        let mut grouped_obstacles_points: Vec<Vec<&Point>> = vec![vec![]];
+
+        OBSTACLES_POINTS
+          .iter()
+          .enumerate()
+          .for_each(|(index, point)| {
+            if index == obstacle_start_point_index + OBSTACLES_LENGTH[obstacle_index] - 1 {
+              grouped_obstacles_points[obstacle_index].push(point);
+              grouped_obstacles_points.push(vec![]);
+              obstacle_start_point_index += OBSTACLES_LENGTH[obstacle_index];
+              obstacle_index += 1;
+            } else {
+              grouped_obstacles_points[obstacle_index].push(point);
+            };
+          });
+
+          grouped_obstacles_points.iter().enumerate().for_each(|(index_a, obstacle_a)| {
+            for index_b in index_a + 1..grouped_obstacles_points.len() {
+
+              let obstacle_b = &grouped_obstacles_points[index_b];
+              obstacle_a.iter().for_each(|point_a| {
+                obstacle_b.iter().for_each(|point_b| {
+
+                  let new_line = Line {
+                    p1: point_a,
+                    p2: point_b,
+                  };
+                  let mut is_intersect = false;
+                  OBSTACLES_LINES.iter().for_each(|obstacle_line| {
+                    if obstacle_line.p1.id != point_a.id
+                      && obstacle_line.p1.id != point_b.id
+                      && obstacle_line.p2.id != point_a.id
+                      && obstacle_line.p2.id != point_b.id
+                      && Utils::check_intersection(&new_line, obstacle_line)
+                    {
+                      is_intersect = true;
+                    };
+                  });
+
+                  if !is_intersect {
+                    graph.get_mut(&point_a.id).unwrap().push(&point_b);
+                    graph.get_mut(&point_b.id).unwrap().push(&point_a);
+                  }
+                })
+              });
+
+            }
+          });
         graph
       };
     }
@@ -172,7 +199,7 @@ impl Utils {
     });
 
     let mut graph = GRAPH.clone();
-
+    
     graph.insert(track_boundaries[0].id, vec![]);
 
     let result: Vec<&Point> = if is_possible_direct_connection {
@@ -302,7 +329,7 @@ impl Utils {
       current_length: 0.0,
       heuristic: 0.0,
     }];
-
+    log!("shortest_path");
     let mut visited: Vec<&u32> = vec![];
     let mut full_path: Vec<&Point> = vec![];
 
