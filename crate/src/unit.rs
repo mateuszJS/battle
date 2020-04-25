@@ -76,7 +76,7 @@ impl Unit {
     }
   }
 
-  pub fn change_state_to_run(&mut self, squadSharedInfo: &SquadUnitShared) {
+  pub fn change_state_to_run(&mut self, squad_shared_info: &SquadUnitShared) {
   // pub fn change_state_to_run(&mut self, target_x: f32, target_y: f32) {
     // when this method will be called
     // 1. When unit need to run by path described in squad, from point to point (some index would be necessary, to keep current point)
@@ -86,28 +86,28 @@ impl Unit {
     self.state = STATE_RUN;
     self.track_index = 0;
     // TODO: add that offset only in some cases
-    self.set_next_target(squadSharedInfo);
+    self.set_next_target(squad_shared_info);
   }
 
-  fn set_next_target(&mut self, squadSharedInfo: &SquadUnitShared) {
-    self.target_x = squadSharedInfo.track[self.track_index].0 + self.position_offset_x;
-    self.target_y = squadSharedInfo.track[self.track_index].1 + self.position_offset_y;
+  fn set_next_target(&mut self, squad_shared_info: &SquadUnitShared) {
+    self.target_x = squad_shared_info.track[self.track_index].0 + self.position_offset_x;
+    self.target_y = squad_shared_info.track[self.track_index].1 + self.position_offset_y;
     let angle = (self.target_x - self.x).atan2(self.y - self.target_y);
     self.mod_x = angle.sin() * UNIT_MOVE_SPEED;
     self.mod_y = -angle.cos() * UNIT_MOVE_SPEED;
     self.angle = angle;
   }
 
-  fn update_run(&mut self, squadSharedInfo: &SquadUnitShared) {
+  fn update_run(&mut self, squad_shared_info: &SquadUnitShared) {
     self.x += self.mod_x;
     self.y += self.mod_y;
 
     if (self.x - self.target_x).hypot(self.y - self.target_y) < UNIT_MOVE_SPEED {
-      if squadSharedInfo.track.len() - 1 == self.track_index {
+      if squad_shared_info.track.len() - 1 == self.track_index {
         self.change_state_to_idle();
       } else {
         self.track_index += 1;
-        self.set_next_target(squadSharedInfo);
+        self.set_next_target(squad_shared_info);
       }
     }
   }
@@ -123,11 +123,11 @@ impl Unit {
     // check if not too far from squad center point
   }
 
-  pub fn update(&mut self, squadSharedInfo: &SquadUnitShared) {
+  pub fn update(&mut self, squad_shared_info: &SquadUnitShared) {
     match self.state {
       STATE_FLY => self.update_fly(),
       STATE_GETUP => self.update_getup(),
-      STATE_RUN => self.update_run(squadSharedInfo),
+      STATE_RUN => self.update_run(squad_shared_info),
       STATE_IDLE => self.update_idle(),
       _ => {}
     }

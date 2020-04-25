@@ -1,7 +1,7 @@
 use crate::id_generator::IdGenerator;
 use crate::squad_types::{get_squad_details, SquadType};
 use crate::unit::Unit;
-use crate::utils::Utils;
+use crate::position_utils::PositionUtils;
 
 pub struct SquadUnitShared {
   pub center_point: (f32, f32),
@@ -68,7 +68,7 @@ impl Squad {
   }
 
   fn recalculate_members_positions(&mut self) {
-    let positions_list = Utils::get_circular_position(self.members.len(), 0.0, 0.0, 50.0);
+    let positions_list = PositionUtils::get_circular_position(self.members.len(), 0.0, 0.0, 50.0);
 
     positions_list
       .into_iter()
@@ -80,10 +80,10 @@ impl Squad {
   }
 
   pub fn add_target(&mut self, destination_x: f32, destination_y: f32) {
-    // let position = Utils::get_circular_position(self.members.len(), target_x, target_y, 50.0);
-    // Utils::get_graph(source_x, source_y, destination_x, destination_y);
+    // let position = PositionUtils::get_circular_position(self.members.len(), target_x, target_y, 50.0);
+    // PositionUtils::get_graph(source_x, source_y, destination_x, destination_y);
 
-    self.shared.track = Utils::get_graph(
+    self.shared.track = PositionUtils::get_track(
       self.shared.center_point.0,
       self.shared.center_point.1,
       destination_x,

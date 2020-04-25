@@ -18,12 +18,12 @@ mod look_up_table;
 mod squad;
 mod squad_types;
 mod unit;
-mod utils;
+mod position_utils;
 
 use crate::constants::MATH_PI;
 use faction::Faction;
 use factory::Factory;
-use utils::{OBSTACLES_LENGTH, RAW_POINTS};
+use position_utils::get_lazy_statics::{OBSTACLES_LENGTH, RAW_POINTS};
 use wasm_bindgen::prelude::*;
 
 const INDEX_OF_USER_FACTION: usize = 0;
