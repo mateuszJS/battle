@@ -20,11 +20,10 @@ mod squad_types;
 mod unit;
 mod utils;
 
-use crate::constants::{MATH_PI, MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS};
-use crate::squad_types::SquadType;
+use crate::constants::MATH_PI;
 use faction::Faction;
 use factory::Factory;
-use utils::Utils;
+use utils::{OBSTACLES_LENGTH, RAW_POINTS};
 use wasm_bindgen::prelude::*;
 
 const INDEX_OF_USER_FACTION: usize = 0;
@@ -187,7 +186,8 @@ impl Universe {
       .iter()
       .flat_map(|squad| {
         let mut path_to_destination: Vec<f32> = squad
-          .shared.track
+          .shared
+          .track
           .iter()
           .flat_map(|point| vec![point.0, point.1])
           .collect();
@@ -196,7 +196,25 @@ impl Universe {
       })
       .collect();
 
-    list_of_numbers.into_iter().map(JsValue::from).collect()
+    let mut obstacle_index = 0;
+    let mut obstacle_start_point_index = 0;
+    let obstacle = RAW_POINTS
+      .iter()
+      .enumerate()
+      .flat_map(|(index, (x, y))| {
+        if index == obstacle_start_point_index + OBSTACLES_LENGTH[obstacle_index] - 1 {
+          obstacle_start_point_index += OBSTACLES_LENGTH[obstacle_index];
+          obstacle_index += 1;
+          vec![*x, *y, -2.0]
+        } else {
+          vec![*x, *y]
+        }
+      })
+      .collect();
+
+    let summary = [vec![-1.0], list_of_numbers, obstacle, vec![-2.0]].concat();
+
+    summary.into_iter().map(JsValue::from).collect()
     // TODO: iterate over all squads, and return their path_to_destination
     // Universe::get_graph_preview(x, y, target_x, target_y)
   }

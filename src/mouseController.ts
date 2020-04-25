@@ -34,6 +34,30 @@ const initializeMouseController = (
 
   window.app.stage.addChild(selectionRectangle)
 
+  const drawPaths = array => {
+    let i = 0
+
+    while (i < array.length) {
+      if (array[i] < 0) {
+        if (i !== 0) {
+          if (array[i] === -1) {
+            graph.endFill()
+          } else {
+            graph.closePath() // array[i] = -2
+          }
+          if (i === array.length - 1) {
+            break
+          }
+        }
+        graph.moveTo(array[i + 1], array[i + 2])
+        i += 3
+      } else {
+        graph.lineTo(array[i], array[i + 1])
+        i += 2
+      }
+    }
+  }
+
   const onMouseDown = (e: MouseEvent) => {
     if (e.button === MOUSE_LEFT_BUTTON) {
       selectedUnits.forEach(unit => unit.deselect())
@@ -49,11 +73,8 @@ const initializeMouseController = (
         e.clientY,
       )
       graph.lineStyle(3, 0xffffff)
-      graph.moveTo(result[0], result[1])
-      for (let i = 2; i < result.length; i += 2) {
-        const operation = result[i] === -1 ? 'moveTo' : 'lineTo'
-        graph[operation](result[i], result[i + 1])
-      }
+      console.log({ result })
+      drawPaths(result)
       // console.log(result)
     }
   }

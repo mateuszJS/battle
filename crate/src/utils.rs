@@ -1,6 +1,5 @@
 use crate::constants::MATH_PI;
 use crate::id_generator::IdGenerator;
-use crate::squad::Squad;
 use std::collections::HashMap;
 
 pub struct Point {
@@ -20,6 +19,22 @@ struct QueueItem<'a> {
   current_length: f32,
   heuristic: f32,
 }
+
+pub static OBSTACLES_LENGTH: [usize; 2] = [4, 5];
+
+pub static RAW_POINTS: [(f32, f32); 9] = [
+  (600.0, 100.0),
+  (900.0, 100.0),
+  (900.0, 300.0),
+  (600.0, 300.0),
+  // end here
+  (1100.0, 400.0),
+  (1400.0, 400.0),
+  (1400.0, 600.0),
+  (1100.0, 600.0),
+  (1000.0, 500.0),
+  // end here
+];
 
 pub struct Utils {}
 
@@ -45,63 +60,134 @@ impl Utils {
     result
   }
 
-  // fn is_point_inside_polygon(rect: &[4; Point], point: Point) -> bool {
-  //   is_point_inside_triangle([react[0], react[1], react[2]], point]) ||
-  //   is_point_inside_triangle([react[2], react[3], react[0]], point])
-  // }
+  pub fn calculate_graph(track_boundaries: [Point; 2]) -> Vec<(f32, f32)> {
+    lazy_static! {
+      static ref OBSTACLES_POINTS: Vec<Point> = {
+        RAW_POINTS
+          .iter()
+          .map(|(x, y)| Point {
+            id: IdGenerator::generate_id() as u32,
+            x: *x,
+            y: *y,
+          })
+          .collect()
+      };
+      static ref OBSTACLES_LINES: Vec<Line<'static>> = {
+        let mut obstacle_index = 0;
+        let mut obstacle_start_point_index = 0;
 
-  pub fn calculate_graph(
-    track_boundaries: [Point; 2],
-    obstalces_points: &Vec<Point>,
-    obtacles_lines: Vec<Line>,
-  ) -> Vec<(f32, f32)> {
+        OBSTACLES_POINTS
+          .iter()
+          .enumerate()
+          .map(|(index, point)| {
+            let connected_point_index = if index == obstacle_start_point_index + OBSTACLES_LENGTH[obstacle_index] - 1 {
+              let copy = obstacle_start_point_index.clone();
+              obstacle_start_point_index += OBSTACLES_LENGTH[obstacle_index];
+              obstacle_index += 1;
+              copy
+            } else {
+              index + 1
+            };
+            Line {
+              p1: point,
+              p2: &OBSTACLES_POINTS[connected_point_index],
+            }
+          })
+          .collect()
+
+        // let last_index = OBSTACLES_POINTS.len() - 1;
+        // OBSTACLES_POINTS
+        //   .iter()
+        //   .enumerate()
+        //   .map(|(index, point)| {
+        //     let connected_point_index = if index == last_index { 0 } else { index + 1 };
+        //     Line {
+        //       p1: point,
+        //       p2: &OBSTACLES_POINTS[connected_point_index],
+        //     }
+        //   })
+        //   .collect()
+      };
+      static ref GRAPH: HashMap<u32, Vec<&'static Point>> = {
+        let mut graph: HashMap<u32, Vec<&Point>> = HashMap::new();
+        OBSTACLES_LINES.iter().for_each(|line| {
+          let point_a = graph.get_mut(&line.p1.id);
+          match point_a {
+            Some(connected_points_list) => {
+              connected_points_list.push(&line.p2);
+            }
+            None => {
+              graph.insert(line.p1.id, vec![&line.p2]);
+            }
+          };
+          let point_b = graph.get_mut(&line.p2.id);
+          match point_b {
+            Some(connected_points_list) => {
+              connected_points_list.push(&line.p1);
+            }
+            None => {
+              graph.insert(line.p2.id, vec![&line.p1]);
+            }
+          };
+        });
+
+
+        OBSTACLES_POINTS.iter().enumerate().for_each(|(index_a, point_a)| {
+          for index_b in index_a + 1..OBSTACLES_POINTS.len() {
+            let point_b = &OBSTACLES_POINTS[index_b];
+            let new_line = Line {
+              p1: point_a,
+              p2: point_a,
+            };
+            let mut is_intersect = false;
+            OBSTACLES_LINES.iter().for_each(|obstacle_line| {
+              if obstacle_line.p1.id != point_a.id
+                && obstacle_line.p2.id != point_b.id
+                && Utils::check_intersection(&new_line, obstacle_line)
+              {
+                is_intersect = true;
+              };
+            });
+            if !is_intersect {
+              log!("create connection");
+              graph.get_mut(&point_a.id).unwrap().push(&point_a);
+              graph.get_mut(&point_a.id).unwrap().push(&point_a);
+            }
+          }
+        });
+
+        graph
+      };
+    }
+
     let direct_connection_line = Line {
       p1: &track_boundaries[0],
       p2: &track_boundaries[1],
     };
     let mut is_possible_direct_connection = true;
-    obtacles_lines.iter().for_each(|obstacle_line| {
+    OBSTACLES_LINES.iter().for_each(|obstacle_line| {
       if Utils::check_intersection(&direct_connection_line, obstacle_line) {
         is_possible_direct_connection = false;
       };
     });
 
-    let mut graph: HashMap<u32, Vec<&Point>> = HashMap::new();
-    obtacles_lines.iter().for_each(|line| {
-      let graph_item = graph.get_mut(&line.p1.id);
-      match graph_item {
-        Some(connected_points_list) => {
-          connected_points_list.push(&line.p2);
-        }
-        None => {
-          graph.insert(line.p1.id, vec![&line.p2]);
-        }
-      };
-      let graph_item_2 = graph.get_mut(&line.p2.id);
-      match graph_item_2 {
-        Some(connected_points_list) => {
-          connected_points_list.push(&line.p1);
-        }
-        None => {
-          graph.insert(line.p2.id, vec![&line.p1]);
-        }
-      };
-    });
+    let mut graph = GRAPH.clone();
+
     graph.insert(track_boundaries[0].id, vec![]);
 
     let result: Vec<&Point> = if is_possible_direct_connection {
       vec![&track_boundaries[0], &track_boundaries[1]]
     } else {
       track_boundaries.iter().for_each(|track_point| {
-        obstalces_points.iter().for_each(|obstalce_point| {
+        OBSTACLES_POINTS.iter().for_each(|obstacle_point| {
           let new_line = Line {
             p1: track_point,
-            p2: obstalce_point,
+            p2: obstacle_point,
           };
-          let mut is_intersect: bool = false;
-          obtacles_lines.iter().for_each(|obstacle_line| {
-            if obstacle_line.p1.id != obstalce_point.id
-              && obstacle_line.p2.id != obstalce_point.id
+          let mut is_intersect = false;
+          OBSTACLES_LINES.iter().for_each(|obstacle_line| {
+            if obstacle_line.p1.id != obstacle_point.id
+              && obstacle_line.p2.id != obstacle_point.id
               && Utils::check_intersection(&new_line, obstacle_line)
             {
               is_intersect = true;
@@ -110,9 +196,9 @@ impl Utils {
           if !is_intersect {
             if graph.contains_key(&track_point.id) {
               let graph_item = graph.get_mut(&track_point.id).unwrap();
-              graph_item.push(&obstalce_point);
+              graph_item.push(&obstacle_point);
             } else {
-              let graph_item = graph.get_mut(&obstalce_point.id).unwrap();
+              let graph_item = graph.get_mut(&obstacle_point.id).unwrap();
               graph_item.push(&track_point);
             }
           }
@@ -120,7 +206,6 @@ impl Utils {
       });
 
       Utils::shortest_path(graph, &track_boundaries[0], &track_boundaries[1])
-
     };
     result.iter().map(|point| (point.x, point.y)).collect()
   }
@@ -144,53 +229,7 @@ impl Utils {
       },
     ];
 
-    let obstalces_points: Vec<Point> = vec![
-      Point {
-        id: IdGenerator::generate_id() as u32,
-        x: 800.0,
-        y: 200.0,
-      },
-      Point {
-        id: IdGenerator::generate_id() as u32,
-        x: 1100.0,
-        y: 200.0,
-      },
-      Point {
-        id: IdGenerator::generate_id() as u32,
-        x: 1100.0,
-        y: 400.0,
-      },
-      Point {
-        id: IdGenerator::generate_id() as u32,
-        x: 800.0,
-        y: 400.0,
-      },
-    ];
-
-    let obtacles_lines: Vec<Line> = vec![
-      Line {
-        p1: &obstalces_points[0],
-        p2: &obstalces_points[1],
-      },
-      Line {
-        p1: &obstalces_points[1],
-        p2: &obstalces_points[2],
-      },
-      Line {
-        p1: &obstalces_points[2],
-        p2: &obstalces_points[3],
-      },
-      Line {
-        p1: &obstalces_points[3],
-        p2: &obstalces_points[0],
-      },
-    ];
-
-    Utils::calculate_graph(
-      track_boundaries,
-      &obstalces_points,
-      obtacles_lines,
-    )
+    Utils::calculate_graph(track_boundaries)
   }
 
   // https://www.tutorialspoint.com/Check-if-two-line-segments-intersect
@@ -265,7 +304,7 @@ impl Utils {
     }];
 
     let mut visited: Vec<&u32> = vec![];
-    let mut full_path: Vec<&Point> = vec![];;
+    let mut full_path: Vec<&Point> = vec![];
 
     while queue.len() > 0 {
       let current_node = queue.pop().unwrap();
@@ -276,12 +315,8 @@ impl Utils {
         .iter()
         .any(|point| point.id == destination_node.id);
       if direct_path_to_destination {
-        log!("path was found!");
         full_path = current_node.path.clone();
         full_path.push(destination_node);
-        full_path.iter().for_each(|node| {
-          log!("point: {}", node.id);
-        });
         break;
       }
       visited.push(&current_node.point.id);
