@@ -80,7 +80,7 @@ impl Squad {
   }
 
   pub fn add_target(&mut self, destination_x: f32, destination_y: f32) {
-    // let position = PositionUtils::get_circular_position(self.members.len(), target_x, target_y, 50.0);
+    // let position = PositionUtils::get_positions(self.members.len(), target_x, target_y, 50.0);
     // PositionUtils::get_graph(source_x, source_y, destination_x, destination_y);
 
     self.shared.track = PositionUtils::get_track(

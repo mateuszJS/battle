@@ -23,7 +23,7 @@ mod position_utils;
 use crate::constants::MATH_PI;
 use faction::Faction;
 use factory::Factory;
-use position_utils::get_obstacle_details::{OBSTACLES_LENGTH, RAW_POINTS};
+use position_utils::obstacles_lazy_statics::{OBSTACLES_LENGTH, RAW_POINTS};
 use wasm_bindgen::prelude::*;
 
 const INDEX_OF_USER_FACTION: usize = 0;

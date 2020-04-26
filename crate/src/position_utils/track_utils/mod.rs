@@ -1,7 +1,7 @@
 mod a_star;
 
 use std::collections::HashMap;
-use super::get_obstacle_details::GetObstacleDetails;
+use super::obstacles_lazy_statics::ObstaclesLazyStatics;
 use super::basic_utils::{Point,Line,BasicUtils};
 use a_star::AStar;
 
@@ -55,24 +55,16 @@ impl TrackUtils {
     end_point: &'a Point,
   ) -> Vec<&'a Point> {
 
-    lazy_static! {
-      static ref OBSTACLES_POINTS: Vec<Point> = {
-        GetObstacleDetails::get_obstacles_points()
-      };
-      static ref OBSTACLES_LINES: Vec<Line<'static>> = {
-        GetObstacleDetails::get_obstacles_lines(&OBSTACLES_POINTS)
-      };
-      static ref PERMANENT_CONNECTIONS_GRAPH: HashMap<u32, Vec<&'static Point>> = {
-        GetObstacleDetails::get_permanent_connection_graph(&OBSTACLES_POINTS, &OBSTACLES_LINES)
-      };
-    }
+    let obstacles_points = ObstaclesLazyStatics::get_obstacles_points();
+    let obstacles_lines = ObstaclesLazyStatics::get_obstacles_lines();
+    let permanent_connection_graph = ObstaclesLazyStatics::get_permanent_connection_graph();
 
     let direct_connection_line = Line {
       p1: start_point,
       p2: end_point,
     };
     let mut is_possible_direct_connection = true;
-    OBSTACLES_LINES.iter().for_each(|obstacle_line| {
+    obstacles_lines.iter().for_each(|obstacle_line| {
       if BasicUtils::check_intersection(&direct_connection_line, obstacle_line) {
         is_possible_direct_connection = false;
       };
@@ -84,9 +76,9 @@ impl TrackUtils {
       TrackUtils::calc_complicated_track(
         start_point,
         end_point,
-        &OBSTACLES_POINTS,
-        &OBSTACLES_LINES,
-        &PERMANENT_CONNECTIONS_GRAPH,
+        obstacles_points,
+        obstacles_lines,
+        permanent_connection_graph,
       )
     }
   }

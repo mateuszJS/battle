@@ -36,12 +36,20 @@ const initializeMouseController = (
 
   const drawPaths = array => {
     let i = 0
-
+    graph.clear()
     while (i < array.length) {
       if (array[i] < 0) {
         if (i !== 0) {
           if (array[i] === -1) {
             graph.endFill()
+
+            graph.beginFill(0xff0000, 1)
+            graph.lineStyle(0)
+            graph.drawCircle(array[i - 2] - 2.5, array[i - 1] - 2.5, 5)
+            graph.endFill()
+
+            graph.beginFill(0x000000, 0)
+            graph.lineStyle(3, 0xffffff, 0.3)
           } else {
             graph.closePath() // array[i] = -2
           }
@@ -72,7 +80,7 @@ const initializeMouseController = (
         e.clientX,
         e.clientY,
       )
-      graph.lineStyle(3, 0xffffff)
+      graph.lineStyle(3, 0xffffff, 0.3)
       console.log({ result })
       drawPaths(result)
       // console.log(result)
