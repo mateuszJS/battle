@@ -34,37 +34,37 @@ impl PositionUtils {
 ─────────────────  ┘
 
 └────────┬────────┘
-        B
+         B
 
 initial_x is toggling, once it's 0, next time B/2, and again 0, and so on and on
 
-                                          B (offset_x) B/2
+                                          B            B/2
                                   ┌───────┴───────┬─────┴─────┐
                                   │               │           │
-  y_top = prev_y_top - H ──────── ¤_______________¤           │ ─────┐
+  y_top = prev_y_top - H ──────── ╳_______________╳           │ ─────┐
                                                    \¸         │      │
-                              initial_x              \¸       │      ├─ H
-                                  ┊                    \¸     │      │
+                              initial_x              \¸       │      │
+                                  ┊                    \¸     │      ├─ H
                                   ┊                      \¸   │      │
                                   ┊                        \¸ │      │
-     prev_y_top ───────── ________┊________                  \¤ ─────┘
-                        ¸/░\¸     ┊       ¸\¸                 \¸
-                      ¸/░░░░░\    ┊     ¸/   \¸                 \¸
-                    ¸/░░░░░░░░\¸  ┊   ¸/       \¸                 \¸
-                  ¸/░░░░░░░░░░░░\ ┊ ¸/           \¸                 \¸
-                 /░░░░░░░░░░░░░░░\┊/               \¸                 \¸
-     y:0 ────── ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈¤┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈ ───────── y:0    ¤
-                │\¸             ¸/┊\¸             ¸/¯│
-                │  \¸         ¸/  ┊  \¸         ¸/   │
-                │    \¸     ¸/    ┊    \¸     ¸/     │
-                │      \¸ ¸/      ┊      \¸ ¸/       │
-prev_y_bottom ────────── \________┊________/         │
-                │                 ┊                  │
-                │                 ┊                  │
-   prev_x_left ─┘                 ┊                  └── prev_x_right
-                                  x:0
-
-y_bottom = prev_y_bottom + H ──── ¤
+    prev_y_top ───────── ╳________┊________╳                 ╳ ──────┘
+                       ¸/░\¸      ┊       ¸\¸                 \¸
+                     ¸/░░░░░\     ┊     ¸/   \¸                 \¸
+                   ¸/░░░░░░░░\¸   ┊   ¸/       \¸                 \¸
+                 ¸/░░░░░░░░░░░░\¸ ┊ ¸/           \¸                 \¸
+                /░░░░░░░░░░░░░░░░\┊/               \¸                 \¸
+     y:0 ───── ╳┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈╳┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈╳ ───────── y:0    ╳
+               │¯\¸             ¸/┊\¸             ¸/¯│               ¸/
+               │   \¸         ¸/  ┊  \¸         ¸/   │             ¸/
+               │     \¸     ¸/    ┊    \¸     ¸/     │           ¸/
+               │       \¸ ¸/      ┊      \¸ ¸/       │         ¸/
+prev_y_bottom ────────── ╳________┊________╳         │       ¸╳
+               │                  ┊                  │     ¸/
+               │                  ┊                  │   ¸/
+  prev_x_left ─┘                  ┊                  └── prev_x_right
+                                  x:0                ¸/¯
+                                                   ¸/
+y_bottom = prev_y_bottom + H ──── ╳_______________╳
 */
   pub fn get_positions_around(
     needed_length: usize,
@@ -175,7 +175,7 @@ y_bottom = prev_y_bottom + H ──── ¤
     let mut multiple_radius: i8 = 1;
     let mut last_visited_result_point_index: usize = 0;
     let mut results: Vec<(f32, f32)> = vec![];
-
+    // TODO: finish algorithm and test with UI, not by adding points to units (hard to detect error)
     while results.len() < needed_length {
       let (center_x, center_y) =
         if results.len() == 0 {
