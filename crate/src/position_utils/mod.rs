@@ -11,7 +11,7 @@ use obstacles_lazy_statics::ObstaclesLazyStatics;
 pub struct PositionUtils {}
 
 impl PositionUtils {
-  fn get_is_point_inside_polygon(point: (u8, u8)) -> bool {
+  fn get_is_point_inside_polygon(point: (i16, i16)) -> bool {
     let p1 = Point { id: 0, x: -1.0, y: -1.0 };
     let p2 = Point { id: 0, x: point.0 as f32, y: point.1 as f32 };
     let line_with_point = Line { p1: &p1, p2: &p2 };
@@ -68,29 +68,26 @@ y_bottom = prev_y_bottom + H ──── ╳_________________╳
 */
   pub fn get_positions_around(
     needed_length: usize,
-    center_x: f32,
-    center_y: f32,
-    multiple_range_factor: i8, // 1, 2, 3...
-    triangle_base_width: i8, // B
-    triangle_height: i8,
-    check_terrain: bool,
-  ) -> Vec<(f32, f32)> {
-    let prev_x_edge: i8 = (multiple_range_factor - 1) * triangle_base_width;
-    let curr_x_edge: i8 = multiple_range_factor * triangle_base_width;
+    center_x: i16,
+    center_y: i16,
+    multiple_range_factor: i16, // 1, 2, 3...
+    triangle_base_width: i16, // B
+    triangle_height: i16,
+    all_results: &Vec<(i16, i16)>
+  ) -> Vec<(i16, i16)> {
+    let prev_x_edge: i16 = (multiple_range_factor - 1) * triangle_base_width;
+    let curr_x_edge: i16 = multiple_range_factor * triangle_base_width;
+    // this method assume that (center_x, center_y) is already checked
+    let mut state: i16 = 0;
+    let mut offset_y: i16 = -multiple_range_factor * triangle_height;
+    let mut offset_x: i16 = if multiple_range_factor % 2 == 0 { triangle_base_width / 2 } else { 0 };
+    let mut mod_offset_x: i16 = triangle_base_width;
+    let mut mod_offset_y: i16 = 0;
 
-    let mut state: u8 = 0;
-    let mut offset_y: i8 = -multiple_range_factor * triangle_height;
-    let mut offset_x: i8 = if multiple_range_factor % 2 == 0 { triangle_base_width / 2 } else { 0 };
-    let mut mod_offset_x: i8 = triangle_base_width;
-    let mut mod_offset_y: i8 = 0;
+    let initial_point = (offset_x + center_x, offset_y + center_y);
+    let mut points: Vec<(i16, i16)> = vec![];
 
-    let initial_point = (mod_offset_x, offset_y);
-    let mut points = vec![];
-    if check_terrain {
-      if PositionUtils::get_is_point_inside_polygon(initial_point) {
-        points.push(initial_point);
-      }
-    } else {
+    if !PositionUtils::get_is_point_inside_polygon(initial_point) {
       points.push(initial_point);
     }
 
@@ -98,58 +95,65 @@ y_bottom = prev_y_bottom + H ──── ╳_________________╳
       offset_x += mod_offset_x;
       offset_y += mod_offset_y;
       
-      let point: (i8, f32, f32) = (center_x + offset_x, center_y + offset_y);
+      let point: (i16, i16) = (center_x + offset_x, center_y + offset_y);
       // (id to compare, x, y)
-      if check_terrain {
-        if PositionUtils::get_is_point_inside_polygon(point) {
-          // TODO: check is not exists already in WHOLE positions array
+      if !PositionUtils::get_is_point_inside_polygon(point) {
+        let already_exists = all_results.iter().any(|(x, y)| point.0 == *x && point.1 == *y);
+        if !already_exists {
           points.push(point);
         }
-      } else {
-        // TODO: check is not exists already in WHOLE positions array
-        points.push(point);
       }
-
-      if state === 0 && offset_x == prev_x_edge {
+      log!("state: {}", state);
+      if state == 0 && offset_x >= prev_x_edge { // >= instead > to handle prev_x_edge = 0
         mod_offset_x = triangle_base_width / 2;
         mod_offset_y = triangle_height;
         state = 1;
+        log!("state 0 -> 1: mod_offset_x: {}, offset_x: {}", mod_offset_x, offset_x);
+        continue;
       }
 
-      if state === 1 && offset_x == curr_x_edge {
+      if state == 1 && offset_x >= curr_x_edge {
         mod_offset_x = -triangle_base_width / 2;
         state = 2;
+        log!("state 1 -> 2: mod_offset_x: {}, offset_x: {}", mod_offset_x, offset_x);
+        continue;
       }
 
-      if state == 2 && offset_x == prev_x_edge {
+      if state == 2 && offset_x <= prev_x_edge {
         mod_offset_x = -triangle_base_width;
         mod_offset_y = 0;
         state = 3;
+        log!("state 2 -> 3: mod_offset_x: {}, offset_x: {}", mod_offset_x, offset_x);
+        continue;
       }
 
-      if state == 3 && offset_x == -prev_x_edge {
+      if state == 3 && offset_x <= -prev_x_edge {
         mod_offset_x = -triangle_base_width / 2;
         mod_offset_y = -triangle_height;
-        state = 4
+        state = 4;
+        continue;
       }
 
-      if state == 4 && offset_x == -curr_x_edge {
+      if state == 4 && offset_x <= -curr_x_edge {
         mod_offset_x = triangle_base_width / 2;
         state = 5;
+        continue;
       }
 
 
-      if state == 5 && offset_x == -prev_x_edge {
-        mod_offset_x = -triangle_base_width;
+      if state == 5 && offset_x >= -prev_x_edge {
+        mod_offset_x = triangle_base_width;
         mod_offset_y = 0;
-        state = 6
+        state = 6;
+        continue;
       }
 
-      if state == 6 && offset_x == 0 {
+      if state == 6 && offset_x >= 0 {
         state = 7;
+        continue;
       }
     }
-    points.into_iter().map(|(x, y)| { (x as f32, y as f32) }).collect()
+    points
 
     // let mut result: Vec<(f32, f32)> = vec![];
     // let mut radius: f32 = initial_radius;
@@ -172,36 +176,37 @@ y_bottom = prev_y_bottom + H ──── ╳_________________╳
     // result
   }
   pub fn get_positions(needed_length: usize, x: f32, y: f32, item_size: f32, with_checking_terrain: bool) -> Vec<(f32, f32)> {
-    let mut multiple_radius: i8 = 1;
+    let mut multiple_radius: i16 = 1;
     let mut last_visited_result_point_index: usize = 0;
-    let mut results: Vec<(f32, f32)> = vec![];
+    let mut results: Vec<(i16, i16)> = vec![];
     // TODO: finish algorithm and test with UI, not by adding points to units (hard to detect error)
     while results.len() < needed_length {
       let (center_x, center_y) =
         if results.len() == 0 {
-          (x, y)
+          (x as i16, y as i16)
         } else {
           results[last_visited_result_point_index]
         };
       // NOTE: initial_radius is 0, so cannot divide by zero!
-      let positions = PositionUtils::get_positions_around(
+
+      let positions: Vec<(i16, i16)> = PositionUtils::get_positions_around(
         needed_length - results.len(),
         center_x,
         center_y,
         multiple_radius,
         10,
         8,
-        true,
+        &results,
       );
       results = [results, positions].concat();
-      if last_visited_result_point_index == results.len() - 1 {
+      if results.len() == 0 || last_visited_result_point_index == results.len() - 1 {
         last_visited_result_point_index = 0;
         multiple_radius += 1;
       } else {
         last_visited_result_point_index += 1;
       }
     };
-    results
+    results.into_iter().map(|(x, y)| (x as f32, y as f32)).collect()
   }
   // pub fn get_positions(length: usize, x: f32, y: f32, item_size: f32, with_checking_terrain: bool) -> Vec<(f32, f32)> {
   //   let mut result: Vec<(f32, f32)> = vec![];
