@@ -76,21 +76,27 @@ y_bottom = prev_y_bottom + H ──── ╳_________________╳
     all_results: &Vec<(i16, i16)>
   ) -> Vec<(i16, i16)> {
     let prev_x_edge: i16 = (multiple_range_factor - 1) * triangle_base_width;
-    let curr_x_edge: i16 = multiple_range_factor * triangle_base_width;
+    let curr_x_edge: i16 = prev_x_edge + (multiple_range_factor) * (triangle_base_width / 2);
+    // for radius 3 looks liek curr_x_edge should has + 25
+
+    // for radius 4, looks like curr_x_edge shoudl be + 50, 4 points on the left, and then 4 poitns goes down & left
     // this method assume that (center_x, center_y) is already checked
     let mut state: i16 = 0;
     let mut offset_y: i16 = -multiple_range_factor * triangle_height;
-    let mut offset_x: i16 = if multiple_range_factor % 2 == 0 { triangle_base_width / 2 } else { 0 };
+    let initial_offset_x: i16 = if multiple_range_factor % 2 == 1 { triangle_base_width / 2 } else { 0 };
+    let mut offset_x: i16 = 0; // initial_offset_x;
     let mut mod_offset_x: i16 = triangle_base_width;
     let mut mod_offset_y: i16 = 0;
 
-    let initial_point = (offset_x + center_x, offset_y + center_y);
+    // let initial_point = (offset_x + center_x, offset_y + center_y);
     let mut points: Vec<(i16, i16)> = vec![];
 
-    if !PositionUtils::get_is_point_inside_polygon(initial_point) {
-      points.push(initial_point);
-    }
-
+    // if !PositionUtils::get_is_point_inside_polygon(initial_point) {
+    //   points.push(initial_point);
+    // }
+    offset_x -= mod_offset_x;
+    offset_y -= mod_offset_y;
+    log!("prev_x_edge: {}, curr_x_edge: {}", prev_x_edge, curr_x_edge);
     while points.len() < needed_length && state != 7 {
       offset_x += mod_offset_x;
       offset_y += mod_offset_y;
@@ -103,40 +109,46 @@ y_bottom = prev_y_bottom + H ──── ╳_________________╳
           points.push(point);
         }
       }
+
+
       log!("state: {}", state);
       if state == 0 && offset_x >= prev_x_edge { // >= instead > to handle prev_x_edge = 0
         mod_offset_x = triangle_base_width / 2;
         mod_offset_y = triangle_height;
         state = 1;
-        log!("state 0 -> 1: mod_offset_x: {}, offset_x: {}", mod_offset_x, offset_x);
+        log!("state 0 -> 1: mod_offset_x: {}, offset_x: {}, mod_offset_y: {}, offset_y: {}", mod_offset_x, offset_x, mod_offset_y, offset_y);
         continue;
       }
 
       if state == 1 && offset_x >= curr_x_edge {
         mod_offset_x = -triangle_base_width / 2;
         state = 2;
-        log!("state 1 -> 2: mod_offset_x: {}, offset_x: {}", mod_offset_x, offset_x);
+        log!("state 1 -> 2: mod_offset_x: {}, offset_x: {}, mod_offset_y: {}, offset_y: {}", mod_offset_x, offset_x, mod_offset_y, offset_y);
         continue;
       }
 
       if state == 2 && offset_x <= prev_x_edge {
+      // if state == 2 && offset_x <= prev_x_edge + initial_offset_x {
         mod_offset_x = -triangle_base_width;
         mod_offset_y = 0;
         state = 3;
-        log!("state 2 -> 3: mod_offset_x: {}, offset_x: {}", mod_offset_x, offset_x);
+        log!("state 2 -> 3: mod_offset_x: {}, offset_x: {}, mod_offset_y: {}, offset_y: {}", mod_offset_x, offset_x, mod_offset_y, offset_y);
         continue;
       }
 
       if state == 3 && offset_x <= -prev_x_edge {
+      // if state == 3 && offset_x <= -(prev_x_edge + initial_offset_x) {
         mod_offset_x = -triangle_base_width / 2;
         mod_offset_y = -triangle_height;
         state = 4;
+        log!("state 3 -> 4: mod_offset_x: {}, offset_x: {}, mod_offset_y: {}, offset_y: {}", mod_offset_x, offset_x, mod_offset_y, offset_y);
         continue;
       }
 
       if state == 4 && offset_x <= -curr_x_edge {
         mod_offset_x = triangle_base_width / 2;
         state = 5;
+        log!("state 4 -> 5: mod_offset_x: {}, offset_x: {}, mod_offset_y: {}, offset_y: {}", mod_offset_x, offset_x, mod_offset_y, offset_y);
         continue;
       }
 
@@ -145,11 +157,13 @@ y_bottom = prev_y_bottom + H ──── ╳_________________╳
         mod_offset_x = triangle_base_width;
         mod_offset_y = 0;
         state = 6;
+        log!("state 5 -> 6: mod_offset_x: {}, offset_x: {}, mod_offset_y: {}, offset_y: {}", mod_offset_x, offset_x, mod_offset_y, offset_y);
         continue;
       }
 
       if state == 6 && offset_x >= 0 {
         state = 7;
+        log!("state 6 -> 7: mod_offset_x: {}, offset_x: {}, mod_offset_y: {}, offset_y: {}", mod_offset_x, offset_x, mod_offset_y, offset_y);
         continue;
       }
     }
@@ -176,17 +190,18 @@ y_bottom = prev_y_bottom + H ──── ╳_________________╳
     // result
   }
   pub fn get_positions(needed_length: usize, x: f32, y: f32, item_size: f32, with_checking_terrain: bool) -> Vec<(f32, f32)> {
-    let mut multiple_radius: i16 = 1;
+    let mut multiple_radius: i16 = 2;
     let mut last_visited_result_point_index: usize = 0;
     let mut results: Vec<(i16, i16)> = vec![];
     // TODO: finish algorithm and test with UI, not by adding points to units (hard to detect error)
     while results.len() < needed_length {
-      let (center_x, center_y) =
-        if results.len() == 0 {
-          (x as i16, y as i16)
-        } else {
-          results[last_visited_result_point_index]
-        };
+      let (center_x, center_y) = (x as i16, y as i16);
+      // let (center_x, center_y) =
+      //   if results.len() == 0 {
+      //     (x as i16, y as i16)
+      //   } else {
+      //     results[last_visited_result_point_index]
+      //   };
       // NOTE: initial_radius is 0, so cannot divide by zero!
 
       let positions: Vec<(i16, i16)> = PositionUtils::get_positions_around(
@@ -194,8 +209,8 @@ y_bottom = prev_y_bottom + H ──── ╳_________________╳
         center_x,
         center_y,
         multiple_radius,
-        10,
-        8,
+        50,
+        40,
         &results,
       );
       results = [results, positions].concat();
