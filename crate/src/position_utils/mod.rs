@@ -190,7 +190,7 @@ y_bottom = prev_y_bottom + H ──── ╳_________________╳
     // result
   }
   pub fn get_positions(needed_length: usize, x: f32, y: f32, item_size: f32, with_checking_terrain: bool) -> Vec<(f32, f32)> {
-    let mut multiple_radius: i16 = 2;
+    let mut multiple_radius: i16 = 1;
     let mut last_visited_result_point_index: usize = 0;
     let mut results: Vec<(i16, i16)> = vec![];
     // TODO: finish algorithm and test with UI, not by adding points to units (hard to detect error)
