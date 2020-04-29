@@ -37,6 +37,7 @@ const initializeMouseController = (
   const drawPaths = array => {
     let i = 0
     graph.clear()
+    graph.lineStyle(3, 0xffffff, 0.3)
     while (i < array.length) {
       if (array[i] < 0) {
         if (i !== 0) {

@@ -12,7 +12,7 @@ const STATE_GETUP: u8 = 3;
 const STATE_DIE: u8 = 0;
 
 const REPRESENTATION_LENGTH: usize = 7;
-const UNIT_MOVE_SPEED: f32 = 0.0; // 2.5;
+const UNIT_MOVE_SPEED: f32 = 2.5;
 
 pub struct Unit {
   pub id: f32,
