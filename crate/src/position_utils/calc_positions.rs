@@ -4,8 +4,8 @@ use super::basic_utils::{Point,Line,BasicUtils};
 use super::obstacles_lazy_statics::ObstaclesLazyStatics;
 
 const NUMBER_OF_PRECALCULATED_OFFSETS: usize = 4;
-const TRIANGLE_BASE_WIDTH: i16 = 110;
-const TRIANGLE_HEIGHT: i16 = 95;
+const TRIANGLE_BASE_WIDTH: i16 = 140;
+const TRIANGLE_HEIGHT: i16 = 113;
 const UNIT_COHERENCY: f32 = 50.0;
 
 type PositionPoint = (i16, i16);

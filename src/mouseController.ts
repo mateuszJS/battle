@@ -39,7 +39,7 @@ const initializeMouseController = (
     graph.clear()
     graph.lineStyle(3, 0xffffff, 0.3)
     while (i < array.length) {
-      if (array[i] < 0) {
+      if (array[i] === -1 || array[i] === -2) {
         if (i !== 0) {
           if (array[i] === -1) {
             graph.endFill()
