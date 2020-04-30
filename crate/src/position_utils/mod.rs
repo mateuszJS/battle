@@ -1,175 +1,34 @@
 pub mod obstacles_lazy_statics;
 mod basic_utils;
 mod track_utils;
+mod calc_positions;
 
 use crate::constants::MATH_PI;
 use crate::id_generator::IdGenerator;
 use basic_utils::{Point,Line,BasicUtils};
 use track_utils::TrackUtils;
 use obstacles_lazy_statics::ObstaclesLazyStatics;
+use calc_positions::CalcPositions;
+
+const MAX_NUMBER_OF_UNITS_IN_SQUAD: usize = 7;
 
 type PositionPoint = (i16, i16);
 
 pub struct PositionUtils {}
 
 impl PositionUtils {
-  fn get_is_point_inside_polygon((x, y): PositionPoint) -> bool {
-    let p1 = Point { id: 0, x: -1.0, y: -1.0 };
-    let p2 = Point { id: 0, x: x as f32, y: y as f32 };
-    let line_with_point = Line { p1: &p1, p2: &p2 };
-    let obstacles_lines = ObstaclesLazyStatics::get_obstacles_lines();
-    let mut number_of_intersections: usize = 0;
-    obstacles_lines.iter().for_each(|line| {
-      if BasicUtils::check_intersection(&line_with_point, line) {
-        number_of_intersections += 1;
-      }
-    });
-    number_of_intersections % 2 == 1
-  }
-
-/*
-        ¸          ┐
-      ¸/░\¸        │ 
-    ¸/░░░░░\¸      ├─ H
-  ¸/░░░░░░░░░\¸    │
-¸/░░░░░░░░░░░░░\¸  │
-─────────────────  ┘
-
-└────────┬────────┘
-         B
-
-initial_x is toggling, once it's 0, next time B/2, and again 0, and so on and on
-
-                                          B              B/2
-                                  ┌───────┴─────────┬─────┴─────┐
-                                  │                 │           │
-  y_top = prev_y_top - H ──────── ╳_________________╳           │ ─────┐
-                                                     \¸         │      │
-                              initial_x                \¸       │      │
-                                  ┊                      \¸     │      ├─ H
-                                  ┊                        \¸   │      │
-                                  ┊                          \¸ │      │
-    prev_y_top ───────── ╳________┊________╳                   ╳ ──────┘
-                       ¸/░\¸      ┊       ¸\¸                   \¸
-                     ¸/░░░░░\     ┊     ¸/   \¸                   \¸
-                   ¸/░░░░░░░░\¸   ┊   ¸/       \¸                   \¸
-                 ¸/░░░░░░░░░░░░\¸ ┊ ¸/           \¸                   \¸
-                /░░░░░░░░░░░░░░░░\┊/               \¸                   \¸
-     y:0 ───── ╳┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈ ╳ ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈╳ ───────── y:0      ╳
-               │¯\¸             ¸/┊\¸             ¸/¯│                 ¸/
-               │   \¸         ¸/  ┊  \¸         ¸/   │               ¸/
-               │     \¸     ¸/    ┊    \¸     ¸/     │             ¸/
-               │       \¸ ¸/      ┊      \¸ ¸/       │           ¸/
-prev_y_bottom ────────── ╳________┊________╳         │         ¸╳
-               │                  ┊                  │       ¸/
-               │                  ┊                  │     ¸/
-  prev_x_left ─┘                  ┊                  └── prev_x_right
-                                  x:0                  ¸/¯
-                                                     ¸/
-y_bottom = prev_y_bottom + H ──── ╳_________________╳
-*/
-  pub fn get_positions_around(
-    needed_length: usize,
-    center_x: i16,
-    center_y: i16,
-    multiple_range_factor: i16, // 1, 2, 3...
-    triangle_base_width: i16, // B
-    triangle_height: i16,
-    all_results: &Vec<PositionPoint>
-  ) -> Vec<PositionPoint> {
-    let curr_x_edge: i16 = multiple_range_factor * triangle_base_width;
-    let prev_x_edge: i16 = curr_x_edge / 2;
-    let initial_offset_x: i16 =
-      if multiple_range_factor % 2 == 1 {
-        -triangle_base_width / 2
-      } else {
-        -triangle_base_width
-      };
-    
-    let mut state: u8 = 0;
-    let mut offset_y: i16 = -multiple_range_factor * triangle_height;
-    let mut mod_offset_x: i16 = triangle_base_width;
-    let mut offset_x: i16 = initial_offset_x;
-    let mut mod_offset_y: i16 = 0;
-    let mut points: Vec<PositionPoint> = vec![];
-
-    while points.len() < needed_length {
-
-      offset_x += mod_offset_x;
-      offset_y += mod_offset_y;
-
-      let point: PositionPoint = (center_x + offset_x, center_y + offset_y);
-      if !PositionUtils::get_is_point_inside_polygon(point) && !all_results.contains(&point) {
-        points.push(point);
-      }
-
-      if state == 0 && offset_x == prev_x_edge {
-        mod_offset_x = triangle_base_width / 2;
-        mod_offset_y = triangle_height;
-        state = 1;
-        continue;
-      }
-
-      if state == 1 && offset_x == curr_x_edge {
-        mod_offset_x = -triangle_base_width / 2;
-        state = 2;
-        continue;
-      }
-
-      if state == 2 && offset_x == prev_x_edge {
-        mod_offset_x = -triangle_base_width;
-        mod_offset_y = 0;
-        state = 3;
-        continue;
-      }
-
-      if state == 3 && offset_x == -prev_x_edge {
-        mod_offset_x = -triangle_base_width / 2;
-        mod_offset_y = -triangle_height;
-        state = 4;
-        continue;
-      }
-
-      if state == 4 && offset_x == -curr_x_edge {
-        mod_offset_x = triangle_base_width / 2;
-        state = 5;
-        continue;
-      }
-
-      if state == 5 && offset_x == -prev_x_edge {
-        mod_offset_x = triangle_base_width;
-        mod_offset_y = 0;
-        state = 6;
-        // only when multiple_range_factor <= 2 (because then there is no point between
-        // last point and start point,so there is no iterator to go from state 6 -> 7)
-        if offset_x >= initial_offset_x {
-          break;
-        }
-        continue;
-      }
-
-      if state == 6 && offset_x == initial_offset_x {
-        break;
-      }
-    }
-
-    points
-  }
-  pub fn get_positions(needed_length: usize, x: f32, y: f32, item_size: f32, with_checking_terrain: bool) -> Vec<(f32, f32)> {
+  pub fn get_squads_positions(number_of_needed_position: usize, x: f32, y: f32) -> Vec<(f32, f32)> {
     let mut multiple_radius: i16 = 1;
     let mut last_visited_result_point_index: isize = -1;
     let mut results: Vec<PositionPoint> = vec![];
-    let triangle_base = (item_size as i16) + ((item_size as i16) % 2); // has to be even, because
-    // we are comparing triangle_base/2 with integers in PositionUtils::get_positions_around
-    let triangle_height = (item_size * 0.87) as i16;
 
     let initial_point = (x as i16, y as i16);
-    if !PositionUtils::get_is_point_inside_polygon(initial_point) {
+    if !CalcPositions::get_is_point_inside_polygon(initial_point) {
       results.push(initial_point);
       last_visited_result_point_index += 1;
     }
 
-    while results.len() < needed_length {
+    while results.len() < number_of_needed_position {
       let (center_x, center_y) =
         if results.len() == 0 {
           initial_point
@@ -177,18 +36,16 @@ y_bottom = prev_y_bottom + H ──── ╳_________________╳
           results[last_visited_result_point_index as usize]
         };
 
-      let positions: Vec<PositionPoint> = PositionUtils::get_positions_around(
-        needed_length - results.len(),
+      let positions: Vec<PositionPoint> = CalcPositions::get_hex_circle_position(
+        number_of_needed_position - results.len(),
         center_x,
         center_y,
         multiple_radius,
-        triangle_base,
-        triangle_height,
         &results,
       );
       results = [results, positions].concat();
 
-      if last_visited_result_point_index == results.len() as isize - 1  {
+      if last_visited_result_point_index == results.len() as isize - 1 {
         if last_visited_result_point_index != -1 {
           last_visited_result_point_index = 0;
         }
@@ -197,61 +54,24 @@ y_bottom = prev_y_bottom + H ──── ╳_________________╳
         last_visited_result_point_index += 1;
       }
     };
+
     results.into_iter().map(|(x, y)| (x as f32, y as f32)).collect()
   }
-  // pub fn get_positions(length: usize, x: f32, y: f32, item_size: f32, with_checking_terrain: bool) -> Vec<(f32, f32)> {
-  //   let mut result: Vec<(f32, f32)> = vec![];
-  //   let mut radius: f32 = 0.0;
-  //   let mut angle: f32 = 2.0 * MATH_PI + 1.0; // +1 just to make it bigger than 2 * PI
-  //   let mut angle_diff = 0.0;
-  //   let mut next_time_use_half_angle_diff: bool = false;
 
-  //   let mut i: usize = 0;
-  //   while i < length {
-  //     let x = angle.sin() * radius + x;
-  //     let y = -angle.cos() * radius + y;
-  //     if (next_time_use_half_angle_diff) {
-  //       angle += angle_diff / 2.0;
-  //     } else {
-  //       angle += angle_diff;
-  //     }
-  //     if angle > (2.0 * MATH_PI) - angle_diff {
-  //       angle = 0.0;
-  //       radius += item_size;
-  //       angle_diff = ((item_size / 2.0) / radius).asin() * 2.0;
-  //       next_time_use_half_angle_diff = false;
-  //     }
-  //     if !PositionUtils::get_is_point_inside_polygon(x, y) {
-  //       result.push((x, y));
-  //       i += 1;
-  //       next_time_use_half_angle_diff = false;
-  //     } else {
-  //       next_time_use_half_angle_diff = true;
-  //     }
-  //   };
-  //   log!("length: {}, result.len(): {}", length, result.len());
-  //   result
-  // }
+  pub fn get_units_in_squad_position(number_of_needed_position: usize) -> &'static Vec<(f32, f32)> {
+    lazy_static! {
+      static ref PRECALCULATED_POSITIONS: [Vec<(f32, f32)>; MAX_NUMBER_OF_UNITS_IN_SQUAD] = [
+        CalcPositions::calc_units_in_squad_position(1),
+        CalcPositions::calc_units_in_squad_position(2),
+        CalcPositions::calc_units_in_squad_position(3),
+        CalcPositions::calc_units_in_squad_position(4),
+        CalcPositions::calc_units_in_squad_position(5),
+        CalcPositions::calc_units_in_squad_position(6),
+        CalcPositions::calc_units_in_squad_position(7),
+      ];
+    };
 
-  pub fn get_circular_position(length: usize, x: f32, y: f32, item_size: f32) -> Vec<(f32, f32)> {
-    let mut result: Vec<(f32, f32)> = vec![(x, y)];
-    let mut radius: f32 = item_size;
-    let mut angle: f32 = 0.0;
-    let mut angle_diff = ((item_size / 2.0) / radius).asin() * 2.0;
-
-    (0..length - 1).for_each(|_| {
-      let x = angle.sin() * radius + x;
-      let y = -angle.cos() * radius + y;
-      angle += angle_diff;
-      if angle > (2.0 * MATH_PI) - angle_diff {
-        angle = 0.0;
-        radius += item_size;
-        angle_diff = ((item_size / 2.0) / radius).asin() * 2.0;
-      }
-      result.push((x, y));
-    });
-
-    result
+    &PRECALCULATED_POSITIONS[number_of_needed_position - 1]
   }
 
   pub fn get_track(

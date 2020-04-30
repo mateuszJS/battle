@@ -121,7 +121,7 @@ impl Faction {
   }
 
   pub fn move_squads(&mut self, squads_ids: Vec<f32>, target_x: f32, target_y: f32) {
-    let position = PositionUtils::get_positions(squads_ids.len(), target_x, target_y, 110.0, true);
+    let position = PositionUtils::get_squads_positions(squads_ids.len(), target_x, target_y);
     let mut index = 0;
     self.squads.iter_mut().for_each(|squad| {
       if squads_ids.contains(&squad.id) {

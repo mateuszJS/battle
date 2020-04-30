@@ -99,9 +99,6 @@ impl Unit {
   }
 
   fn update_run(&mut self, squad_shared_info: &SquadUnitShared) {
-    self.x += self.mod_x;
-    self.y += self.mod_y;
-
     if (self.x - self.target_x).hypot(self.y - self.target_y) < UNIT_MOVE_SPEED {
       if squad_shared_info.track.len() - 1 == self.track_index {
         self.change_state_to_idle();
@@ -109,6 +106,9 @@ impl Unit {
         self.track_index += 1;
         self.set_next_target(squad_shared_info);
       }
+    } else {
+      self.x += self.mod_x;
+      self.y += self.mod_y;
     }
   }
 

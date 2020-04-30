@@ -68,7 +68,7 @@ impl Squad {
   }
 
   fn recalculate_members_positions(&mut self) {
-    let positions_list = PositionUtils::get_circular_position(self.members.len(), 0.0, 0.0, 50.0);
+    let positions_list = PositionUtils::get_units_in_squad_position(self.members.len());
 
     positions_list
       .into_iter()
@@ -80,9 +80,6 @@ impl Squad {
   }
 
   pub fn add_target(&mut self, destination_x: f32, destination_y: f32) {
-    // let position = PositionUtils::get_positions(self.members.len(), target_x, target_y, 50.0);
-    // PositionUtils::get_graph(source_x, source_y, destination_x, destination_y);
-
     self.shared.track = PositionUtils::get_track(
       self.shared.center_point.0,
       self.shared.center_point.1,
@@ -90,16 +87,9 @@ impl Squad {
       destination_y,
     );
     let shared = &self.shared;
-
     self.members.iter_mut().for_each(|unit| {
       unit.change_state_to_run(shared)
     });
-    // let mut index = 0;
-    // self.members.iter_mut().for_each(|unit| {
-    //   let unit_target = position[index];
-    //   unit.change_state_to_run(unit_target.0, unit_target.1);
-    //   index += 1;
-    // })
   }
 
   pub fn remove_member(&mut self) {
