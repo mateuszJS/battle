@@ -22,12 +22,12 @@ impl BasicUtils {
 
   fn direction(a: &Point, b: &Point, c: &Point) -> u8 {
     let val: f32 = (b.y - a.y) * (c.x - b.x) - (b.x - a.x) * (c.y - b.y);
-    if val == 0.0 {
-      0 //colinear
-    } else if val < 0.0 {
+    if val < 0.0 {
       2 //anti-clockwise direction
-    } else {
+    } else if val > 0.0 {
       1 //clockwise direction
+    } else {
+      0
     }
   }
 
