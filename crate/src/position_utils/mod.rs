@@ -1,5 +1,5 @@
 pub mod obstacles_lazy_statics;
-mod basic_utils;
+pub mod basic_utils;
 mod track_utils;
 mod calc_positions;
 

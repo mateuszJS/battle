@@ -1,4 +1,4 @@
-use crate::constants::MATH_PI;
+use crate::constants::{MATH_PI,MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS};
 use crate::id_generator::IdGenerator;
 use crate::look_up_table::LookUpTable;
 use crate::squad::SquadUnitShared;
@@ -84,7 +84,16 @@ impl Unit {
     // 3. When unit by FLY state runs out of weapon range, and need to get closer, to use weapon again (not sure if then just 2. point is not enough)
 
     self.state = STATE_RUN;
-    self.track_index = 0;
+    
+    let distance_from_squad_center = (squad_shared_info.center_point.0 - self.x)
+      .hypot(squad_shared_info.center_point.1 - self.y);
+    log!("distance_from_squad_center: {}", distance_from_squad_center);
+    self.track_index =
+      if distance_from_squad_center > MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS {
+        0 // TODO: check if have free way to "1" point, if not, set 0, if has free way, set 1
+      } else {
+        1
+      };
     // TODO: add that offset only in some cases
     self.set_next_target(squad_shared_info);
   }
