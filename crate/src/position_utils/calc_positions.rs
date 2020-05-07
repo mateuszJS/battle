@@ -65,7 +65,7 @@ impl CalcPositions {
                 │         ╳________┊________╳         │         ¸╳        └── curr_x_edge
                 │                  ┊                  │       ¸/
                 │                  ┊                  │     ¸/
-    prev_x_edge ─┘                  ┊                  └── prev_x_edge
+   prev_x_edge ─┘                  ┊                  └── prev_x_edge
                                   x:0                   ¸/¯
                                                       ¸/
   ╳
