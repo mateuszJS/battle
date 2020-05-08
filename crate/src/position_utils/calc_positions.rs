@@ -1,7 +1,6 @@
-use crate::constants::MATH_PI;
-use crate::id_generator::IdGenerator;
-use super::basic_utils::{Point,Line,BasicUtils};
+use super::basic_utils::{BasicUtils, Line, Point};
 use super::obstacles_lazy_statics::ObstaclesLazyStatics;
+use crate::constants::MATH_PI;
 
 const NUMBER_OF_PRECALCULATED_OFFSETS: usize = 4;
 const TRIANGLE_BASE_WIDTH: i16 = 140;
@@ -13,9 +12,17 @@ type PositionPoint = (i16, i16);
 pub struct CalcPositions {}
 
 impl CalcPositions {
-  pub fn get_is_point_inside_polygon((x, y): (i16, i16)) -> bool {
-    let p1 = Point { id: 0, x: -1.0, y: -1.0 };
-    let p2 = Point { id: 0, x: x as f32, y: y as f32 };
+  pub fn get_is_point_inside_any_obstacle((x, y): (i16, i16)) -> bool {
+    let p1 = Point {
+      id: 0,
+      x: -1.0,
+      y: -1.0,
+    };
+    let p2 = Point {
+      id: 0,
+      x: x as f32,
+      y: y as f32,
+    };
     let line_with_point = Line { p1: &p1, p2: &p2 };
     let obstacles_lines = ObstaclesLazyStatics::get_obstacles_lines();
     let mut number_of_intersections: usize = 0;
@@ -29,9 +36,60 @@ impl CalcPositions {
     number_of_intersections % 2 == 1
   }
 
+  // https://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
+  fn shortest_distance_from_point_to_line(
+    p: (f32, f32),
+    l1: (f32, f32),
+    l2: (f32, f32),
+  ) -> (f32, (f32, f32)) {
+    let A = p.0 - l1.0;
+    let B = p.1 - l1.1;
+    let C = l2.0 - l1.0;
+    let D = l2.1 - l1.1;
+    let dot = A * C + B * D;
+    let len_sq = C * C + D * D;
+    let param = dot / len_sq; // doesn't handle cae when len_sq (line length) is 0
+    let mut xx = 0.0;
+    let mut yy = 0.0;
+    if param < 0.0 {
+      xx = l1.0;
+      yy = l1.1;
+    } else if param > 1.0 {
+      xx = l2.0;
+      yy = l2.1;
+    } else {
+      xx = l1.0 + param * C;
+      yy = l1.1 + param * D;
+    }
+    let dx = p.0 - xx;
+    let dy = p.1 - yy;
+
+    ((dx * dx + dy * dy).sqrt(), (xx, yy))
+  }
+
+  pub fn get_nearest_line((x, y): (f32, f32)) -> (f32, (f32, f32)) {
+    let mut min_distance: f32 = std::f32::MAX;
+    let obstacles_lines = ObstaclesLazyStatics::get_obstacles_lines();
+    let mut closest_point = (0.0, 0.0);
+
+    obstacles_lines.iter().for_each(|line| {
+      let (distance, point) = CalcPositions::shortest_distance_from_point_to_line(
+        (x, y),
+        (line.p1.x, line.p1.y),
+        (line.p2.x, line.p2.y),
+      );
+      if distance < min_distance {
+        min_distance = distance;
+        closest_point = point;
+      }
+    });
+
+    (min_distance, closest_point)
+  }
+
   /*
           ¸          ┐
-        ¸/░\¸        │ 
+        ¸/░\¸        │
       ¸/░░░░░\¸      ├─ H
     ¸/░░░░░░░░░\¸    │
   ¸/░░░░░░░░░░░░░\¸  │
@@ -81,13 +139,11 @@ impl CalcPositions {
   ) -> Vec<PositionPoint> {
     let curr_x_edge: i16 = multiple_range_factor * TRIANGLE_BASE_WIDTH;
     let prev_x_edge: i16 = curr_x_edge / 2;
-    let initial_offset_x: i16 =
-      if multiple_range_factor % 2 == 1 {
-        -TRIANGLE_BASE_WIDTH / 2
-      } else {
-        -TRIANGLE_BASE_WIDTH
-      };
-    
+    let initial_offset_x: i16 = if multiple_range_factor % 2 == 1 {
+      -TRIANGLE_BASE_WIDTH / 2
+    } else {
+      -TRIANGLE_BASE_WIDTH
+    };
     let mut state: u8 = 0;
     let mut offset_y: i16 = -multiple_range_factor * TRIANGLE_HEIGHT;
     let mut mod_offset_x: i16 = TRIANGLE_BASE_WIDTH;
@@ -96,14 +152,13 @@ impl CalcPositions {
     let mut points: Vec<PositionPoint> = vec![];
 
     while points.len() < number_of_needed_position {
-
       offset_x += mod_offset_x;
       offset_y += mod_offset_y;
 
       let point: PositionPoint = (center_x + offset_x, center_y + offset_y);
       if !all_results.contains(&point) {
         if check_with_terrain {
-          if !CalcPositions::get_is_point_inside_polygon(point)  {
+          if !CalcPositions::get_is_point_inside_any_obstacle(point) {
             points.push(point);
           }
         } else {
@@ -169,21 +224,47 @@ impl CalcPositions {
     center_x: i16,
     center_y: i16,
     multiple_range_factor: i16, // 1, 2, 3...
-    all_results: &Vec<PositionPoint>
+    all_results: &Vec<PositionPoint>,
   ) -> Vec<PositionPoint> {
-
     lazy_static! {
       static ref PRECALCULATED_OFFSETS: [Vec<PositionPoint>; NUMBER_OF_PRECALCULATED_OFFSETS] = {
         let empty_vector = vec![];
         [
-          CalcPositions::calculate_hex_circle_position(usize::max_value(), 0, 0, 1, &empty_vector, false),
-          CalcPositions::calculate_hex_circle_position(usize::max_value(), 0, 0, 2, &empty_vector, false),
-          CalcPositions::calculate_hex_circle_position(usize::max_value(), 0, 0, 3, &empty_vector, false),
-          CalcPositions::calculate_hex_circle_position(usize::max_value(), 0, 0, 4, &empty_vector, false),
+          CalcPositions::calculate_hex_circle_position(
+            usize::max_value(),
+            0,
+            0,
+            1,
+            &empty_vector,
+            false,
+          ),
+          CalcPositions::calculate_hex_circle_position(
+            usize::max_value(),
+            0,
+            0,
+            2,
+            &empty_vector,
+            false,
+          ),
+          CalcPositions::calculate_hex_circle_position(
+            usize::max_value(),
+            0,
+            0,
+            3,
+            &empty_vector,
+            false,
+          ),
+          CalcPositions::calculate_hex_circle_position(
+            usize::max_value(),
+            0,
+            0,
+            4,
+            &empty_vector,
+            false,
+          ),
         ]
       };
     };
-  
     if multiple_range_factor as usize <= NUMBER_OF_PRECALCULATED_OFFSETS {
       let calculated_offsets = &PRECALCULATED_OFFSETS[(multiple_range_factor - 1) as usize];
       let mut points = vec![];
@@ -195,7 +276,8 @@ impl CalcPositions {
           center_y + calculated_offsets[index].1,
         );
 
-        if !CalcPositions::get_is_point_inside_polygon(point) && !all_results.contains(&point) {
+        if !CalcPositions::get_is_point_inside_any_obstacle(point) && !all_results.contains(&point)
+        {
           points.push(point);
         }
         index += 1;
@@ -238,6 +320,9 @@ impl CalcPositions {
 
     let center_x: f32 = sum_x_positions / (number_of_needed_position as f32);
     let center_y: f32 = sum_y_positions / (number_of_needed_position as f32);
-    result.into_iter().map(|(x, y)| (x - center_x, y - center_y)).collect()
+    result
+      .into_iter()
+      .map(|(x, y)| (x - center_x, y - center_y))
+      .collect()
   }
 }

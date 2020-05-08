@@ -1,6 +1,6 @@
+use super::basic_utils::{BasicUtils, Line, Point};
 use crate::id_generator::IdGenerator;
 use std::collections::HashMap;
-use super::basic_utils::{Point,Line,BasicUtils};
 
 pub static OBSTACLES_LENGTH: [usize; 2] = [4, 5];
 
@@ -25,7 +25,7 @@ impl ObstaclesLazyStatics {
     ref_graph: &mut HashMap<u32, Vec<&'a Point>>,
     point_a: &'a Point,
     point_b: &'a Point,
-   ) {
+  ) {
     match ref_graph.get_mut(&point_a.id) {
       Some(connected_points_list) => {
         connected_points_list.push(point_b);
@@ -64,9 +64,9 @@ impl ObstaclesLazyStatics {
           .iter()
           .enumerate()
           .map(|(index, point)| {
-            let obstacle_last_point_index = obstacle_start_point_index + OBSTACLES_LENGTH[obstacle_index] - 1;
-            let connected_point_index =
-            if index == obstacle_last_point_index {
+            let obstacle_last_point_index =
+              obstacle_start_point_index + OBSTACLES_LENGTH[obstacle_index] - 1;
+            let connected_point_index = if index == obstacle_last_point_index {
               let prev_obstacle_start_point_index = obstacle_start_point_index;
               obstacle_start_point_index += OBSTACLES_LENGTH[obstacle_index];
               obstacle_index += 1;
@@ -124,11 +124,13 @@ impl ObstaclesLazyStatics {
               obstacle_a.iter().for_each(|point_a| {
                 obstacle_b.iter().for_each(|point_b| {
 
+                  // ------------START checking intersection-------------------
                   let new_line = Line {
                     p1: point_a,
                     p2: point_b,
                   };
                   let mut is_intersect = false;
+                  // this one can be slow, it's called once, jsut for lazy statics
                   obstacles_lines.iter().for_each(|obstacle_line| {
                     if obstacle_line.p1.id != point_a.id
                       && obstacle_line.p1.id != point_b.id
@@ -139,6 +141,7 @@ impl ObstaclesLazyStatics {
                       is_intersect = true;
                     };
                   });
+                  // ------------END checking intersection-------------------
 
                   if !is_intersect {
                     graph.get_mut(&point_a.id).unwrap().push(&point_b);

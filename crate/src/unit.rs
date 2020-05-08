@@ -1,6 +1,8 @@
-use crate::constants::{MATH_PI,MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS};
+use crate::constants::{MATH_PI, MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS};
 use crate::id_generator::IdGenerator;
 use crate::look_up_table::LookUpTable;
+use crate::position_utils::basic_utils::{BasicUtils, Line, Point};
+use crate::position_utils::obstacles_lazy_statics::ObstaclesLazyStatics;
 use crate::squad::SquadUnitShared;
 
 const STATE_ABILITY: u8 = 8;
@@ -77,23 +79,46 @@ impl Unit {
   }
 
   pub fn change_state_to_run(&mut self, squad_shared_info: &SquadUnitShared) {
-  // pub fn change_state_to_run(&mut self, target_x: f32, target_y: f32) {
+    // pub fn change_state_to_run(&mut self, target_x: f32, target_y: f32) {
     // when this method will be called
     // 1. When unit need to run by path described in squad, from point to point (some index would be necessary, to keep current point)
     // 2. When units in squad are too far from each other, and need to be closer, in the center on the squad
     // 3. When unit by FLY state runs out of weapon range, and need to get closer, to use weapon again (not sure if then just 2. point is not enough)
 
     self.state = STATE_RUN;
-    
-    let distance_from_squad_center = (squad_shared_info.center_point.0 - self.x)
-      .hypot(squad_shared_info.center_point.1 - self.y);
+
+    let distance_from_squad_center =
+      (squad_shared_info.center_point.0 - self.x).hypot(squad_shared_info.center_point.1 - self.y);
     log!("distance_from_squad_center: {}", distance_from_squad_center);
-    self.track_index =
-      if distance_from_squad_center > MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS {
-        0 // TODO: check if have free way to "1" point, if not, set 0, if has free way, set 1
-      } else {
-        1
+    self.track_index = if distance_from_squad_center > MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS {
+      let obstacles_lines = ObstaclesLazyStatics::get_obstacles_lines();
+      // ------------START checking intersection-------------------
+      let next_track_point = squad_shared_info.track[1];
+      let start_point = Point {
+        id: 0,
+        x: self.x,
+        y: self.y,
       };
+      let end_point = Point {
+        id: 0,
+        x: next_track_point.0,
+        y: next_track_point.1,
+      };
+      let line_to_next_track_point = Line {
+        p1: &start_point,
+        p2: &end_point,
+      };
+      let mut track_index = 1;
+      obstacles_lines.iter().for_each(|obstacle_line| {
+        if BasicUtils::check_intersection(&line_to_next_track_point, obstacle_line) {
+          track_index = 0;
+        };
+      });
+      track_index
+    // ------------END checking intersection-------------------
+    } else {
+      1
+    };
     // TODO: add that offset only in some cases
     self.set_next_target(squad_shared_info);
   }

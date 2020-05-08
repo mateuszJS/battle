@@ -1,7 +1,8 @@
 use crate::id_generator::IdGenerator;
+use crate::position_utils::calc_positions::CalcPositions;
+use crate::position_utils::PositionUtils;
 use crate::squad_types::{get_squad_details, SquadType};
 use crate::unit::Unit;
-use crate::position_utils::PositionUtils;
 
 pub struct SquadUnitShared {
   pub center_point: (f32, f32),
@@ -28,7 +29,7 @@ impl Squad {
       shared: SquadUnitShared {
         center_point: (0.0, 0.0),
         track: vec![],
-      }
+      },
     }
   }
 
@@ -80,6 +81,15 @@ impl Squad {
   }
 
   pub fn add_target(&mut self, destination_x: f32, destination_y: f32) {
+    let is_center_inside_obstacle =
+      CalcPositions::get_is_point_inside_any_obstacle((destination_x as i16, destination_y as i16));
+    if is_center_inside_obstacle {
+      // have to avoid squad center in a obstacle or in the boundaries of obstacle
+      let (distance, closest_point) =
+        CalcPositions::get_nearest_line((destination_x, destination_y));
+      // TODO: calc segment, from squad_center thought closest_point to outsite (like plus 5?)
+      // also handle case when distance is 0, then add 5, check if it's okay, if not, minsu 5, and this is have to be okay
+    }
     self.shared.track = PositionUtils::get_track(
       self.shared.center_point.0,
       self.shared.center_point.1,
@@ -87,9 +97,10 @@ impl Squad {
       destination_y,
     );
     let shared = &self.shared;
-    self.members.iter_mut().for_each(|unit| {
-      unit.change_state_to_run(shared)
-    });
+    self
+      .members
+      .iter_mut()
+      .for_each(|unit| unit.change_state_to_run(shared));
   }
 
   pub fn remove_member(&mut self) {

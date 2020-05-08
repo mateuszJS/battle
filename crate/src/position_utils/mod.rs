@@ -1,14 +1,14 @@
-pub mod obstacles_lazy_statics;
 pub mod basic_utils;
+pub mod calc_positions;
+pub mod obstacles_lazy_statics;
 mod track_utils;
-mod calc_positions;
 
 use crate::constants::MATH_PI;
 use crate::id_generator::IdGenerator;
-use basic_utils::{Point,Line,BasicUtils};
-use track_utils::TrackUtils;
-use obstacles_lazy_statics::ObstaclesLazyStatics;
+use basic_utils::{BasicUtils, Line, Point};
 use calc_positions::CalcPositions;
+use obstacles_lazy_statics::ObstaclesLazyStatics;
+use track_utils::TrackUtils;
 
 const MAX_NUMBER_OF_UNITS_IN_SQUAD: usize = 7;
 
@@ -23,18 +23,17 @@ impl PositionUtils {
     let mut results: Vec<PositionPoint> = vec![];
 
     let initial_point = (x as i16, y as i16);
-    if !CalcPositions::get_is_point_inside_polygon(initial_point) {
+    if !CalcPositions::get_is_point_inside_any_obstacle(initial_point) {
       results.push(initial_point);
       last_visited_result_point_index += 1;
     }
 
     while results.len() < number_of_needed_position {
-      let (center_x, center_y) =
-        if results.len() == 0 {
-          initial_point
-        } else {
-          results[last_visited_result_point_index as usize]
-        };
+      let (center_x, center_y) = if results.len() == 0 {
+        initial_point
+      } else {
+        results[last_visited_result_point_index as usize]
+      };
 
       let positions: Vec<PositionPoint> = CalcPositions::get_hex_circle_position(
         number_of_needed_position - results.len(),
@@ -53,9 +52,12 @@ impl PositionUtils {
       } else {
         last_visited_result_point_index += 1;
       }
-    };
+    }
 
-    results.into_iter().map(|(x, y)| (x as f32, y as f32)).collect()
+    results
+      .into_iter()
+      .map(|(x, y)| (x as f32, y as f32))
+      .collect()
   }
 
   pub fn get_units_in_squad_position(number_of_needed_position: usize) -> &'static Vec<(f32, f32)> {
