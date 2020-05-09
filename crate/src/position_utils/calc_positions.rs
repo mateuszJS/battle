@@ -36,56 +36,56 @@ impl CalcPositions {
     number_of_intersections % 2 == 1
   }
 
-  // https://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
-  fn shortest_distance_from_point_to_line(
-    p: (f32, f32),
-    l1: (f32, f32),
-    l2: (f32, f32),
-  ) -> (f32, (f32, f32)) {
-    let A = p.0 - l1.0;
-    let B = p.1 - l1.1;
-    let C = l2.0 - l1.0;
-    let D = l2.1 - l1.1;
-    let dot = A * C + B * D;
-    let len_sq = C * C + D * D;
-    let param = dot / len_sq; // doesn't handle cae when len_sq (line length) is 0
-    let mut xx = 0.0;
-    let mut yy = 0.0;
-    if param < 0.0 {
-      xx = l1.0;
-      yy = l1.1;
-    } else if param > 1.0 {
-      xx = l2.0;
-      yy = l2.1;
-    } else {
-      xx = l1.0 + param * C;
-      yy = l1.1 + param * D;
-    }
-    let dx = p.0 - xx;
-    let dy = p.1 - yy;
+  // // https://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
+  // fn shortest_distance_from_point_to_line(
+  //   p: (f32, f32),
+  //   l1: (f32, f32),
+  //   l2: (f32, f32),
+  // ) -> (f32, (f32, f32)) {
+  //   let A = p.0 - l1.0;
+  //   let B = p.1 - l1.1;
+  //   let C = l2.0 - l1.0;
+  //   let D = l2.1 - l1.1;
+  //   let dot = A * C + B * D;
+  //   let len_sq = C * C + D * D;
+  //   let param = dot / len_sq; // doesn't handle cae when len_sq (line length) is 0
+  //   let mut xx = 0.0;
+  //   let mut yy = 0.0;
+  //   if param < 0.0 {
+  //     xx = l1.0;
+  //     yy = l1.1;
+  //   } else if param > 1.0 {
+  //     xx = l2.0;
+  //     yy = l2.1;
+  //   } else {
+  //     xx = l1.0 + param * C;
+  //     yy = l1.1 + param * D;
+  //   }
+  //   let dx = p.0 - xx;
+  //   let dy = p.1 - yy;
 
-    ((dx * dx + dy * dy).sqrt(), (xx, yy))
-  }
+  //   ((dx * dx + dy * dy).sqrt(), (xx, yy))
+  // }
 
-  pub fn get_nearest_line((x, y): (f32, f32)) -> (f32, (f32, f32)) {
-    let mut min_distance: f32 = std::f32::MAX;
-    let obstacles_lines = ObstaclesLazyStatics::get_obstacles_lines();
-    let mut closest_point = (0.0, 0.0);
+  // pub fn get_nearest_line((x, y): (f32, f32)) -> (f32, (f32, f32)) {
+  //   let mut min_distance: f32 = std::f32::MAX;
+  //   let obstacles_lines = ObstaclesLazyStatics::get_obstacles_lines();
+  //   let mut closest_point = (0.0, 0.0);
 
-    obstacles_lines.iter().for_each(|line| {
-      let (distance, point) = CalcPositions::shortest_distance_from_point_to_line(
-        (x, y),
-        (line.p1.x, line.p1.y),
-        (line.p2.x, line.p2.y),
-      );
-      if distance < min_distance {
-        min_distance = distance;
-        closest_point = point;
-      }
-    });
+  //   obstacles_lines.iter().for_each(|line| {
+  //     let (distance, point) = CalcPositions::shortest_distance_from_point_to_line(
+  //       (x, y),
+  //       (line.p1.x, line.p1.y),
+  //       (line.p2.x, line.p2.y),
+  //     );
+  //     if distance < min_distance {
+  //       min_distance = distance;
+  //       closest_point = point;
+  //     }
+  //   });
 
-    (min_distance, closest_point)
-  }
+  //   (min_distance, closest_point)
+  // }
 
   /*
           ¸          ┐

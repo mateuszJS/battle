@@ -3,6 +3,7 @@ use crate::position_utils::calc_positions::CalcPositions;
 use crate::position_utils::PositionUtils;
 use crate::squad_types::{get_squad_details, SquadType};
 use crate::unit::Unit;
+use crate::constants::{MATH_PI,NORMAL_SQUAD_SPREAD_FROM_CENTER_RADIUS};
 
 pub struct SquadUnitShared {
   pub center_point: (f32, f32),
@@ -81,21 +82,43 @@ impl Squad {
   }
 
   pub fn add_target(&mut self, destination_x: f32, destination_y: f32) {
-    let is_center_inside_obstacle =
-      CalcPositions::get_is_point_inside_any_obstacle((destination_x as i16, destination_y as i16));
-    if is_center_inside_obstacle {
-      // have to avoid squad center in a obstacle or in the boundaries of obstacle
-      let (distance, closest_point) =
-        CalcPositions::get_nearest_line((destination_x, destination_y));
-      // TODO: calc segment, from squad_center thought closest_point to outsite (like plus 5?)
-      // also handle case when distance is 0, then add 5, check if it's okay, if not, minsu 5, and this is have to be okay
-    }
-    self.shared.track = PositionUtils::get_track(
+    // let is_center_inside_obstacle =
+    //   CalcPositions::get_is_point_inside_any_obstacle((destination_x as i16, destination_y as i16));
+    // if is_center_inside_obstacle {
+    //   // have to avoid squad center in a obstacle or in the boundaries of obstacle
+    //   let (distance, closest_point) =
+    //     CalcPositions::get_nearest_line((destination_x, destination_y));
+    //   // TODO: calc segment, from squad_center thought closest_point to outsite (like plus 5?)
+    //   // also handle case when distance is 0, then add 5, check if it's okay, if not, minsu 5, and this is have to be okay
+    // }
+    let raw_track = PositionUtils::get_track(
       self.shared.center_point.0,
       self.shared.center_point.1,
       destination_x,
       destination_y,
     );
+    let last_index = raw_track.len() - 1;
+    self.shared.track = raw_track.iter().enumerate().map(|(index, (x, y))| {
+      if index == 0 || index == last_index {
+        (*x, *y)
+      } else {
+        let previous_point = raw_track[index - 1];
+        let next_point = raw_track[index + 1];
+
+        // https://rosettacode.org/wiki/Averages/Mean_angle#Rust
+        let from_previous_point_angle = (previous_point.0 - x).atan2(y - previous_point.1);
+        let from_next_point_angle = (next_point.0 - x).atan2(y - next_point.1);
+        let sin_mean = (from_previous_point_angle.sin() + from_next_point_angle.sin()) / 2.0;
+        let cos_mean = (from_previous_point_angle.cos() + from_next_point_angle.cos()) / 2.0;
+        let mean_angle = sin_mean.atan2(cos_mean) + MATH_PI;
+
+        (
+          mean_angle.sin() * NORMAL_SQUAD_SPREAD_FROM_CENTER_RADIUS + x,
+          -mean_angle.cos() * NORMAL_SQUAD_SPREAD_FROM_CENTER_RADIUS + y,
+        )
+      }
+    }).collect();
+    
     let shared = &self.shared;
     self
       .members

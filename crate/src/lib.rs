@@ -36,6 +36,7 @@ pub struct Universe {
 #[wasm_bindgen]
 impl Universe {
   pub fn new(faction_ids: Vec<f32>) -> Universe {
+    // log!("rust atan2: {}", (10.0 - 2.0 as f32).atan2(10.0 - 2.0));
     let angle_diff: f32 = MATH_PI / faction_ids.len() as f32;
     // QUESTION:
     // do you think it's better to always add specific type?
