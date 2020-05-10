@@ -102,13 +102,19 @@ impl PositionUtils {
         let previous_point = result[index - 1];
         let next_point = result[index + 1];
 
-        let from_previous_point_angle = (previous_point.x - point.x).atan2(point.y - previous_point.y);
-        let from_next_point_angle = (next_point.x - point.x).atan2(point.y - next_point.y);
+        let mut to_previous_point_angle = (point.x - previous_point.x).atan2(previous_point.y - point.y);
+        let mut to_next_point_angle = (point.x - next_point.x).atan2(next_point.y - point.y);
+
+        if (to_previous_point_angle - to_next_point_angle) % MATH_PI == 0.0 {
+          // (point.x, point.y)
+          // to_previous_point_angle = to_next_point_angle;
+          // to_next_point_angle = to_previous_point_angle;
+        }
 
         // https://rosettacode.org/wiki/Averages/Mean_angle#Rust
-        let sin_mean = (from_previous_point_angle.sin() + from_next_point_angle.sin()) / 2.0;
-        let cos_mean = (from_previous_point_angle.cos() + from_next_point_angle.cos()) / 2.0;
-        let mean_angle = sin_mean.atan2(cos_mean) + MATH_PI;
+        let sin_mean = (to_previous_point_angle.sin() + to_next_point_angle.sin()) / 2.0;
+        let cos_mean = (to_previous_point_angle.cos() + to_next_point_angle.cos()) / 2.0;
+        let mean_angle = sin_mean.atan2(cos_mean);
 
         (
           mean_angle.sin() * NORMAL_SQUAD_RADIUS + point.x,
