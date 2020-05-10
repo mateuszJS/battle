@@ -44,7 +44,7 @@ impl PositionUtils {
       );
       results = [results, positions].concat();
 
-      if last_visited_result_point_index == results.len() as isize - 1 {
+      if last_visited_result_point_index == (results.len() as isize) - 1 {
         if last_visited_result_point_index != -1 {
           last_visited_result_point_index = 0;
         }

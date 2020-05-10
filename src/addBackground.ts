@@ -1,3 +1,5 @@
+import { MAP_WIDTH, MAP_HEIGHT } from 'Consts'
+
 const addBackground = () => {
   window.mapWidth = Math.floor(window.innerWidth / 50) * 50 * 3
   window.mapHeight = Math.floor(window.innerHeight / 50) * 50 * 3
@@ -52,6 +54,8 @@ const addBackground = () => {
   window.app.renderer.render(map, renderTexture)
 
   const mapSprite = new PIXI.Sprite(renderTexture)
+  mapSprite.width = MAP_WIDTH
+  mapSprite.height = MAP_HEIGHT
   return mapSprite
   // map.destroy(true);
 }

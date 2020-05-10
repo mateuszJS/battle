@@ -3,7 +3,7 @@ use crate::position_utils::calc_positions::CalcPositions;
 use crate::position_utils::PositionUtils;
 use crate::squad_types::{get_squad_details, SquadType};
 use crate::unit::Unit;
-use crate::constants::{MATH_PI,NORMAL_SQUAD_SPREAD_FROM_CENTER_RADIUS};
+use crate::constants::{MATH_PI,NORMAL_SQUAD_RADIUS};
 
 pub struct SquadUnitShared {
   pub center_point: (f32, f32),
@@ -113,8 +113,8 @@ impl Squad {
         let mean_angle = sin_mean.atan2(cos_mean) + MATH_PI;
 
         (
-          mean_angle.sin() * NORMAL_SQUAD_SPREAD_FROM_CENTER_RADIUS + x,
-          -mean_angle.cos() * NORMAL_SQUAD_SPREAD_FROM_CENTER_RADIUS + y,
+          mean_angle.sin() * NORMAL_SQUAD_RADIUS + x,
+          -mean_angle.cos() * NORMAL_SQUAD_RADIUS + y,
         )
       }
     }).collect();

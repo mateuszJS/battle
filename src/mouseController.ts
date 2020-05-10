@@ -1,3 +1,13 @@
+import Utils from 'Utils'
+import {
+  MIN_CAMERA_X,
+  MAX_CAMERA_X,
+  MIN_CAMERA_Y,
+  MAX_CAMERA_Y,
+  MAX_CAMERA_MOVE_SPEED,
+  START_MOVING_CAMERA_BOUNDARY,
+} from 'Consts'
+
 import Unit from './representation/Unit'
 import { Universe } from '../crate/pkg/index'
 import { UniverseRepresentation } from './setup'
@@ -12,6 +22,12 @@ const initializeMouseController = (
 ) => {
   let selectedUnits = []
   let selectedSquads = []
+  let modX = 0
+  let modY = 0
+  let sceneX = 0
+  let sceneY = 0
+  let mouseX = 0
+  let mouseY = 0
 
   let startPoint = null
   const selectionRectangle = new PIXI.Graphics()
@@ -279,19 +295,22 @@ const initializeMouseController = (
     }
   }
 
-  const onMouseDown = (e: MouseEvent) => {
-    if (e.button === MOUSE_LEFT_BUTTON) {
+  const onMouseDown = ({ button: mouseButton }: MouseEvent) => {
+    const gameX = mouseX - sceneX
+    const gameY = mouseY - sceneY
+
+    if (mouseButton === MOUSE_LEFT_BUTTON) {
       selectedUnits.forEach(unit => unit.deselect())
       selectedUnits = []
       startPoint = {
-        x: e.clientX,
-        y: e.clientY,
+        x: gameX,
+        y: gameY,
       }
-    } else if (e.button === MOUSE_RIGHT_BUTTON) {
+    } else if (mouseButton === MOUSE_RIGHT_BUTTON) {
       const result = universe.move_units(
         Float32Array.from(selectedSquads),
-        e.clientX,
-        e.clientY,
+        gameX,
+        gameY,
       )
       graph.lineStyle(3, 0xffffff, 0.3)
       console.log({ result })
@@ -300,19 +319,20 @@ const initializeMouseController = (
     }
   }
 
-  const onMouseMove = (e: MouseEvent) => {
+  const updateSelection = () => {
     if (!startPoint) return
+
+    const gameX = mouseX - sceneX
+    const gameY = mouseY - sceneY
+
     selectedUnits.forEach(unit => unit.deselect())
     selectedUnits = []
 
-    const endX = e.clientX
-    const endY = e.clientY
-
     selectUnits(
-      Math.min(startPoint.x, endX),
-      Math.max(startPoint.x, endX),
-      Math.min(startPoint.y, endY),
-      Math.max(startPoint.y, endY),
+      Math.min(startPoint.x, gameX),
+      Math.max(startPoint.x, gameX),
+      Math.min(startPoint.y, gameY),
+      Math.max(startPoint.y, gameY),
     )
     selectionRectangle.clear()
     selectionRectangle.lineStyle(2, 0x00ff00, 1)
@@ -320,10 +340,46 @@ const initializeMouseController = (
     selectionRectangle.drawRect(
       startPoint.x,
       startPoint.y,
-      endX - startPoint.x,
-      endY - startPoint.y,
+      gameX - startPoint.x,
+      gameY - startPoint.y,
     )
     selectionRectangle.endFill()
+  }
+
+  const updateCameraMovement = () => {
+    modX = 0
+    modY = 0
+
+    if (mouseX < START_MOVING_CAMERA_BOUNDARY) {
+      modX =
+        ((START_MOVING_CAMERA_BOUNDARY - mouseX) /
+          START_MOVING_CAMERA_BOUNDARY) *
+        MAX_CAMERA_MOVE_SPEED
+    } else if (mouseX > window.innerWidth - START_MOVING_CAMERA_BOUNDARY) {
+      modX =
+        ((window.innerWidth - START_MOVING_CAMERA_BOUNDARY - mouseX) /
+          START_MOVING_CAMERA_BOUNDARY) *
+        MAX_CAMERA_MOVE_SPEED
+    }
+
+    if (mouseY < START_MOVING_CAMERA_BOUNDARY) {
+      modY =
+        ((START_MOVING_CAMERA_BOUNDARY - mouseY) /
+          START_MOVING_CAMERA_BOUNDARY) *
+        MAX_CAMERA_MOVE_SPEED
+    } else if (mouseY > window.innerHeight - START_MOVING_CAMERA_BOUNDARY) {
+      modY =
+        ((window.innerHeight - START_MOVING_CAMERA_BOUNDARY - mouseY) /
+          START_MOVING_CAMERA_BOUNDARY) *
+        MAX_CAMERA_MOVE_SPEED
+    }
+  }
+
+  const onMouseMove = (event: MouseEvent) => {
+    mouseX = event.clientX
+    mouseY = event.clientY
+    updateCameraMovement()
+    updateSelection()
   }
 
   const onMouseUp = () => {
@@ -339,9 +395,27 @@ const initializeMouseController = (
     startPoint = null
   }
 
+  const onMouseLeave = () => {
+    modX = 0
+    modY = 0
+  }
+
+  const updateScenePosition = () => {
+    sceneX = Utils.clamp(MIN_CAMERA_X, sceneX + modX, MAX_CAMERA_X)
+    sceneY = Utils.clamp(MIN_CAMERA_Y, sceneY + modY, MAX_CAMERA_Y)
+
+    window.app.stage.x = sceneX
+    window.app.stage.y = sceneY
+
+    updateSelection()
+  }
+
   window.app.view.addEventListener('mousedown', onMouseDown)
   window.app.view.addEventListener('mouseup', onMouseUp)
   window.app.view.addEventListener('mousemove', onMouseMove)
+  window.app.view.addEventListener('mouseleave', onMouseLeave)
+
+  return updateScenePosition
 }
 
 export default initializeMouseController

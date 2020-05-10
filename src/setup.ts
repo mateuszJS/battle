@@ -125,9 +125,17 @@ const setup = () => {
 
   document.getElementById('shop-list').appendChild(button)
 
-  initializeMouseController(universe, universeRepresentation)
+  const updateScenePosition = initializeMouseController(
+    universe,
+    universeRepresentation,
+  )
+
+  window.sceneX = 0
+  window.sceneY = 0
 
   window.app.ticker.add((delta: number) => {
+    updateScenePosition()
+
     universe.update()
     const [pointer, length] = universe.get_pointer()
     const universeData = new Float32Array(memory.buffer, pointer, length)
