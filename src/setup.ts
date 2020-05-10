@@ -125,7 +125,7 @@ const setup = () => {
 
   document.getElementById('shop-list').appendChild(button)
 
-  const updateScenePosition = initializeMouseController(
+  const mouseController = new initializeMouseController(
     universe,
     universeRepresentation,
   )
@@ -134,7 +134,7 @@ const setup = () => {
   window.sceneY = 0
 
   window.app.ticker.add((delta: number) => {
-    updateScenePosition()
+    mouseController.updateScenePosition()
 
     universe.update()
     const [pointer, length] = universe.get_pointer()

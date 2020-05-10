@@ -303,21 +303,21 @@ impl CalcPositions {
     let mut angle_diff: f32 = ((UNIT_COHERENCY / 2.0) / radius).asin() * 2.0;
 
     let (sum_x_positions, sum_y_positions) = (0..number_of_needed_position - 1)
-    .fold(
-      (0.0, 0.0), 
-      |(sum_x, sum_y), _| {
-        let x = angle.sin() * radius;
-        let y = -angle.cos() * radius;
-        angle += angle_diff;
-        if angle > (2.0 * MATH_PI) - angle_diff {
-          angle = 0.0;
-          radius += UNIT_COHERENCY;
-          angle_diff = ((UNIT_COHERENCY / 2.0) / radius).asin() * 2.0;
-        }
-        result.push((x, y));
-        (sum_x + x, sum_y + y)
-      },
-    );
+      .fold(
+        (0.0, 0.0), 
+        |(sum_x, sum_y), _| {
+          let x = angle.sin() * radius;
+          let y = -angle.cos() * radius;
+          angle += angle_diff;
+          if angle > (2.0 * MATH_PI) - angle_diff {
+            angle = 0.0;
+            radius += UNIT_COHERENCY;
+            angle_diff = ((UNIT_COHERENCY / 2.0) / radius).asin() * 2.0;
+          }
+          result.push((x, y));
+          (sum_x + x, sum_y + y)
+        },
+      );
 
     let center_x: f32 = sum_x_positions / (number_of_needed_position as f32);
     let center_y: f32 = sum_y_positions / (number_of_needed_position as f32);

@@ -3,12 +3,12 @@ pub mod calc_positions;
 pub mod obstacles_lazy_statics;
 mod track_utils;
 
-use crate::constants::MATH_PI;
 use crate::id_generator::IdGenerator;
 use basic_utils::{BasicUtils, Line, Point};
 use calc_positions::CalcPositions;
 use obstacles_lazy_statics::ObstaclesLazyStatics;
 use track_utils::TrackUtils;
+use crate::constants::{MATH_PI,NORMAL_SQUAD_RADIUS};
 
 const MAX_NUMBER_OF_UNITS_IN_SQUAD: usize = 7;
 
@@ -93,6 +93,28 @@ impl PositionUtils {
       y: destination_y,
     };
     let result = TrackUtils::calculate_track(&start_point, &end_point);
-    result.iter().map(|point| (point.x, point.y)).collect()
+
+    let last_index = result.len() - 1;
+    result.iter().enumerate().map(|(index, point)| {
+      if index == 0 || index == last_index {
+        (point.x, point.y)
+      } else {
+        let previous_point = result[index - 1];
+        let next_point = result[index + 1];
+
+        let from_previous_point_angle = (previous_point.x - point.x).atan2(point.y - previous_point.y);
+        let from_next_point_angle = (next_point.x - point.x).atan2(point.y - next_point.y);
+
+        // https://rosettacode.org/wiki/Averages/Mean_angle#Rust
+        let sin_mean = (from_previous_point_angle.sin() + from_next_point_angle.sin()) / 2.0;
+        let cos_mean = (from_previous_point_angle.cos() + from_next_point_angle.cos()) / 2.0;
+        let mean_angle = sin_mean.atan2(cos_mean) + MATH_PI;
+
+        (
+          mean_angle.sin() * NORMAL_SQUAD_RADIUS + point.x,
+          -mean_angle.cos() * NORMAL_SQUAD_RADIUS + point.y,
+        )
+      }
+    }).collect()
   }
 }
