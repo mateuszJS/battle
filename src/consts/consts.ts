@@ -22,6 +22,6 @@ export const MAX_CAMERA_MOVE_SPEED = 15
 export const MAX_CAMERA_X = 0
 export const MAX_CAMERA_Y = 0
 export const MIN_CAMERA_X = -(MAP_WIDTH - window.innerWidth)
-export const MIN_CAMERA_Y = -(MAP_HEIGHT - window.innerWidth)
+export const MIN_CAMERA_Y = -(MAP_HEIGHT - window.innerHeight)
 export const START_MOVING_CAMERA_BOUNDARY = 100
 export const HALF_UNIT_HEIGHT = 20
