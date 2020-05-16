@@ -41,6 +41,27 @@ const playersList = [
   6.0,
 ]
 
+// const players = [
+//   {
+//     id: 1,
+//     base: {
+//       x: 100,
+//       y: 100,
+//       angle: 2.25,
+//     },
+//   },
+//   {
+//     id: 2,
+//     base: {
+//       x: 1000,
+//       y: 1000,
+//       angle: 5.39,
+//     },
+//   },
+// ]
+
+// const obstacles = []
+
 const setup = () => {
   EffectsFactory.initialize()
   // const factionsCount = playersList.length

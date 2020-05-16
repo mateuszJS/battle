@@ -3,7 +3,6 @@ pub mod calc_positions;
 pub mod obstacles_lazy_statics;
 mod track_utils;
 
-use crate::id_generator::IdGenerator;
 use basic_utils::{BasicUtils, Line, Point};
 use calc_positions::CalcPositions;
 use obstacles_lazy_statics::ObstaclesLazyStatics;
@@ -83,12 +82,12 @@ impl PositionUtils {
     destination_y: f32,
   ) -> Vec<(f32, f32)> {
     let start_point = Point {
-      id: IdGenerator::generate_id() as u32,
+      id: 0,
       x: source_x,
       y: source_y,
     };
     let end_point = Point {
-      id: IdGenerator::generate_id() as u32,
+      id: 1,
       x: destination_x,
       y: destination_y,
     };

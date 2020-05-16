@@ -16,7 +16,7 @@ impl AStar {
     let mut high: usize = list.len();
 
     while low < high {
-      let mid: usize = (low + high) >> 1; // should be >>>
+      let mid: usize = (low + high) >> 1;
       if list[mid].heuristic > value {
         low = mid + 1;
       } else {

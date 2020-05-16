@@ -1,3 +1,6 @@
+// #![feature(test)]
+
+
 extern crate js_sys;
 extern crate wasm_bindgen;
 extern crate web_sys;
@@ -23,7 +26,11 @@ mod position_utils;
 use crate::constants::MATH_PI;
 use faction::Faction;
 use factory::Factory;
-use position_utils::obstacles_lazy_statics::{OBSTACLES_LENGTH, RAW_POINTS};
+use position_utils::obstacles_lazy_statics::{ObstaclesLazyStatics, OBSTACLES_LENGTH};
+use position_utils::PositionUtils;
+
+// use position_utils_tuple::obstacles_lazy_statics::ObstaclesLazyStaticsTuple;
+// use position_utils_tuple::PositionUtilsTuple;
 use wasm_bindgen::prelude::*;
 
 const INDEX_OF_USER_FACTION: usize = 0;
@@ -58,6 +65,21 @@ impl Universe {
       .enumerate()
       .map(get_faction)
       .collect();
+    ObstaclesLazyStatics::all_obstacles_points_handler(Some(
+      vec![
+        (600.0, 100.0),
+        (900.0, 100.0),
+        (900.0, 300.0),
+        (600.0, 300.0),
+        // end here
+        (700.0, 400.0),
+        (900.0, 400.0),
+        (900.0, 600.0),
+        (700.0, 600.0),
+        (600.0, 500.0),
+      ]
+    ));
+    log!("{:?}", ObstaclesLazyStatics::unwrap_all_points());
 
     Universe { factions }
   }
@@ -199,7 +221,7 @@ impl Universe {
 
     let mut obstacle_index = 0;
     let mut obstacle_start_point_index = 0;
-    let obstacle = RAW_POINTS
+    let obstacle = ObstaclesLazyStatics::unwrap_all_points()
       .iter()
       .enumerate()
       .flat_map(|(index, (x, y))| {
@@ -232,3 +254,79 @@ impl Universe {
   //     .collect()
   // }
 }
+
+
+
+
+// #[cfg(test)]
+// mod tests {
+//   use super::*;
+//   use test::Bencher;
+
+//   // #[test]
+//   // fn it_works() {
+//   //     assert_eq!(4, add_two(2));
+//   // }
+
+//   #[bench]
+//   fn bench_find_track_floats32(b: &mut Bencher) {
+//     ObstaclesLazyStatics::all_obstacles_points_handler(Some(
+//       vec![
+//         (600.0, 100.0),
+//         (900.0, 100.0),
+//         (900.0, 300.0),
+//         (600.0, 300.0),
+//         // end here
+//         (700.0, 400.0),
+//         (900.0, 400.0),
+//         (900.0, 600.0),
+//         (700.0, 600.0),
+//         (600.0, 500.0),
+//       ]
+//     ));
+
+//     PositionUtils::get_track(
+//       100.0,
+//       100.0,
+//       950.0,
+//       450.0,
+//     );
+    
+//     b.iter(|| {
+//       PositionUtils::get_track(
+//         100.0,
+//         100.0,
+//         950.0,
+//         450.0,
+//       );
+//     });
+//   }
+
+
+  // #[bench]
+  // fn bench_find_track_i16(b: &mut Bencher) {
+  //   ObstaclesLazyStaticsTuple::all_obstacles_points_handler(Some(
+  //     vec![
+  //       (600.0, 100.0),
+  //       (900.0, 100.0),
+  //       (900.0, 300.0),
+  //       (600.0, 300.0),
+  //       // end here
+  //       (700.0, 400.0),
+  //       (900.0, 400.0),
+  //       (900.0, 600.0),
+  //       (700.0, 600.0),
+  //       (600.0, 500.0),
+  //     ]
+  //   ));
+    
+  //   b.iter(|| {
+  //     PositionUtilsTuple::get_track(
+  //       100.0,
+  //       100.0,
+  //       950.0,
+  //       450.0,
+  //     );
+  //   });
+  // }
+// }
