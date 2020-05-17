@@ -3,23 +3,9 @@ use crate::id_generator::IdGenerator;
 use std::collections::HashMap;
 use std::sync::Mutex;
 
-pub static OBSTACLES_LENGTH: [usize; 2] = [4, 5];
-
-// pub static RAW_POINTS: [(f32, f32); 9] = [
-//   (600.0, 100.0),
-//   (900.0, 100.0),
-//   (900.0, 300.0),
-//   (600.0, 300.0),
-//   // end here
-//   (700.0, 400.0),
-//   (900.0, 400.0),
-//   (900.0, 600.0),
-//   (700.0, 600.0),
-//   (600.0, 500.0),
-//   // end here
-// ];
-
 pub struct ObstaclesLazyStatics {}
+
+type ObstaclesList = Vec<Vec<(f32, f32)>>;
 
 impl ObstaclesLazyStatics {
   fn insert_lines_to_graph<'a>(
@@ -37,9 +23,9 @@ impl ObstaclesLazyStatics {
     };
   }
 
-  pub fn all_obstacles_points_handler(option: Option<Vec<(f32, f32)>>) -> &'static Mutex<Vec<(f32, f32)>> {
+  pub fn get_obstacles_handler(option: Option<ObstaclesList>) -> &'static Mutex<ObstaclesList> {
     lazy_static! {
-      static ref ALL_OBSTACLES_POINTS: Mutex<Vec<(f32, f32)>> = {
+      static ref ALL_OBSTACLES_POINTS: Mutex<ObstaclesList> = {
         Mutex::new(vec![])
       };
     };
@@ -50,36 +36,39 @@ impl ObstaclesLazyStatics {
       }
       None => {}
     }
-    
-    // let list = vec![
-    //   (600.0, 100.0),
-    //   (900.0, 100.0),
-    //   (900.0, 300.0),
-    //   (600.0, 300.0),
-    //   // end here
-    //   (700.0, 400.0),
-    //   (900.0, 400.0),
-    //   (900.0, 600.0),
-    //   (700.0, 600.0),
-    //   (600.0, 500.0),
-    //   // end here
-    // ];
+
     &ALL_OBSTACLES_POINTS
   }
 
-  pub fn unwrap_all_points() -> &'static Vec<(f32, f32)>{
+  // pub fn unwrap_all_points() -> &'static ObstaclesList{
+  //   lazy_static! {
+  //     static ref UNWRAPPED_POINTS: ObstaclesList = {
+  //       ObstaclesLazyStatics::get_obstacles_handler(None).lock().unwrap().to_vec()
+  //     };
+  //   };
+  //   &UNWRAPPED_POINTS
+  // }
+
+  pub fn get_obstacles() -> &'static Vec<Vec<Point>> {
     lazy_static! {
-      static ref UNWRAPPED_POINTS: Vec<(f32, f32)> = {
-        ObstaclesLazyStatics::all_obstacles_points_handler(None).lock().unwrap().to_vec()
+      static ref OBSTACLES_POINTS: Vec<Point> = {
+        ObstaclesLazyStatics::get_obstacles_handler(None).lock().unwrap().to_vec()
+          .iter()
+          .map(|(x, y)| Point {
+            id: IdGenerator::generate_id() as u32,
+            x: *x,
+            y: *y,
+          })
+          .collect()
       };
     };
-    &UNWRAPPED_POINTS
+    &OBSTACLES_POINTS
   }
 
   pub fn get_obstacles_points() -> &'static Vec<Point> {
     lazy_static! {
       static ref OBSTACLES_POINTS: Vec<Point> = {
-        ObstaclesLazyStatics::unwrap_all_points()
+        ObstaclesLazyStatics::get_obstacles_handler(None).lock().unwrap().to_vec()
           .iter()
           .map(|(x, y)| Point {
             id: IdGenerator::generate_id() as u32,
@@ -148,7 +137,8 @@ impl ObstaclesLazyStatics {
           .enumerate()
           .for_each(|(index, point)| {
             grouped_obstacles_points[obstacle_index].push(point);
-            if index == obstacle_start_point_index + OBSTACLES_LENGTH[obstacle_index] - 1 {
+            let current_obstacle_last_index = obstacle_start_point_index + OBSTACLES_LENGTH[obstacle_index] - 1;
+            if index == current_obstacle_last_index {
               grouped_obstacles_points.push(vec![]);
               obstacle_start_point_index += OBSTACLES_LENGTH[obstacle_index];
               obstacle_index += 1;

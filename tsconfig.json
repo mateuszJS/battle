@@ -22,7 +22,11 @@
       "Consts": [
         "./src/consts/consts.ts"
       ]
-    }
+    },
+    "lib": [
+      "es2019",
+      "dom" // with that, window/document is undefined
+    ]
   },
   "include": [
     "src"

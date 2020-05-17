@@ -4,11 +4,6 @@ import { IIcon } from './modules/icons'
 import { WeaponName } from './weapons/WeaponTypes'
 import Factory from '~/representation/Factory'
 
-declare module '*!wasm' {
-  const _: string
-  export default _
-}
-
 declare global {
   interface Window {
     sceneX: number

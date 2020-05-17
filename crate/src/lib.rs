@@ -42,29 +42,42 @@ pub struct Universe {
 
 #[wasm_bindgen]
 impl Universe {
-  pub fn new(faction_ids: Vec<f32>) -> Universe {
-    // log!("rust atan2: {}", (10.0 - 2.0 as f32).atan2(10.0 - 2.0));
-    let angle_diff: f32 = MATH_PI / faction_ids.len() as f32;
-    // QUESTION:
-    // do you think it's better to always add specific type?
-    // I mean that I could also do it ^ like:
-    // let angle_diff = MATH_PI / faction_ids.len() as f32;
+  pub fn new(factions_data: Vec<f32>, obstacles_data: Vec<f32>) -> Universe {
+    let mut factions: Vec<Faction> = vec![];
 
-    let get_faction = |(index, faction_id)| {
-      Faction::new(
-        faction_id,
-        (index as f32) * 100.0 + 200.0,
-        (index as f32) * 100.0 + 200.0,
-        (index as f32) * angle_diff + MATH_PI,
-        index == INDEX_OF_USER_FACTION,
-      )
+    let mut i = 0;
+    while i < factions_data.len() {
+      factions.push(
+        Faction::new(
+          factions_data[i],
+          factions_data[i + 1],
+          factions_data[i + 2],
+          factions_data[i + 3],
+          i == 0,
+        )
+      );
+      i += 4;
     };
 
-    let factions = faction_ids
-      .into_iter()
-      .enumerate()
-      .map(get_faction)
-      .collect();
+    let obstacles_input = vec![];
+    i = 0;
+    while i < obstacles_data.len() {
+      let cell_data = obstacles_data[i];
+      if cell_data != -1 {
+        factions.push(
+          Faction::new(
+            factions_data[i],
+            factions_data[i + 1],
+            factions_data[i + 2],
+            factions_data[i + 3],
+            i == 0,
+          )
+        );
+      } else {
+        i += 1;
+      }
+    };
+
     ObstaclesLazyStatics::all_obstacles_points_handler(Some(
       vec![
         (600.0, 100.0),
@@ -79,7 +92,6 @@ impl Universe {
         (600.0, 500.0),
       ]
     ));
-    log!("{:?}", ObstaclesLazyStatics::unwrap_all_points());
 
     Universe { factions }
   }
@@ -200,10 +212,8 @@ impl Universe {
       .flat_map(|array| array.into_iter())
       .collect();
     let summary = [&x[..], &selected_squads_ids[..]].concat();
-    // x.extend(&selected_squads_ids);
-    // x.extend(selected_squads_ids.iter().cloned());
+
     unsafe {
-      log!("{:?}", summary);
       // read weird data on the beginning with "view", garbage collector?
       js_sys::Float32Array::from(&summary[..])
     }

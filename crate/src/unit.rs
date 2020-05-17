@@ -89,7 +89,6 @@ impl Unit {
 
     let distance_from_squad_center =
       (squad_shared_info.center_point.0 - self.x).hypot(squad_shared_info.center_point.1 - self.y);
-    log!("distance_from_squad_center: {}", distance_from_squad_center);
     self.track_index = if distance_from_squad_center > MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS {
       let obstacles_lines = ObstaclesLazyStatics::get_obstacles_lines();
       // ------------START checking intersection-------------------

@@ -18,6 +18,7 @@ import { Universe } from '../crate/pkg/index'
 
 import Factory from '~/representation/Factory'
 import initializeMouseController from './mouseController'
+import getSerializedInfoAboutWorld from './getSerializedInfoAboutWorld'
 
 export type UniverseRepresentation = {
   [id: number]: Factory | Unit
@@ -29,37 +30,6 @@ const mapIconToRepresentationType = (icon: 'solider') => {
       return 2
   }
 }
-
-// eslint-disable-next-line prettier/prettier
-const playersList = [
-  1.0,
-  2.0,
-  3.0,
-  4.0,
-  5.0,
-  6.0,
-]
-
-// const players = [
-//   {
-//     id: 1,
-//     base: {
-//       x: 100,
-//       y: 100,
-//       angle: 2.25,
-//     },
-//   },
-//   {
-//     id: 2,
-//     base: {
-//       x: 1000,
-//       y: 1000,
-//       angle: 5.39,
-//     },
-//   },
-// ]
-
-// const obstacles = []
 
 const setup = () => {
   EffectsFactory.initialize()
@@ -121,7 +91,11 @@ const setup = () => {
   // }
   const universeRepresentation: UniverseRepresentation = {}
 
-  const universe = Universe.new(new Float32Array(playersList))
+  const serializedInfoAboutWorld = getSerializedInfoAboutWorld()
+  const universe = Universe.new(
+    serializedInfoAboutWorld.factions,
+    serializedInfoAboutWorld.obstacles,
+  )
   const factoriesInitData = universe.get_factories_init_data()
 
   for (let i = 0; i < factoriesInitData.length; i += 5) {
