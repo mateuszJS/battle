@@ -10,7 +10,7 @@ class SelectionController {
   private universe: Universe
   private universeRepresentation: UniverseRepresentation
   private selectedUnits: Unit[]
-  private selectedSquads: number[]
+  private selectedSquads: Float32Array
 
   constructor(
     universe: Universe,
@@ -19,28 +19,29 @@ class SelectionController {
     this.universe = universe
     this.universeRepresentation = universeRepresentation
     this.selectedUnits = []
-    this.selectedSquads = []
+    this.selectedSquads = new Float32Array()
     this.startPoint = null
     this.selectionRectangle = new PIXI.Graphics()
     window.app.stage.addChild(this.selectionRectangle)
   }
 
   public consumeSelection({ x, y }: Point) {
-    const tracks: Float32Array = this.universe.move_units(
-      Float32Array.from(this.selectedSquads),
-      x,
-      y,
-    )
+    const tracks = this.universe.move_units(this.selectedSquads, x, y)
     tracksDebug(tracks)
   }
 
   private selectUnits(x1: number, x2: number, y1: number, y2: number) {
     const result = this.universe.get_selected_units_ids(x1, x2, y1, y2, true)
+    if (result.length === 1) {
+      this.selectedSquads = new Float32Array()
+      return
+    } // it's only divider "0"
     const indexOfDivider = result.indexOf(0)
-    this.selectedSquads = result.splice(indexOfDivider + 1)
-    result.pop()
+    const unitsIds = result.subarray(0, indexOfDivider)
+    const squadsIds = result.subarray(indexOfDivider + 1)
+    this.selectedSquads = squadsIds
 
-    result.forEach(id => {
+    unitsIds.forEach(id => {
       const unit = this.universeRepresentation[id] as Unit
       unit.select()
       this.selectedUnits.push(unit)

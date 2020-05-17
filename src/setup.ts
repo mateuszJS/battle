@@ -14,7 +14,6 @@ import getSortableLayer from '~/modules/getSortableLayer'
 import addBackground from './addBackground'
 import render from './render'
 
-import { memory } from '../crate/pkg/index_bg'
 import { Universe } from '../crate/pkg/index'
 
 import Factory from '~/representation/Factory'
@@ -158,8 +157,8 @@ const setup = () => {
     mouseController.updateScenePosition()
 
     universe.update()
-    const [pointer, length] = universe.get_pointer()
-    const universeData = new Float32Array(memory.buffer, pointer, length)
+    const universeData = universe.get_universe_data()
+    // const universeData = new Float32Array(memory.buffer, pointer, length)
 
     render(
       delta,

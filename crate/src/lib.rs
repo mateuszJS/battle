@@ -84,7 +84,7 @@ impl Universe {
     Universe { factions }
   }
 
-  pub fn get_factories_init_data(&self) -> js_sys::Array {
+  pub fn get_factories_init_data(&self) -> js_sys::Float32Array {
     // FYI:
     // this function runs only once, just to let for JS know about factory details
     // I did it here, because don't want to sent this data each update & render (those data won't change)
@@ -93,13 +93,15 @@ impl Universe {
       vec![faction.id, factory.id, factory.x, factory.y, factory.angle]
     };
 
-    self
+    let result: Vec<f32> = self
       .factions
       .iter()
       .flat_map(get_initial_factories_representation)
-      .into_iter()
-      .map(JsValue::from)
-      .collect()
+      .collect();
+    
+    unsafe {
+      js_sys::Float32Array::view(&result[..])
+    }
   }
 
   pub fn update(&mut self) {
@@ -118,7 +120,7 @@ impl Universe {
     })
   }
 
-  pub fn get_pointer(&self) -> js_sys::Array {
+  pub fn get_universe_data(&self) -> js_sys::Float32Array {
     // FYI:
     // this method is called every render, to get fresh "Universe representation" in Vec<f32>
     let universe_representation: Vec<f32> = self
@@ -126,21 +128,27 @@ impl Universe {
       .iter()
       .flat_map(|faction| faction.get_representation())
       .collect();
+    unsafe {
+      // it's unsafe bc doesn't make copy, read directly from memory
+      // https://rustwasm.github.io/wasm-bindgen/api/js_sys/struct.Float32Array.html#method.view
+      // to make copy, use "from" method
+      js_sys::Float32Array::view(&universe_representation[..])
+    }
 
-    let output_mem_localization = vec![
-      universe_representation.as_ptr() as usize as u32,
-      universe_representation.len() as u32,
-    ];
+    // let output_mem_localization = vec![
+    //   universe_representation.as_ptr() as usize as u32,
+    //   universe_representation.len() as u32,
+    // ];
     // 2.
     // QUESTION:
     // as you can see firstly I'm creating vector here output_mem_localization
     // can I omit it somehow? like with range I can do (0..5).map(JsValue::from).collect()
     // it that possible to create something similar here?
 
-    output_mem_localization
-      .into_iter()
-      .map(JsValue::from)
-      .collect()
+    // output_mem_localization
+    //   .into_iter()
+    //   .map(JsValue::from)
+    //   .collect()
     // FYI:
     // for the first sight you can think that what I'm making is not right, I'm passing array
     // with pointer and length related to another array?! I could as well pass that array directly
@@ -166,7 +174,7 @@ impl Universe {
     start_y: f32,
     end_y: f32,
     select_our: bool,
-  ) -> js_sys::Array {
+  ) -> js_sys::Float32Array {
     let mut selected_units_ids: Vec<Vec<f32>> = vec![];
     let mut selected_squads_ids: Vec<f32> = vec![0.0];
     self
@@ -191,10 +199,14 @@ impl Universe {
       .into_iter()
       .flat_map(|array| array.into_iter())
       .collect();
-    x.extend(&selected_squads_ids);
+    let summary = [&x[..], &selected_squads_ids[..]].concat();
+    // x.extend(&selected_squads_ids);
     // x.extend(selected_squads_ids.iter().cloned());
-
-    x.into_iter().map(JsValue::from).collect()
+    unsafe {
+      log!("{:?}", summary);
+      // read weird data on the beginning with "view", garbage collector?
+      js_sys::Float32Array::from(&summary[..])
+    }
   }
 
   pub fn move_units(
@@ -202,7 +214,7 @@ impl Universe {
     squads_ids: Vec<f32>,
     target_x: f32,
     target_y: f32,
-  ) -> js_sys::Array {
+  ) -> js_sys::Float32Array {
     self.factions[INDEX_OF_USER_FACTION].move_squads(squads_ids, target_x, target_y);
     let list_of_numbers: Vec<f32> = self.factions[INDEX_OF_USER_FACTION]
       .squads
@@ -236,8 +248,10 @@ impl Universe {
       .collect();
 
     let summary = [vec![-1.0], list_of_numbers, obstacle, vec![-2.0]].concat();
-
-    summary.into_iter().map(JsValue::from).collect()
+    unsafe {
+      js_sys::Float32Array::view(&summary[..])
+    }
+    // summary.into_iter().map(JsValue::from).collect()
     // TODO: iterate over all squads, and return their path_to_destination
     // Universe::get_graph_preview(x, y, target_x, target_y)
   }
