@@ -1,7 +1,7 @@
 import { HALF_UNIT_HEIGHT } from 'Consts'
 import { Universe } from '../../crate/pkg/index'
 import { UniverseRepresentation } from '../setup'
-import { tracksDebug } from './debug'
+import { tracksDebug } from '~/debug'
 import Unit from '~/representation/Unit'
 
 class SelectionController {

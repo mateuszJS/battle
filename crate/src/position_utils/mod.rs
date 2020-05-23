@@ -3,11 +3,10 @@ pub mod calc_positions;
 pub mod obstacles_lazy_statics;
 mod track_utils;
 
-use basic_utils::{BasicUtils, Line, Point};
+use crate::constants::{MATH_PI, NORMAL_SQUAD_RADIUS};
+use basic_utils::Point;
 use calc_positions::CalcPositions;
-use obstacles_lazy_statics::ObstaclesLazyStatics;
 use track_utils::TrackUtils;
-use crate::constants::{MATH_PI,NORMAL_SQUAD_RADIUS};
 
 const MAX_NUMBER_OF_UNITS_IN_SQUAD: usize = 7;
 
@@ -101,8 +100,8 @@ impl PositionUtils {
         let previous_point = result[index - 1];
         let next_point = result[index + 1];
 
-        let mut to_previous_point_angle = (point.x - previous_point.x).atan2(previous_point.y - point.y);
-        let mut to_next_point_angle = (point.x - next_point.x).atan2(next_point.y - point.y);
+        let to_previous_point_angle = (point.x - previous_point.x).atan2(previous_point.y - point.y);
+        let to_next_point_angle = (point.x - next_point.x).atan2(next_point.y - point.y);
 
         if (to_previous_point_angle - to_next_point_angle) % MATH_PI == 0.0 { // straight line
           // in this case it's impossible to figure out, on

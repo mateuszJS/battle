@@ -7,7 +7,6 @@ import EffectsFactory from '~/representation/EffectFactory'
 // import aiController from '~/ai/ai'
 // import Icons from '~/modules/icons'
 import getSortableLayer from '~/modules/getSortableLayer'
-
 // import createFactories from './createFactories'
 // import addProductionIcons from './addProductionIcons'
 // import createSmokeContainer from './createSmokeContainer'

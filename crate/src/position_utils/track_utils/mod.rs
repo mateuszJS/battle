@@ -11,7 +11,7 @@ impl TrackUtils {
   fn calc_complicated_track<'a>(
     start_point: &'a Point,
     end_point: &'a Point,
-    obstacles_points: &'static Vec<Point>,
+    obstacles_points: &'static Vec<&'static Point>,
     obstacles_lines: &'static Vec<Line<'static>>,
     permanent_connection_graph: &'static HashMap<u32, Vec<&'static Point>>,
   ) -> Vec<&'a Point> {
@@ -51,9 +51,7 @@ impl TrackUtils {
   }
 
   pub fn calculate_track<'a>(start_point: &'a Point, end_point: &'a Point) -> Vec<&'a Point> {
-    let obstacles_points = ObstaclesLazyStatics::get_obstacles_points();
     let obstacles_lines = ObstaclesLazyStatics::get_obstacles_lines();
-    let permanent_connection_graph = ObstaclesLazyStatics::get_permanent_connection_graph();
     // ------------START checking intersection-------------------
     let direct_connection_line = Line {
       p1: start_point,
@@ -66,16 +64,15 @@ impl TrackUtils {
       };
     });
     // ------------END checking intersection-------------------
-
     if is_possible_direct_connection {
       vec![start_point, end_point]
     } else {
       TrackUtils::calc_complicated_track(
         start_point,
         end_point,
-        obstacles_points,
+        ObstaclesLazyStatics::get_obstacles_points(),
         obstacles_lines,
-        permanent_connection_graph,
+        ObstaclesLazyStatics::get_permanent_connection_graph(),
       )
     }
   }

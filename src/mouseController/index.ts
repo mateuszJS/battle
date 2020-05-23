@@ -5,7 +5,7 @@ import { Universe } from '../../crate/pkg/index'
 import { UniverseRepresentation } from '../setup'
 import SelectionController from './SelectionController'
 import getCameraPositionModificators from './getCameraPositionModificators'
-import { anglesDebug } from './debug'
+import { anglesDebug } from '~/debug'
 
 const MOUSE_LEFT_BUTTON = 0
 const MOUSE_RIGHT_BUTTON = 2

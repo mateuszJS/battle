@@ -1,3 +1,4 @@
+#[derive(Clone)]
 pub struct Point {
   pub id: u32,
   pub x: f32,
