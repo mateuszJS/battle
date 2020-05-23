@@ -1,6 +1,6 @@
-// #![feature(test)]
-// extern crate test;
+#![feature(test)]
 extern crate js_sys;
+// extern crate test;
 extern crate wasm_bindgen;
 extern crate web_sys;
 
@@ -172,7 +172,7 @@ impl Universe {
     js_sys::Float32Array::from(&list_of_numbers[..])
   }
 }
-/*
+
 #[cfg(test)]
 mod tests {
   use super::*;
@@ -223,4 +223,3 @@ mod tests {
   //   });
   // }
 }
-*/
