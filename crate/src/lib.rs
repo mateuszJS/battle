@@ -19,7 +19,6 @@ mod id_generator;
 mod look_up_table;
 // public just to import it in bench
 pub mod position_utils;
-pub mod position_utils_line_tuple;
 mod squad;
 mod squad_types;
 mod unit;
