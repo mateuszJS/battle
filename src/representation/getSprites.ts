@@ -75,14 +75,14 @@ const getSprites = () => {
     movieClip.animationSpeed = 0.01
     movieClip.scale.set(0.7)
     movieClip.stop()
-    let phase = '0' // TODO: describe phase, or even better, create enum (or string better to include rotation)
+    let previousPhase = ''
 
     return {
       movieClip,
       goToIdle(angle: number) {
-        const correctPhase = `idle${Math.round(angle)}`
-        if (phase !== correctPhase) {
-          phase = correctPhase
+        const currentPhase = `idle${Math.round(angle * 100)}`
+        if (previousPhase !== currentPhase) {
+          previousPhase = currentPhase
           const indexOfStartingFrame = getIndexOfStartingFrame(
             angle,
             framesPeriods.IDLE,
@@ -91,9 +91,9 @@ const getSprites = () => {
         }
       },
       goToRun(angle: number) {
-        const correctPhase = `run${Math.round(angle)}`
-        if (phase !== correctPhase) {
-          phase = correctPhase
+        const currentPhase = `run${Math.round(angle * 100)}`
+        if (previousPhase !== currentPhase) {
+          previousPhase = currentPhase
           movieClip.animationSpeed = 0.4
           movieClip.onFrameChange = null
           movieClip.gotoAndStop(framesPeriods.RUN.first)
@@ -127,17 +127,17 @@ const getSprites = () => {
           currentFrame < framesPeriods.FLY.first ||
           currentFrame > framesPeriods.FLY.last
         ) {
-          phase = 'fly1' // TODO: use correct names, and assign to consts
+          previousPhase = 'fly_up'
           movieClip.animationSpeed = 0.3
           movieClip.gotoAndPlay(indexOfStartingFrame)
         } else if (
-          phase === 'fly1' &&
+          previousPhase === 'fly_up' &&
           currentFrame > indexOfStartingFrame + framesPeriods.FLY.length / 2 - 1
         ) {
-          phase = 'fly2'
+          previousPhase = 'fly_middle'
           movieClip.stop()
-        } else if (flyingProgress <= 4 && phase === 'fly2') {
-          phase = 'fly3'
+        } else if (flyingProgress <= 4 && previousPhase === 'fly_middle') {
+          previousPhase = 'fly_down'
           movieClip.play()
           movieClip.onFrameChange = getCallbackStopOnLastFrame(
             indexOfStartingFrame + framesPeriods.FLY.length - 1,
@@ -153,7 +153,7 @@ const getSprites = () => {
           indexOfStartingFrame +
           Math.floor(getUppingProgress * (framesPeriods.GETUP.length - 1))
         movieClip.gotoAndStop(indexOfCurrentFrame)
-        phase = 'getup'
+        previousPhase = 'getup'
       },
     }
   }
