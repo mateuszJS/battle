@@ -1,6 +1,6 @@
 /*
 to do bench you have to
-1. remove cdylib from crate-type (Cargo.toml) and use rlib
+1. remove cdylib from crate-type (Cargo.toml) and use rlib to link you lib.rs package
 2. install nightly to support test feature "rustup install nightly"
 3. set nightly as default compiler "rustup default nightly", to revert it use "rustup default stable"
 4. call "cargo bench"
