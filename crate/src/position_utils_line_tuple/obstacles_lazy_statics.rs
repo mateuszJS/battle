@@ -67,7 +67,7 @@ impl ObstaclesLazyStatics {
         ObstaclesLazyStatics::init_and_get_obstacles_handler(None)
           .lock()
           .unwrap()
-          .to_vec()
+          .to_vec() // TODO: consider to remove "Clone" trait form Point, and use reference, what will be faster
       };
     };
     &OBSTACLES_POINTS
@@ -98,10 +98,7 @@ impl ObstaclesLazyStatics {
               .enumerate()
               .map(|(index, point)| {
                 let next_point = &points_list[(index + 1) % points_list.len()];
-                Line {
-                  p1: point,
-                  p2: &next_point,
-                }
+                (point, next_point)
               })
               .collect()
           })
@@ -120,8 +117,8 @@ impl ObstaclesLazyStatics {
         let mut graph: HashMap<u32, Vec<&Point>> = HashMap::new();
 
         obstacles_lines.iter().for_each(|line| {
-          ObstaclesLazyStatics::insert_lines_to_graph(&mut graph, &line.p1, &line.p2);
-          ObstaclesLazyStatics::insert_lines_to_graph(&mut graph, &line.p2, &line.p1);
+          ObstaclesLazyStatics::insert_lines_to_graph(&mut graph, &line.0, &line.1);
+          ObstaclesLazyStatics::insert_lines_to_graph(&mut graph, &line.1, &line.0);
         });
 
         obstacles.iter().enumerate().for_each(|(index_a, obstacle_a)| {
@@ -132,17 +129,14 @@ impl ObstaclesLazyStatics {
               obstacle_b.iter().for_each(|point_b| {
 
                 // ------------START checking intersection-------------------
-                let new_line = Line {
-                  p1: point_a,
-                  p2: point_b,
-                };
+                let new_line = (point_a, point_b);
                 let mut is_intersect = false;
                 // this one can be slow, it's called once, jsut for lazy statics
                 obstacles_lines.iter().for_each(|obstacle_line| {
-                  if obstacle_line.p1.id != point_a.id
-                    && obstacle_line.p1.id != point_b.id
-                    && obstacle_line.p2.id != point_a.id
-                    && obstacle_line.p2.id != point_b.id
+                  if obstacle_line.0.id != point_a.id
+                    && obstacle_line.0.id != point_b.id
+                    && obstacle_line.1.id != point_a.id
+                    && obstacle_line.1.id != point_b.id
                     && BasicUtils::check_intersection(&new_line, obstacle_line)
                   {
                     is_intersect = true;
