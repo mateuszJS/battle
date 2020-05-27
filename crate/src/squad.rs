@@ -1,11 +1,9 @@
 use crate::id_generator::IdGenerator;
-use crate::position_utils::calc_positions::CalcPositions;
 use crate::position_utils::PositionUtils;
-use crate::squad_types::{get_squad_details, SquadType};
+use crate::squad_types::{get_squad_details, SquadDetails, SquadType};
 use crate::unit::Unit;
-use crate::constants::MATH_PI;
 
-pub struct SquadUnitShared {
+pub struct SquadUnitSharedDataSet {
   pub center_point: (f32, f32),
   pub track: Vec<(f32, f32)>,
 }
@@ -15,7 +13,8 @@ pub struct Squad {
   pub squad_type: SquadType,
   pub members: Vec<Unit>,
   pub representation_type: f32,
-  pub shared: SquadUnitShared,
+  pub shared: SquadUnitSharedDataSet,
+  pub details: &'static SquadDetails,
 }
 
 impl Squad {
@@ -23,11 +22,12 @@ impl Squad {
     let squad_details = get_squad_details(&squad_type);
 
     Squad {
-      representation_type: squad_details.representation_type,
-      id: IdGenerator::generate_id(), // not sure if needed
-      squad_type: squad_type,
+      representation_type: squad_details.representation_type, // prob not needed rn, maybe should be used in representation (only then unit were added)
+      id: IdGenerator::generate_id(),                         // not sure if needed
+      squad_type: squad_type,                                 // prob not needed
       members: vec![],
-      shared: SquadUnitShared {
+      details: squad_details,
+      shared: SquadUnitSharedDataSet {
         center_point: (0.0, 0.0),
         track: vec![],
       },
@@ -48,10 +48,6 @@ impl Squad {
   }
 
   pub fn get_representation(&self) -> Vec<f32> {
-    // QUESTION:
-    // am I able to return array without known the size during code compilation?
-    // in this case I can return array from "unit.get_representation" because length of the array is known
-    // but number of units can change, so in this method, I don't know how the size of array
     self
       .members
       .iter()
@@ -60,7 +56,7 @@ impl Squad {
   }
 
   pub fn add_member(&mut self, position_x: f32, position_y: f32, unit_angle: f32) {
-    let unit = Unit::new(position_x, position_y, unit_angle);
+    let unit = Unit::new(position_x, position_y, unit_angle, self.details);
     self.members.push(unit);
 
     let squad_details = get_squad_details(&self.squad_type);
@@ -97,7 +93,6 @@ impl Squad {
       destination_x,
       destination_y,
     );
-    
     let shared = &self.shared;
     self
       .members

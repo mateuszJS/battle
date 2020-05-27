@@ -3,7 +3,8 @@ use crate::id_generator::IdGenerator;
 use crate::look_up_table::LookUpTable;
 use crate::position_utils::basic_utils::{BasicUtils, Line, Point};
 use crate::position_utils::obstacles_lazy_statics::ObstaclesLazyStatics;
-use crate::squad::SquadUnitShared;
+use crate::squad::SquadUnitSharedDataSet;
+use crate::squad_types::SquadDetails;
 
 const STATE_ABILITY: u8 = 8;
 const STATE_FLY: u8 = 7;
@@ -14,7 +15,6 @@ const STATE_GETUP: u8 = 3;
 const STATE_DIE: u8 = 0;
 
 const REPRESENTATION_LENGTH: usize = 7;
-const UNIT_MOVE_SPEED: f32 = 0.0; // 2.5;
 
 pub struct Unit {
   pub id: f32,
@@ -30,10 +30,11 @@ pub struct Unit {
   position_offset_x: f32,
   position_offset_y: f32,
   track_index: usize,
+  squad_details: &'static SquadDetails,
 }
 
 impl Unit {
-  pub fn new(x: f32, y: f32, angle: f32) -> Unit {
+  pub fn new(x: f32, y: f32, angle: f32, squad_details: &'static SquadDetails) -> Unit {
     let seed_throwing_strength = LookUpTable::get_random();
     let throwing_strength = 8.0 + seed_throwing_strength * 15.0;
 
@@ -51,6 +52,7 @@ impl Unit {
       position_offset_x: 0.0,
       position_offset_y: 0.0,
       track_index: 0,
+      squad_details,
     }
   }
 
@@ -78,7 +80,7 @@ impl Unit {
     }
   }
 
-  pub fn change_state_to_run(&mut self, squad_shared_info: &SquadUnitShared) {
+  pub fn change_state_to_run(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
     // pub fn change_state_to_run(&mut self, target_x: f32, target_y: f32) {
     // when this method will be called
     // 1. When unit need to run by path described in squad, from point to point (some index would be necessary, to keep current point)
@@ -122,17 +124,17 @@ impl Unit {
     self.set_next_target(squad_shared_info);
   }
 
-  fn set_next_target(&mut self, squad_shared_info: &SquadUnitShared) {
+  fn set_next_target(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
     self.target_x = squad_shared_info.track[self.track_index].0 + self.position_offset_x;
     self.target_y = squad_shared_info.track[self.track_index].1 + self.position_offset_y;
     let angle = (self.target_x - self.x).atan2(self.y - self.target_y);
-    self.mod_x = angle.sin() * UNIT_MOVE_SPEED;
-    self.mod_y = -angle.cos() * UNIT_MOVE_SPEED;
+    self.mod_x = angle.sin() * self.squad_details.movement_speed;
+    self.mod_y = -angle.cos() * self.squad_details.movement_speed;
     self.angle = angle;
   }
 
-  fn update_run(&mut self, squad_shared_info: &SquadUnitShared) {
-    if (self.x - self.target_x).hypot(self.y - self.target_y) < UNIT_MOVE_SPEED {
+  fn update_run(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
+    if (self.x - self.target_x).hypot(self.y - self.target_y) < self.squad_details.movement_speed {
       if squad_shared_info.track.len() - 1 == self.track_index {
         self.change_state_to_idle();
       } else {
@@ -156,7 +158,7 @@ impl Unit {
     // check if not too far from squad center point
   }
 
-  pub fn update(&mut self, squad_shared_info: &SquadUnitShared) {
+  pub fn update(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
     match self.state {
       STATE_FLY => self.update_fly(),
       STATE_GETUP => self.update_getup(),
@@ -168,13 +170,13 @@ impl Unit {
 
   pub fn get_representation(&self) -> [f32; REPRESENTATION_LENGTH] {
     let mut representation: [f32; REPRESENTATION_LENGTH] = [
-      2.0,
+      self.squad_details.representation_type,
       self.id,
       self.x,
       self.y,
       self.angle,
       self.state as f32,
-      0.0,
+      0.0, // space for additional parameter for state, used below
     ];
 
     match self.state {
