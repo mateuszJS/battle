@@ -169,24 +169,19 @@ impl Unit {
   }
 
   pub fn get_representation(&self) -> [f32; REPRESENTATION_LENGTH] {
-    let mut representation: [f32; REPRESENTATION_LENGTH] = [
+    [
       self.squad_details.representation_type,
       self.id,
       self.x,
       self.y,
       self.angle,
       self.state as f32,
-      0.0, // space for additional parameter for state, used below
-    ];
-
-    match self.state {
-      STATE_FLY => representation[REPRESENTATION_LENGTH - 1] = self.mod_x.hypot(self.mod_y),
-      STATE_GETUP => representation[REPRESENTATION_LENGTH - 1] = self.get_upping_progress,
-      STATE_RUN => {}
-      STATE_IDLE => {}
-      _ => {}
-    }
-    representation
+      match self.state { // additional parameter for state, used below
+        STATE_FLY => self.mod_x.hypot(self.mod_y),
+        STATE_GETUP => self.get_upping_progress,
+        _ => 0.0
+      },
+    ]
   }
 
   pub fn set_position_offset(&mut self, offset_x: f32, offset_y: f32) {

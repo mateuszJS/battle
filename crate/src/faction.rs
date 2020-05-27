@@ -53,13 +53,12 @@ impl Faction {
         if creating_squad.time_to_create_another_unit == TIME_BETWEEN_CREATION {
           creating_squad.time_to_create_another_unit = 0;
 
-          let (position_x, position_y, unit_angle) = factory.get_creation_point();
+          let (position_x, position_y, factory_angle) = factory.get_creation_point();
           creating_squad
             .squad
-            .add_member(position_x, position_y, unit_angle);
+            .add_member(position_x, position_y, factory_angle);
 
-          let squad_details = get_squad_details(&creating_squad.squad.squad_type);
-          if creating_squad.squad.members.len() == squad_details.members_number {
+          if creating_squad.squad.members.len() == creating_squad.squad.squad_details.members_number {
             squad_index = index;
           } else {
             creating_squad.time_to_create_another_unit = 0;

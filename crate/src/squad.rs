@@ -10,23 +10,17 @@ pub struct SquadUnitSharedDataSet {
 
 pub struct Squad {
   pub id: f32,
-  pub squad_type: SquadType,
   pub members: Vec<Unit>,
-  pub representation_type: f32,
   pub shared: SquadUnitSharedDataSet,
-  pub details: &'static SquadDetails,
+  pub squad_details: &'static SquadDetails,
 }
 
 impl Squad {
   pub fn new(squad_type: SquadType) -> Squad {
-    let squad_details = get_squad_details(&squad_type);
-
     Squad {
-      representation_type: squad_details.representation_type, // prob not needed rn, maybe should be used in representation (only then unit were added)
-      id: IdGenerator::generate_id(),                         // not sure if needed
-      squad_type: squad_type,                                 // prob not needed
+      id: IdGenerator::generate_id(),
       members: vec![],
-      details: squad_details,
+      squad_details: get_squad_details(&squad_type),
       shared: SquadUnitSharedDataSet {
         center_point: (0.0, 0.0),
         track: vec![],
@@ -35,14 +29,14 @@ impl Squad {
   }
 
   pub fn update(&mut self) {
-    let mut sum_x: f32 = 0.0;
-    let mut sum_y: f32 = 0.0;
     let shared = &self.shared;
-    self.members.iter_mut().for_each(|unit| {
-      unit.update(shared);
-      sum_x += unit.x;
-      sum_y += unit.y;
-    });
+    let (sum_x, sum_y) = self.members.iter_mut().fold(
+      (0.0, 0.0), 
+      |(sum_x, sum_y), unit| { // TODO: should be done once per couple of seconds
+        unit.update(shared);
+        (sum_x + unit.x, sum_y + unit.y)
+      },
+    );
     self.shared.center_point.0 = sum_x / self.members.len() as f32;
     self.shared.center_point.1 = sum_y / self.members.len() as f32;
   }
@@ -56,11 +50,11 @@ impl Squad {
   }
 
   pub fn add_member(&mut self, position_x: f32, position_y: f32, unit_angle: f32) {
-    let unit = Unit::new(position_x, position_y, unit_angle, self.details);
-    self.members.push(unit);
+    self.members.push(
+      Unit::new(position_x, position_y, unit_angle, self.squad_details),
+    );
 
-    let squad_details = get_squad_details(&self.squad_type);
-    if self.members.len() == squad_details.members_number {
+    if self.members.len() == self.squad_details.members_number {
       self.recalculate_members_positions();
     }
   }
