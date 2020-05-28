@@ -1,9 +1,9 @@
 use crate::constants::MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE;
 use crate::look_up_table::LookUpTable;
+use crate::position_utils::PositionUtils;
 use crate::squad::Squad;
 use crate::squad_types::{get_squad_details, SquadType};
 use crate::unit::Unit;
-use crate::position_utils::PositionUtils;
 use crate::Factory;
 
 const TIME_BETWEEN_CREATION: u8 = 10;
@@ -58,7 +58,8 @@ impl Faction {
             .squad
             .add_member(position_x, position_y, factory_angle);
 
-          if creating_squad.squad.members.len() == creating_squad.squad.squad_details.members_number {
+          if creating_squad.squad.members.len() == creating_squad.squad.squad_details.members_number
+          {
             squad_index = index;
           } else {
             creating_squad.time_to_create_another_unit = 0;
@@ -130,4 +131,6 @@ impl Faction {
       }
     });
   }
+
+  pub fn attack_enemy(&mut self, squads_ids: Vec<f32>, enemy: &Squad) {}
 }

@@ -26,8 +26,27 @@ class SelectionController {
   }
 
   public consumeSelection({ x, y }: Point) {
-    const tracks = this.universe.move_units(this.selectedSquads, x, y)
-    tracksDebug(tracks)
+    // const tracks = this.universe.move_units(this.selectedSquads, x, y)
+    // tracksDebug(tracks)
+    const selectedEnemyUnitsIds = this.universe.move_units(
+      this.selectedSquads,
+      x,
+      y,
+    )
+
+    if (selectedEnemyUnitsIds.length === 0) return
+
+    selectedEnemyUnitsIds.forEach(id => {
+      const unit = this.universeRepresentation[id] as Unit
+      unit.select()
+    })
+
+    setTimeout(() => {
+      selectedEnemyUnitsIds.forEach(id => {
+        const unit = this.universeRepresentation[id] as Unit
+        unit.deselect()
+      })
+    }, 2000)
   }
 
   private selectUnits(x1: number, x2: number, y1: number, y2: number) {

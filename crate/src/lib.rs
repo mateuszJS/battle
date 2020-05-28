@@ -23,10 +23,12 @@ mod unit;
 
 use wasm_bindgen::prelude::*;
 
+use constants::THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER;
 use faction::Faction;
 use factory::Factory;
 use position_utils::obstacles_lazy_statics::ObstaclesLazyStatics;
 use position_utils::PositionUtils;
+use squad::Squad;
 
 const INDEX_OF_USER_FACTION: usize = 0;
 
@@ -146,28 +148,47 @@ impl Universe {
     }
   }
 
+  fn is_it_attack<'a>(&'a self, target_x: f32, target_y: f32) -> Option<&'a Squad> {
+    let mut selected_enemy_squad = None;
+    let i = 1;
+
+    while i < self.factions.len() {
+      for squad in self.factions[i].squads.iter() {
+        if (squad.shared.center_point.0 - target_x).hypot(squad.shared.center_point.1 - target_y)
+          < THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER
+        {
+          for unit in squad.members.iter() {
+            if (unit.x - target_x).hypot(unit.y - target_y) < squad.squad_details.unit_radius * 2.0
+            {
+              selected_enemy_squad = Some(squad);
+              break;
+            };
+          }
+        };
+      }
+    }
+    selected_enemy_squad
+  }
+
   pub fn move_units(
     &mut self,
     squads_ids: Vec<f32>,
     target_x: f32,
     target_y: f32,
   ) -> js_sys::Float32Array {
-    self.factions[INDEX_OF_USER_FACTION].move_squads(squads_ids, target_x, target_y);
-    let list_of_numbers: Vec<f32> = self.factions[INDEX_OF_USER_FACTION]
-      .squads
-      .iter()
-      .flat_map(|squad| {
-        let mut path_to_destination: Vec<f32> = squad
-          .shared
-          .track
-          .iter()
-          .flat_map(|point| vec![point.0, point.1])
-          .collect();
-        path_to_destination.push(-1.0);
-        path_to_destination
-      })
-      .collect();
+    let selected_enemy_squad = { self.is_it_attack(target_x, target_y) };
 
-    js_sys::Float32Array::from(&list_of_numbers[..])
+    let user_faction = &mut self.factions[INDEX_OF_USER_FACTION];
+    let selected_enemy_units = match selected_enemy_squad {
+      Some(squad) => {
+        user_faction.attack_enemy(squads_ids, squad);
+        squad.members.iter().map(|unit| unit.id).collect()
+      }
+      None => {
+        user_faction.move_squads(squads_ids, target_x, target_y);
+        vec![]
+      }
+    };
+    js_sys::Float32Array::from(&selected_enemy_units[..])
   }
 }

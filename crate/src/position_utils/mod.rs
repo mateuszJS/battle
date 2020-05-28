@@ -147,4 +147,8 @@ impl PositionUtils {
       }
     }).collect()
   }
+
+  // pub fn call_for_all_squads_in_range(factions: &Vec<Faction>, f: &dyn Fn(Squad) -> ()) {
+  //   factions.
+  // }
 }
