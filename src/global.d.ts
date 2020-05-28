@@ -6,6 +6,8 @@ import Factory from '~/representation/Factory'
 
 declare global {
   interface Window {
+    sceneX: number
+    sceneY: number
     PIXI: typeof PIXI
     app: PIXI.Application
     bulletContainer: any

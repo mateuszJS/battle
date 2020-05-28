@@ -7,17 +7,17 @@ import EffectsFactory from '~/representation/EffectFactory'
 // import aiController from '~/ai/ai'
 // import Icons from '~/modules/icons'
 import getSortableLayer from '~/modules/getSortableLayer'
-
 // import createFactories from './createFactories'
 // import addProductionIcons from './addProductionIcons'
 // import createSmokeContainer from './createSmokeContainer'
 import addBackground from './addBackground'
 import render from './render'
 
-import { memory } from '../crate/pkg/index_bg'
 import { Universe } from '../crate/pkg/index'
 
 import Factory from '~/representation/Factory'
+import initializeMouseController from './mouseController'
+import getSerializedInfoAboutWorld from './getSerializedInfoAboutWorld'
 
 export type UniverseRepresentation = {
   [id: number]: Factory | Unit
@@ -29,16 +29,6 @@ const mapIconToRepresentationType = (icon: 'solider') => {
       return 2
   }
 }
-
-// eslint-disable-next-line prettier/prettier
-const playersList = [
-  1.0,
-  2.0,
-  3.0,
-  4.0,
-  5.0,
-  6.0,
-]
 
 const setup = () => {
   EffectsFactory.initialize()
@@ -100,7 +90,11 @@ const setup = () => {
   // }
   const universeRepresentation: UniverseRepresentation = {}
 
-  const universe = Universe.new(new Float32Array(playersList))
+  const serializedInfoAboutWorld = getSerializedInfoAboutWorld()
+  const universe = Universe.new(
+    serializedInfoAboutWorld.factions,
+    serializedInfoAboutWorld.obstacles,
+  )
   const factoriesInitData = universe.get_factories_init_data()
 
   for (let i = 0; i < factoriesInitData.length; i += 5) {
@@ -114,20 +108,30 @@ const setup = () => {
     )
     universeRepresentation[factoryId] = factoryRepresentation
   }
-  const handledKeyUp = () => {
+  const onClickCreateUnit = () => {
     console.log(universe.create_squad(mapIconToRepresentationType('solider')))
   }
 
   const button = document.createElement('button')
   button.className = 'solider-product'
-  button.addEventListener('click', handledKeyUp)
+  button.addEventListener('click', onClickCreateUnit)
 
   document.getElementById('shop-list').appendChild(button)
 
+  const mouseController = new initializeMouseController(
+    universe,
+    universeRepresentation,
+  )
+
+  window.sceneX = 0
+  window.sceneY = 0
+
   window.app.ticker.add((delta: number) => {
+    mouseController.updateScenePosition()
+
     universe.update()
-    const [pointer, length] = universe.get_pointer()
-    const universeData = new Float32Array(memory.buffer, pointer, length)
+    const universeData = universe.get_universe_data()
+    // const universeData = new Float32Array(memory.buffer, pointer, length)
 
     render(
       delta,

@@ -2,6 +2,7 @@ import {
   getFrames,
   getIndexOfStartingFrame,
   getCallbackStopOnLastFrame,
+  getCallbackGoToFirstOnLastFrame,
 } from './utils'
 
 type FramesPeriods = {
@@ -71,23 +72,43 @@ const getSprites = () => {
 
   return () => {
     const movieClip = new PIXI.AnimatedSprite(frames)
-    movieClip.animationSpeed = 0.3
+    movieClip.animationSpeed = 0.01
     movieClip.scale.set(0.7)
     movieClip.stop()
-    let phase = 0
+    let previousPhase = ''
 
     return {
       movieClip,
       goToIdle(angle: number) {
-        const indexOfStartingFrame = getIndexOfStartingFrame(
-          angle,
-          framesPeriods.IDLE,
-        )
-        movieClip.gotoAndStop(indexOfStartingFrame)
+        const currentPhase = `idle${Math.round(angle * 100)}`
+        if (previousPhase !== currentPhase) {
+          previousPhase = currentPhase
+          const indexOfStartingFrame = getIndexOfStartingFrame(
+            angle,
+            framesPeriods.IDLE,
+          )
+          movieClip.gotoAndStop(indexOfStartingFrame)
+        }
       },
       goToRun(angle: number) {
-        // repeat
-        movieClip.gotoAndStop(framesPeriods.RUN.first)
+        const currentPhase = `run${Math.round(angle * 100)}`
+        if (previousPhase !== currentPhase) {
+          previousPhase = currentPhase
+          movieClip.animationSpeed = 0.4
+          movieClip.onFrameChange = null
+          movieClip.gotoAndStop(framesPeriods.RUN.first)
+          const indexOfStartingFrame = getIndexOfStartingFrame(
+            angle,
+            framesPeriods.RUN,
+          )
+          const indexOfLastFrame =
+            indexOfStartingFrame + framesPeriods.RUN.length
+          movieClip.gotoAndPlay(indexOfStartingFrame)
+          movieClip.onFrameChange = getCallbackGoToFirstOnLastFrame(
+            indexOfStartingFrame,
+            indexOfLastFrame,
+          )
+        }
       },
       goToShoot(angle: number) {
         // stop at end frame
@@ -106,16 +127,17 @@ const getSprites = () => {
           currentFrame < framesPeriods.FLY.first ||
           currentFrame > framesPeriods.FLY.last
         ) {
-          phase = 1
+          previousPhase = 'fly_up'
+          movieClip.animationSpeed = 0.3
           movieClip.gotoAndPlay(indexOfStartingFrame)
         } else if (
-          phase === 1 &&
+          previousPhase === 'fly_up' &&
           currentFrame > indexOfStartingFrame + framesPeriods.FLY.length / 2 - 1
         ) {
-          phase = 2
+          previousPhase = 'fly_middle'
           movieClip.stop()
-        } else if (flyingProgress <= 4 && phase === 2) {
-          phase = 3
+        } else if (flyingProgress <= 4 && previousPhase === 'fly_middle') {
+          previousPhase = 'fly_down'
           movieClip.play()
           movieClip.onFrameChange = getCallbackStopOnLastFrame(
             indexOfStartingFrame + framesPeriods.FLY.length - 1,
@@ -131,6 +153,7 @@ const getSprites = () => {
           indexOfStartingFrame +
           Math.floor(getUppingProgress * (framesPeriods.GETUP.length - 1))
         movieClip.gotoAndStop(indexOfCurrentFrame)
+        previousPhase = 'getup'
       },
     }
   }

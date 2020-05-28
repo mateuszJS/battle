@@ -122,6 +122,9 @@ class Utils {
   static canPreventCurrentAction(state: STATE) {
     return ![STATE.FLY, STATE.GETUP, STATE.DIE, STATE.ABILITY].includes(state)
   }
+
+  static clamp = (min: number, value: number, max: number) =>
+    Math.min(Math.max(value, min), max)
 }
 
 for (let i = 0; i < ARRAY_SIZE / 3; i++) {

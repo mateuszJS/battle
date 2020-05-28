@@ -4,15 +4,15 @@ const getFormattedNumber = (value: number) => {
 }
 
 const getAngleOffsetInFrames = (angle: number, numberOfSides: number) => {
-  const oneAngleSlice = (2 * Math.PI) / numberOfSides
-  const centeredAngle = angle - oneAngleSlice / 2
+  const singleAngleSlice = (2 * Math.PI) / numberOfSides
+  const centeredAngle = angle - singleAngleSlice / 2
 
   const positiveCenteredAngle =
     centeredAngle < 0 ? centeredAngle + Math.PI * 2 : centeredAngle
-  const framesAngle =
+  const framesAngle = // remove when sprites will be prepared correctly
     Math.abs(positiveCenteredAngle - 2 * Math.PI) + 2 * Math.PI * 0.75
   const preparedAngle = framesAngle % (Math.PI * 2)
-  return Math.floor(preparedAngle / oneAngleSlice)
+  return Math.floor(preparedAngle / singleAngleSlice)
 }
 
 export const getFrames = (
@@ -41,5 +41,15 @@ export const getCallbackStopOnLastFrame = (lastFrame: number) =>
     if (this.currentFrame >= lastFrame) {
       this.onFrameChange = null
       this.gotoAndStop(lastFrame)
+    }
+  }
+
+export const getCallbackGoToFirstOnLastFrame = (
+  firstFrame: number,
+  lastFrame: number,
+) =>
+  function() {
+    if (this.currentFrame >= lastFrame) {
+      this.gotoAndPlay(firstFrame)
     }
   }

@@ -6,6 +6,7 @@ type PixiUnitStuff = {
   container: PIXI.Container
   movieClip: PIXI.AnimatedSprite
   frameUpdaters: FrameUpdaters
+  selectionSprite: PIXI.Sprite
 }
 
 enum State {
@@ -23,6 +24,8 @@ class Unit {
   public graphics: PIXI.Container
   public movieClip: PIXI.AnimatedSprite
   private frameUpdaters: FrameUpdaters
+  private selectionSprite: PIXI.Sprite
+  private indicator: PIXI.Graphics
   public previousFramesFactors: {
     // has impact of current frame
     state: State
@@ -33,9 +36,13 @@ class Unit {
     this.graphics = pixiStuff.container
     this.movieClip = pixiStuff.movieClip
     this.frameUpdaters = pixiStuff.frameUpdaters
+    this.selectionSprite = pixiStuff.selectionSprite
 
+    this.graphics.addChild(this.selectionSprite)
     this.graphics.addChild(this.movieClip)
-    this.graphics.pivot.set(0.5, this.graphics.height * 0.9)
+    this.movieClip.x = -this.movieClip.width / 2
+    this.movieClip.y = -this.movieClip.height * 0.7
+
     this.graphics.parentGroup = pixiStuff.sortingLayer
 
     this.graphics.x = x
@@ -44,6 +51,14 @@ class Unit {
 
     window.app.stage.addChild(this.graphics)
     EffectFactory.createBoomEffect(x, y)
+
+    this.indicator = new PIXI.Graphics()
+
+    this.indicator.beginFill(0xff0000)
+    this.indicator.drawRect(-2, -2, 2, 2)
+    this.indicator.endFill()
+
+    this.graphics.addChild(this.indicator)
   }
 
   goToFrame(frame: number) {
@@ -93,6 +108,14 @@ class Unit {
     window.app.stage.removeChild(this.graphics)
     this.graphics.destroy()
     this.graphics = undefined
+  }
+
+  select() {
+    this.selectionSprite.visible = true
+  }
+
+  deselect() {
+    this.selectionSprite.visible = false
   }
 }
 
