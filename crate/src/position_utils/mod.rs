@@ -95,6 +95,12 @@ impl PositionUtils {
     let last_index = result.len() - 1;
     result.iter().enumerate().map(|(index, point)| {
       if index == 0 || index == last_index {
+        /*
+        TODO: correct the last point, to be not so close to obstacle
+        1. find the nearest line
+        2. check if distance to the nearest line is less than NORMAL_SQUAD_RADIUS
+        3. if is less, then move point away by (NORMAL_SQUAD_RADIUS - distance)
+        */
         (point.x, point.y)
       } else {
         let previous_point = result[index - 1];
