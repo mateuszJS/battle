@@ -94,14 +94,14 @@ impl Universe {
     }
   }
 
-  // QUESTION:
-  // is there any way to specify exactly which value are allowed? AFAIK there is no
-  // like in this case it rn could be squad_type_representation = 2 only (in the future will be more number allowed)
   pub fn create_squad(&mut self, squad_type_representation: u8) -> bool {
-    // FYI:
-    // rn this is the only one real interaction from JS into RUST
-    // called when user click on button to create a unit
     self.factions[INDEX_OF_USER_FACTION]
+      .factory
+      .add_squad_to_production_line(squad_type_representation)
+  }
+
+  pub fn create_enemy_squad(&mut self, squad_type_representation: u8) -> bool {
+    self.factions[1]
       .factory
       .add_squad_to_production_line(squad_type_representation)
   }
