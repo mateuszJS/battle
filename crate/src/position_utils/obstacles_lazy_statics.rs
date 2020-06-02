@@ -44,7 +44,7 @@ impl ObstaclesLazyStatics {
             i += 1
           } else {
             all_obstacles_input[last_obstacle_index].push(Point {
-              id: IdGenerator::generate_id() as u32,
+              id: IdGenerator::generate_id(),
               x: cell_data,
               y: obstacles_data[i + 1],
             });

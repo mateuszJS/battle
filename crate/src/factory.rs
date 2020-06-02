@@ -15,7 +15,7 @@ struct ProducedSquad {
 }
 
 pub struct Factory {
-  pub id: f32,
+  pub id: u32,
   pub hp: f32,
   pub x: f32,
   pub y: f32,
@@ -59,7 +59,7 @@ impl Factory {
     } else {
       0.0
     };
-    let factory_representation = [factory_type, self.id, progress];
+    let factory_representation = [factory_type, self.id as f32, progress];
 
     if self.owner_user {
       let production_line_representation: Vec<f32> = self

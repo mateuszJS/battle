@@ -27,7 +27,6 @@ use constants::THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER;
 use faction::Faction;
 use factory::Factory;
 use position_utils::obstacles_lazy_statics::ObstaclesLazyStatics;
-use position_utils::PositionUtils;
 use squad::Squad;
 
 const INDEX_OF_USER_FACTION: usize = 0;
@@ -63,7 +62,13 @@ impl Universe {
     // ifno about factories come from JS, but id comes from rust
     let get_initial_factories_representation = |faction: &Faction| {
       let factory = &faction.factory;
-      vec![faction.id, factory.id, factory.x, factory.y, factory.angle]
+      vec![
+        faction.id,
+        factory.id as f32,
+        factory.x,
+        factory.y,
+        factory.angle,
+      ]
     };
 
     let result: Vec<f32> = self
@@ -127,8 +132,8 @@ impl Universe {
           faction.squads.iter().for_each(|squad| {
             for unit in squad.members.iter() {
               if unit.x > start_x && unit.x < end_x && unit.y > start_y && unit.y < end_y {
-                selected_units_ids.push(squad.members.iter().map(|unit| unit.id).collect());
-                selected_squads_ids.push(squad.id);
+                selected_units_ids.push(squad.members.iter().map(|unit| unit.id as f32).collect());
+                selected_squads_ids.push(squad.id as f32);
                 break;
               }
             }
@@ -150,15 +155,17 @@ impl Universe {
 
   fn is_it_attack<'a>(&'a self, target_x: f32, target_y: f32) -> Option<&'a Squad> {
     let mut selected_enemy_squad = None;
-    let i = 1;
+    let mut i = 1;
 
     while i < self.factions.len() {
       for squad in self.factions[i].squads.iter() {
         if (squad.shared.center_point.0 - target_x).hypot(squad.shared.center_point.1 - target_y)
           < THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER
         {
+          let corrected_target_y = target_y + squad.squad_details.unit_model_offset_y;
           for unit in squad.members.iter() {
-            if (unit.x - target_x).hypot(unit.y - target_y) < squad.squad_details.unit_radius * 2.0
+            if (unit.x - target_x).hypot(unit.y - corrected_target_y)
+              < squad.squad_details.selection_threshold
             {
               selected_enemy_squad = Some(squad);
               break;
@@ -166,26 +173,28 @@ impl Universe {
           }
         };
       }
+      i += 1;
     }
     selected_enemy_squad
   }
 
   pub fn move_units(
     &mut self,
-    squads_ids: Vec<f32>,
+    raw_squads_ids: Vec<f32>,
     target_x: f32,
     target_y: f32,
   ) -> js_sys::Float32Array {
     let selected_enemy_squad = { self.is_it_attack(target_x, target_y) };
+    // let squads_ids = raw_squads_ids.into_iter().map(|id| id as u32).collect();
 
-    let user_faction = &mut self.factions[INDEX_OF_USER_FACTION];
+    // let user_faction = &mut self.factions[INDEX_OF_USER_FACTION];
     let selected_enemy_units = match selected_enemy_squad {
       Some(squad) => {
-        user_faction.attack_enemy(squads_ids, squad);
-        squad.members.iter().map(|unit| unit.id).collect()
+        // user_faction.attack_enemy(squads_ids, squad);
+        squad.members.iter().map(|unit| unit.id as f32).collect()
       }
       None => {
-        user_faction.move_squads(squads_ids, target_x, target_y);
+        // user_faction.move_squads(squads_ids, target_x, target_y);
         vec![]
       }
     };

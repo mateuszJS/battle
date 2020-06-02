@@ -7,7 +7,7 @@ export default [
   'assets/human_getup/s_gu.json',
   'assets/fire_effect/fireEffect.json',
   'assets/laser_effect/laserEffect.json',
-  'assets/selectMyUnit.png',
+  'assets/generic_selection.png',
   'assets/warrior_idle/warrior_idle.json',
   'assets/warrior_fire/w_f.json',
   'assets/warrior_hit/w_h.json',

@@ -9,7 +9,7 @@ pub struct SquadUnitSharedDataSet {
 }
 
 pub struct Squad {
-  pub id: f32,
+  pub id: u32,
   pub members: Vec<Unit>,
   pub shared: SquadUnitSharedDataSet,
   pub squad_details: &'static SquadDetails,
@@ -30,13 +30,14 @@ impl Squad {
 
   pub fn update(&mut self) {
     let shared = &self.shared;
-    let (sum_x, sum_y) = self.members.iter_mut().fold(
-      (0.0, 0.0), 
-      |(sum_x, sum_y), unit| { // TODO: should be done once per couple of seconds
+    let (sum_x, sum_y) = self
+      .members
+      .iter_mut()
+      .fold((0.0, 0.0), |(sum_x, sum_y), unit| {
+        // TODO: should be done once per couple of seconds
         unit.update(shared);
         (sum_x + unit.x, sum_y + unit.y)
-      },
-    );
+      });
     self.shared.center_point.0 = sum_x / self.members.len() as f32;
     self.shared.center_point.1 = sum_y / self.members.len() as f32;
   }
@@ -50,9 +51,12 @@ impl Squad {
   }
 
   pub fn add_member(&mut self, position_x: f32, position_y: f32, unit_angle: f32) {
-    self.members.push(
-      Unit::new(position_x, position_y, unit_angle, self.squad_details),
-    );
+    self.members.push(Unit::new(
+      position_x,
+      position_y,
+      unit_angle,
+      self.squad_details,
+    ));
 
     if self.members.len() == self.squad_details.members_number {
       self.recalculate_members_positions();

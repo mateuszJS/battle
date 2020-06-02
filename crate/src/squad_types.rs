@@ -8,7 +8,8 @@ pub struct SquadDetails {
   pub production_time: u16,
   pub members_number: usize,
   pub representation_type: f32,
-  pub unit_radius: f32,
+  pub unit_model_offset_y: f32, // for selection
+  pub selection_threshold: f32, // for selection
 }
 
 static SOLIDER_DETAILS: SquadDetails = SquadDetails {
@@ -17,7 +18,8 @@ static SOLIDER_DETAILS: SquadDetails = SquadDetails {
   production_time: 3,
   members_number: 7, // predicted max number of units in squad in utils is 7 MAX_NUMBER_OF_UNITS_IN_SQUAD
   representation_type: 2.0,
-  unit_radius: 20.0,
+  selection_threshold: 40.0,
+  unit_model_offset_y: 20.0,
 };
 
 pub fn get_squad_details(squad_type: &SquadType) -> &'static SquadDetails {

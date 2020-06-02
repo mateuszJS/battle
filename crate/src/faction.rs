@@ -1,12 +1,16 @@
 use crate::constants::MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE;
-use crate::look_up_table::LookUpTable;
 use crate::position_utils::PositionUtils;
 use crate::squad::Squad;
-use crate::squad_types::{get_squad_details, SquadType};
-use crate::unit::Unit;
+use crate::squad_types::SquadType;
 use crate::Factory;
+use std::collections::HashMap;
 
 const TIME_BETWEEN_CREATION: u8 = 10;
+
+pub struct Hunter<'a> {
+  aim: &'a Squad,
+  target_pos: (u32, u32),
+}
 
 pub struct SquadDuringCreation {
   pub time_to_create_another_unit: u8,
@@ -19,6 +23,7 @@ pub struct Faction {
   pub squads: Vec<Squad>,
   pub factory: Factory,
   pub squads_during_creation: Vec<SquadDuringCreation>,
+  hunters: HashMap<u32, Hunter<'static>>,
 }
 
 impl Faction {
@@ -36,6 +41,7 @@ impl Faction {
       resources: 0,
       squads: vec![],
       squads_during_creation: vec![],
+      hunters: HashMap::new(),
     }
   }
 
@@ -120,7 +126,7 @@ impl Faction {
     .concat()
   }
 
-  pub fn move_squads(&mut self, squads_ids: Vec<f32>, target_x: f32, target_y: f32) {
+  pub fn move_squads(&mut self, squads_ids: Vec<u32>, target_x: f32, target_y: f32) {
     let position = PositionUtils::get_squads_positions(squads_ids.len(), target_x, target_y);
     let mut index = 0;
     self.squads.iter_mut().for_each(|squad| {
@@ -132,5 +138,5 @@ impl Faction {
     });
   }
 
-  pub fn attack_enemy(&mut self, squads_ids: Vec<f32>, enemy: &Squad) {}
+  pub fn attack_enemy(&mut self, squads_ids: Vec<u32>, enemy: &Squad) {}
 }

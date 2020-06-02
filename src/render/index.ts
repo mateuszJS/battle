@@ -10,6 +10,7 @@ import { UniverseRepresentation } from '../setup'
 import Factory from '~/representation/Factory'
 import Unit from '~/representation/Unit'
 import UnitsFactory from '~/representation/UnitFactory'
+import { USER_FACTION_ID } from 'Consts'
 
 const render = (
   delta: number,
@@ -66,6 +67,7 @@ const render = (
             universeData[indexOfId + 1],
             universeData[indexOfId + 2],
             universeData[indexOfId + 3],
+            factionId === USER_FACTION_ID,
             universeData[indexOfId + 4],
           )
         }

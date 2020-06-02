@@ -17,7 +17,7 @@ const STATE_DIE: u8 = 0;
 const REPRESENTATION_LENGTH: usize = 7;
 
 pub struct Unit {
-  pub id: f32,
+  pub id: u32,
   pub x: f32,
   pub y: f32,
   pub angle: f32,
@@ -171,15 +171,16 @@ impl Unit {
   pub fn get_representation(&self) -> [f32; REPRESENTATION_LENGTH] {
     [
       self.squad_details.representation_type,
-      self.id,
+      self.id as f32,
       self.x,
       self.y,
       self.angle,
       self.state as f32,
-      match self.state { // additional parameter for state, used below
+      match self.state {
+        // additional parameter for state, used below
         STATE_FLY => self.mod_x.hypot(self.mod_y),
         STATE_GETUP => self.get_upping_progress,
-        _ => 0.0
+        _ => 0.0,
       },
     ]
   }
