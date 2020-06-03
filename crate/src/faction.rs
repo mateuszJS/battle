@@ -3,6 +3,7 @@ use crate::position_utils::PositionUtils;
 use crate::squad::Squad;
 use crate::squad_types::SquadType;
 use crate::Factory;
+use crate::World;
 use std::cell::{Ref, RefCell};
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -21,7 +22,7 @@ pub struct SquadDuringCreation {
 }
 
 pub struct Faction {
-  pub id: f32,
+  pub id: u32,
   pub resources: u32,
   pub squads: Vec<RefCell<Squad>>, // call borrow() and share that Ref<Squad>, if it's not possible then wrap in Rc like Vec<Rc<RefCell<Squad>>>
   pub factory: Factory,
@@ -31,7 +32,7 @@ pub struct Faction {
 
 impl Faction {
   pub fn new(
-    id: f32,
+    id: u32,
     factory_x: f32,
     factory_y: f32,
     factory_angle: f32,
@@ -48,7 +49,7 @@ impl Faction {
     }
   }
 
-  fn update_squads_during_creation(&mut self) {
+  fn update_squads_during_creation(&mut self, world: &mut World) {
     let factory = &mut self.factory;
     let mut squad_index: usize = MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE;
 
@@ -77,18 +78,19 @@ impl Faction {
       });
 
     if squad_index != MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE {
-      let squad = self.squads_during_creation.remove(squad_index).squad;
-      self.squads.push(RefCell::new(squad));
+      let squad = RefCell::new(self.squads_during_creation.remove(squad_index).squad);
+      world.all_squads.push(squad.borrow());
+      self.squads.push(squad);
     }
   }
 
-  pub fn update(&mut self) {
+  pub fn update(&mut self, world: &mut World) {
     let result: Option<SquadType> = self.factory.update();
 
     match result {
       Some(squad_type) => {
         let new_squad = SquadDuringCreation {
-          squad: Squad::new(squad_type),
+          squad: Squad::new(self.id, squad_type),
           time_to_create_another_unit: 0,
         };
         self.squads_during_creation.push(new_squad);
@@ -105,11 +107,11 @@ impl Faction {
       .iter_mut()
       .for_each(|squad_during_creation| squad_during_creation.squad.update());
 
-    self.update_squads_during_creation();
+    self.update_squads_during_creation(world);
   }
 
   pub fn get_representation(&self) -> Vec<f32> {
-    let start_representation = [&[0.0, self.id], &self.factory.get_representation()[..]].concat();
+    let start_representation = [&[0.0, self.id as f32], &self.factory.get_representation()[..]].concat();
 
     let active_squads_representation: Vec<f32> = self
       .squads

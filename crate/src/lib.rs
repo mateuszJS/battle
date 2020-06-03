@@ -32,9 +32,14 @@ use squad::Squad;
 
 const INDEX_OF_USER_FACTION: usize = 0;
 
+pub struct World {
+  all_squads: Vec<Ref<'static, Squad>>,
+}
+
 #[wasm_bindgen]
 pub struct Universe {
   factions: Vec<Faction>,
+  world: World,
 }
 
 #[wasm_bindgen]
@@ -45,7 +50,7 @@ impl Universe {
     let mut i = 0;
     while i < factions_data.len() {
       factions.push(Faction::new(
-        factions_data[i],
+        factions_data[i] as u32,
         factions_data[i + 1],
         factions_data[i + 2],
         factions_data[i + 3],
@@ -55,8 +60,14 @@ impl Universe {
     }
 
     ObstaclesLazyStatics::init_and_get_obstacles_handler(Some(obstacles_data));
+    let world = World {
+      all_squads: vec![],
+    };
 
-    Universe { factions }
+    Universe {
+      factions,
+      world,
+    }
   }
 
   pub fn get_factories_init_data(&self) -> js_sys::Float32Array {
@@ -64,7 +75,7 @@ impl Universe {
     let get_initial_factories_representation = |faction: &Faction| {
       let factory = &faction.factory;
       vec![
-        faction.id,
+        faction.id as f32,
         factory.id as f32,
         factory.x,
         factory.y,
@@ -82,9 +93,10 @@ impl Universe {
   }
 
   pub fn update(&mut self) {
-    self.factions.iter_mut().for_each(|faction| {
+    let Universe { factions: ref mut factions, world: ref mut world } = self;
+    factions.iter_mut().for_each(|faction| {
       faction.resources += 1;
-      faction.update();
+      faction.update(world);
     })
   }
 
@@ -161,29 +173,24 @@ impl Universe {
     }
   }
 
-  fn is_it_attack<'a>(&'a self, target_x: f32, target_y: f32) -> Option<Ref<Squad>> {
+  fn is_it_attack(world: &World, target_x: f32, target_y: f32) -> Option<&Ref<Squad>> {
     let mut selected_enemy_squad = None;
-    let mut i = 1;
 
-    while i < self.factions.len() {
-      for squad in self.factions[i].squads.iter() {
-        let read_squad = squad.borrow();
-        if (read_squad.shared.center_point.0 - target_x)
-          .hypot(read_squad.shared.center_point.1 - target_y)
-          < THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER
-        {
-          let corrected_target_y = target_y + read_squad.squad_details.unit_model_offset_y;
-          for unit in read_squad.members.iter() {
-            if (unit.x - target_x).hypot(unit.y - corrected_target_y)
-              < read_squad.squad_details.selection_threshold
-            {
-              selected_enemy_squad = Some(read_squad);
-              break;
-            };
-          }
-        };
-      }
-      i += 1;
+    for squad in world.all_squads.iter() {
+      if (squad.shared.center_point.0 - target_x)
+        .hypot(squad.shared.center_point.1 - target_y)
+        < THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER
+      {
+        let corrected_target_y = target_y + squad.squad_details.unit_model_offset_y;
+        for unit in squad.members.iter() {
+          if (unit.x - target_x).hypot(unit.y - corrected_target_y)
+            < squad.squad_details.selection_threshold
+          {
+            selected_enemy_squad = Some(squad);
+            break;
+          };
+        }
+      };
     }
     selected_enemy_squad
   }
@@ -194,17 +201,17 @@ impl Universe {
     target_x: f32,
     target_y: f32,
   ) -> js_sys::Float32Array {
-    let selected_enemy_squad = { self.is_it_attack(target_x, target_y) };
-    // let squads_ids = raw_squads_ids.into_iter().map(|id| id as u32).collect();
+    let Universe { factions: ref mut factions, world: ref world } = self;
+    let squads_ids = raw_squads_ids.into_iter().map(|id| id as u32).collect();
 
-    // let user_faction = &mut self.factions[INDEX_OF_USER_FACTION];
-    let selected_enemy_units = match selected_enemy_squad {
+    let user_faction = &mut factions[INDEX_OF_USER_FACTION];
+    let selected_enemy_units = match Universe::is_it_attack(world, target_x, target_y) {
       Some(squad) => {
-        // user_faction.attack_enemy(squads_ids, squad);
+        user_faction.attack_enemy(squads_ids, &squad);
         squad.members.iter().map(|unit| unit.id as f32).collect()
       }
       None => {
-        // user_faction.move_squads(squads_ids, target_x, target_y);
+        user_faction.move_squads(squads_ids, target_x, target_y);
         vec![]
       }
     };

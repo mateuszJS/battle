@@ -10,15 +10,17 @@ pub struct SquadUnitSharedDataSet {
 
 pub struct Squad {
   pub id: u32,
+  faction_id: u32,
   pub members: Vec<Unit>,
   pub shared: SquadUnitSharedDataSet,
   pub squad_details: &'static SquadDetails,
 }
 
 impl Squad {
-  pub fn new(squad_type: SquadType) -> Squad {
+  pub fn new(faction_id: u32, squad_type: SquadType) -> Squad {
     Squad {
       id: IdGenerator::generate_id(),
+      faction_id,
       members: vec![],
       squad_details: get_squad_details(&squad_type),
       shared: SquadUnitSharedDataSet {
