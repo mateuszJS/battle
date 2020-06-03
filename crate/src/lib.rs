@@ -9,6 +9,7 @@ macro_rules! log {
   ($( $t:tt )*) => (web_sys::console::log_1(&format!($($t)*).into()));
 }
 // https://rustwasm.github.io/book/game-of-life/debugging.html fix debugging
+use std::cell::Ref;
 
 mod constants;
 mod faction;
@@ -130,10 +131,17 @@ impl Universe {
       .for_each(|(index, faction)| {
         if index == INDEX_OF_USER_FACTION {
           faction.squads.iter().for_each(|squad| {
-            for unit in squad.members.iter() {
+            let read_squad = squad.borrow();
+            for unit in read_squad.members.iter() {
               if unit.x > start_x && unit.x < end_x && unit.y > start_y && unit.y < end_y {
-                selected_units_ids.push(squad.members.iter().map(|unit| unit.id as f32).collect());
-                selected_squads_ids.push(squad.id as f32);
+                selected_units_ids.push(
+                  read_squad
+                    .members
+                    .iter()
+                    .map(|unit| unit.id as f32)
+                    .collect(),
+                );
+                selected_squads_ids.push(read_squad.id as f32);
                 break;
               }
             }
@@ -153,21 +161,23 @@ impl Universe {
     }
   }
 
-  fn is_it_attack<'a>(&'a self, target_x: f32, target_y: f32) -> Option<&'a Squad> {
+  fn is_it_attack<'a>(&'a self, target_x: f32, target_y: f32) -> Option<Ref<Squad>> {
     let mut selected_enemy_squad = None;
     let mut i = 1;
 
     while i < self.factions.len() {
       for squad in self.factions[i].squads.iter() {
-        if (squad.shared.center_point.0 - target_x).hypot(squad.shared.center_point.1 - target_y)
+        let read_squad = squad.borrow();
+        if (read_squad.shared.center_point.0 - target_x)
+          .hypot(read_squad.shared.center_point.1 - target_y)
           < THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER
         {
-          let corrected_target_y = target_y + squad.squad_details.unit_model_offset_y;
-          for unit in squad.members.iter() {
+          let corrected_target_y = target_y + read_squad.squad_details.unit_model_offset_y;
+          for unit in read_squad.members.iter() {
             if (unit.x - target_x).hypot(unit.y - corrected_target_y)
-              < squad.squad_details.selection_threshold
+              < read_squad.squad_details.selection_threshold
             {
-              selected_enemy_squad = Some(squad);
+              selected_enemy_squad = Some(read_squad);
               break;
             };
           }

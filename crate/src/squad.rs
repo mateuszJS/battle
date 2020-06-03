@@ -85,6 +85,7 @@ impl Squad {
     //   // TODO: calc segment, from squad_center thought closest_point to outsite (like plus 5?)
     //   // also handle case when distance is 0, then add 5, check if it's okay, if not, minsu 5, and this is have to be okay
     // }
+    // https://doc.rust-lang.org/stable/rust-by-example/scope/borrow/ref.html
     self.shared.track = PositionUtils::get_track(
       self.shared.center_point.0,
       self.shared.center_point.1,

@@ -3,7 +3,10 @@ use crate::position_utils::PositionUtils;
 use crate::squad::Squad;
 use crate::squad_types::SquadType;
 use crate::Factory;
+use std::cell::{Ref, RefCell};
 use std::collections::HashMap;
+use std::rc::Rc;
+use std::sync::Weak;
 
 const TIME_BETWEEN_CREATION: u8 = 10;
 
@@ -20,7 +23,7 @@ pub struct SquadDuringCreation {
 pub struct Faction {
   pub id: f32,
   pub resources: u32,
-  pub squads: Vec<Squad>,
+  pub squads: Vec<RefCell<Squad>>, // call borrow() and share that Ref<Squad>, if it's not possible then wrap in Rc like Vec<Rc<RefCell<Squad>>>
   pub factory: Factory,
   pub squads_during_creation: Vec<SquadDuringCreation>,
   hunters: HashMap<u32, Hunter<'static>>,
@@ -75,7 +78,7 @@ impl Faction {
 
     if squad_index != MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE {
       let squad = self.squads_during_creation.remove(squad_index).squad;
-      self.squads.push(squad);
+      self.squads.push(RefCell::new(squad));
     }
   }
 
@@ -93,7 +96,10 @@ impl Faction {
       None => {}
     }
 
-    self.squads.iter_mut().for_each(|squad| squad.update());
+    self
+      .squads
+      .iter_mut()
+      .for_each(|squad| squad.borrow_mut().update());
     self
       .squads_during_creation
       .iter_mut()
@@ -108,7 +114,7 @@ impl Faction {
     let active_squads_representation: Vec<f32> = self
       .squads
       .iter()
-      .flat_map(|squad| squad.get_representation())
+      .flat_map(|squad| squad.borrow().get_representation())
       .collect();
 
     let squads_during_creation_representation: Vec<f32> = self
@@ -130,9 +136,11 @@ impl Faction {
     let position = PositionUtils::get_squads_positions(squads_ids.len(), target_x, target_y);
     let mut index = 0;
     self.squads.iter_mut().for_each(|squad| {
-      if squads_ids.contains(&squad.id) {
+      if squads_ids.contains(&squad.borrow().id) {
         let squad_target = position[index];
-        squad.add_target(squad_target.0, squad_target.1);
+        squad
+          .borrow_mut()
+          .add_target(squad_target.0, squad_target.1);
         index += 1;
       }
     });
