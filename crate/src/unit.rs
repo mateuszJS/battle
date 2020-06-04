@@ -158,12 +158,15 @@ impl Unit {
     // check if not too far from squad center point
   }
 
+  fn update_shoot(&mut self) {}
+
   pub fn update(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
     match self.state {
       STATE_FLY => self.update_fly(),
       STATE_GETUP => self.update_getup(),
       STATE_RUN => self.update_run(squad_shared_info),
       STATE_IDLE => self.update_idle(),
+      STATE_SHOOT => self.update_shoot(),
       _ => {}
     }
   }

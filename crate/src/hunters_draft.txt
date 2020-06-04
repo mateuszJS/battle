@@ -1,0 +1,11 @@
+How hunters will work:
+1. Go over all squads
+2. Introduce was_moved field to squad, will be set to true if any member was moved, as set to false for all squads after loop over hunters
+3. Collect all squads from one faction, each squad with was_moved = true and squad have aim
+4. Check distance to the target
+5. If squad is in range, when stay and shoot (dumb way, cannot  place the units closer then (if many squads attack one aim))
+6. If squad is out of range, then collect all these squads, and calc positon for them
+7. loop over all positions, and calc track for each position
+
+How attack will works:
+1. unit has to have reference to the aim

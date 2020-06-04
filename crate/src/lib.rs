@@ -8,8 +8,21 @@ extern crate lazy_static;
 macro_rules! log {
   ($( $t:tt )*) => (web_sys::console::log_1(&format!($($t)*).into()));
 }
+
+// macro_rules! read_squad {
+//   ( $( $x:expr ),* ) => {
+//       {
+//           let mut temp_vec = Vec::new();
+//           $(
+//               temp_vec.push($x);
+//           )*
+//           temp_vec
+//       }
+//   };
+// }
+
 // https://rustwasm.github.io/book/game-of-life/debugging.html fix debugging
-use std::cell::Cell;
+
 use std::cell::RefCell;
 use std::rc::Weak;
 
@@ -91,8 +104,8 @@ impl Universe {
 
   pub fn update(&mut self) {
     let Universe {
-      factions: ref mut factions,
-      world: ref mut world,
+      ref mut factions,
+      ref mut world,
     } = self;
     factions.iter_mut().for_each(|faction| {
       faction.resources += 1;
@@ -176,24 +189,21 @@ impl Universe {
     let mut selected_enemy_squad = None;
 
     for weak_squad in world.all_squads.iter() {
-      let upgraded_squad = weak_squad.upgrade();
-      if upgraded_squad.is_none() {
-        continue;
-      };
-      let unwrapper_squad = upgraded_squad.unwrap();
-      let squad = unwrapper_squad.borrow();
-      if (squad.shared.center_point.0 - target_x).hypot(squad.shared.center_point.1 - target_y)
-        < THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER
-      {
-        let corrected_target_y = target_y + squad.squad_details.unit_model_offset_y;
-        for unit in squad.members.iter() {
-          if (unit.x - target_x).hypot(unit.y - corrected_target_y)
-            < squad.squad_details.selection_threshold
-          {
-            selected_enemy_squad = Some(weak_squad);
-            break;
-          };
-        }
+      if let Some(unwrapper_squad) = weak_squad.upgrade() {
+        let squad = unwrapper_squad.borrow();
+        if (squad.shared.center_point.0 - target_x).hypot(squad.shared.center_point.1 - target_y)
+          < THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER
+        {
+          let corrected_target_y = target_y + squad.squad_details.unit_model_offset_y;
+          for unit in squad.members.iter() {
+            if (unit.x - target_x).hypot(unit.y - corrected_target_y)
+              < squad.squad_details.selection_threshold
+            {
+              selected_enemy_squad = Some(weak_squad);
+              break;
+            };
+          }
+        };
       };
     }
     selected_enemy_squad

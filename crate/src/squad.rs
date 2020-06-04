@@ -2,6 +2,8 @@ use crate::id_generator::IdGenerator;
 use crate::position_utils::PositionUtils;
 use crate::squad_types::{get_squad_details, SquadDetails, SquadType};
 use crate::unit::Unit;
+use std::cell::RefCell;
+use std::rc::Weak;
 
 pub struct SquadUnitSharedDataSet {
   pub center_point: (f32, f32),
@@ -100,6 +102,8 @@ impl Squad {
       .iter_mut()
       .for_each(|unit| unit.change_state_to_run(shared));
   }
+
+  pub fn attack_enemy(&mut self, enemy: &Weak<RefCell<Squad>>) {}
 
   pub fn remove_member(&mut self) {
     // TODO: self.members.remove

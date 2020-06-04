@@ -156,5 +156,11 @@ impl Faction {
     });
   }
 
-  pub fn attack_enemy(&mut self, squads_ids: Vec<u32>, enemy: &Weak<RefCell<Squad>>) {}
+  pub fn attack_enemy(&mut self, squads_ids: Vec<u32>, enemy: &Weak<RefCell<Squad>>) {
+    self.squads.iter_mut().for_each(|squad| {
+      if squads_ids.contains(&squad.borrow().id) {
+        squad.borrow_mut().attack_enemy(enemy);
+      }
+    });
+  }
 }
