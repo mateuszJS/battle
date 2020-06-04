@@ -50,7 +50,7 @@ class SelectionController {
   }
 
   private selectUnits(x1: number, x2: number, y1: number, y2: number) {
-    const result = this.universe.get_selected_units_ids(x1, x2, y1, y2, true)
+    const result = this.universe.get_selected_units_ids(x1, x2, y1, y2)
     if (result.length === 1) {
       this.selectedSquads = new Float32Array()
       return
