@@ -8,11 +8,13 @@ use std::rc::Weak;
 pub struct SquadUnitSharedDataSet {
   pub center_point: (f32, f32),
   pub track: Vec<(f32, f32)>,
+  pub last_aim_position: (i32, i32),
+  pub aim: Option<Weak<RefCell<Squad>>>,
 }
 
 pub struct Squad {
   pub id: u32,
-  faction_id: u32,
+  pub faction_id: u32,
   pub members: Vec<Unit>,
   pub shared: SquadUnitSharedDataSet,
   pub squad_details: &'static SquadDetails,
@@ -28,6 +30,8 @@ impl Squad {
       shared: SquadUnitSharedDataSet {
         center_point: (0.0, 0.0),
         track: vec![],
+        last_aim_position: (-1, -1),
+        aim: None,
       },
     }
   }
@@ -90,6 +94,11 @@ impl Squad {
     //   // also handle case when distance is 0, then add 5, check if it's okay, if not, minsu 5, and this is have to be okay
     // }
 
+    if self.shared.aim.is_some() {
+      self.shared.aim = None;
+      self.shared.last_aim_position = (-1, -1);
+    }
+
     self.shared.track = PositionUtils::get_track(
       self.shared.center_point.0,
       self.shared.center_point.1,
@@ -103,7 +112,10 @@ impl Squad {
       .for_each(|unit| unit.change_state_to_run(shared));
   }
 
-  pub fn attack_enemy(&mut self, enemy: &Weak<RefCell<Squad>>) {}
+  pub fn attack_enemy(&mut self, enemy: &Weak<RefCell<Squad>>) {
+    self.shared.aim = Some(Weak::clone(enemy));
+    self.shared.last_aim_position = (-1, -1);
+  }
 
   pub fn remove_member(&mut self) {
     // TODO: self.members.remove

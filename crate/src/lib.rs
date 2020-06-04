@@ -24,7 +24,8 @@ macro_rules! log {
 // https://rustwasm.github.io/book/game-of-life/debugging.html fix debugging
 
 use std::cell::RefCell;
-use std::rc::Weak;
+use std::rc::{Rc,Weak};
+use std::collections::HashMap;
 
 mod constants;
 mod faction;
@@ -49,12 +50,14 @@ const INDEX_OF_USER_FACTION: usize = 0;
 
 pub struct World {
   all_squads: Vec<Weak<RefCell<Squad>>>,
+  all_moved_squads: Vec<Weak<RefCell<Squad>>>,
 }
 
 #[wasm_bindgen]
 pub struct Universe {
   factions: Vec<Faction>,
   world: World,
+  time: u32,
 }
 
 #[wasm_bindgen]
@@ -75,9 +78,12 @@ impl Universe {
     }
 
     ObstaclesLazyStatics::init_and_get_obstacles_handler(Some(obstacles_data));
-    let world = World { all_squads: vec![] };
+    let world = World {
+      all_squads: vec![],
+      all_moved_squads: vec![],
+    };
 
-    Universe { factions, world }
+    Universe { factions, world, time: 0 }
   }
 
   pub fn get_factories_init_data(&self) -> js_sys::Float32Array {
@@ -102,12 +108,40 @@ impl Universe {
     unsafe { js_sys::Float32Array::view(&result[..]) }
   }
 
+  fn manage_hunters(faction: &mut Faction) {
+    let mut hunters: HashMap<u32, Vec<&Rc<RefCell<Squad>>>> = HashMap::new();
+
+    faction.squads.iter().for_each(|squad| {
+      if let Some(weak_aim) = &squad.borrow().shared.aim {
+        let upgraded_aim = weak_aim.upgrade();
+        if let Some(ref_cell_aim) = upgraded_aim {
+          let aim = ref_cell_aim.borrow();
+          if hunters.contains_key(&aim.id) {
+            hunters.get_mut(&aim.id).unwrap().push(squad);
+          } else {
+            hunters.insert(aim.id, vec![squad]);
+          }
+        }
+      }
+    });
+
+    hunters.values().for_each(|squads_list| {
+      log!("{:?}", squads_list.len());
+    })
+  }
+
   pub fn update(&mut self) {
     let Universe {
       ref mut factions,
       ref mut world,
+      ref mut time,
     } = self;
+    *time = (*time + 1) % 1000;
+
     factions.iter_mut().for_each(|faction| {
+      if *time % 100 == 0 {
+        Universe::manage_hunters(faction);
+      }
       faction.resources += 1;
       faction.update(world);
     })
@@ -218,13 +252,14 @@ impl Universe {
     let Universe {
       ref mut factions,
       ref world,
+      ..
     } = self;
     let squads_ids = raw_squads_ids.into_iter().map(|id| id as u32).collect();
 
     let user_faction = &mut factions[INDEX_OF_USER_FACTION];
     let selected_enemy_units = match Universe::is_it_attack(world, target_x, target_y) {
       Some(squad) => {
-        user_faction.attack_enemy(squads_ids, &squad);
+        user_faction.attack_enemy(squads_ids, squad);
         let upgraded_squad = squad.upgrade();
         if upgraded_squad.is_some() {
           upgraded_squad

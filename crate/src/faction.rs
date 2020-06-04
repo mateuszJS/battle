@@ -5,7 +5,6 @@ use crate::squad_types::SquadType;
 use crate::Factory;
 use crate::World;
 use std::cell::RefCell;
-use std::collections::HashMap;
 use std::rc::Rc;
 use std::rc::Weak;
 
@@ -27,7 +26,6 @@ pub struct Faction {
   pub squads: Vec<Rc<RefCell<Squad>>>, // call borrow() and share that Ref<Squad>, if it's not possible then wrap in Rc like Vec<Rc<RefCell<Squad>>>
   pub factory: Factory,
   pub squads_during_creation: Vec<SquadDuringCreation>,
-  hunters: HashMap<u32, Hunter<'static>>,
 }
 
 impl Faction {
@@ -45,7 +43,6 @@ impl Faction {
       resources: 0,
       squads: vec![],
       squads_during_creation: vec![],
-      hunters: HashMap::new(),
     }
   }
 
@@ -81,10 +78,8 @@ impl Faction {
       let squad = Rc::new(RefCell::new(
         self.squads_during_creation.remove(squad_index).squad,
       ));
+      world.all_squads.push(Rc::downgrade(&squad));
       self.squads.push(squad);
-      world
-        .all_squads
-        .push(Rc::downgrade(&self.squads[self.squads.len() - 1]));
     }
   }
 
