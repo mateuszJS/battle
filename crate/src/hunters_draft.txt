@@ -9,14 +9,3 @@ How hunters will work:
   4.1 also there is a case when track is calculated first time, then just treat it as moving enemy, and needs to calc track one more time
 5. Calc new position
 6. Calc new tracks for all squads which got a new position
-
-
-How attack will works:
-1. unit has to have reference to the aim
-
-
-0. Calc new centers for all squads
-1. Call hunters update
-Problem is that user can move units, right after hunters will go over the squads, so was_moved = false for all
-2. Update all_moved_squad (because 1. use that "was_moved" field, and here will be set to false always)
-3. Update units/AI/squads/factions/factories
