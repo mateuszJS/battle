@@ -4,10 +4,10 @@ use crate::squad::Squad;
 use crate::squad_types::SquadType;
 use crate::Factory;
 use crate::World;
-use std::cell::{Ref, RefCell};
+use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
-use std::sync::Weak;
+use std::rc::Weak;
 
 const TIME_BETWEEN_CREATION: u8 = 10;
 
@@ -24,7 +24,7 @@ pub struct SquadDuringCreation {
 pub struct Faction {
   pub id: u32,
   pub resources: u32,
-  pub squads: Vec<RefCell<Squad>>, // call borrow() and share that Ref<Squad>, if it's not possible then wrap in Rc like Vec<Rc<RefCell<Squad>>>
+  pub squads: Vec<Rc<RefCell<Squad>>>, // call borrow() and share that Ref<Squad>, if it's not possible then wrap in Rc like Vec<Rc<RefCell<Squad>>>
   pub factory: Factory,
   pub squads_during_creation: Vec<SquadDuringCreation>,
   hunters: HashMap<u32, Hunter<'static>>,
@@ -78,9 +78,13 @@ impl Faction {
       });
 
     if squad_index != MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE {
-      let squad = RefCell::new(self.squads_during_creation.remove(squad_index).squad);
-      world.all_squads.push(squad.borrow());
+      let squad = Rc::new(RefCell::new(
+        self.squads_during_creation.remove(squad_index).squad,
+      ));
       self.squads.push(squad);
+      world
+        .all_squads
+        .push(Rc::downgrade(&self.squads[self.squads.len() - 1]));
     }
   }
 
@@ -111,7 +115,11 @@ impl Faction {
   }
 
   pub fn get_representation(&self) -> Vec<f32> {
-    let start_representation = [&[0.0, self.id as f32], &self.factory.get_representation()[..]].concat();
+    let start_representation = [
+      &[0.0, self.id as f32],
+      &self.factory.get_representation()[..],
+    ]
+    .concat();
 
     let active_squads_representation: Vec<f32> = self
       .squads
@@ -148,5 +156,5 @@ impl Faction {
     });
   }
 
-  pub fn attack_enemy(&mut self, squads_ids: Vec<u32>, enemy: &Squad) {}
+  pub fn attack_enemy(&mut self, squads_ids: Vec<u32>, enemy: &Weak<RefCell<Squad>>) {}
 }

@@ -9,7 +9,9 @@ macro_rules! log {
   ($( $t:tt )*) => (web_sys::console::log_1(&format!($($t)*).into()));
 }
 // https://rustwasm.github.io/book/game-of-life/debugging.html fix debugging
-use std::cell::Ref;
+use std::cell::Cell;
+use std::cell::{Ref, RefCell};
+use std::rc::Weak;
 
 mod constants;
 mod faction;
@@ -33,7 +35,7 @@ use squad::Squad;
 const INDEX_OF_USER_FACTION: usize = 0;
 
 pub struct World {
-  all_squads: Vec<Ref<'static, Squad>>,
+  all_squads: Vec<Weak<RefCell<Squad>>>,
 }
 
 #[wasm_bindgen]
@@ -60,14 +62,9 @@ impl Universe {
     }
 
     ObstaclesLazyStatics::init_and_get_obstacles_handler(Some(obstacles_data));
-    let world = World {
-      all_squads: vec![],
-    };
+    let world = World { all_squads: vec![] };
 
-    Universe {
-      factions,
-      world,
-    }
+    Universe { factions, world }
   }
 
   pub fn get_factories_init_data(&self) -> js_sys::Float32Array {
@@ -93,7 +90,10 @@ impl Universe {
   }
 
   pub fn update(&mut self) {
-    let Universe { factions: ref mut factions, world: ref mut world } = self;
+    let Universe {
+      factions: ref mut factions,
+      world: ref mut world,
+    } = self;
     factions.iter_mut().for_each(|faction| {
       faction.resources += 1;
       faction.update(world);
@@ -173,12 +173,16 @@ impl Universe {
     }
   }
 
-  fn is_it_attack(world: &World, target_x: f32, target_y: f32) -> Option<&Ref<Squad>> {
+  fn is_it_attack(world: &World, target_x: f32, target_y: f32) -> Option<&Weak<RefCell<Squad>>> {
     let mut selected_enemy_squad = None;
 
-    for squad in world.all_squads.iter() {
-      if (squad.shared.center_point.0 - target_x)
-        .hypot(squad.shared.center_point.1 - target_y)
+    for weak_squad in world.all_squads.iter() {
+      let upgraded_squad = weak_squad.upgrade();
+      if upgraded_squad.is_none() {
+        continue;
+      }
+      let squad = upgraded_squad.unwrap().borrow();
+      if (squad.shared.center_point.0 - target_x).hypot(squad.shared.center_point.1 - target_y)
         < THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER
       {
         let corrected_target_y = target_y + squad.squad_details.unit_model_offset_y;
@@ -186,7 +190,7 @@ impl Universe {
           if (unit.x - target_x).hypot(unit.y - corrected_target_y)
             < squad.squad_details.selection_threshold
           {
-            selected_enemy_squad = Some(squad);
+            selected_enemy_squad = Some(weak_squad);
             break;
           };
         }
@@ -195,26 +199,40 @@ impl Universe {
     selected_enemy_squad
   }
 
-  pub fn move_units(
-    &mut self,
-    raw_squads_ids: Vec<f32>,
-    target_x: f32,
-    target_y: f32,
-  ) -> js_sys::Float32Array {
-    let Universe { factions: ref mut factions, world: ref world } = self;
-    let squads_ids = raw_squads_ids.into_iter().map(|id| id as u32).collect();
+  // pub fn move_units(
+  //   &mut self,
+  //   raw_squads_ids: Vec<f32>,
+  //   target_x: f32,
+  //   target_y: f32,
+  // ) -> js_sys::Float32Array {
+  //   let Universe {
+  //     factions: ref mut factions,
+  //     world: ref world,
+  //   } = self;
+  //   let squads_ids = raw_squads_ids.into_iter().map(|id| id as u32).collect();
 
-    let user_faction = &mut factions[INDEX_OF_USER_FACTION];
-    let selected_enemy_units = match Universe::is_it_attack(world, target_x, target_y) {
-      Some(squad) => {
-        user_faction.attack_enemy(squads_ids, &squad);
-        squad.members.iter().map(|unit| unit.id as f32).collect()
-      }
-      None => {
-        user_faction.move_squads(squads_ids, target_x, target_y);
-        vec![]
-      }
-    };
-    js_sys::Float32Array::from(&selected_enemy_units[..])
-  }
+  //   let user_faction = &mut factions[INDEX_OF_USER_FACTION];
+  //   let selected_enemy_units = match Universe::is_it_attack(world, target_x, target_y) {
+  //     Some(squad) => {
+  //       user_faction.attack_enemy(squads_ids, &squad);
+  //       let upgraded_squad = squad.upgrade();
+  //       if upgraded_squad.is_some() {
+  //         upgraded_squad
+  //           .unwrap()
+  //           .borrow()
+  //           .members
+  //           .iter()
+  //           .map(|unit| unit.id as f32)
+  //           .collect()
+  //       } else {
+  //         vec![]
+  //       }
+  //     }
+  //     None => {
+  //       user_faction.move_squads(squads_ids, target_x, target_y);
+  //       vec![]
+  //     }
+  //   };
+  //   js_sys::Float32Array::from(&selected_enemy_units[..])
+  // }
 }
