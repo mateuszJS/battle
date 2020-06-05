@@ -5,15 +5,11 @@ use crate::squad_types::SquadType;
 use crate::Factory;
 use crate::World;
 use std::cell::RefCell;
+use std::collections::HashMap;
 use std::rc::Rc;
 use std::rc::Weak;
 
 const TIME_BETWEEN_CREATION: u8 = 10;
-
-pub struct Hunter<'a> {
-  aim: &'a Squad,
-  target_pos: (u32, u32),
-}
 
 pub struct SquadDuringCreation {
   pub time_to_create_another_unit: u8,
@@ -157,5 +153,25 @@ impl Faction {
         squad.borrow_mut().attack_enemy(enemy);
       }
     });
+  }
+
+  pub fn manage_hunters(&mut self) {
+    let mut hunters: HashMap<u32, Vec<&Rc<RefCell<Squad>>>> = HashMap::new();
+
+    self.squads.iter().for_each(|squad| {
+      let upgraded_aim = &squad.borrow().shared.aim.upgrade();
+      if let Some(ref_cell_aim) = upgraded_aim {
+        let aim = ref_cell_aim.borrow();
+        if hunters.contains_key(&aim.id) {
+          hunters.get_mut(&aim.id).unwrap().push(squad);
+        } else {
+          hunters.insert(aim.id, vec![squad]);
+        }
+      }
+    });
+
+    hunters.values().for_each(|squads_list| {
+      log!("{:?}", squads_list.len());
+    })
   }
 }

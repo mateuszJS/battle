@@ -24,8 +24,7 @@ macro_rules! log {
 // https://rustwasm.github.io/book/game-of-life/debugging.html fix debugging
 
 use std::cell::RefCell;
-use std::rc::{Rc,Weak};
-use std::collections::HashMap;
+use std::rc::Weak;
 
 mod constants;
 mod faction;
@@ -83,7 +82,11 @@ impl Universe {
       all_moved_squads: vec![],
     };
 
-    Universe { factions, world, time: 0 }
+    Universe {
+      factions,
+      world,
+      time: 0,
+    }
   }
 
   pub fn get_factories_init_data(&self) -> js_sys::Float32Array {
@@ -108,28 +111,6 @@ impl Universe {
     unsafe { js_sys::Float32Array::view(&result[..]) }
   }
 
-  fn manage_hunters(faction: &mut Faction) {
-    let mut hunters: HashMap<u32, Vec<&Rc<RefCell<Squad>>>> = HashMap::new();
-
-    faction.squads.iter().for_each(|squad| {
-      if let Some(weak_aim) = &squad.borrow().shared.aim {
-        let upgraded_aim = weak_aim.upgrade();
-        if let Some(ref_cell_aim) = upgraded_aim {
-          let aim = ref_cell_aim.borrow();
-          if hunters.contains_key(&aim.id) {
-            hunters.get_mut(&aim.id).unwrap().push(squad);
-          } else {
-            hunters.insert(aim.id, vec![squad]);
-          }
-        }
-      }
-    });
-
-    hunters.values().for_each(|squads_list| {
-      log!("{:?}", squads_list.len());
-    })
-  }
-
   pub fn update(&mut self) {
     let Universe {
       ref mut factions,
@@ -140,7 +121,7 @@ impl Universe {
 
     factions.iter_mut().for_each(|faction| {
       if *time % 100 == 0 {
-        Universe::manage_hunters(faction);
+        faction.manage_hunters();
       }
       faction.resources += 1;
       faction.update(world);

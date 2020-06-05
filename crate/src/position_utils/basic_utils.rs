@@ -14,17 +14,17 @@ pub struct BasicUtils {}
 
 impl BasicUtils {
   // https://www.tutorialspoint.com/Check-if-two-line-segments-intersect
-  fn on_line(line: &Line, point: &Point) -> bool {
-    //check whether p is on the line or not
-    // let lineP1X = line.p1.x as i16;
-    // let lineP1Y = line.p1.y as i16;
-    // point.x as i16 <= lineP1X.max(line.p2.x as i16)
-    //   && point.x as i16 <= lineP1X.min(line.p2.x as i16)
-    //   && (point.y as i16 <= lineP1Y.max(line.p2.y as i16) && point.y as i16 <= lineP1Y.min(line.p2.y as i16))
-    point.x <= line.p1.x.max(line.p2.x)
-      && point.x <= line.p1.x.min(line.p2.x)
-      && (point.y <= line.p1.y.max(line.p2.y) && point.y <= line.p1.y.min(line.p2.y))
-  }
+  // fn on_line(line: &Line, point: &Point) -> bool {
+  //   //check whether p is on the line or not
+  //   // let lineP1X = line.p1.x as i16;
+  //   // let lineP1Y = line.p1.y as i16;
+  //   // point.x as i16 <= lineP1X.max(line.p2.x as i16)
+  //   //   && point.x as i16 <= lineP1X.min(line.p2.x as i16)
+  //   //   && (point.y as i16 <= lineP1Y.max(line.p2.y as i16) && point.y as i16 <= lineP1Y.min(line.p2.y as i16))
+  //   point.x <= line.p1.x.max(line.p2.x)
+  //     && point.x <= line.p1.x.min(line.p2.x)
+  //     && (point.y <= line.p1.y.max(line.p2.y) && point.y <= line.p1.y.min(line.p2.y))
+  // }
 
   fn direction(a: &Point, b: &Point, c: &Point) -> u8 {
     let by = b.y as i32;

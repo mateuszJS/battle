@@ -9,7 +9,7 @@ pub struct SquadUnitSharedDataSet {
   pub center_point: (f32, f32),
   pub track: Vec<(f32, f32)>,
   pub last_aim_position: (i32, i32),
-  pub aim: Option<Weak<RefCell<Squad>>>,
+  pub aim: Weak<RefCell<Squad>>,
 }
 
 pub struct Squad {
@@ -31,7 +31,7 @@ impl Squad {
         center_point: (0.0, 0.0),
         track: vec![],
         last_aim_position: (-1, -1),
-        aim: None,
+        aim: Weak::new(),
       },
     }
   }
@@ -94,10 +94,8 @@ impl Squad {
     //   // also handle case when distance is 0, then add 5, check if it's okay, if not, minsu 5, and this is have to be okay
     // }
 
-    if self.shared.aim.is_some() {
-      self.shared.aim = None;
-      self.shared.last_aim_position = (-1, -1);
-    }
+    self.shared.aim = Weak::new();
+    self.shared.last_aim_position = (-1, -1);
 
     self.shared.track = PositionUtils::get_track(
       self.shared.center_point.0,
@@ -113,7 +111,7 @@ impl Squad {
   }
 
   pub fn attack_enemy(&mut self, enemy: &Weak<RefCell<Squad>>) {
-    self.shared.aim = Some(Weak::clone(enemy));
+    self.shared.aim = Weak::clone(enemy);
     self.shared.last_aim_position = (-1, -1);
   }
 

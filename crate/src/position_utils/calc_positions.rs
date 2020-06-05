@@ -296,28 +296,69 @@ impl CalcPositions {
     }
   }
 
+  pub fn calc_squads_positions(
+    number_of_needed_position: usize,
+    x: f32,
+    y: f32,
+  ) -> Vec<PositionPoint> {
+    let mut multiple_radius: i16 = 1;
+    let mut last_visited_result_point_index: isize = -1;
+    let mut results: Vec<PositionPoint> = vec![];
+
+    let initial_point = (x as i16, y as i16);
+    if !CalcPositions::get_is_point_inside_any_obstacle(initial_point) {
+      results.push(initial_point);
+      last_visited_result_point_index += 1;
+    }
+
+    while results.len() < number_of_needed_position {
+      let (center_x, center_y) = if results.len() == 0 {
+        initial_point
+      } else {
+        results[last_visited_result_point_index as usize]
+      };
+
+      let positions: Vec<PositionPoint> = CalcPositions::get_hex_circle_position(
+        number_of_needed_position - results.len(),
+        center_x,
+        center_y,
+        multiple_radius,
+        &results,
+      );
+      results = [results, positions].concat();
+
+      if last_visited_result_point_index == (results.len() as isize) - 1 {
+        if last_visited_result_point_index != -1 {
+          last_visited_result_point_index = 0;
+        }
+        multiple_radius += 1;
+      } else {
+        last_visited_result_point_index += 1;
+      }
+    }
+
+    results
+  }
+
   pub fn calc_units_in_squad_position(number_of_needed_position: usize) -> Vec<(f32, f32)> {
     let mut result: Vec<(f32, f32)> = vec![(0.0, 0.0)];
     let mut radius: f32 = UNIT_COHERENCY;
     let mut angle: f32 = 0.0;
     let mut angle_diff: f32 = ((UNIT_COHERENCY / 2.0) / radius).asin() * 2.0;
 
-    let (sum_x_positions, sum_y_positions) = (0..number_of_needed_position - 1)
-      .fold(
-        (0.0, 0.0), 
-        |(sum_x, sum_y), _| {
-          let x = angle.sin() * radius;
-          let y = -angle.cos() * radius;
-          angle += angle_diff;
-          if angle > (2.0 * MATH_PI) - angle_diff {
-            angle = 0.0;
-            radius += UNIT_COHERENCY;
-            angle_diff = ((UNIT_COHERENCY / 2.0) / radius).asin() * 2.0;
-          }
-          result.push((x, y));
-          (sum_x + x, sum_y + y)
-        },
-      );
+    let (sum_x_positions, sum_y_positions) =
+      (0..number_of_needed_position - 1).fold((0.0, 0.0), |(sum_x, sum_y), _| {
+        let x = angle.sin() * radius;
+        let y = -angle.cos() * radius;
+        angle += angle_diff;
+        if angle > (2.0 * MATH_PI) - angle_diff {
+          angle = 0.0;
+          radius += UNIT_COHERENCY;
+          angle_diff = ((UNIT_COHERENCY / 2.0) / radius).asin() * 2.0;
+        }
+        result.push((x, y));
+        (sum_x + x, sum_y + y)
+      });
 
     let center_x: f32 = sum_x_positions / (number_of_needed_position as f32);
     let center_y: f32 = sum_y_positions / (number_of_needed_position as f32);
