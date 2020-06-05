@@ -169,9 +169,37 @@ impl Faction {
         }
       }
     });
-
     hunters.values().for_each(|squads_list| {
-      log!("{:?}", squads_list.len());
-    })
+      let squads_average_pos =
+        squads_list
+          .iter()
+          .fold((0.0, 0.0), |(sum_x, sum_y), squad: &&Rc<RefCell<Squad>>| {
+            let squad = squad.borrow();
+            (
+              sum_x + squad.shared.center_point.0,
+              sum_y + squad.shared.center_point.1,
+            )
+          });
+
+      let positions = PositionUtils::get_attackers_position(
+        squads_list.len(),
+        squads_average_pos,
+        600.0,
+        squads_list[0]
+          .borrow()
+          .shared
+          .aim
+          .upgrade()
+          .unwrap()
+          .borrow()
+          .shared
+          .center_point,
+      );
+
+      squads_list.iter().enumerate().for_each(|(index, squad)| {
+        let position = positions[index];
+        squad.borrow_mut().add_target(position.0, position.1);
+      });
+    });
   }
 }
