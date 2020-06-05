@@ -66,22 +66,21 @@ impl PositionUtils {
     range: f32,
     aim: (f32, f32),
   ) -> Vec<(f32, f32)> {
-    let angle = (squads_average_position.0 - aim.0).atan2(aim.1 - squads_average_position.1);
-    let diff_angle = (1.0 - (DISTANCE_BETWEEN_ATTACKERS.powi(2) / 2.0 * range.powi(2))).acos();
-    let first_position = (angle.sin() * range + aim.0, -angle.cos() * range + aim.1);
-    let mut result = vec![first_position];
+    let angle_from_aim = (squads_average_position.0 - aim.0).atan2(aim.1 - squads_average_position.1);
+    let diff_angle = (1.0 - (DISTANCE_BETWEEN_ATTACKERS.powi(2) / (2.0 * range.powi(2)))).acos();
+    let mut result = vec![];
     let mut multiple_by = 0.0;
 
     while result.len() < number_of_needed_positions {
       result.push((
-        (angle + multiple_by * diff_angle).sin() * range + aim.0,
-        -(angle + multiple_by * diff_angle).cos() * range + aim.1,
+        (angle_from_aim + multiple_by * diff_angle).sin() * range + aim.0,
+        -(angle_from_aim + multiple_by * diff_angle).cos() * range + aim.1,
       ));
 
-      if multiple_by < 0.0 {
+      if multiple_by > 0.0 {
         multiple_by = -multiple_by;
       } else {
-        multiple_by = diff_angle - multiple_by;
+        multiple_by = 1.0 - multiple_by;
       }
     }
 

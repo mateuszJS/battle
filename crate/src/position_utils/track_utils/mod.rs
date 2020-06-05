@@ -95,13 +95,13 @@ impl TrackUtils {
         let previous_point = track[index - 1];
         let next_point = track[index + 1];
 
-        let to_previous_point_angle = (point.x - previous_point.x).atan2(previous_point.y - point.y);
-        let to_next_point_angle = (point.x - next_point.x).atan2(next_point.y - point.y);
+        let from_previous_point_angle = (point.x - previous_point.x).atan2(previous_point.y - point.y);
+        let from_next_point_angle = (point.x - next_point.x).atan2(next_point.y - point.y);
 
-        if (to_previous_point_angle - to_next_point_angle) % MATH_PI == 0.0 { // straight line
+        if (from_previous_point_angle - from_next_point_angle).abs() % MATH_PI <= std::f32::EPSILON { // straight line
           // in this case it's impossible to figure out, on
           // which site are obstacles (if are even on one site)
-          let angle = to_previous_point_angle + MATH_PI / 2.0;
+          let angle = from_previous_point_angle + MATH_PI / 2.0;
           let maybe_correct_point = (
             (angle.sin() * NORMAL_SQUAD_RADIUS + point.x) as i16,
             (-angle.cos() * NORMAL_SQUAD_RADIUS + point.y) as i16,
@@ -124,8 +124,8 @@ impl TrackUtils {
           }
         } else {
           // https://rosettacode.org/wiki/Averages/Mean_angle#Rust
-          let sin_mean = (to_previous_point_angle.sin() + to_next_point_angle.sin()) / 2.0;
-          let cos_mean = (to_previous_point_angle.cos() + to_next_point_angle.cos()) / 2.0;
+          let sin_mean = (from_previous_point_angle.sin() + from_next_point_angle.sin()) / 2.0;
+          let cos_mean = (from_previous_point_angle.cos() + from_next_point_angle.cos()) / 2.0;
           let mean_angle = sin_mean.atan2(cos_mean);
 
           (

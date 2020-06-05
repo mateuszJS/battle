@@ -170,7 +170,7 @@ impl Faction {
       }
     });
     hunters.values().for_each(|squads_list| {
-      let squads_average_pos =
+      let (sum_x, sum_y) =
         squads_list
           .iter()
           .fold((0.0, 0.0), |(sum_x, sum_y), squad: &&Rc<RefCell<Squad>>| {
@@ -183,7 +183,7 @@ impl Faction {
 
       let positions = PositionUtils::get_attackers_position(
         squads_list.len(),
-        squads_average_pos,
+        (sum_x / squads_list.len() as f32, sum_y / squads_list.len() as f32),
         600.0,
         squads_list[0]
           .borrow()
@@ -195,7 +195,7 @@ impl Faction {
           .shared
           .center_point,
       );
-
+      log!("{:?}", positions);
       squads_list.iter().enumerate().for_each(|(index, squad)| {
         let position = positions[index];
         squad.borrow_mut().add_target(position.0, position.1);
