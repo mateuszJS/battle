@@ -3,13 +3,11 @@ pub mod calc_positions;
 pub mod obstacles_lazy_statics;
 mod track_utils;
 
-use crate::constants::NORMAL_SQUAD_RADIUS;
 use basic_utils::Point;
 use calc_positions::CalcPositions;
 use track_utils::TrackUtils;
 
 const MAX_NUMBER_OF_UNITS_IN_SQUAD: usize = 7;
-const DISTANCE_BETWEEN_ATTACKERS: f32 = 2.0 * NORMAL_SQUAD_RADIUS;
 
 type PositionPoint = (i16, i16);
 
@@ -66,24 +64,6 @@ impl PositionUtils {
     range: f32,
     aim: (f32, f32),
   ) -> Vec<(f32, f32)> {
-    let angle_from_aim = (squads_average_position.0 - aim.0).atan2(aim.1 - squads_average_position.1);
-    let diff_angle = (1.0 - (DISTANCE_BETWEEN_ATTACKERS.powi(2) / (2.0 * range.powi(2)))).acos();
-    let mut result = vec![];
-    let mut multiple_by = 0.0;
-
-    while result.len() < number_of_needed_positions {
-      result.push((
-        (angle_from_aim + multiple_by * diff_angle).sin() * range + aim.0,
-        -(angle_from_aim + multiple_by * diff_angle).cos() * range + aim.1,
-      ));
-
-      if multiple_by > 0.0 {
-        multiple_by = -multiple_by;
-      } else {
-        multiple_by = 1.0 - multiple_by;
-      }
-    }
-
-    result
+    CalcPositions::get_attackers_positions(aim, squads_average_position, number_of_needed_positions)
   }
 }

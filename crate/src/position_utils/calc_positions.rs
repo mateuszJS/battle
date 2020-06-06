@@ -1,11 +1,12 @@
 use super::basic_utils::{BasicUtils, Line, Point};
 use super::obstacles_lazy_statics::ObstaclesLazyStatics;
-use crate::constants::MATH_PI;
+use crate::constants::{MATH_PI, NORMAL_SQUAD_RADIUS};
 
 const NUMBER_OF_PRECALCULATED_OFFSETS: usize = 4;
 const TRIANGLE_BASE_WIDTH: i16 = 140;
 const TRIANGLE_HEIGHT: i16 = 113;
 const UNIT_COHERENCY: f32 = 50.0;
+const DISTANCE_BETWEEN_ATTACKERS: f32 = 2.0 * NORMAL_SQUAD_RADIUS;
 
 type PositionPoint = (i16, i16);
 
@@ -227,44 +228,23 @@ impl CalcPositions {
     all_results: &Vec<PositionPoint>,
   ) -> Vec<PositionPoint> {
     lazy_static! {
-      static ref PRECALCULATED_OFFSETS: [Vec<PositionPoint>; NUMBER_OF_PRECALCULATED_OFFSETS] = {
+      static ref PRECALCULATED_OFFSETS: Vec<Vec<PositionPoint>> = {
         let empty_vector = vec![];
-        [
-          CalcPositions::calculate_hex_circle_position(
-            usize::max_value(),
-            0,
-            0,
-            1,
-            &empty_vector,
-            false,
-          ),
-          CalcPositions::calculate_hex_circle_position(
-            usize::max_value(),
-            0,
-            0,
-            2,
-            &empty_vector,
-            false,
-          ),
-          CalcPositions::calculate_hex_circle_position(
-            usize::max_value(),
-            0,
-            0,
-            3,
-            &empty_vector,
-            false,
-          ),
-          CalcPositions::calculate_hex_circle_position(
-            usize::max_value(),
-            0,
-            0,
-            4,
-            &empty_vector,
-            false,
-          ),
-        ]
+        (1..=NUMBER_OF_PRECALCULATED_OFFSETS)
+          .map(|i| {
+            CalcPositions::calculate_hex_circle_position(
+              usize::max_value(),
+              0,
+              0,
+              i as i16,
+              &empty_vector,
+              false,
+            )
+          })
+          .collect()
       };
     };
+
     if multiple_range_factor as usize <= NUMBER_OF_PRECALCULATED_OFFSETS {
       let calculated_offsets = &PRECALCULATED_OFFSETS[(multiple_range_factor - 1) as usize];
       let mut points = vec![];
@@ -366,5 +346,65 @@ impl CalcPositions {
       .into_iter()
       .map(|(x, y)| (x - center_x, y - center_y))
       .collect()
+  }
+
+  pub fn get_attackers_positions(
+    target: (f32, f32),
+    source: (f32, f32),
+    needed_positions: usize,
+  ) -> Vec<(f32, f32)> {
+    lazy_static! {
+      static ref PRECALCULATED_ATTACKERS_POSITIONS: Vec<(f32, f32)> = {
+        let mut range: f32 = 600.0;
+        let mut positions = vec![];
+
+        while range > DISTANCE_BETWEEN_ATTACKERS {
+          let diff_angle = (1.0 - (DISTANCE_BETWEEN_ATTACKERS.powi(2) / (2.0 * range.powi(2)))).acos();
+          let mut multiple_by = 0.0;
+
+          while (multiple_by * diff_angle).abs() < MATH_PI - diff_angle / 2.0 {
+            let angle = multiple_by * diff_angle;
+            positions.push((angle, range));
+
+            if multiple_by > 0.0 {
+              multiple_by = -multiple_by;
+            } else {
+              multiple_by = 1.0 - multiple_by;
+            }
+          }
+          range -= DISTANCE_BETWEEN_ATTACKERS;
+        }
+
+        positions.sort_by(|a, b| {
+          let y_a = -a.0.cos() * a.1;
+          let y_b = -b.0.cos() * b.1;
+          (y_a).partial_cmp(&y_b).unwrap()
+          // angle is 0, so comparing y is enough
+        });
+
+        positions
+      };
+    };
+
+    let mut result = vec![];
+    let mut position_index = 0;
+    let angle_from_aim = (source.0 - target.0).atan2(target.1 - source.1);
+    let precalc_positions_number = PRECALCULATED_ATTACKERS_POSITIONS.len();
+
+    while result.len() < needed_positions {
+      let precalc_pos_info = PRECALCULATED_ATTACKERS_POSITIONS[position_index];
+      let real_position = (
+        (angle_from_aim + precalc_pos_info.0).sin() * precalc_pos_info.1 + target.0,
+        -(angle_from_aim + precalc_pos_info.0).cos() * precalc_pos_info.1 + target.1,
+      );
+      if !CalcPositions::get_is_point_inside_any_obstacle((
+        real_position.0 as i16,
+        real_position.1 as i16,
+      )) {
+        result.push(real_position);
+      }
+      position_index = (position_index + 1) % precalc_positions_number;
+    }
+    result
   }
 }
