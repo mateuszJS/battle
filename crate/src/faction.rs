@@ -173,13 +173,13 @@ impl Faction {
       if let Some(ref_cell_aim) = upgraded_aim {
         let aim = ref_cell_aim.borrow();
         let aim_point = aim.shared.center_point;
-        let squad_point = squad.shared.last_aim_position;
-        let distance_to_enemy = (aim.shared.center_point.0 - squad.shared.center_point.0)
-          .hypot(aim.shared.center_point.1 - squad.shared.center_point.1);
+        let aim_last_point = squad.shared.last_aim_position;
+        let distance_to_enemy = (aim_point.0 - squad.shared.center_point.0)
+          .hypot(aim_point.1 - squad.shared.center_point.1);
 
         if distance_to_enemy > ATTACKERS_DISTANCE {
           // is out of attacker range
-          let diff_distance = (aim_point.0 - squad_point.0).hypot(aim_point.1 - squad_point.1);
+          let diff_distance = (aim_point.0 - aim_last_point.0).hypot(aim_point.1 - aim_last_point.1);
 
           if diff_distance > THRESHOLD_SQUAD_ON_POSITION {
             // and enemy was move
@@ -189,7 +189,8 @@ impl Faction {
               hunters.insert(aim.id, vec![cell_squad]);
             }
           }
-        } else {
+        } else if (aim_last_point.0 - squad.shared.center_point.0)
+        .hypot(aim_last_point.1 - squad.shared.center_point.1) > distance_to_enemy {
           // else if squad is not already staying
           squad.stop_running();
         }
