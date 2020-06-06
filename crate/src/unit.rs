@@ -1,4 +1,4 @@
-use crate::constants::{MATH_PI, MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS};
+use crate::constants::{MATH_PI, MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS, THRESHOLD_SQUAD_ON_POSITION};
 use crate::id_generator::IdGenerator;
 use crate::look_up_table::LookUpTable;
 use crate::position_utils::basic_utils::{BasicUtils, Line, Point};
@@ -121,10 +121,10 @@ impl Unit {
       1
     };
     // TODO: add that offset only in some cases
-    self.set_next_target(squad_shared_info);
+    self.update_target(squad_shared_info);
   }
 
-  fn set_next_target(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
+  pub fn update_target(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
     self.target_x = squad_shared_info.track[self.track_index].0 + self.position_offset_x;
     self.target_y = squad_shared_info.track[self.track_index].1 + self.position_offset_y;
     let angle = (self.target_x - self.x).atan2(self.y - self.target_y);
@@ -136,10 +136,24 @@ impl Unit {
   fn update_run(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
     if (self.x - self.target_x).hypot(self.y - self.target_y) < self.squad_details.movement_speed {
       if squad_shared_info.track.len() - 1 == self.track_index {
-        self.change_state_to_idle();
+        if let Some(ref_cell_aim) = squad_shared_info.aim.upgrade() {
+          let aim_pos = ref_cell_aim.borrow().shared.center_point;
+          if (aim_pos.0 - squad_shared_info.last_aim_position.0)
+            .hypot(aim_pos.1 - squad_shared_info.last_aim_position.1)
+            > THRESHOLD_SQUAD_ON_POSITION
+          {
+            // to avoid effect like RUN and IDLE all the time when hunting on enemy
+            self.target_x += self.mod_x * 100.0; // add difference between last_aim_position and current position of aim
+            self.target_y += self.mod_y * 100.0;
+          } else {
+            self.change_state_to_idle();
+          }
+        } else {
+          self.change_state_to_idle();
+        }
       } else {
         self.track_index += 1;
-        self.set_next_target(squad_shared_info);
+        self.update_target(squad_shared_info);
       }
     } else {
       self.x += self.mod_x;
@@ -147,7 +161,7 @@ impl Unit {
     }
   }
 
-  fn change_state_to_idle(&mut self) {
+  pub fn change_state_to_idle(&mut self) {
     self.mod_x = 0.0;
     self.mod_y = 0.0;
     self.state = STATE_IDLE;

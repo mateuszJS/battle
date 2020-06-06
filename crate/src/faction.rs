@@ -1,4 +1,6 @@
-use crate::constants::MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE;
+use crate::constants::{
+  ATTACKERS_DISTANCE, MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE, THRESHOLD_SQUAD_ON_POSITION,
+};
 use crate::position_utils::PositionUtils;
 use crate::squad::Squad;
 use crate::squad_types::SquadType;
@@ -74,6 +76,7 @@ impl Faction {
       let squad = Rc::new(RefCell::new(
         self.squads_during_creation.remove(squad_index).squad,
       ));
+      squad.borrow_mut().update_center();
       world.all_squads.push(Rc::downgrade(&squad));
       self.squads.push(squad);
     }
@@ -95,7 +98,7 @@ impl Faction {
 
     self
       .squads
-      .iter_mut()
+      .iter()
       .for_each(|squad| squad.borrow_mut().update());
     self
       .squads_during_creation
@@ -141,7 +144,7 @@ impl Faction {
         let squad_target = position[index];
         squad
           .borrow_mut()
-          .add_target(squad_target.0, squad_target.1);
+          .add_target(squad_target.0, squad_target.1, true);
         index += 1;
       }
     });
@@ -155,21 +158,44 @@ impl Faction {
     });
   }
 
+  pub fn update_squads_centers(&mut self) {
+    self
+      .squads
+      .iter_mut()
+      .for_each(|squad| squad.borrow_mut().update_center());
+  }
+
   pub fn manage_hunters(&mut self) {
     let mut hunters: HashMap<u32, Vec<&Rc<RefCell<Squad>>>> = HashMap::new();
-
-    self.squads.iter().for_each(|squad| {
-      let upgraded_aim = &squad.borrow().shared.aim.upgrade();
+    self.squads.iter().for_each(|cell_squad| {
+      let mut squad = cell_squad.borrow_mut();
+      let upgraded_aim = &squad.shared.aim.upgrade();
       if let Some(ref_cell_aim) = upgraded_aim {
         let aim = ref_cell_aim.borrow();
-        if hunters.contains_key(&aim.id) {
-          hunters.get_mut(&aim.id).unwrap().push(squad);
+        let aim_point = aim.shared.center_point;
+        let squad_point = squad.shared.last_aim_position;
+        let distance_to_enemy = (aim.shared.center_point.0 - squad.shared.center_point.0)
+          .hypot(aim.shared.center_point.1 - squad.shared.center_point.1);
+
+        if distance_to_enemy > ATTACKERS_DISTANCE {
+          // is out of attacker range
+          let diff_distance = (aim_point.0 - squad_point.0).hypot(aim_point.1 - squad_point.1);
+
+          if diff_distance > THRESHOLD_SQUAD_ON_POSITION {
+            // and enemy was move
+            if hunters.contains_key(&aim.id) {
+              hunters.get_mut(&aim.id).unwrap().push(cell_squad);
+            } else {
+              hunters.insert(aim.id, vec![cell_squad]);
+            }
+          }
         } else {
-          hunters.insert(aim.id, vec![squad]);
+          // else if squad is not already staying
+          squad.stop_running();
         }
       }
     });
-    hunters.values().for_each(|squads_list| {
+    hunters.values_mut().for_each(|squads_list| {
       let (sum_x, sum_y) =
         squads_list
           .iter()
@@ -181,11 +207,37 @@ impl Faction {
             )
           });
 
+      let aim_position = squads_list[0]
+        .borrow()
+        .shared
+        .aim
+        .upgrade()
+        .unwrap()
+        .borrow()
+        .shared
+        .center_point;
+
       let positions = PositionUtils::get_attackers_position(
         squads_list.len(),
-        (sum_x / squads_list.len() as f32, sum_y / squads_list.len() as f32),
+        (
+          sum_x / squads_list.len() as f32,
+          sum_y / squads_list.len() as f32,
+        ),
         600.0,
-        squads_list[0]
+        aim_position,
+      );
+
+      squads_list.sort_by(|a, b| {
+        // sort by id, to avoid changing position on each attack
+        // the best would be to calc the nearest destination position to each squad
+        let squad_a_pos = a.borrow().id;
+        let squad_b_pos = b.borrow().id;
+        (squad_a_pos).partial_cmp(&squad_b_pos).unwrap()
+      });
+
+      squads_list.iter().enumerate().for_each(|(index, squad)| {
+        let position = positions[index];
+        let enemy_center_point = squad
           .borrow()
           .shared
           .aim
@@ -193,12 +245,10 @@ impl Faction {
           .unwrap()
           .borrow()
           .shared
-          .center_point,
-      );
-      log!("{:?}", positions);
-      squads_list.iter().enumerate().for_each(|(index, squad)| {
-        let position = positions[index];
-        squad.borrow_mut().add_target(position.0, position.1);
+          .center_point;
+        let mut mut_squad = squad.borrow_mut();
+        mut_squad.add_target(position.0, position.1, false);
+        mut_squad.shared.last_aim_position = enemy_center_point;
       });
     });
   }

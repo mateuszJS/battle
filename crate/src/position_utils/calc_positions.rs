@@ -1,6 +1,6 @@
 use super::basic_utils::{BasicUtils, Line, Point};
 use super::obstacles_lazy_statics::ObstaclesLazyStatics;
-use crate::constants::{MATH_PI, NORMAL_SQUAD_RADIUS};
+use crate::constants::{ATTACKERS_DISTANCE, MATH_PI, NORMAL_SQUAD_RADIUS};
 
 const NUMBER_OF_PRECALCULATED_OFFSETS: usize = 4;
 const TRIANGLE_BASE_WIDTH: i16 = 140;
@@ -355,7 +355,7 @@ impl CalcPositions {
   ) -> Vec<(f32, f32)> {
     lazy_static! {
       static ref PRECALCULATED_ATTACKERS_POSITIONS: Vec<(f32, f32)> = {
-        let mut range: f32 = 600.0;
+        let mut range: f32 = ATTACKERS_DISTANCE;
         let mut positions = vec![];
 
         while range > DISTANCE_BETWEEN_ATTACKERS {

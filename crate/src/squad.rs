@@ -1,3 +1,4 @@
+use crate::constants::{THRESHOLD_SQUAD_ON_POSITION, WEAPON_RANGE};
 use crate::id_generator::IdGenerator;
 use crate::position_utils::PositionUtils;
 use crate::squad_types::{get_squad_details, SquadDetails, SquadType};
@@ -8,7 +9,7 @@ use std::rc::Weak;
 pub struct SquadUnitSharedDataSet {
   pub center_point: (f32, f32),
   pub track: Vec<(f32, f32)>,
-  pub last_aim_position: (i32, i32),
+  pub last_aim_position: (f32, f32),
   pub aim: Weak<RefCell<Squad>>,
 }
 
@@ -30,24 +31,28 @@ impl Squad {
       shared: SquadUnitSharedDataSet {
         center_point: (0.0, 0.0),
         track: vec![],
-        last_aim_position: (-1, -1),
+        last_aim_position: (-1.0, -1.0),
         aim: Weak::new(),
       },
     }
   }
 
+  pub fn update_center(&mut self) {
+    let Self {
+      ref mut members,
+      ref mut shared,
+      ..
+    } = self;
+    let (sum_x, sum_y) = members.iter().fold((0.0, 0.0), |(sum_x, sum_y), unit| {
+      (sum_x + unit.x, sum_y + unit.y)
+    });
+    shared.center_point.0 = sum_x / members.len() as f32;
+    shared.center_point.1 = sum_y / members.len() as f32;
+  }
+
   pub fn update(&mut self) {
     let shared = &self.shared;
-    let (sum_x, sum_y) = self
-      .members
-      .iter_mut()
-      .fold((0.0, 0.0), |(sum_x, sum_y), unit| {
-        // TODO: should be done once per couple of seconds
-        unit.update(shared);
-        (sum_x + unit.x, sum_y + unit.y)
-      });
-    self.shared.center_point.0 = sum_x / self.members.len() as f32;
-    self.shared.center_point.1 = sum_y / self.members.len() as f32;
+    self.members.iter_mut().for_each(|unit| unit.update(shared));
   }
 
   pub fn get_representation(&self) -> Vec<f32> {
@@ -83,7 +88,7 @@ impl Squad {
       })
   }
 
-  pub fn add_target(&mut self, destination_x: f32, destination_y: f32) {
+  pub fn add_target(&mut self, destination_x: f32, destination_y: f32, clear_aim: bool) {
     // let is_center_inside_obstacle =
     //   CalcPositions::get_is_point_inside_any_obstacle((destination_x as i16, destination_y as i16));
     // if is_center_inside_obstacle {
@@ -93,9 +98,10 @@ impl Squad {
     //   // TODO: calc segment, from squad_center thought closest_point to outsite (like plus 5?)
     //   // also handle case when distance is 0, then add 5, check if it's okay, if not, minsu 5, and this is have to be okay
     // }
-
-    self.shared.aim = Weak::new();
-    self.shared.last_aim_position = (-1, -1);
+    if clear_aim {
+      self.shared.aim = Weak::new();
+      self.shared.last_aim_position = (-1.0, -1.0);
+    }
 
     self.shared.track = PositionUtils::get_track(
       self.shared.center_point.0,
@@ -110,9 +116,16 @@ impl Squad {
       .for_each(|unit| unit.change_state_to_run(shared));
   }
 
+  pub fn stop_running(&mut self) {
+    self
+      .members
+      .iter_mut()
+      .for_each(|unit| unit.change_state_to_idle());
+  }
+
   pub fn attack_enemy(&mut self, enemy: &Weak<RefCell<Squad>>) {
     self.shared.aim = Weak::clone(enemy);
-    self.shared.last_aim_position = (-1, -1);
+    self.stop_running();
   }
 
   pub fn remove_member(&mut self) {

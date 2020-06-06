@@ -39,7 +39,9 @@ mod unit;
 
 use wasm_bindgen::prelude::*;
 
-use constants::THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER;
+use constants::{
+  MANAGE_HUNTERS_PERIOD, THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER, UPDATE_SQUAD_CENTER_PERIOD,
+};
 use faction::Faction;
 use factory::Factory;
 use position_utils::obstacles_lazy_statics::ObstaclesLazyStatics;
@@ -119,13 +121,32 @@ impl Universe {
     } = self;
     *time = (*time + 1) % 1000;
 
-    factions.iter_mut().for_each(|faction| {
-      if *time % 100 == 0 {
+    factions.iter_mut().for_each(|faction: &mut Faction| {
+      if *time % UPDATE_SQUAD_CENTER_PERIOD == 0 {
+        faction.update_squads_centers();
+      }
+    });
+
+    factions.iter_mut().for_each(|faction: &mut Faction| {
+      if *time % MANAGE_HUNTERS_PERIOD == 0 {
         faction.manage_hunters();
+      }
+
+      if *time % 1000 == 0 && faction.id == 2 && faction.squads.len() > 0 {
+        let squad_id = faction.squads[0].borrow().id;
+        faction.move_squads(
+          vec![squad_id],
+          if faction.squads[0].borrow().shared.center_point.0 > 2000.0 {
+            200.0
+          } else {
+            2200.0
+          },
+          1300.0,
+        );
       }
       faction.resources += 1;
       faction.update(world);
-    })
+    });
   }
 
   pub fn get_universe_data(&self) -> js_sys::Float32Array {
@@ -206,8 +227,9 @@ impl Universe {
     for weak_squad in world.all_squads.iter() {
       if let Some(unwrapper_squad) = weak_squad.upgrade() {
         let squad = unwrapper_squad.borrow();
-        if (squad.shared.center_point.0 - target_x).hypot(squad.shared.center_point.1 - target_y)
-          < THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER
+        if squad.faction_id != INDEX_OF_USER_FACTION as u32
+          && (squad.shared.center_point.0 - target_x).hypot(squad.shared.center_point.1 - target_y)
+            < THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER
         {
           let corrected_target_y = target_y + squad.squad_details.unit_model_offset_y;
           for unit in squad.members.iter() {
