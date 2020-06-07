@@ -167,9 +167,11 @@ impl Faction {
 
   pub fn manage_hunters(&mut self) {
     let mut hunters: HashMap<u32, Vec<&Rc<RefCell<Squad>>>> = HashMap::new();
+
     self.squads.iter().for_each(|cell_squad| {
       let mut squad = cell_squad.borrow_mut();
       let upgraded_aim = &squad.shared.aim.upgrade();
+
       if let Some(ref_cell_aim) = upgraded_aim {
         let aim = ref_cell_aim.borrow();
         let aim_point = aim.shared.center_point;
@@ -196,6 +198,7 @@ impl Faction {
         }
       }
     });
+
     hunters.values_mut().for_each(|squads_list| {
       let (sum_x, sum_y) =
         squads_list

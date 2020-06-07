@@ -138,6 +138,8 @@ impl Unit {
   fn update_run(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
     if (self.x - self.target_x).hypot(self.y - self.target_y) < self.squad_details.movement_speed {
       if squad_shared_info.track.len() - 1 == self.track_index {
+
+        // --------------- handle hunting ----------------- START
         if let Some(ref_cell_aim) = squad_shared_info.aim.upgrade() {
           let aim_pos = ref_cell_aim.borrow().shared.center_point;
           if (aim_pos.0 - squad_shared_info.last_aim_position.0)
@@ -150,6 +152,8 @@ impl Unit {
           } else {
             self.change_state_to_shoot(squad_shared_info);
           }
+          // --------------- handle hunting ----------------- END
+
         } else {
           self.change_state_to_idle();
         }
@@ -174,16 +178,26 @@ impl Unit {
     // check if not too far from squad center point
   }
 
-  fn change_state_to_shoot(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
+  pub fn change_state_to_shoot(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
     self.state = STATE_SHOOT;
-    // choose certain unit in enemy squad to attack
-    // set correct angle
+    // if aim die, then just
+      // lives
+        // check if it's too far
+          // is in range:
+            // choose certain unit in the enemy squad to attack
+            // set correct angle
+          // is outside of the range
+            // run to the aim
+      // go to idle
   }
 
-  fn update_shoot(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
-    // update the angle
+  fn update_shoot(&mut self) {
+    // if Some(upgraded_aim) = self.aim.upgrade() { // check if chosen enemy still lives
+      // let aim = upgraded_aim.borrow(); // check if state is moving and if it's still in range
+      // self.angle = (aim.0)
+    // } // if not live or out of range, then go to change_state_to_shoot to select a new one
     if self.time_to_next_shoot == 0 {
-      // make shoot, create bullet, change state to let know for rerpesentation that shoot was created
+      // make shoot, create bullet, change state to let know for representation that shoot was created
       let random = LookUpTable::get_random() - 0.5;
 
       self.time_to_next_shoot = if random.abs() > 0.4 { // 25% chances to reload
@@ -202,7 +216,7 @@ impl Unit {
       STATE_GETUP => self.update_getup(),
       STATE_RUN => self.update_run(squad_shared_info),
       STATE_IDLE => self.update_idle(),
-      STATE_SHOOT => self.update_shoot(squad_shared_info),
+      STATE_SHOOT => self.update_shoot(),
       _ => {}
     }
   }

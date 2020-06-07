@@ -117,10 +117,14 @@ impl Squad {
   }
 
   pub fn stop_running(&mut self) {
-    self
-      .members
-      .iter_mut()
-      .for_each(|unit| unit.change_state_to_idle());
+    let Self { ref mut members, ref shared, .. } = self;
+    if shared.aim.upgrade().is_some() {
+      // what if unit it's far away from the center?
+      members.iter_mut().for_each(|unit| unit.change_state_to_shoot(&shared));
+    } else {
+      // what if unit it's far away from the center?
+      members.iter_mut().for_each(|unit| unit.change_state_to_idle());
+    }
   }
 
   pub fn attack_enemy(&mut self, enemy: &Weak<RefCell<Squad>>) {
