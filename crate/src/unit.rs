@@ -31,11 +31,12 @@ pub struct Unit {
   position_offset_y: f32,
   track_index: usize,
   squad_details: &'static SquadDetails,
+  time_to_next_shoot: u16,
 }
 
 impl Unit {
   pub fn new(x: f32, y: f32, angle: f32, squad_details: &'static SquadDetails) -> Unit {
-    let seed_throwing_strength = LookUpTable::get_random();
+    let seed_throwing_strength = LookUpTable::get_random(); // TODO: move it to factory code, or faction
     let throwing_strength = 8.0 + seed_throwing_strength * 15.0;
 
     Unit {
@@ -53,6 +54,7 @@ impl Unit {
       position_offset_y: 0.0,
       track_index: 0,
       squad_details,
+      time_to_next_shoot: 0,
     }
   }
 
@@ -146,7 +148,7 @@ impl Unit {
             self.target_x += self.mod_x * 100.0; // add difference between last_aim_position and current position of aim
             self.target_y += self.mod_y * 100.0;
           } else {
-            self.change_state_to_idle();
+            self.change_state_to_shoot(squad_shared_info);
           }
         } else {
           self.change_state_to_idle();
@@ -172,7 +174,27 @@ impl Unit {
     // check if not too far from squad center point
   }
 
-  fn update_shoot(&mut self) {}
+  fn change_state_to_shoot(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
+    self.state = STATE_SHOOT;
+    // choose certain unit in enemy squad to attack
+    // set correct angle
+  }
+
+  fn update_shoot(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
+    // update the angle
+    if self.time_to_next_shoot == 0 {
+      // make shoot, create bullet, change state to let know for rerpesentation that shoot was created
+      let random = LookUpTable::get_random() - 0.5;
+
+      self.time_to_next_shoot = if random.abs() > 0.4 { // 25% chances to reload
+        200
+      } else {
+        40
+      };
+    } else {
+      self.time_to_next_shoot -= 1;
+    }
+  }
 
   pub fn update(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
     match self.state {
@@ -180,7 +202,7 @@ impl Unit {
       STATE_GETUP => self.update_getup(),
       STATE_RUN => self.update_run(squad_shared_info),
       STATE_IDLE => self.update_idle(),
-      STATE_SHOOT => self.update_shoot(),
+      STATE_SHOOT => self.update_shoot(squad_shared_info),
       _ => {}
     }
   }
@@ -197,6 +219,7 @@ impl Unit {
         // additional parameter for state, used below
         STATE_FLY => self.mod_x.hypot(self.mod_y),
         STATE_GETUP => self.get_upping_progress,
+        STATE_SHOOT => self.time_to_next_shoot as f32,
         _ => 0.0,
       },
     ]

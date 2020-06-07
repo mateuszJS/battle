@@ -3,6 +3,7 @@ import {
   getIndexOfStartingFrame,
   getCallbackStopOnLastFrame,
   getCallbackGoToFirstOnLastFrame,
+  getCallbackGoToFirstOnLastFrameAndStop,
 } from './utils'
 
 type FramesPeriods = {
@@ -110,10 +111,36 @@ const getSprites = () => {
           )
         }
       },
-      goToShoot(angle: number) {
-        // stop at end frame
-        // call again if isShoot = true
-        movieClip.gotoAndStop(framesPeriods.SHOOT.first)
+      goToShoot(angle: number, shootProgress: number) {
+        const isShoot = shootProgress === 0
+        const currentPhase = `shoot${Math.round(angle * 100)}`
+
+        if (previousPhase !== currentPhase) {
+          previousPhase = currentPhase
+          const indexOfStartingFrame = getIndexOfStartingFrame(
+            angle,
+            framesPeriods.SHOOT,
+          )
+          movieClip.gotoAndStop(indexOfStartingFrame)
+        }
+
+        if (isShoot) {
+          const indexOfStartingFrame = getIndexOfStartingFrame(
+            angle,
+            framesPeriods.SHOOT,
+          )
+          const indexOfLastFrame =
+            indexOfStartingFrame + framesPeriods.SHOOT.length
+          movieClip.gotoAndPlay(indexOfStartingFrame)
+          // actually we cold create frames with half of shotY
+          // and after the last frame, just animate in reverse, to first frame
+          movieClip.onFrameChange = getCallbackGoToFirstOnLastFrameAndStop(
+            indexOfStartingFrame,
+            indexOfLastFrame,
+          )
+        }
+
+        // movieClip.gotoAndStop(framesPeriods.SHOOT.first)
       },
       goToFly(angle: number, flyingProgress: number) {
         // stop and last frame

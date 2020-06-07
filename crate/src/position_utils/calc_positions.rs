@@ -348,7 +348,7 @@ impl CalcPositions {
       .collect()
   }
 
-  pub fn get_attackers_positions(
+  pub fn calc_attackers_positions(
     target: (f32, f32),
     source: (f32, f32),
     needed_positions: usize,

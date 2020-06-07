@@ -84,7 +84,7 @@ class Unit {
         break
       }
       case State.SHOOT: {
-        this.frameUpdaters.goToShoot(angle)
+        this.frameUpdaters.goToShoot(angle, firstStateParam)
         break
       }
       case State.RUN: {
