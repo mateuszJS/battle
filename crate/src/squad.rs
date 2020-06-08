@@ -1,4 +1,4 @@
-use crate::constants::{THRESHOLD_SQUAD_ON_POSITION, WEAPON_RANGE};
+use crate::constants::{THRESHOLD_SQUAD_MOVED, WEAPON_RANGE};
 use crate::id_generator::IdGenerator;
 use crate::position_utils::PositionUtils;
 use crate::squad_types::{get_squad_details, SquadDetails, SquadType};
@@ -117,13 +117,21 @@ impl Squad {
   }
 
   pub fn stop_running(&mut self) {
-    let Self { ref mut members, ref shared, .. } = self;
+    let Self {
+      ref mut members,
+      ref shared,
+      ..
+    } = self;
     if shared.aim.upgrade().is_some() {
       // what if unit it's far away from the center?
-      members.iter_mut().for_each(|unit| unit.change_state_to_shoot(&shared));
+      members
+        .iter_mut()
+        .for_each(|unit| unit.change_state_to_shoot(&shared));
     } else {
       // what if unit it's far away from the center?
-      members.iter_mut().for_each(|unit| unit.change_state_to_idle());
+      members
+        .iter_mut()
+        .for_each(|unit| unit.change_state_to_idle());
     }
   }
 

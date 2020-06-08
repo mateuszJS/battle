@@ -355,11 +355,12 @@ impl CalcPositions {
   ) -> Vec<(f32, f32)> {
     lazy_static! {
       static ref PRECALCULATED_ATTACKERS_POSITIONS: Vec<(f32, f32)> = {
-        let mut range: f32 = ATTACKERS_DISTANCE;
+        let mut range: f32 = ATTACKERS_DISTANCE; // should be replaces with weapon range?
         let mut positions = vec![];
 
         while range > DISTANCE_BETWEEN_ATTACKERS {
-          let diff_angle = (1.0 - (DISTANCE_BETWEEN_ATTACKERS.powi(2) / (2.0 * range.powi(2)))).acos();
+          let diff_angle =
+            (1.0 - (DISTANCE_BETWEEN_ATTACKERS.powi(2) / (2.0 * range.powi(2)))).acos();
           let mut multiple_by = 0.0;
 
           while (multiple_by * diff_angle).abs() < MATH_PI - diff_angle / 2.0 {
@@ -376,10 +377,13 @@ impl CalcPositions {
         }
 
         positions.sort_by(|a, b| {
-          let y_a = -a.0.cos() * a.1;
-          let y_b = -b.0.cos() * b.1;
-          (y_a).partial_cmp(&y_b).unwrap()
-          // angle is 0, so comparing y is enough
+          let a_x = a.0.sin() * a.1;
+          let a_y = -a.0.cos() * a.1;
+          let b_x = b.0.sin() * b.1;
+          let b_y = -b.0.cos() * b.1;
+          let a_dis = (a_x).hypot(a_y + ATTACKERS_DISTANCE); // a_y - (-ATTACKERS_DISTANCE)
+          let b_dis = (b_x).hypot(b_y + ATTACKERS_DISTANCE);
+          (a_dis).partial_cmp(&b_dis).unwrap()
         });
 
         positions
@@ -388,14 +392,14 @@ impl CalcPositions {
 
     let mut result = vec![];
     let mut position_index = 0;
-    let angle_from_aim = (source.0 - target.0).atan2(target.1 - source.1);
+    let angle_from_target = (source.0 - target.0).atan2(target.1 - source.1);
     let precalc_positions_number = PRECALCULATED_ATTACKERS_POSITIONS.len();
 
     while result.len() < needed_positions {
       let precalc_pos_info = PRECALCULATED_ATTACKERS_POSITIONS[position_index];
       let real_position = (
-        (angle_from_aim + precalc_pos_info.0).sin() * precalc_pos_info.1 + target.0,
-        -(angle_from_aim + precalc_pos_info.0).cos() * precalc_pos_info.1 + target.1,
+        (angle_from_target + precalc_pos_info.0).sin() * precalc_pos_info.1 + target.0,
+        -(angle_from_target + precalc_pos_info.0).cos() * precalc_pos_info.1 + target.1,
       );
       if !CalcPositions::get_is_point_inside_any_obstacle((
         real_position.0 as i16,

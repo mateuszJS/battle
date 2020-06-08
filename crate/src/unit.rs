@@ -1,4 +1,6 @@
-use crate::constants::{MATH_PI, MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS, THRESHOLD_SQUAD_ON_POSITION};
+use crate::constants::{
+  MANAGE_HUNTERS_PERIOD, MATH_PI, MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS, THRESHOLD_SQUAD_MOVED,
+};
 use crate::id_generator::IdGenerator;
 use crate::look_up_table::LookUpTable;
 use crate::position_utils::basic_utils::{BasicUtils, Line, Point};
@@ -138,22 +140,20 @@ impl Unit {
   fn update_run(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
     if (self.x - self.target_x).hypot(self.y - self.target_y) < self.squad_details.movement_speed {
       if squad_shared_info.track.len() - 1 == self.track_index {
-
         // --------------- handle hunting ----------------- START
         if let Some(ref_cell_aim) = squad_shared_info.aim.upgrade() {
           let aim_pos = ref_cell_aim.borrow().shared.center_point;
-          if (aim_pos.0 - squad_shared_info.last_aim_position.0)
-            .hypot(aim_pos.1 - squad_shared_info.last_aim_position.1)
-            > THRESHOLD_SQUAD_ON_POSITION
-          {
+          let dis_aim_curr_pos_and_last = (aim_pos.0 - squad_shared_info.last_aim_position.0)
+            .hypot(aim_pos.1 - squad_shared_info.last_aim_position.1);
+
+          if dis_aim_curr_pos_and_last > THRESHOLD_SQUAD_MOVED {
             // to avoid effect like RUN and IDLE all the time when hunting on enemy
-            self.target_x += self.mod_x * 100.0; // add difference between last_aim_position and current position of aim
-            self.target_y += self.mod_y * 100.0;
+            self.target_x += self.mod_x * MANAGE_HUNTERS_PERIOD as f32; // add difference between last_aim_position and current position of aim
+            self.target_y += self.mod_y * MANAGE_HUNTERS_PERIOD as f32;
           } else {
             self.change_state_to_shoot(squad_shared_info);
           }
-          // --------------- handle hunting ----------------- END
-
+        // --------------- handle hunting ----------------- END
         } else {
           self.change_state_to_idle();
         }
@@ -181,26 +181,27 @@ impl Unit {
   pub fn change_state_to_shoot(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
     self.state = STATE_SHOOT;
     // if aim die, then just
-      // lives
-        // check if it's too far
-          // is in range:
-            // choose certain unit in the enemy squad to attack
-            // set correct angle
-          // is outside of the range
-            // run to the aim
-      // go to idle
+    // lives
+    // check if it's too far
+    // is in range:
+    // choose certain unit in the enemy squad to attack
+    // set correct angle
+    // is outside of the range
+    // run to the aim
+    // go to idle
   }
 
   fn update_shoot(&mut self) {
     // if Some(upgraded_aim) = self.aim.upgrade() { // check if chosen enemy still lives
-      // let aim = upgraded_aim.borrow(); // check if state is moving and if it's still in range
-      // self.angle = (aim.0)
+    // let aim = upgraded_aim.borrow(); // check if state is moving and if it's still in range
+    // self.angle = (aim.0)
     // } // if not live or out of range, then go to change_state_to_shoot to select a new one
     if self.time_to_next_shoot == 0 {
       // make shoot, create bullet, change state to let know for representation that shoot was created
       let random = LookUpTable::get_random() - 0.5;
 
-      self.time_to_next_shoot = if random.abs() > 0.4 { // 25% chances to reload
+      self.time_to_next_shoot = if random.abs() > 0.4 {
+        // 25% chances to reload
         200
       } else {
         40

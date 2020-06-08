@@ -110,7 +110,7 @@ impl Universe {
       .flat_map(get_initial_factories_representation)
       .collect();
 
-    unsafe { js_sys::Float32Array::view(&result[..]) }
+    js_sys::Float32Array::from(&result[..])
   }
 
   pub fn update(&mut self) {
@@ -155,12 +155,8 @@ impl Universe {
       .iter()
       .flat_map(|faction| faction.get_representation())
       .collect();
-    unsafe {
-      // it's unsafe bc doesn't make copy, read directly from memory
-      // https://rustwasm.github.io/wasm-bindgen/api/js_sys/struct.Float32Array.html#method.view
-      // to make copy, use "from" method
-      js_sys::Float32Array::view(&universe_representation[..])
-    }
+
+    js_sys::Float32Array::from(&universe_representation[..])
   }
 
   pub fn create_squad(&mut self, squad_type_representation: u8) -> bool {
@@ -215,10 +211,8 @@ impl Universe {
       .collect();
     let summary = [&x[..], &selected_squads_ids[..]].concat();
 
-    unsafe {
-      // read weird data on the beginning with "view", garbage collector?
-      js_sys::Float32Array::from(&summary[..])
-    }
+    // read weird data on the beginning with "view", garbage collector?
+    js_sys::Float32Array::from(&summary[..])
   }
 
   fn is_it_attack(world: &World, target_x: f32, target_y: f32) -> Option<&Weak<RefCell<Squad>>> {
