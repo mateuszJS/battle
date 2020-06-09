@@ -142,6 +142,10 @@ impl Unit {
       if squad_shared_info.track.len() - 1 == self.track_index {
         // --------------- handle hunting ----------------- START
         if let Some(ref_cell_aim) = squad_shared_info.aim.upgrade() {
+          // or maybe to change_state_to_shoot we should pass aim (when is really exists)
+          // and then just inside that function (or update function), check
+          // if you are in range with aim, if no, go ahead, so there won't be effect like
+          // stopping and running all the time
           let aim_pos = ref_cell_aim.borrow().shared.center_point;
           let dis_aim_curr_pos_and_last = (aim_pos.0 - squad_shared_info.last_aim_position.0)
             .hypot(aim_pos.1 - squad_shared_info.last_aim_position.1);
@@ -190,6 +194,8 @@ impl Unit {
     // run to the aim
     // go to idle
   }
+
+  fn is_aim_in_range(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {}
 
   fn update_shoot(&mut self) {
     // if Some(upgraded_aim) = self.aim.upgrade() { // check if chosen enemy still lives

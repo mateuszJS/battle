@@ -25,25 +25,20 @@ impl SquadsManager {
           (aim_curr_point.0 - aim_last_point.0).hypot(aim_curr_point.1 - aim_last_point.1);
 
         if diff_distance > THRESHOLD_SQUAD_MOVED {
-          let distance_to_enemy = (aim_curr_point.0 - squad.shared.center_point.0)
+          let distance_to_enemy_curr_pos = (aim_curr_point.0 - squad.shared.center_point.0)
             .hypot(aim_curr_point.1 - squad.shared.center_point.1);
+          let distance_to_enemy_last_pos = (aim_last_point.0 - squad.shared.center_point.0)
+            .hypot(aim_last_point.1 - squad.shared.center_point.1);
 
-          if distance_to_enemy > ATTACKERS_DISTANCE {
+          if distance_to_enemy_curr_pos > ATTACKERS_DISTANCE {
             if hunters.contains_key(&aim.id) {
               hunters.get_mut(&aim.id).unwrap().push(cell_squad);
             } else {
               hunters.insert(aim.id, vec![cell_squad]);
             }
-          } else if squad.shared.track.len() > 0 {
-            let dest_pos = squad.shared.track[squad.shared.track.len() - 1];
-            let dis_to_dest_pos = (dest_pos.0 - squad.shared.center_point.0)
-              .hypot(dest_pos.1 - squad.shared.center_point.1);
-
-            if 4.0 * dis_to_dest_pos > distance_to_enemy {
-              // TODO: change this if to something what got better results
-              // else if squad is not already staying
-              squad.stop_running();
-            }
+          } else if distance_to_enemy_curr_pos < distance_to_enemy_last_pos - 35.0 {
+            // 35.0 to avoid stopping just because aim is a little bit close to the squad
+            squad.stop_running();
           }
         }
       }
