@@ -1,12 +1,15 @@
 use crate::constants::{
   MANAGE_HUNTERS_PERIOD, MATH_PI, MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS, THRESHOLD_SQUAD_MOVED,
+  WEAPON_RANGE,
 };
 use crate::id_generator::IdGenerator;
 use crate::look_up_table::LookUpTable;
 use crate::position_utils::basic_utils::{BasicUtils, Line, Point};
 use crate::position_utils::obstacles_lazy_statics::ObstaclesLazyStatics;
-use crate::squad::SquadUnitSharedDataSet;
+use crate::squad::{Squad, SquadUnitSharedDataSet};
 use crate::squad_types::SquadDetails;
+use std::cell::RefCell;
+use std::rc::Rc;
 
 const STATE_ABILITY: u8 = 8;
 const STATE_FLY: u8 = 7;
@@ -124,17 +127,24 @@ impl Unit {
     } else {
       1
     };
-    // TODO: add that offset only in some cases
-    self.update_target(squad_shared_info);
+
+    self.go_to_current_point_on_track(squad_shared_info);
   }
 
-  pub fn update_target(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
-    self.target_x = squad_shared_info.track[self.track_index].0 + self.position_offset_x;
-    self.target_y = squad_shared_info.track[self.track_index].1 + self.position_offset_y;
-    let angle = (self.target_x - self.x).atan2(self.y - self.target_y);
+  pub fn set_target(&mut self, x: f32, y: f32) {
+    self.target_x = x;
+    self.target_y = y;
+    let angle = (x - self.x).atan2(self.y - y);
     self.mod_x = angle.sin() * self.squad_details.movement_speed;
     self.mod_y = -angle.cos() * self.squad_details.movement_speed;
     self.angle = angle;
+  }
+
+  fn go_to_current_point_on_track(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
+    self.set_target(
+      squad_shared_info.track[self.track_index].0 + self.position_offset_x,
+      squad_shared_info.track[self.track_index].1 + self.position_offset_y,
+    );
   }
 
   fn update_run(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
@@ -152,10 +162,15 @@ impl Unit {
 
           if dis_aim_curr_pos_and_last > THRESHOLD_SQUAD_MOVED {
             // to avoid effect like RUN and IDLE all the time when hunting on enemy
-            self.target_x += self.mod_x * MANAGE_HUNTERS_PERIOD as f32; // add difference between last_aim_position and current position of aim
-            self.target_y += self.mod_y * MANAGE_HUNTERS_PERIOD as f32;
+            // self.target_x += self.mod_x * MANAGE_HUNTERS_PERIOD as f32; // add difference between last_aim_position and current position of aim
+            // self.target_y += self.mod_y * MANAGE_HUNTERS_PERIOD as f32;
+            // check when last_aim_position is updated!
+            self.set_target(
+              self.mod_x * MANAGE_HUNTERS_PERIOD as f32 + self.target_x,
+              self.mod_y * MANAGE_HUNTERS_PERIOD as f32 + self.target_y,
+            );
           } else {
-            self.change_state_to_shoot(squad_shared_info);
+            self.change_state_to_shoot(&ref_cell_aim);
           }
         // --------------- handle hunting ----------------- END
         } else {
@@ -163,7 +178,7 @@ impl Unit {
         }
       } else {
         self.track_index += 1;
-        self.update_target(squad_shared_info);
+        self.go_to_current_point_on_track(squad_shared_info);
       }
     } else {
       self.x += self.mod_x;
@@ -182,17 +197,30 @@ impl Unit {
     // check if not too far from squad center point
   }
 
-  pub fn change_state_to_shoot(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
-    self.state = STATE_SHOOT;
-    // if aim die, then just
-    // lives
-    // check if it's too far
-    // is in range:
-    // choose certain unit in the enemy squad to attack
-    // set correct angle
-    // is outside of the range
-    // run to the aim
-    // go to idle
+  pub fn change_state_to_shoot(&mut self, aim: &Rc<RefCell<Squad>>) {
+    let borrowed_members = &aim.borrow().members;
+    let (unit_aim, distance) =
+      borrowed_members
+        .iter()
+        .fold((&borrowed_members[0], std::f32::MAX), |acc, unit| {
+          let dis = (self.x - unit.x).hypot(self.y - unit.y);
+          if dis < acc.1 {
+            (unit, dis)
+          } else {
+            acc
+          }
+        });
+
+    let angle = (unit_aim.x - self.x).atan2(self.y - unit_aim.y);
+    if distance <= WEAPON_RANGE {
+      self.state = STATE_SHOOT;
+      self.angle = angle;
+    } else {
+      self.set_target(
+        (MATH_PI - angle).sin() * WEAPON_RANGE + unit_aim.x,
+        -(MATH_PI - angle).cos() * WEAPON_RANGE + unit_aim.y,
+      );
+    };
   }
 
   fn is_aim_in_range(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {}

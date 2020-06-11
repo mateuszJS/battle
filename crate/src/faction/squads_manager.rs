@@ -37,9 +37,10 @@ impl SquadsManager {
               hunters.insert(aim.id, vec![cell_squad]);
             }
           } else if distance_to_enemy_curr_pos < distance_to_enemy_last_pos - 35.0 {
-            // 35.0 to avoid stopping just because aim is a little bit close to the squad
+            // 35.0 to avoid stopping just because aim is a little bit closer to the squad
             squad.stop_running();
           }
+          squad.shared.last_aim_position = aim_curr_point;
         }
       }
     });
@@ -63,16 +64,7 @@ impl SquadsManager {
   }
 
   fn manage_single_hunters_group(hunters: &mut Vec<&Rc<RefCell<Squad>>>) {
-    let aim_position = hunters[0]
-      .borrow()
-      .shared
-      .aim
-      .upgrade()
-      .unwrap()
-      .borrow()
-      .shared
-      .center_point;
-
+    let aim_position = hunters[0].borrow().shared.last_aim_position;
     let mut positions = PositionUtils::get_attackers_position(
       hunters.len(),
       SquadsManager::calc_hunters_center(hunters),
@@ -90,18 +82,8 @@ impl SquadsManager {
 
     hunters.iter().enumerate().for_each(|(index, squad)| {
       let position = positions[index];
-      let enemy_center_point = squad
-        .borrow()
-        .shared
-        .aim
-        .upgrade()
-        .unwrap()
-        .borrow()
-        .shared
-        .center_point;
       let mut mut_squad = squad.borrow_mut();
       mut_squad.add_target(position.0, position.1, false);
-      mut_squad.shared.last_aim_position = enemy_center_point;
     });
   }
 

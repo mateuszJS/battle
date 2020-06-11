@@ -6,6 +6,8 @@ use crate::unit::Unit;
 use std::cell::RefCell;
 use std::rc::Weak;
 
+const DEFAULT_LAST_AIM_POSITION: (f32, f32) = (std::f32::MIN, std::f32::MIN);
+
 pub struct SquadUnitSharedDataSet {
   pub center_point: (f32, f32),
   pub track: Vec<(f32, f32)>,
@@ -31,7 +33,7 @@ impl Squad {
       shared: SquadUnitSharedDataSet {
         center_point: (0.0, 0.0),
         track: vec![],
-        last_aim_position: (-1.0, -1.0),
+        last_aim_position: DEFAULT_LAST_AIM_POSITION,
         aim: Weak::new(),
       },
     }
@@ -100,7 +102,7 @@ impl Squad {
     // }
     if clear_aim {
       self.shared.aim = Weak::new();
-      self.shared.last_aim_position = (-1.0, -1.0);
+      self.shared.last_aim_position = DEFAULT_LAST_AIM_POSITION;
     }
 
     self.shared.track = PositionUtils::get_track(
@@ -122,11 +124,12 @@ impl Squad {
       ref shared,
       ..
     } = self;
-    if shared.aim.upgrade().is_some() {
+    if let Some(aim) = shared.aim.upgrade() {
       // what if unit it's far away from the center?
+      log!("squad.stop_running");
       members
         .iter_mut()
-        .for_each(|unit| unit.change_state_to_shoot(&shared));
+        .for_each(|unit| unit.change_state_to_shoot(&aim));
     } else {
       // what if unit it's far away from the center?
       members
@@ -137,6 +140,7 @@ impl Squad {
 
   pub fn attack_enemy(&mut self, enemy: &Weak<RefCell<Squad>>) {
     self.shared.aim = Weak::clone(enemy);
+    // if, stop running only if the squad is running
     self.stop_running();
   }
 
