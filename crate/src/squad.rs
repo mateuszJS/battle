@@ -21,6 +21,7 @@ pub struct Squad {
   pub members: Vec<Unit>,
   pub shared: SquadUnitSharedDataSet,
   pub squad_details: &'static SquadDetails,
+  pub time_since_last_move: u16,
 }
 
 impl Squad {
@@ -30,6 +31,7 @@ impl Squad {
       faction_id,
       members: vec![],
       squad_details: get_squad_details(&squad_type),
+      time_since_last_move: 0,
       shared: SquadUnitSharedDataSet {
         center_point: (0.0, 0.0),
         track: vec![],
@@ -48,8 +50,18 @@ impl Squad {
     let (sum_x, sum_y) = members.iter().fold((0.0, 0.0), |(sum_x, sum_y), unit| {
       (sum_x + unit.x, sum_y + unit.y)
     });
-    shared.center_point.0 = sum_x / members.len() as f32;
-    shared.center_point.1 = sum_y / members.len() as f32;
+    let new_center = (
+      sum_x / members.len() as f32,
+      sum_y / members.len() as f32,
+    );
+
+    self.time_since_last_move = if (new_center.0 - shared.center_point.0).hypot(new_center.1 - shared.center_point.1) <= std::f32::EPSILON {
+      self.time_since_last_move + 1
+    } else {
+      0
+    };
+
+    shared.center_point = new_center;
   }
 
   pub fn update(&mut self) {

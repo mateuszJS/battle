@@ -25,21 +25,31 @@ impl SquadsManager {
           (aim_curr_point.0 - aim_last_point.0).hypot(aim_curr_point.1 - aim_last_point.1);
 
         if diff_distance > THRESHOLD_SQUAD_MOVED {
+          // aim.lops_since_last_move > 5
           let distance_to_enemy_curr_pos = (aim_curr_point.0 - squad.shared.center_point.0)
             .hypot(aim_curr_point.1 - squad.shared.center_point.1);
           let distance_to_enemy_last_pos = (aim_last_point.0 - squad.shared.center_point.0)
             .hypot(aim_last_point.1 - squad.shared.center_point.1);
 
-          if distance_to_enemy_curr_pos > ATTACKERS_DISTANCE {
+            /* DO NOT add when:
+              - squad is closer to the aim than destination position could be?
+              - or just squad is close to the aim
+              - squad is already attacking since couple of seconds
+            */
+
+
+          // if distance_to_enemy_curr_pos > ATTACKERS_DISTANCE {
+            // if destination OR current position is not in range, then add to hunters
+            // or squad is not moving since 5 loops
             if hunters.contains_key(&aim.id) {
               hunters.get_mut(&aim.id).unwrap().push(cell_squad);
             } else {
               hunters.insert(aim.id, vec![cell_squad]);
             }
-          } else if distance_to_enemy_curr_pos < distance_to_enemy_last_pos - 35.0 {
+          // } else if distance_to_enemy_curr_pos < distance_to_enemy_last_pos - 35.0 {
             // 35.0 to avoid stopping just because aim is a little bit closer to the squad
-            squad.stop_running();
-          }
+            // squad.stop_running();
+          // }
           squad.shared.last_aim_position = aim_curr_point;
         }
       }
