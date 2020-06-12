@@ -31,14 +31,31 @@ impl SquadsManager {
           let distance_to_enemy_last_pos = (aim_last_point.0 - squad.shared.center_point.0)
             .hypot(aim_last_point.1 - squad.shared.center_point.1);
 
-            /* DO NOT add when:
-              - squad is closer to the aim than destination position could be?
-              - or just squad is close to the aim
-              - squad is already attacking since couple of seconds
-            */
+          /* DO NOT add when:
+            - when aim is in the weapon range then check if aim is approach:
+              - if aim is approaching, then STOP
+              - if not approaching, then check if waiting for a long time
+                - if yes, stay
+                - if not, go
+            -
+            - when outside of weapon range, then add to the hunters
 
 
-          // if distance_to_enemy_curr_pos > ATTACKERS_DISTANCE {
+            use range as Math.min(MAX_RANGE, distance the further squad, to the aim)
+            - then only one wrong one
+            that sucks, whole army is moving even when aim is in range of the nearest ones
+
+
+            - keeps offset, how much squad should be going on the left or right from the center
+            - then we could also share tracks, like for big army there is 5 tracks, very left, left, center, right, very right,
+            - and each of squad choose one of the tracks (assigned here in hunters, or in squad struct)
+            - then when squad is close to the aim, or is in range, then should find position
+            HOW should find the position? still not really sure
+
+            -
+          */
+
+          if distance_to_enemy_curr_pos > ATTACKERS_DISTANCE {
             // if destination OR current position is not in range, then add to hunters
             // or squad is not moving since 5 loops
             if hunters.contains_key(&aim.id) {
@@ -46,10 +63,10 @@ impl SquadsManager {
             } else {
               hunters.insert(aim.id, vec![cell_squad]);
             }
-          // } else if distance_to_enemy_curr_pos < distance_to_enemy_last_pos - 35.0 {
+          } else if distance_to_enemy_curr_pos < distance_to_enemy_last_pos - 35.0 {
             // 35.0 to avoid stopping just because aim is a little bit closer to the squad
-            // squad.stop_running();
-          // }
+            squad.stop_running();
+          }
           squad.shared.last_aim_position = aim_curr_point;
         }
       }
