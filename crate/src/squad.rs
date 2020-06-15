@@ -5,6 +5,7 @@ use crate::squad_types::{get_squad_details, SquadDetails, SquadType};
 use crate::unit::Unit;
 use std::cell::RefCell;
 use std::rc::Weak;
+use std::rc::Rc;
 
 const DEFAULT_LAST_AIM_POSITION: (f32, f32) = (std::f32::MIN, std::f32::MIN);
 
@@ -18,7 +19,7 @@ pub struct SquadUnitSharedDataSet {
 pub struct Squad {
   pub id: u32,
   pub faction_id: u32,
-  pub members: Vec<Unit>,
+  pub members: Vec<Rc<RefCell<Unit>>>,
   pub shared: SquadUnitSharedDataSet,
   pub squad_details: &'static SquadDetails,
   pub time_since_last_move: u16,
@@ -47,7 +48,8 @@ impl Squad {
       ref mut shared,
       ..
     } = self;
-    let (sum_x, sum_y) = members.iter().fold((0.0, 0.0), |(sum_x, sum_y), unit| {
+    let (sum_x, sum_y) = members.iter().fold((0.0, 0.0), |(sum_x, sum_y), ref_cell_unit| {
+      let unit = ref_cell_unit.borrow();
       (sum_x + unit.x, sum_y + unit.y)
     });
     let new_center = (
@@ -66,24 +68,24 @@ impl Squad {
 
   pub fn update(&mut self) {
     let shared = &self.shared;
-    self.members.iter_mut().for_each(|unit| unit.update(shared));
+    self.members.iter_mut().for_each(|unit| unit.borrow_mut().update(shared));
   }
 
   pub fn get_representation(&self) -> Vec<f32> {
     self
       .members
       .iter()
-      .flat_map(|unit| unit.get_representation().to_vec())
+      .flat_map(|unit| unit.borrow().get_representation().to_vec())
       .collect()
   }
 
   pub fn add_member(&mut self, position_x: f32, position_y: f32, unit_angle: f32) {
-    self.members.push(Unit::new(
+    self.members.push(Rc::new(RefCell::new(Unit::new(
       position_x,
       position_y,
       unit_angle,
       self.squad_details,
-    ));
+    ))));
 
     if self.members.len() == self.squad_details.members_number {
       self.recalculate_members_positions();
@@ -98,7 +100,7 @@ impl Squad {
       .enumerate()
       .for_each(|(index, position)| {
         let unit = &mut self.members[index];
-        unit.set_position_offset(position.0, position.1);
+        unit.borrow_mut().set_position_offset(position.0, position.1);
       })
   }
 
@@ -127,7 +129,7 @@ impl Squad {
     self
       .members
       .iter_mut()
-      .for_each(|unit| unit.change_state_to_run(shared));
+      .for_each(|unit| unit.borrow_mut().change_state_to_run(shared));
   }
 
   pub fn stop_running(&mut self) {
@@ -141,17 +143,18 @@ impl Squad {
       log!("squad.stop_running");
       members
         .iter_mut()
-        .for_each(|unit| unit.change_state_to_shoot(&aim));
+        .for_each(|unit| unit.borrow_mut().change_state_to_shoot(&aim));
     } else {
       // what if unit it's far away from the center?
       members
         .iter_mut()
-        .for_each(|unit| unit.change_state_to_idle());
+        .for_each(|unit| unit.borrow_mut().change_state_to_idle());
     }
   }
 
   pub fn attack_enemy(&mut self, enemy: &Weak<RefCell<Squad>>) {
     self.shared.aim = Weak::clone(enemy);
+    // self.shared.track = vec![];
     // if, stop running only if the squad is running
     self.stop_running();
   }

@@ -107,8 +107,9 @@ impl SquadsManager {
       (a_squad_pos.1).partial_cmp(&b_squad_pos.1).unwrap()
     });
 
+    let positions_number = positions.len();
     hunters.iter().enumerate().for_each(|(index, squad)| {
-      let position = positions[index];
+      let position = positions[index % positions_number];
       let mut mut_squad = squad.borrow_mut();
       mut_squad.add_target(position.0, position.1, false);
     });

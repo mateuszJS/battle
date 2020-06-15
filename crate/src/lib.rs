@@ -188,13 +188,14 @@ impl Universe {
         if index == INDEX_OF_USER_FACTION {
           faction.squads.iter().for_each(|squad| {
             let read_squad = squad.borrow();
-            for unit in read_squad.members.iter() {
+            for ref_cell_unit in read_squad.members.iter() {
+              let unit = ref_cell_unit.borrow();
               if unit.x > start_x && unit.x < end_x && unit.y > start_y && unit.y < end_y {
                 selected_units_ids.push(
                   read_squad
                     .members
                     .iter()
-                    .map(|unit| unit.id as f32)
+                    .map(|squad_member| squad_member.borrow().id as f32)
                     .collect(),
                 );
                 selected_squads_ids.push(read_squad.id as f32);
@@ -226,7 +227,8 @@ impl Universe {
             < THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER
         {
           let corrected_target_y = target_y + squad.squad_details.unit_model_offset_y;
-          for unit in squad.members.iter() {
+          for ref_cell_unit in squad.members.iter() {
+            let unit = ref_cell_unit.borrow();
             if (unit.x - target_x).hypot(unit.y - corrected_target_y)
               < squad.squad_details.selection_threshold
             {
@@ -264,7 +266,7 @@ impl Universe {
             .borrow()
             .members
             .iter()
-            .map(|unit| unit.id as f32)
+            .map(|unit| unit.borrow().id as f32)
             .collect()
         } else {
           vec![]

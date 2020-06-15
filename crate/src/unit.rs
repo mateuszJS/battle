@@ -10,6 +10,7 @@ use crate::squad::{Squad, SquadUnitSharedDataSet};
 use crate::squad_types::SquadDetails;
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::rc::Weak;
 
 const STATE_ABILITY: u8 = 8;
 const STATE_FLY: u8 = 7;
@@ -37,6 +38,7 @@ pub struct Unit {
   track_index: usize,
   squad_details: &'static SquadDetails,
   time_to_next_shoot: u16,
+  aim: Weak<RefCell<Unit>>,
 }
 
 impl Unit {
@@ -60,6 +62,7 @@ impl Unit {
       track_index: 0,
       squad_details,
       time_to_next_shoot: 0,
+      aim: Weak::new(),
     }
   }
 
@@ -199,33 +202,50 @@ impl Unit {
 
   pub fn change_state_to_shoot(&mut self, aim: &Rc<RefCell<Squad>>) {
     let borrowed_members = &aim.borrow().members;
-    let (unit_aim, distance) =
+    let (weak_unit_aim, distance) =
       borrowed_members
         .iter()
-        .fold((&borrowed_members[0], std::f32::MAX), |acc, unit| {
+        .fold((Weak::new(), std::f32::MAX), |acc, ref_cell_unit| {
+          let unit = ref_cell_unit.borrow();
           let dis = (self.x - unit.x).hypot(self.y - unit.y);
           if dis < acc.1 {
-            (unit, dis)
+            (Rc::downgrade(ref_cell_unit), dis)
           } else {
             acc
           }
         });
-
-    let angle = (unit_aim.x - self.x).atan2(self.y - unit_aim.y);
-    if distance <= WEAPON_RANGE {
-      self.state = STATE_SHOOT;
-      self.angle = angle;
-    } else {
-      self.set_target(
-        (MATH_PI - angle).sin() * WEAPON_RANGE + unit_aim.x,
-        -(MATH_PI - angle).cos() * WEAPON_RANGE + unit_aim.y,
-      );
-    };
+    
+    if let Some(ref_cell_unit_aim) = weak_unit_aim.upgrade() {
+      let unit_aim = ref_cell_unit_aim.borrow();
+      let angle = (unit_aim.x - self.x).atan2(self.y - unit_aim.y);
+      if distance <= WEAPON_RANGE {
+        self.state = STATE_SHOOT;
+        self.angle = angle;
+        self.aim = weak_unit_aim;
+      } else {
+        self.set_target(
+          (MATH_PI - angle).sin() * WEAPON_RANGE + unit_aim.x,
+          -(MATH_PI - angle).cos() * WEAPON_RANGE + unit_aim.y,
+        );
+      };
+    }
   }
 
   fn is_aim_in_range(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {}
 
   fn update_shoot(&mut self) {
+
+    // let angle = (unit_aim.x - self.x).atan2(self.y - unit_aim.y);
+    // if distance <= WEAPON_RANGE {
+    //   self.state = STATE_SHOOT;
+    //   self.angle = angle;
+    // } else {
+    //   self.set_target(
+    //     (MATH_PI - angle).sin() * WEAPON_RANGE + unit_aim.x,
+    //     -(MATH_PI - angle).cos() * WEAPON_RANGE + unit_aim.y,
+    //   );
+    // };
+
     // if Some(upgraded_aim) = self.aim.upgrade() { // check if chosen enemy still lives
     // let aim = upgraded_aim.borrow(); // check if state is moving and if it's still in range
     // self.angle = (aim.0)
