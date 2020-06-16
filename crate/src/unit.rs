@@ -189,15 +189,20 @@ impl Unit {
     }
   }
 
-  pub fn change_state_to_idle(&mut self) {
+  pub fn change_state_to_idle(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
     self.mod_x = 0.0;
     self.mod_y = 0.0;
     self.state = STATE_IDLE;
+    self.update_idle();
   }
 
-  fn update_idle(&mut self) {
-    // searching for the enemies
-    // check if not too far from squad center point
+  fn update_idle(&mut self, squad_shared_info: &SquadUnitSharedDataSe) {
+    /*
+     0. check if has track, if has, then just go though this
+     1. check if the unit is too far from the squad center, then go closer to the center
+     2. if there is aim in squad_shared_info, then change_state_to_shoot
+     3. if there is secondary_aim in squad_shared_info, then
+    */
   }
 
   pub fn change_state_to_shoot(&mut self, aim: &Rc<RefCell<Squad>>) {
@@ -214,7 +219,6 @@ impl Unit {
             acc
           }
         });
-    
     if let Some(ref_cell_unit_aim) = weak_unit_aim.upgrade() {
       let unit_aim = ref_cell_unit_aim.borrow();
       let angle = (unit_aim.x - self.x).atan2(self.y - unit_aim.y);
@@ -223,6 +227,7 @@ impl Unit {
         self.angle = angle;
         self.aim = weak_unit_aim;
       } else {
+        // TODO: after reach the destination, run this function again maybe?
         self.set_target(
           (MATH_PI - angle).sin() * WEAPON_RANGE + unit_aim.x,
           -(MATH_PI - angle).cos() * WEAPON_RANGE + unit_aim.y,
@@ -234,7 +239,6 @@ impl Unit {
   fn is_aim_in_range(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {}
 
   fn update_shoot(&mut self) {
-
     // let angle = (unit_aim.x - self.x).atan2(self.y - unit_aim.y);
     // if distance <= WEAPON_RANGE {
     //   self.state = STATE_SHOOT;

@@ -8,8 +8,7 @@ use crate::Factory;
 use crate::World;
 use squads_manager::SquadsManager;
 use std::cell::RefCell;
-use std::rc::Rc;
-use std::rc::Weak;
+use std::rc::{Rc, Weak};
 
 const TIME_BETWEEN_CREATION: u8 = 10;
 
@@ -158,6 +157,25 @@ impl Faction {
     });
 
     SquadsManager::manage_hunters(self);
+  }
+
+  pub fn search_for_enemies(&mut self, squads_which_moved: &Vec<Rc<RefCell<Squad>>>) {
+    let idle_squads: Vec<&Rc<RefCell<Squad>>> = self
+      .squads
+      .iter()
+      .filter(|ref_cell_squad| {
+        let squad = ref_cell_squad.borrow();
+        (squad.shared.center_point.0 - squad.last_center_point.0)
+          .hypot(squad.shared.center_point.1 - squad.last_center_point.1)
+          >= std::f32::EPSILON
+      })
+      .collect();
+
+    let enemy_squads = squads_which_moved
+      .iter()
+      .filter(|squad| squad.borrow().faction_id != self.id)
+      .collect();
+    SquadsManager::search_for_enemies(idle_squads, enemy_squads); // it's &mut bc wasm is getting errror
   }
 
   pub fn update_squads_centers(&mut self) {

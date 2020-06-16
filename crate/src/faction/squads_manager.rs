@@ -1,11 +1,18 @@
 use super::Faction;
-use crate::constants::{ATTACKERS_DISTANCE, THRESHOLD_SQUAD_MOVED};
+use crate::constants::{
+  ATTACKERS_DISTANCE, MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS,
+  THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER, THRESHOLD_SQUAD_MOVED, WEAPON_RANGE,
+};
 use crate::position_utils::PositionUtils;
 use crate::squad::Squad;
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::rc::Rc;
-use std::rc::Weak;
+use std::rc::{Rc, Weak};
+
+const POSSIBLE_IN_RANGE: f32 = WEAPON_RANGE
+  + THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER
+  + MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS;
+// our weapon range + max distance of enemy unit from enemy squad center + distance of our unit from our squad center
 
 pub struct SquadsManager {}
 
@@ -115,7 +122,43 @@ impl SquadsManager {
     });
   }
 
-  pub fn search_for_enemies(faction: &mut Faction, all_squads: &Vec<Weak<RefCell<Squad>>>) {}
+  fn get_nearest_enemy_squad(
+    squad_center: (f32, f32),
+    enemy_squads: Vec<&&Rc<RefCell<Squad>>>,
+  ) -> Weak<RefCell<Squad>> {
+    let mut sorted_enemy_squads = enemy_squads.clone();
+    sorted_enemy_squads.sort_by(|a, b| {
+      let a_squad_center = a.borrow().shared.center_point;
+      let b_squad_center = b.borrow().shared.center_point;
+      let distance_a = (squad_center.0 - a_squad_center.0).hypot(squad_center.1 - a_squad_center.1);
+      let distance_b = (squad_center.0 - b_squad_center.0).hypot(squad_center.1 - b_squad_center.1);
+      distance_a.partial_cmp(&distance_b).unwrap()
+    });
+
+    Rc::downgrade(sorted_enemy_squads[0])
+  }
+
+  pub fn search_for_enemies(
+    idle_squads: Vec<&Rc<RefCell<Squad>>>,
+    enemy_squads: Vec<&Rc<RefCell<Squad>>>,
+  ) {
+    idle_squads.iter().for_each(|squad| {
+      let squad_center_point = squad.borrow().shared.center_point;
+      let enemies_in_range: Vec<&&Rc<RefCell<Squad>>> = enemy_squads
+        .iter()
+        .filter(|enemy| {
+          let enemy_position = enemy.borrow().shared.center_point;
+          (squad_center_point.0 - enemy_position.0).hypot(squad_center_point.1 - enemy_position.1)
+            < POSSIBLE_IN_RANGE
+        })
+        .collect();
+
+      if enemies_in_range.len() > 0 {
+        squad.borrow_mut().shared.secondary_aim =
+          SquadsManager::get_nearest_enemy_squad(squad_center_point, enemies_in_range);
+      }
+    })
+  }
 
   pub fn manage_hunters(faction: &mut Faction) {
     let mut hunters = SquadsManager::get_hunters(faction);

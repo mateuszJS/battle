@@ -4,16 +4,17 @@ use crate::position_utils::PositionUtils;
 use crate::squad_types::{get_squad_details, SquadDetails, SquadType};
 use crate::unit::Unit;
 use std::cell::RefCell;
-use std::rc::Weak;
 use std::rc::Rc;
+use std::rc::Weak;
 
-const DEFAULT_LAST_AIM_POSITION: (f32, f32) = (std::f32::MIN, std::f32::MIN);
+const DEFAULT_LAST_POSITION: (f32, f32) = (std::f32::MIN, std::f32::MIN);
 
 pub struct SquadUnitSharedDataSet {
   pub center_point: (f32, f32),
   pub track: Vec<(f32, f32)>,
   pub last_aim_position: (f32, f32),
   pub aim: Weak<RefCell<Squad>>,
+  pub secondary_aim: Weak<RefCell<Squad>>,
 }
 
 pub struct Squad {
@@ -22,7 +23,7 @@ pub struct Squad {
   pub members: Vec<Rc<RefCell<Unit>>>,
   pub shared: SquadUnitSharedDataSet,
   pub squad_details: &'static SquadDetails,
-  pub time_since_last_move: u16,
+  pub last_center_point: (f32, f32),
 }
 
 impl Squad {
@@ -32,12 +33,13 @@ impl Squad {
       faction_id,
       members: vec![],
       squad_details: get_squad_details(&squad_type),
-      time_since_last_move: 0,
+      last_center_point: DEFAULT_LAST_POSITION,
       shared: SquadUnitSharedDataSet {
         center_point: (0.0, 0.0),
         track: vec![],
-        last_aim_position: DEFAULT_LAST_AIM_POSITION,
+        last_aim_position: DEFAULT_LAST_POSITION,
         aim: Weak::new(),
+        secondary_aim: Weak::new(),
       },
     }
   }
@@ -48,27 +50,21 @@ impl Squad {
       ref mut shared,
       ..
     } = self;
-    let (sum_x, sum_y) = members.iter().fold((0.0, 0.0), |(sum_x, sum_y), ref_cell_unit| {
-      let unit = ref_cell_unit.borrow();
-      (sum_x + unit.x, sum_y + unit.y)
-    });
-    let new_center = (
-      sum_x / members.len() as f32,
-      sum_y / members.len() as f32,
-    );
-
-    self.time_since_last_move = if (new_center.0 - shared.center_point.0).hypot(new_center.1 - shared.center_point.1) <= std::f32::EPSILON {
-      self.time_since_last_move + 1
-    } else {
-      0
-    };
-
-    shared.center_point = new_center;
+    let (sum_x, sum_y) = members
+      .iter()
+      .fold((0.0, 0.0), |(sum_x, sum_y), ref_cell_unit| {
+        let unit = ref_cell_unit.borrow();
+        (sum_x + unit.x, sum_y + unit.y)
+      });
+    shared.center_point = (sum_x / members.len() as f32, sum_y / members.len() as f32);
   }
 
   pub fn update(&mut self) {
     let shared = &self.shared;
-    self.members.iter_mut().for_each(|unit| unit.borrow_mut().update(shared));
+    self
+      .members
+      .iter_mut()
+      .for_each(|unit| unit.borrow_mut().update(shared));
   }
 
   pub fn get_representation(&self) -> Vec<f32> {
@@ -100,7 +96,9 @@ impl Squad {
       .enumerate()
       .for_each(|(index, position)| {
         let unit = &mut self.members[index];
-        unit.borrow_mut().set_position_offset(position.0, position.1);
+        unit
+          .borrow_mut()
+          .set_position_offset(position.0, position.1);
       })
   }
 
@@ -116,7 +114,8 @@ impl Squad {
     // }
     if clear_aim {
       self.shared.aim = Weak::new();
-      self.shared.last_aim_position = DEFAULT_LAST_AIM_POSITION;
+      self.shared.last_aim_position = DEFAULT_LAST_POSITION;
+      self.shared.secondary_aim = Weak::new();
     }
 
     self.shared.track = PositionUtils::get_track(
@@ -138,22 +137,15 @@ impl Squad {
       ref shared,
       ..
     } = self;
-    if let Some(aim) = shared.aim.upgrade() {
-      // what if unit it's far away from the center?
-      log!("squad.stop_running");
-      members
-        .iter_mut()
-        .for_each(|unit| unit.borrow_mut().change_state_to_shoot(&aim));
-    } else {
-      // what if unit it's far away from the center?
-      members
-        .iter_mut()
-        .for_each(|unit| unit.borrow_mut().change_state_to_idle());
-    }
+    members
+      .iter_mut()
+      .for_each(|unit| unit.borrow_mut().change_state_to_idle(shared));
   }
 
   pub fn attack_enemy(&mut self, enemy: &Weak<RefCell<Squad>>) {
     self.shared.aim = Weak::clone(enemy);
+    self.shared.secondary_aim = Weak::new();
+    self.shared.last_aim_position = DEFAULT_LAST_POSITION;
     // self.shared.track = vec![];
     // if, stop running only if the squad is running
     self.stop_running();

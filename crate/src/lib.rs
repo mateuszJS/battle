@@ -24,7 +24,7 @@ macro_rules! log {
 // https://rustwasm.github.io/book/game-of-life/debugging.html fix debugging
 
 use std::cell::RefCell;
-use std::rc::Weak;
+use std::rc::{Rc, Weak};
 
 mod constants;
 mod faction;
@@ -40,7 +40,8 @@ mod unit;
 use wasm_bindgen::prelude::*;
 
 use constants::{
-  MANAGE_HUNTERS_PERIOD, THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER, UPDATE_SQUAD_CENTER_PERIOD,
+  MANAGE_HUNTERS_PERIOD, SEARCH_FOR_ENEMIES_PERIOD, THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER,
+  UPDATE_SQUAD_CENTER_PERIOD,
 };
 use faction::Faction;
 use factory::Factory;
@@ -51,7 +52,6 @@ const INDEX_OF_USER_FACTION: usize = 0;
 
 pub struct World {
   all_squads: Vec<Weak<RefCell<Squad>>>,
-  all_moved_squads: Vec<Weak<RefCell<Squad>>>,
 }
 
 #[wasm_bindgen]
@@ -61,7 +61,7 @@ pub struct Universe {
   time: u32,
 }
 
-#[wasm_bindgen]
+// #[wasm_bindgen]
 impl Universe {
   pub fn new(factions_data: Vec<f32>, obstacles_data: Vec<f32>) -> Universe {
     let mut factions: Vec<Faction> = vec![];
@@ -79,10 +79,7 @@ impl Universe {
     }
 
     ObstaclesLazyStatics::init_and_get_obstacles_handler(Some(obstacles_data));
-    let world = World {
-      all_squads: vec![],
-      all_moved_squads: vec![],
-    };
+    let world = World { all_squads: vec![] };
 
     Universe {
       factions,
@@ -113,6 +110,50 @@ impl Universe {
     js_sys::Float32Array::from(&result[..])
   }
 
+  fn run_squad_manager(&mut self) {
+    let Universe {
+      ref mut factions,
+      ref mut world,
+      ..
+    } = self;
+
+    world.all_squads = world
+      .all_squads
+      .clone()
+      .into_iter()
+      .filter(|weak_squad| weak_squad.upgrade().is_some())
+      .collect();
+
+    // collect squads which moved
+    let all_moved_squads: Vec<Rc<RefCell<Squad>>> = world
+      .all_squads
+      .iter()
+      .filter_map(|weak_squad| {
+        let ref_cell_squad = weak_squad.upgrade().unwrap();
+        let squad = ref_cell_squad.borrow();
+        if (squad.shared.center_point.0 - squad.last_center_point.0)
+          .hypot(squad.shared.center_point.1 - squad.last_center_point.1)
+          >= std::f32::EPSILON
+        {
+          Some(weak_squad.upgrade().unwrap())
+        } else {
+          None
+        }
+      })
+      .collect();
+
+    // search for enemy
+    factions.iter_mut().for_each(|faction: &mut Faction| {
+      faction.search_for_enemies(&all_moved_squads);
+    });
+
+    // update the center point
+    all_moved_squads.iter().for_each(|weak_squad| {
+      let mut squad = weak_squad.borrow_mut();
+      squad.last_center_point = squad.shared.center_point;
+    });
+  }
+
   pub fn update(&mut self) {
     let Universe {
       ref mut factions,
@@ -120,6 +161,10 @@ impl Universe {
       ref mut time,
     } = self;
     *time = (*time + 1) % 1000;
+
+    if *time % SEARCH_FOR_ENEMIES_PERIOD == 0 {
+      self.run_squad_manager();
+    }
 
     factions.iter_mut().for_each(|faction: &mut Faction| {
       if *time % UPDATE_SQUAD_CENTER_PERIOD == 0 {
