@@ -4,6 +4,7 @@ use crate::constants::MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE;
 use crate::position_utils::PositionUtils;
 use crate::squad::Squad;
 use crate::squad_types::SquadType;
+use crate::unit::STATE_IDLE;
 use crate::Factory;
 use crate::World;
 use squads_manager::SquadsManager;
@@ -159,23 +160,38 @@ impl Faction {
     SquadsManager::manage_hunters(self);
   }
 
-  pub fn search_for_enemies(&mut self, squads_which_moved: &Vec<Rc<RefCell<Squad>>>) {
+  pub fn search_for_enemies(
+    &mut self,
+    squads_which_moved: &Vec<Rc<RefCell<Squad>>>,
+    all_squads: &Vec<Rc<RefCell<Squad>>>,
+  ) {
+    self.squads.iter().for_each(|squad| {
+      squad.borrow_mut().shared.secondary_aim = Weak::new();
+    });
+
     let idle_squads: Vec<&Rc<RefCell<Squad>>> = self
       .squads
       .iter()
       .filter(|ref_cell_squad| {
-        let squad = ref_cell_squad.borrow();
-        (squad.shared.center_point.0 - squad.last_center_point.0)
-          .hypot(squad.shared.center_point.1 - squad.last_center_point.1)
-          >= std::f32::EPSILON
+        ref_cell_squad
+          .borrow()
+          .members
+          .iter()
+          .any(|unit| unit.borrow().state == STATE_IDLE)
       })
       .collect();
 
-    let enemy_squads = squads_which_moved
+    let moved_enemies_squads: Vec<&Rc<RefCell<Squad>>> = squads_which_moved
       .iter()
       .filter(|squad| squad.borrow().faction_id != self.id)
       .collect();
-    SquadsManager::search_for_enemies(idle_squads, enemy_squads); // it's &mut bc wasm is getting errror
+
+    let all_enemies_squads: Vec<&Rc<RefCell<Squad>>> = all_squads
+      .iter()
+      .filter(|squad| squad.borrow().faction_id != self.id)
+      .collect();
+
+    SquadsManager::search_for_enemies(idle_squads, moved_enemies_squads, all_enemies_squads);
   }
 
   pub fn update_squads_centers(&mut self) {

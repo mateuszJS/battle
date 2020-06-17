@@ -113,14 +113,14 @@ const getSprites = () => {
       },
       goToShoot(angle: number, shootProgress: number) {
         const isShoot = shootProgress === 0
-        const currentPhase = `shoot${Math.round(angle * 100)}`
+        const indexOfStartingFrame = getIndexOfStartingFrame(
+          angle,
+          framesPeriods.SHOOT,
+        )
+        const currentPhase = `shoot${indexOfStartingFrame}`
 
         if (previousPhase !== currentPhase) {
           previousPhase = currentPhase
-          const indexOfStartingFrame = getIndexOfStartingFrame(
-            angle,
-            framesPeriods.SHOOT,
-          )
           movieClip.gotoAndStop(indexOfStartingFrame)
         }
 

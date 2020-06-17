@@ -16,7 +16,7 @@ const STATE_ABILITY: u8 = 8;
 const STATE_FLY: u8 = 7;
 const STATE_RUN: u8 = 6;
 const STATE_SHOOT: u8 = 5;
-const STATE_IDLE: u8 = 4;
+pub const STATE_IDLE: u8 = 4;
 const STATE_GETUP: u8 = 3;
 const STATE_DIE: u8 = 0;
 
@@ -35,7 +35,7 @@ pub struct Unit {
   target_y: f32,
   position_offset_x: f32,
   position_offset_y: f32,
-  track_index: usize,
+  track_index: i8,
   squad_details: &'static SquadDetails,
   time_to_next_shoot: u16,
   aim: Weak<RefCell<Unit>>,
@@ -59,7 +59,7 @@ impl Unit {
       target_y: 0.0,
       position_offset_x: 0.0,
       position_offset_y: 0.0,
-      track_index: 0,
+      track_index: -1, // -1 means, there is no needed to go though track
       squad_details,
       time_to_next_shoot: 0,
       aim: Weak::new(),
@@ -83,25 +83,23 @@ impl Unit {
     self.get_upping_progress = 0.0;
   }
 
-  fn update_getup(&mut self) {
+  fn update_getup(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
     self.get_upping_progress += 0.01;
     if self.get_upping_progress >= 1.0 {
-      self.state = STATE_IDLE;
+      self.change_state_to_idle(squad_shared_info);
     }
   }
 
-  pub fn change_state_to_run(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
-    // pub fn change_state_to_run(&mut self, target_x: f32, target_y: f32) {
-    // when this method will be called
-    // 1. When unit need to run by path described in squad, from point to point (some index would be necessary, to keep current point)
-    // 2. When units in squad are too far from each other, and need to be closer, in the center on the squad
-    // 3. When unit by FLY state runs out of weapon range, and need to get closer, to use weapon again (not sure if then just 2. point is not enough)
+  fn check_if_too_far_from_squad_center(&self, squad_shared_info: &SquadUnitSharedDataSet) -> bool {
+    (squad_shared_info.center_point.0 - self.x).hypot(squad_shared_info.center_point.1 - self.y)
+      > MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS
+  }
 
+  pub fn change_state_to_run_though_track(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
     self.state = STATE_RUN;
 
-    let distance_from_squad_center =
-      (squad_shared_info.center_point.0 - self.x).hypot(squad_shared_info.center_point.1 - self.y);
-    self.track_index = if distance_from_squad_center > MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS {
+    // select correct self.track_index ----- START
+    self.track_index = if self.check_if_too_far_from_squad_center(squad_shared_info) {
       let obstacles_lines = ObstaclesLazyStatics::get_obstacles_lines();
       // ------------START checking intersection-------------------
       let next_track_point = squad_shared_info.track[1];
@@ -130,11 +128,13 @@ impl Unit {
     } else {
       1
     };
+    // select correct self.track_index ----- END
 
     self.go_to_current_point_on_track(squad_shared_info);
   }
 
   pub fn set_target(&mut self, x: f32, y: f32) {
+    self.state = STATE_RUN;
     self.target_x = x;
     self.target_y = y;
     let angle = (x - self.x).atan2(self.y - y);
@@ -145,39 +145,34 @@ impl Unit {
 
   fn go_to_current_point_on_track(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
     self.set_target(
-      squad_shared_info.track[self.track_index].0 + self.position_offset_x,
-      squad_shared_info.track[self.track_index].1 + self.position_offset_y,
+      squad_shared_info.track[self.track_index as usize].0 + self.position_offset_x,
+      squad_shared_info.track[self.track_index as usize].1 + self.position_offset_y,
     );
   }
 
   fn update_run(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
     if (self.x - self.target_x).hypot(self.y - self.target_y) < self.squad_details.movement_speed {
-      if squad_shared_info.track.len() - 1 == self.track_index {
+      if squad_shared_info.track.len() as i8 - 1 == self.track_index {
+        self.track_index = -1;
         // --------------- handle hunting ----------------- START
         if let Some(ref_cell_aim) = squad_shared_info.aim.upgrade() {
-          // or maybe to change_state_to_shoot we should pass aim (when is really exists)
-          // and then just inside that function (or update function), check
-          // if you are in range with aim, if no, go ahead, so there won't be effect like
-          // stopping and running all the time
+          // check if you are in range with aim, if no, go ahead, so there won't be effect like
+          // to avoid effect like stopping and running all the time
           let aim_pos = ref_cell_aim.borrow().shared.center_point;
           let dis_aim_curr_pos_and_last = (aim_pos.0 - squad_shared_info.last_aim_position.0)
             .hypot(aim_pos.1 - squad_shared_info.last_aim_position.1);
 
           if dis_aim_curr_pos_and_last > THRESHOLD_SQUAD_MOVED {
-            // to avoid effect like RUN and IDLE all the time when hunting on enemy
-            // self.target_x += self.mod_x * MANAGE_HUNTERS_PERIOD as f32; // add difference between last_aim_position and current position of aim
-            // self.target_y += self.mod_y * MANAGE_HUNTERS_PERIOD as f32;
-            // check when last_aim_position is updated!
             self.set_target(
-              self.mod_x * MANAGE_HUNTERS_PERIOD as f32 + self.target_x,
-              self.mod_y * MANAGE_HUNTERS_PERIOD as f32 + self.target_y,
+              self.mod_x * MANAGE_HUNTERS_PERIOD as f32 + self.target_x, // maybe we can reduce it
+              self.mod_y * MANAGE_HUNTERS_PERIOD as f32 + self.target_y, // the still will run, but slower
             );
           } else {
-            self.change_state_to_shoot(&ref_cell_aim);
+            self.change_state_to_shoot(ref_cell_aim, true);
           }
         // --------------- handle hunting ----------------- END
         } else {
-          self.change_state_to_idle();
+          self.change_state_to_idle(squad_shared_info);
         }
       } else {
         self.track_index += 1;
@@ -193,19 +188,31 @@ impl Unit {
     self.mod_x = 0.0;
     self.mod_y = 0.0;
     self.state = STATE_IDLE;
-    self.update_idle();
+    // log!("change_state_to_idle");
+    if self.track_index != -1 {
+      self.go_to_current_point_on_track(squad_shared_info);
+    // log!("if self.track_index != -1");
+    } else if self.check_if_too_far_from_squad_center(squad_shared_info) {
+      // log!("else if self.check_if_too_far_from_squad_center(squad_shared_info)");
+      self.set_target(
+        squad_shared_info.center_point.0 + self.position_offset_x,
+        squad_shared_info.center_point.1 + self.position_offset_y,
+      );
+    } else if let Some(aim) = squad_shared_info.aim.upgrade() {
+      // log!("else if let Some(aim) = squad_shared_info.aim.upgrade()");
+      self.change_state_to_shoot(aim, true);
+    } else if let Some(secondary_aim) = squad_shared_info.secondary_aim.upgrade() {
+      // log!("else if let Some(secondary_aim) = squad_shared_info.secondary_aim.upgrade()");
+      self.change_state_to_shoot(secondary_aim, false);
+    }
   }
 
-  fn update_idle(&mut self, squad_shared_info: &SquadUnitSharedDataSe) {
-    /*
-     0. check if has track, if has, then just go though this
-     1. check if the unit is too far from the squad center, then go closer to the center
-     2. if there is aim in squad_shared_info, then change_state_to_shoot
-     3. if there is secondary_aim in squad_shared_info, then
-    */
+  fn update_idle(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
+    // call once per couple of loops self.change_state_to_idle
+    self.change_state_to_idle(squad_shared_info);
   }
 
-  pub fn change_state_to_shoot(&mut self, aim: &Rc<RefCell<Squad>>) {
+  pub fn change_state_to_shoot(&mut self, aim: Rc<RefCell<Squad>>, is_squad_primary_aim: bool) {
     let borrowed_members = &aim.borrow().members;
     let (weak_unit_aim, distance) =
       borrowed_members
@@ -226,56 +233,54 @@ impl Unit {
         self.state = STATE_SHOOT;
         self.angle = angle;
         self.aim = weak_unit_aim;
-      } else {
-        // TODO: after reach the destination, run this function again maybe?
+      } else if is_squad_primary_aim {
         self.set_target(
           (MATH_PI - angle).sin() * WEAPON_RANGE + unit_aim.x,
           -(MATH_PI - angle).cos() * WEAPON_RANGE + unit_aim.y,
         );
-      };
+      }
     }
   }
 
   fn is_aim_in_range(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {}
 
-  fn update_shoot(&mut self) {
-    // let angle = (unit_aim.x - self.x).atan2(self.y - unit_aim.y);
-    // if distance <= WEAPON_RANGE {
-    //   self.state = STATE_SHOOT;
-    //   self.angle = angle;
-    // } else {
-    //   self.set_target(
-    //     (MATH_PI - angle).sin() * WEAPON_RANGE + unit_aim.x,
-    //     -(MATH_PI - angle).cos() * WEAPON_RANGE + unit_aim.y,
-    //   );
-    // };
+  // function called once per couple of loops
+  fn periodical_state_update(&mut self) {}
 
-    // if Some(upgraded_aim) = self.aim.upgrade() { // check if chosen enemy still lives
-    // let aim = upgraded_aim.borrow(); // check if state is moving and if it's still in range
-    // self.angle = (aim.0)
-    // } // if not live or out of range, then go to change_state_to_shoot to select a new one
-    if self.time_to_next_shoot == 0 {
-      // make shoot, create bullet, change state to let know for representation that shoot was created
-      let random = LookUpTable::get_random() - 0.5;
+  fn update_shoot(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
+    if let Some(ref_cell_aim) = self.aim.upgrade() {
+      let aim_pos = ref_cell_aim.borrow();
+      let angle = (aim_pos.x - self.x).atan2(self.y - aim_pos.y);
+      let distance = (aim_pos.x - self.x).hypot(aim_pos.y - self.y);
 
-      self.time_to_next_shoot = if random.abs() > 0.4 {
-        // 25% chances to reload
-        200
+      if distance <= WEAPON_RANGE {
+        if self.time_to_next_shoot == 0 {
+          // make shoot, create bullet, change state to let know for representation that shoot was created
+          let random = LookUpTable::get_random() - 0.5;
+
+          self.time_to_next_shoot = if random.abs() > 0.4 {
+            // 25% chances to reload
+            200
+          } else {
+            40
+          };
+        } else {
+          self.time_to_next_shoot -= 1;
+        }
+        self.angle = angle;
       } else {
-        40
+        self.change_state_to_idle(squad_shared_info);
       };
-    } else {
-      self.time_to_next_shoot -= 1;
     }
   }
 
   pub fn update(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
     match self.state {
       STATE_FLY => self.update_fly(),
-      STATE_GETUP => self.update_getup(),
+      STATE_GETUP => self.update_getup(squad_shared_info),
       STATE_RUN => self.update_run(squad_shared_info),
-      STATE_IDLE => self.update_idle(),
-      STATE_SHOOT => self.update_shoot(),
+      STATE_IDLE => self.update_idle(squad_shared_info),
+      STATE_SHOOT => self.update_shoot(squad_shared_info),
       _ => {}
     }
   }
@@ -289,7 +294,7 @@ impl Unit {
       self.angle,
       self.state as f32,
       match self.state {
-        // additional parameter for state, used below
+        // additional parameter for state
         STATE_FLY => self.mod_x.hypot(self.mod_y),
         STATE_GETUP => self.get_upping_progress,
         STATE_SHOOT => self.time_to_next_shoot as f32,

@@ -140,11 +140,13 @@ impl SquadsManager {
 
   pub fn search_for_enemies(
     idle_squads: Vec<&Rc<RefCell<Squad>>>,
-    enemy_squads: Vec<&Rc<RefCell<Squad>>>,
+    moved_enemies_squads: Vec<&Rc<RefCell<Squad>>>,
+    all_enemies_squads: Vec<&Rc<RefCell<Squad>>>,
   ) {
     idle_squads.iter().for_each(|squad| {
       let squad_center_point = squad.borrow().shared.center_point;
-      let enemies_in_range: Vec<&&Rc<RefCell<Squad>>> = enemy_squads
+      // let enemies_squads = if  { all_enemies_squads } else { moved_enemies_squads };
+      let enemies_in_range: Vec<&&Rc<RefCell<Squad>>> = all_enemies_squads
         .iter()
         .filter(|enemy| {
           let enemy_position = enemy.borrow().shared.center_point;

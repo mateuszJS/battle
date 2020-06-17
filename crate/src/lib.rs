@@ -61,7 +61,7 @@ pub struct Universe {
   time: u32,
 }
 
-// #[wasm_bindgen]
+#[wasm_bindgen]
 impl Universe {
   pub fn new(factions_data: Vec<f32>, obstacles_data: Vec<f32>) -> Universe {
     let mut factions: Vec<Faction> = vec![];
@@ -110,13 +110,7 @@ impl Universe {
     js_sys::Float32Array::from(&result[..])
   }
 
-  fn run_squad_manager(&mut self) {
-    let Universe {
-      ref mut factions,
-      ref mut world,
-      ..
-    } = self;
-
+  fn run_squad_manager(factions: &mut Vec<Faction>, world: &mut World) {
     world.all_squads = world
       .all_squads
       .clone()
@@ -142,9 +136,15 @@ impl Universe {
       })
       .collect();
 
+    let all_squads: Vec<Rc<RefCell<Squad>>> = world
+      .all_squads
+      .iter()
+      .map(|squad| squad.upgrade().unwrap())
+      .collect();
+
     // search for enemy
     factions.iter_mut().for_each(|faction: &mut Faction| {
-      faction.search_for_enemies(&all_moved_squads);
+      faction.search_for_enemies(&all_moved_squads, &all_squads);
     });
 
     // update the center point
@@ -163,7 +163,7 @@ impl Universe {
     *time = (*time + 1) % 1000;
 
     if *time % SEARCH_FOR_ENEMIES_PERIOD == 0 {
-      self.run_squad_manager();
+      Universe::run_squad_manager(factions, world);
     }
 
     factions.iter_mut().for_each(|faction: &mut Faction| {

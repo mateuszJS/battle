@@ -128,7 +128,7 @@ impl Squad {
     self
       .members
       .iter_mut()
-      .for_each(|unit| unit.borrow_mut().change_state_to_run(shared));
+      .for_each(|unit| unit.borrow_mut().change_state_to_run_though_track(shared));
   }
 
   pub fn stop_running(&mut self) {
