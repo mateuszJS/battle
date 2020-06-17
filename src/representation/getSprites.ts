@@ -125,10 +125,6 @@ const getSprites = () => {
         }
 
         if (isShoot) {
-          const indexOfStartingFrame = getIndexOfStartingFrame(
-            angle,
-            framesPeriods.SHOOT,
-          )
           const indexOfLastFrame =
             indexOfStartingFrame + framesPeriods.SHOOT.length
           movieClip.gotoAndPlay(indexOfStartingFrame)
