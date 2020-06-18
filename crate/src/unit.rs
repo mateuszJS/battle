@@ -1,6 +1,5 @@
 use crate::constants::{
-  MANAGE_HUNTERS_PERIOD, MATH_PI, MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS, THRESHOLD_SQUAD_MOVED,
-  WEAPON_RANGE,
+  MANAGE_HUNTERS_PERIOD, MATH_PI, MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS, WEAPON_RANGE,
 };
 use crate::id_generator::IdGenerator;
 use crate::look_up_table::LookUpTable;
@@ -14,7 +13,7 @@ use std::rc::Weak;
 
 const STATE_ABILITY: u8 = 8;
 const STATE_FLY: u8 = 7;
-const STATE_RUN: u8 = 6;
+pub const STATE_RUN: u8 = 6;
 const STATE_SHOOT: u8 = 5;
 pub const STATE_IDLE: u8 = 4;
 const STATE_GETUP: u8 = 3;
@@ -158,14 +157,11 @@ impl Unit {
         if let Some(ref_cell_aim) = squad_shared_info.aim.upgrade() {
           // check if you are in range with aim, if no, go ahead, so there won't be effect like
           // to avoid effect like stopping and running all the time
-          let aim_pos = ref_cell_aim.borrow().shared.center_point;
-          let dis_aim_curr_pos_and_last = (aim_pos.0 - squad_shared_info.last_aim_position.0)
-            .hypot(aim_pos.1 - squad_shared_info.last_aim_position.1);
-
-          if dis_aim_curr_pos_and_last > THRESHOLD_SQUAD_MOVED {
+          if ref_cell_aim.borrow().was_moved_in_previous_loop {
+            // in this case it's current loop, because "update" goes after updating the "was_moved_in_previous_loop"
             self.set_target(
-              self.mod_x * MANAGE_HUNTERS_PERIOD as f32 + self.target_x, // maybe we can reduce it
-              self.mod_y * MANAGE_HUNTERS_PERIOD as f32 + self.target_y, // the still will run, but slower
+              self.mod_x * MANAGE_HUNTERS_PERIOD as f32 + self.target_x,
+              self.mod_y * MANAGE_HUNTERS_PERIOD as f32 + self.target_y,
             );
           } else {
             self.change_state_to_shoot(ref_cell_aim, true);

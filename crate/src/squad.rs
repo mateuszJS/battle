@@ -1,18 +1,14 @@
-use crate::constants::{THRESHOLD_SQUAD_MOVED, WEAPON_RANGE};
 use crate::id_generator::IdGenerator;
 use crate::position_utils::PositionUtils;
 use crate::squad_types::{get_squad_details, SquadDetails, SquadType};
-use crate::unit::Unit;
+use crate::unit::{Unit, STATE_RUN};
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::rc::Weak;
 
-const DEFAULT_LAST_POSITION: (f32, f32) = (std::f32::MIN, std::f32::MIN);
-
 pub struct SquadUnitSharedDataSet {
   pub center_point: (f32, f32),
   pub track: Vec<(f32, f32)>,
-  pub last_aim_position: (f32, f32),
   pub aim: Weak<RefCell<Squad>>,
   pub secondary_aim: Weak<RefCell<Squad>>,
 }
@@ -23,7 +19,9 @@ pub struct Squad {
   pub members: Vec<Rc<RefCell<Unit>>>,
   pub shared: SquadUnitSharedDataSet,
   pub squad_details: &'static SquadDetails,
-  pub last_center_point: (f32, f32),
+  pub was_moved_in_previous_loop: bool,
+  pub last_center_point: (f32, f32), // it's pub only bc
+                                     // in squads_manager we are calc distance, to detect if aim is coming closer or farther
 }
 
 impl Squad {
@@ -33,11 +31,11 @@ impl Squad {
       faction_id,
       members: vec![],
       squad_details: get_squad_details(&squad_type),
-      last_center_point: DEFAULT_LAST_POSITION,
+      last_center_point: (0.0, 0.0),
+      was_moved_in_previous_loop: true,
       shared: SquadUnitSharedDataSet {
         center_point: (0.0, 0.0),
         track: vec![],
-        last_aim_position: DEFAULT_LAST_POSITION,
         aim: Weak::new(),
         secondary_aim: Weak::new(),
       },
@@ -114,7 +112,6 @@ impl Squad {
     // }
     if clear_aim {
       self.shared.aim = Weak::new();
-      self.shared.last_aim_position = DEFAULT_LAST_POSITION;
       self.shared.secondary_aim = Weak::new();
     }
 
@@ -137,18 +134,34 @@ impl Squad {
       ref shared,
       ..
     } = self;
-    members
-      .iter_mut()
-      .for_each(|unit| unit.borrow_mut().change_state_to_idle(shared));
+    members.iter_mut().for_each(|unit| {
+      if unit.borrow().state == STATE_RUN {
+        unit.borrow_mut().change_state_to_idle(shared);
+      }
+    });
   }
 
   pub fn attack_enemy(&mut self, enemy: &Weak<RefCell<Squad>>) {
     self.shared.aim = Weak::clone(enemy);
     self.shared.secondary_aim = Weak::new();
-    self.shared.last_aim_position = DEFAULT_LAST_POSITION;
     // self.shared.track = vec![];
     // if, stop running only if the squad is running
     self.stop_running();
+  }
+
+  pub fn was_center_point_changed(&self) -> bool {
+    (self.shared.center_point.0 - self.last_center_point.0)
+      .hypot(self.shared.center_point.1 - self.last_center_point.1)
+      >= std::f32::EPSILON
+  }
+
+  pub fn update_moved_status(&mut self) {
+    self.was_moved_in_previous_loop = if self.was_center_point_changed() {
+      self.last_center_point = self.shared.center_point;
+      true
+    } else {
+      false
+    }
   }
 
   pub fn remove_member(&mut self) {

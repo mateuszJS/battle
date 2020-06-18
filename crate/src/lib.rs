@@ -123,11 +123,11 @@ impl Universe {
       .all_squads
       .iter()
       .filter_map(|weak_squad| {
-        let ref_cell_squad = weak_squad.upgrade().unwrap();
-        let squad = ref_cell_squad.borrow();
-        if (squad.shared.center_point.0 - squad.last_center_point.0)
-          .hypot(squad.shared.center_point.1 - squad.last_center_point.1)
-          >= std::f32::EPSILON
+        if weak_squad
+          .upgrade()
+          .unwrap()
+          .borrow()
+          .was_moved_in_previous_loop
         {
           Some(weak_squad.upgrade().unwrap())
         } else {
@@ -147,10 +147,8 @@ impl Universe {
       faction.search_for_enemies(&all_moved_squads, &all_squads);
     });
 
-    // update the center point
-    all_moved_squads.iter().for_each(|weak_squad| {
-      let mut squad = weak_squad.borrow_mut();
-      squad.last_center_point = squad.shared.center_point;
+    world.all_squads.iter().for_each(|squad| {
+      squad.upgrade().unwrap().borrow_mut().update_moved_status();
     });
   }
 
@@ -162,15 +160,11 @@ impl Universe {
     } = self;
     *time = (*time + 1) % 1000;
 
-    if *time % SEARCH_FOR_ENEMIES_PERIOD == 0 {
-      Universe::run_squad_manager(factions, world);
-    }
-
-    factions.iter_mut().for_each(|faction: &mut Faction| {
-      if *time % UPDATE_SQUAD_CENTER_PERIOD == 0 {
+    if *time % UPDATE_SQUAD_CENTER_PERIOD == 0 {
+      factions.iter_mut().for_each(|faction: &mut Faction| {
         faction.update_squads_centers();
-      }
-    });
+      });
+    }
 
     factions.iter_mut().for_each(|faction: &mut Faction| {
       if *time % MANAGE_HUNTERS_PERIOD == 0 {
@@ -192,6 +186,10 @@ impl Universe {
       faction.resources += 1;
       faction.update(world);
     });
+
+    if *time % SEARCH_FOR_ENEMIES_PERIOD == 0 {
+      Universe::run_squad_manager(factions, world);
+    }
   }
 
   pub fn get_universe_data(&self) -> js_sys::Float32Array {

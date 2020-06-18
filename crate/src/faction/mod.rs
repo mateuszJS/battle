@@ -180,7 +180,9 @@ impl Faction {
           .any(|unit| unit.borrow().state == STATE_IDLE)
       })
       .collect();
-
+    if self.id == 1 {
+      log!("{}", idle_squads.len());
+    }
     let moved_enemies_squads: Vec<&Rc<RefCell<Squad>>> = squads_which_moved
       .iter()
       .filter(|squad| squad.borrow().faction_id != self.id)

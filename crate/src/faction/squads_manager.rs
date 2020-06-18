@@ -1,7 +1,7 @@
 use super::Faction;
 use crate::constants::{
   ATTACKERS_DISTANCE, MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS,
-  THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER, THRESHOLD_SQUAD_MOVED, WEAPON_RANGE,
+  THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER, WEAPON_RANGE,
 };
 use crate::position_utils::PositionUtils;
 use crate::squad::Squad;
@@ -27,11 +27,10 @@ impl SquadsManager {
       if let Some(ref_cell_aim) = upgraded_aim {
         let aim = ref_cell_aim.borrow();
         let aim_curr_point = aim.shared.center_point;
-        let aim_last_point = squad.shared.last_aim_position;
-        let diff_distance =
-          (aim_curr_point.0 - aim_last_point.0).hypot(aim_curr_point.1 - aim_last_point.1);
+        let aim_last_point = aim.last_center_point;
 
-        if diff_distance > THRESHOLD_SQUAD_MOVED {
+        if aim.was_moved_in_previous_loop || aim.was_center_point_changed() {
+          // if was moved in previous loop
           // aim.lops_since_last_move > 5
           let distance_to_enemy_curr_pos = (aim_curr_point.0 - squad.shared.center_point.0)
             .hypot(aim_curr_point.1 - squad.shared.center_point.1);
@@ -74,7 +73,6 @@ impl SquadsManager {
             // 35.0 to avoid stopping just because aim is a little bit closer to the squad
             squad.stop_running();
           }
-          squad.shared.last_aim_position = aim_curr_point;
         }
       }
     });
@@ -98,7 +96,15 @@ impl SquadsManager {
   }
 
   fn manage_single_hunters_group(hunters: &mut Vec<&Rc<RefCell<Squad>>>) {
-    let aim_position = hunters[0].borrow().shared.last_aim_position;
+    let aim_position = hunters[0]
+      .borrow()
+      .shared
+      .aim
+      .upgrade()
+      .unwrap()
+      .borrow()
+      .shared
+      .center_point;
     let mut positions = PositionUtils::get_attackers_position(
       hunters.len(),
       SquadsManager::calc_hunters_center(hunters),
@@ -143,10 +149,16 @@ impl SquadsManager {
     moved_enemies_squads: Vec<&Rc<RefCell<Squad>>>,
     all_enemies_squads: Vec<&Rc<RefCell<Squad>>>,
   ) {
-    idle_squads.iter().for_each(|squad| {
-      let squad_center_point = squad.borrow().shared.center_point;
-      // let enemies_squads = if  { all_enemies_squads } else { moved_enemies_squads };
-      let enemies_in_range: Vec<&&Rc<RefCell<Squad>>> = all_enemies_squads
+    idle_squads.iter().for_each(|ref_cell_squad| {
+      let mut squad = ref_cell_squad.borrow_mut();
+      let squad_center_point = squad.shared.center_point;
+      let enemies_squads = if squad.was_moved_in_previous_loop || squad.was_center_point_changed() {
+        &all_enemies_squads
+      } else {
+        // didn't move previously, and also now didn't move
+        &moved_enemies_squads
+      };
+      let enemies_in_range: Vec<&&Rc<RefCell<Squad>>> = enemies_squads
         .iter()
         .filter(|enemy| {
           let enemy_position = enemy.borrow().shared.center_point;
@@ -156,7 +168,7 @@ impl SquadsManager {
         .collect();
 
       if enemies_in_range.len() > 0 {
-        squad.borrow_mut().shared.secondary_aim =
+        squad.shared.secondary_aim =
           SquadsManager::get_nearest_enemy_squad(squad_center_point, enemies_in_range);
       }
     })
