@@ -1,5 +1,6 @@
 use crate::constants::{
-  MANAGE_HUNTERS_PERIOD, MATH_PI, MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS, WEAPON_RANGE,
+  MANAGE_HUNTERS_PERIOD, MATH_PI, MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS, NORMAL_SQUAD_RADIUS,
+  WEAPON_RANGE,
 };
 use crate::id_generator::IdGenerator;
 use crate::look_up_table::LookUpTable;
@@ -94,11 +95,30 @@ impl Unit {
       > MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS
   }
 
-  pub fn change_state_to_run_though_track(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
+  fn check_if_close_to_squad_center(&self, squad_shared_info: &SquadUnitSharedDataSet) -> bool {
+    (squad_shared_info.center_point.0 - self.x).hypot(squad_shared_info.center_point.1 - self.y)
+      <= NORMAL_SQUAD_RADIUS + 20.0
+  }
+
+  pub fn change_state_to_run_though_track(
+    &mut self,
+    squad_shared_info: &SquadUnitSharedDataSet,
+    from_start: bool,
+  ) {
     self.state = STATE_RUN;
 
-    // select correct self.track_index ----- START
-    self.track_index = if self.check_if_too_far_from_squad_center(squad_shared_info) {
+    if from_start {
+      self.track_index = 0;
+    }
+
+    // increase self.track_index by one if possible ----- START
+    self.track_index += if self.check_if_close_to_squad_center(squad_shared_info) {
+      if self.track_index == squad_shared_info.track.len() as i8 - 1 {
+        0
+      } else {
+        1 // it won't work when unit is in idle (after get up)
+      }
+    } else {
       let obstacles_lines = ObstaclesLazyStatics::get_obstacles_lines();
       // ------------START checking intersection-------------------
       let next_track_point = squad_shared_info.track[1];
@@ -116,16 +136,15 @@ impl Unit {
         p1: &start_point,
         p2: &end_point,
       };
-      let mut track_index = 1;
-      obstacles_lines.iter().for_each(|obstacle_line| {
+      let mut index_modifier = 1;
+      for obstacle_line in obstacles_lines.iter() {
         if BasicUtils::check_intersection(&line_to_next_track_point, obstacle_line) {
-          track_index = 0;
+          index_modifier = 0;
+          break;
         };
-      });
-      track_index
-    // ------------END checking intersection-------------------
-    } else {
-      1
+      }
+      index_modifier
+      // ------------END checking intersection-------------------
     };
     // select correct self.track_index ----- END
 
@@ -184,21 +203,16 @@ impl Unit {
     self.mod_x = 0.0;
     self.mod_y = 0.0;
     self.state = STATE_IDLE;
-    // log!("change_state_to_idle");
     if self.track_index != -1 {
       self.go_to_current_point_on_track(squad_shared_info);
-    // log!("if self.track_index != -1");
     } else if self.check_if_too_far_from_squad_center(squad_shared_info) {
-      // log!("else if self.check_if_too_far_from_squad_center(squad_shared_info)");
       self.set_target(
         squad_shared_info.center_point.0 + self.position_offset_x,
         squad_shared_info.center_point.1 + self.position_offset_y,
       );
     } else if let Some(aim) = squad_shared_info.aim.upgrade() {
-      // log!("else if let Some(aim) = squad_shared_info.aim.upgrade()");
       self.change_state_to_shoot(aim, true);
     } else if let Some(secondary_aim) = squad_shared_info.secondary_aim.upgrade() {
-      // log!("else if let Some(secondary_aim) = squad_shared_info.secondary_aim.upgrade()");
       self.change_state_to_shoot(secondary_aim, false);
     }
   }

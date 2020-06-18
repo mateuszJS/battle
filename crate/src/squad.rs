@@ -122,10 +122,11 @@ impl Squad {
       destination_y,
     );
     let shared = &self.shared;
-    self
-      .members
-      .iter_mut()
-      .for_each(|unit| unit.borrow_mut().change_state_to_run_though_track(shared));
+    self.members.iter_mut().for_each(|unit| {
+      unit
+        .borrow_mut()
+        .change_state_to_run_though_track(shared, true);
+    });
   }
 
   pub fn stop_running(&mut self) {
