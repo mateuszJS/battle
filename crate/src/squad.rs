@@ -1,7 +1,7 @@
 use crate::id_generator::IdGenerator;
 use crate::position_utils::PositionUtils;
 use crate::squad_types::{get_squad_details, SquadDetails, SquadType};
-use crate::unit::{Unit, STATE_RUN};
+use crate::unit::{Unit, STATE_IDLE, STATE_RUN};
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::rc::Weak;
@@ -162,6 +162,43 @@ impl Squad {
       true
     } else {
       false
+    }
+  }
+
+  pub fn keep_coherency(&mut self) {
+    let are_members_in_coherency = self.members.iter().any(|ref_cell_unit| {
+      ref_cell_unit
+        .borrow()
+        .check_if_too_far_from_squad_center(&self.shared)
+    });
+    // TODO: remove checking coherency in unit
+
+    if !are_members_in_coherency {
+      let (min_track_index, max_track_index) =
+        self
+          .members
+          .iter()
+          .fold((-1, std::i8::MAX), |(min, max), ref_cell_unit| {
+            let unit = ref_cell_unit.borrow();
+            (unit.track_index.min(min), unit.track_index.max(max))
+          });
+
+      if min_track_index == max_track_index {
+        // calc center point and go there
+      } else {
+        // calc center track_index, and go to. By default take smaller one if after /2 there is a rest
+      }
+    } else {
+      // if coherency is kept,
+      self.members.iter().for_each(|ref_cell_unit| {
+        let mut unit = ref_cell_unit.borrow_mut();
+        if unit.state == STATE_IDLE {
+          unit.change_state_to_idle(&self.shared);
+        }
+        // TODO: check also is_aim_in_range if STATE_SHOOT is currently
+        // update angle
+        // mvoed all logic with it ot one function in unit.rs
+      });
     }
   }
 

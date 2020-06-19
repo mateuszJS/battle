@@ -35,7 +35,7 @@ pub struct Unit {
   target_y: f32,
   position_offset_x: f32,
   position_offset_y: f32,
-  track_index: i8,
+  pub track_index: i8,
   squad_details: &'static SquadDetails,
   time_to_next_shoot: u16,
   aim: Weak<RefCell<Unit>>,
@@ -90,7 +90,10 @@ impl Unit {
     }
   }
 
-  fn check_if_too_far_from_squad_center(&self, squad_shared_info: &SquadUnitSharedDataSet) -> bool {
+  pub fn check_if_too_far_from_squad_center(
+    &self,
+    squad_shared_info: &SquadUnitSharedDataSet,
+  ) -> bool {
     (squad_shared_info.center_point.0 - self.x).hypot(squad_shared_info.center_point.1 - self.y)
       > MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS
   }
@@ -113,6 +116,8 @@ impl Unit {
 
     // increase self.track_index by one if possible ----- START
     self.track_index += if self.check_if_close_to_squad_center(squad_shared_info) {
+      // AND doesn't GETUP at this moment!
+      // when GETUP then always check if you are not closer to the next point!
       if self.track_index == squad_shared_info.track.len() as i8 - 1 {
         0
       } else {
@@ -219,7 +224,7 @@ impl Unit {
 
   fn update_idle(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
     // call once per couple of loops self.change_state_to_idle
-    self.change_state_to_idle(squad_shared_info);
+    // self.change_state_to_idle(squad_shared_info);
   }
 
   pub fn change_state_to_shoot(&mut self, aim: Rc<RefCell<Squad>>, is_squad_primary_aim: bool) {
@@ -253,9 +258,6 @@ impl Unit {
   }
 
   fn is_aim_in_range(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {}
-
-  // function called once per couple of loops
-  fn periodical_state_update(&mut self) {}
 
   fn update_shoot(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
     if let Some(ref_cell_aim) = self.aim.upgrade() {
