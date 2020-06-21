@@ -198,7 +198,11 @@ impl Faction {
     self
       .squads
       .iter_mut()
-      .for_each(|squad| squad.borrow_mut().update_center());
+      .for_each(|ref_cell_squad| {
+        let mut squad = ref_cell_squad.borrow_mut();
+        squad.update_center();
+        squad.check_units_correctness();
+      });
   }
 
   pub fn manage_hunters(&mut self) {

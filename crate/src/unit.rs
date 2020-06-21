@@ -35,7 +35,7 @@ pub struct Unit {
   target_y: f32,
   position_offset_x: f32,
   position_offset_y: f32,
-  pub track_index: i8,
+  track_index: i8,
   squad_details: &'static SquadDetails,
   time_to_next_shoot: u16,
   aim: Weak<RefCell<Unit>>,
@@ -103,13 +103,15 @@ impl Unit {
       <= NORMAL_SQUAD_RADIUS + 20.0
   }
 
+  fn can_change_state(&mut self) -> bool {
+    self.state != STATE_DIE && self.state != STATE_FLY && self.state != STATE_GETUP
+  }
+
   pub fn change_state_to_run_though_track(
     &mut self,
     squad_shared_info: &SquadUnitSharedDataSet,
     from_start: bool,
   ) {
-    self.state = STATE_RUN;
-
     if from_start {
       self.track_index = 0;
     }
@@ -152,11 +154,13 @@ impl Unit {
       // ------------END checking intersection-------------------
     };
     // select correct self.track_index ----- END
-
-    self.go_to_current_point_on_track(squad_shared_info);
+    if self.can_change_state() {
+      self.state = STATE_RUN;
+      self.go_to_current_point_on_track(squad_shared_info);
+    }
   }
 
-  pub fn set_target(&mut self, x: f32, y: f32) {
+  fn set_target(&mut self, x: f32, y: f32) {
     self.state = STATE_RUN;
     self.target_x = x;
     self.target_y = y;
@@ -183,10 +187,10 @@ impl Unit {
           // to avoid effect like stopping and running all the time
           if ref_cell_aim.borrow().was_moved_in_previous_loop {
             // in this case it's current loop, because "update" goes after updating the "was_moved_in_previous_loop"
-            self.set_target(
-              self.mod_x * MANAGE_HUNTERS_PERIOD as f32 + self.target_x,
-              self.mod_y * MANAGE_HUNTERS_PERIOD as f32 + self.target_y,
-            );
+            // self.set_target(
+            //   self.mod_x * MANAGE_HUNTERS_PERIOD as f32 + self.target_x,
+            //   self.mod_y * MANAGE_HUNTERS_PERIOD as f32 + self.target_y,
+            // );
           } else {
             self.change_state_to_shoot(ref_cell_aim, true);
           }
@@ -210,11 +214,6 @@ impl Unit {
     self.state = STATE_IDLE;
     if self.track_index != -1 {
       self.go_to_current_point_on_track(squad_shared_info);
-    } else if self.check_if_too_far_from_squad_center(squad_shared_info) {
-      self.set_target(
-        squad_shared_info.center_point.0 + self.position_offset_x,
-        squad_shared_info.center_point.1 + self.position_offset_y,
-      );
     } else if let Some(aim) = squad_shared_info.aim.upgrade() {
       self.change_state_to_shoot(aim, true);
     } else if let Some(secondary_aim) = squad_shared_info.secondary_aim.upgrade() {
@@ -222,12 +221,31 @@ impl Unit {
     }
   }
 
-  fn update_idle(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
-    // call once per couple of loops self.change_state_to_idle
-    // self.change_state_to_idle(squad_shared_info);
+  fn update_idle(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {}
+
+  pub fn check_state_correctness(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
+    if self.state == STATE_IDLE {
+      self.change_state_to_idle(squad_shared_info);
+    } else if self.state == STATE_SHOOT {
+      self.check_correction_of_shooting_state(squad_shared_info);
+    }
   }
 
-  pub fn change_state_to_shoot(&mut self, aim: Rc<RefCell<Squad>>, is_squad_primary_aim: bool) {
+  fn check_correction_of_shooting_state(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
+    if let Some(ref_cell_aim) = self.aim.upgrade() {
+      let aim_pos = ref_cell_aim.borrow();
+      let angle = (aim_pos.x - self.x).atan2(self.y - aim_pos.y);
+      let distance = (aim_pos.x - self.x).hypot(aim_pos.y - self.y);
+      self.angle = angle;
+
+      if distance > WEAPON_RANGE {
+        self.change_state_to_idle(squad_shared_info);
+      }
+    }
+    // TODO: else with removing aim from squad?
+  }
+
+  fn change_state_to_shoot(&mut self, aim: Rc<RefCell<Squad>>, is_squad_primary_aim: bool) {
     let borrowed_members = &aim.borrow().members;
     let (weak_unit_aim, distance) =
       borrowed_members
@@ -255,34 +273,21 @@ impl Unit {
         );
       }
     }
+    // TODO: else with removing aim from squad?
   }
 
-  fn is_aim_in_range(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {}
-
   fn update_shoot(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
-    if let Some(ref_cell_aim) = self.aim.upgrade() {
-      let aim_pos = ref_cell_aim.borrow();
-      let angle = (aim_pos.x - self.x).atan2(self.y - aim_pos.y);
-      let distance = (aim_pos.x - self.x).hypot(aim_pos.y - self.y);
-
-      if distance <= WEAPON_RANGE {
-        if self.time_to_next_shoot == 0 {
-          // make shoot, create bullet, change state to let know for representation that shoot was created
-          let random = LookUpTable::get_random() - 0.5;
-
-          self.time_to_next_shoot = if random.abs() > 0.4 {
-            // 25% chances to reload
-            200
-          } else {
-            40
-          };
-        } else {
-          self.time_to_next_shoot -= 1;
-        }
-        self.angle = angle;
+    if self.time_to_next_shoot == 0 {
+      // make shoot, create bullet, change state to let know for representation that shoot was created
+      let random = LookUpTable::get_random() - 0.5;
+      self.time_to_next_shoot = if random.abs() > 0.4 {
+        // 25% chances to reload
+        200
       } else {
-        self.change_state_to_idle(squad_shared_info);
+        40
       };
+    } else {
+      self.time_to_next_shoot -= 1;
     }
   }
 

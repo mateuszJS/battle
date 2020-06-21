@@ -20,6 +20,7 @@ pub struct Squad {
   pub shared: SquadUnitSharedDataSet,
   pub squad_details: &'static SquadDetails,
   pub was_moved_in_previous_loop: bool,
+  pub stored_track_destination: Option<(f32, f32)>, // to store destination, bc units are regrouping rn
   pub last_center_point: (f32, f32), // it's pub only bc
                                      // in squads_manager we are calc distance, to detect if aim is coming closer or farther
 }
@@ -33,6 +34,7 @@ impl Squad {
       squad_details: get_squad_details(&squad_type),
       last_center_point: (0.0, 0.0),
       was_moved_in_previous_loop: true,
+      stored_track_destination: None,
       shared: SquadUnitSharedDataSet {
         center_point: (0.0, 0.0),
         track: vec![],
@@ -110,9 +112,15 @@ impl Squad {
     //   // TODO: calc segment, from squad_center thought closest_point to outsite (like plus 5?)
     //   // also handle case when distance is 0, then add 5, check if it's okay, if not, minsu 5, and this is have to be okay
     // }
+    
     if clear_aim {
       self.shared.aim = Weak::new();
       self.shared.secondary_aim = Weak::new();
+    }
+
+    if self.stored_track_destination.is_some() {
+      self.stored_track_destination = Some((destination_x, destination_y));
+      return;
     }
 
     self.shared.track = PositionUtils::get_track(
@@ -165,39 +173,33 @@ impl Squad {
     }
   }
 
-  pub fn keep_coherency(&mut self) {
-    let are_members_in_coherency = self.members.iter().any(|ref_cell_unit| {
+  pub fn check_units_correctness(&mut self) {
+    // Firstly, check coherency
+    let coherency_not_kept = self.members.iter().any(|ref_cell_unit| {
       ref_cell_unit
         .borrow()
         .check_if_too_far_from_squad_center(&self.shared)
     });
-    // TODO: remove checking coherency in unit
-
-    if !are_members_in_coherency {
-      let (min_track_index, max_track_index) =
-        self
-          .members
-          .iter()
-          .fold((-1, std::i8::MAX), |(min, max), ref_cell_unit| {
-            let unit = ref_cell_unit.borrow();
-            (unit.track_index.min(min), unit.track_index.max(max))
-          });
-
-      if min_track_index == max_track_index {
-        // calc center point and go there
-      } else {
-        // calc center track_index, and go to. By default take smaller one if after /2 there is a rest
+  
+    if coherency_not_kept {
+      if self.stored_track_destination.is_none() {
+        let track_len = self.shared.track.len();
+        // store point, instead of saving to "self" because self.add_target is checking self
+        let point_to_store = if track_len > 0 {
+          Some(self.shared.track[track_len - 1])
+        } else {
+          None
+        };
+        self.add_target(self.shared.center_point.0, self.shared.center_point.1 , false);
+        self.stored_track_destination = point_to_store;
       }
+    } else if let Some(stored_track_destination) = self.stored_track_destination {
+      self.stored_track_destination = None;
+      self.add_target(stored_track_destination.0, stored_track_destination.1 , false);
     } else {
       // if coherency is kept,
       self.members.iter().for_each(|ref_cell_unit| {
-        let mut unit = ref_cell_unit.borrow_mut();
-        if unit.state == STATE_IDLE {
-          unit.change_state_to_idle(&self.shared);
-        }
-        // TODO: check also is_aim_in_range if STATE_SHOOT is currently
-        // update angle
-        // mvoed all logic with it ot one function in unit.rs
+        ref_cell_unit.borrow_mut().check_state_correctness(&self.shared);
       });
     }
   }
