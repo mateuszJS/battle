@@ -77,7 +77,6 @@ class Unit {
     this.graphics.x = x
     this.graphics.y = y
 
-    // isShoot won't be stored in this.previousState
     switch (state) {
       case State.IDLE: {
         this.frameUpdaters.goToIdle(angle)

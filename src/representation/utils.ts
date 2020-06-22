@@ -61,5 +61,6 @@ export const getCallbackGoToFirstOnLastFrameAndStop = (
   function() {
     if (this.currentFrame >= lastFrame) {
       this.gotoAndStop(firstFrame)
+      this.onFrameChange = null
     }
   }

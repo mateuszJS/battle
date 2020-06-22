@@ -84,6 +84,7 @@ const getSprites = () => {
         const currentPhase = `idle${Math.round(angle * 100)}`
         if (previousPhase !== currentPhase) {
           previousPhase = currentPhase
+          movieClip.onFrameChange = null
           const indexOfStartingFrame = getIndexOfStartingFrame(
             angle,
             framesPeriods.IDLE,
@@ -96,7 +97,7 @@ const getSprites = () => {
         if (previousPhase !== currentPhase) {
           previousPhase = currentPhase
           movieClip.animationSpeed = 0.4
-          movieClip.onFrameChange = null
+          // movieClip.onFrameChange = null
           movieClip.gotoAndStop(framesPeriods.RUN.first)
           const indexOfStartingFrame = getIndexOfStartingFrame(
             angle,
@@ -121,6 +122,7 @@ const getSprites = () => {
 
         if (previousPhase !== currentPhase) {
           previousPhase = currentPhase
+          movieClip.onFrameChange = null
           movieClip.gotoAndStop(indexOfStartingFrame)
         }
 
@@ -151,6 +153,7 @@ const getSprites = () => {
           currentFrame > framesPeriods.FLY.last
         ) {
           previousPhase = 'fly_up'
+          movieClip.onFrameChange = null
           movieClip.animationSpeed = 0.3
           movieClip.gotoAndPlay(indexOfStartingFrame)
         } else if (
@@ -177,6 +180,7 @@ const getSprites = () => {
           Math.floor(getUppingProgress * (framesPeriods.GETUP.length - 1))
         movieClip.gotoAndStop(indexOfCurrentFrame)
         previousPhase = 'getup'
+        movieClip.onFrameChange = null
       },
     }
   }
