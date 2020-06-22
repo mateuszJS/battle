@@ -110,7 +110,7 @@ impl Unit {
   pub fn change_state_to_run_though_track(
     &mut self,
     squad_shared_info: &SquadUnitSharedDataSet,
-    from_start: bool,
+    from_start: bool, // after GETUP will be false, bc have to start with last point where was
   ) {
     if from_start {
       self.track_index = 0;
@@ -143,14 +143,16 @@ impl Unit {
         p1: &start_point,
         p2: &end_point,
       };
-      let mut index_modifier = 1;
-      for obstacle_line in obstacles_lines.iter() {
-        if BasicUtils::check_intersection(&line_to_next_track_point, obstacle_line) {
-          index_modifier = 0;
-          break;
-        };
+
+      let cannot_go_to_next_point_directly = obstacles_lines.iter().any(|obstacle_line| {
+        BasicUtils::check_intersection(&line_to_next_track_point, obstacle_line)
+      });
+
+      if cannot_go_to_next_point_directly {
+        0
+      } else {
+        1
       }
-      index_modifier
       // ------------END checking intersection-------------------
     };
     // select correct self.track_index ----- END
@@ -179,7 +181,7 @@ impl Unit {
 
   fn update_run(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
     if (self.x - self.target_x).hypot(self.y - self.target_y) < self.squad_details.movement_speed {
-      if squad_shared_info.track.len() as i8 - 1 == self.track_index {
+      if squad_shared_info.track.len() as i8 - 1 == self.track_index || self.track_index == -1 {
         self.track_index = -1;
         // --------------- handle hunting ----------------- START
         if let Some(ref_cell_aim) = squad_shared_info.aim.upgrade() {
@@ -187,10 +189,10 @@ impl Unit {
           // to avoid effect like stopping and running all the time
           if ref_cell_aim.borrow().was_moved_in_previous_loop {
             // in this case it's current loop, because "update" goes after updating the "was_moved_in_previous_loop"
-            // self.set_target(
-            //   self.mod_x * MANAGE_HUNTERS_PERIOD as f32 + self.target_x,
-            //   self.mod_y * MANAGE_HUNTERS_PERIOD as f32 + self.target_y,
-            // );
+            self.set_target(
+              self.mod_x * MANAGE_HUNTERS_PERIOD as f32 + self.target_x,
+              self.mod_y * MANAGE_HUNTERS_PERIOD as f32 + self.target_y,
+            );
           } else {
             self.change_state_to_shoot(ref_cell_aim, true);
           }
@@ -267,9 +269,11 @@ impl Unit {
         self.angle = angle;
         self.aim = weak_unit_aim;
       } else if is_squad_primary_aim {
+        // TODO: actually, if squad will regorup (or at least this one unit)
+        // then should be in range
         self.set_target(
-          (MATH_PI - angle).sin() * WEAPON_RANGE + unit_aim.x,
-          -(MATH_PI - angle).cos() * WEAPON_RANGE + unit_aim.y,
+          angle.sin() * WEAPON_RANGE + unit_aim.x,
+          -angle.cos() * WEAPON_RANGE + unit_aim.y,
         );
       }
     }

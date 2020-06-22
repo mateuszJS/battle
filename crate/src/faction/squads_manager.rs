@@ -95,7 +95,7 @@ impl SquadsManager {
     (sum_x / hunters.len() as f32, sum_y / hunters.len() as f32)
   }
 
-  fn manage_single_hunters_group(hunters: &mut Vec<&Rc<RefCell<Squad>>>) {
+  pub fn manage_single_hunters_group(hunters: &mut Vec<&Rc<RefCell<Squad>>>) {
     let aim_position = hunters[0]
       .borrow()
       .shared
@@ -115,9 +115,9 @@ impl SquadsManager {
     positions.sort_by(|a, b| (a.1).partial_cmp(&b.1).unwrap());
 
     hunters.sort_by(|a, b| {
-      let a_squad_pos = a.borrow().shared.center_point;
-      let b_squad_pos = b.borrow().shared.center_point;
-      (a_squad_pos.1).partial_cmp(&b_squad_pos.1).unwrap()
+      (a.borrow().shared.center_point.1)
+        .partial_cmp(&b.borrow().shared.center_point.1)
+        .unwrap()
     });
 
     let positions_number = positions.len();

@@ -151,13 +151,17 @@ impl Faction {
   }
 
   pub fn attack_enemy(&mut self, squads_ids: Vec<u32>, enemy: &Weak<RefCell<Squad>>) {
-    self.squads.iter_mut().for_each(|squad| {
-      if squads_ids.contains(&squad.borrow().id) {
-        squad.borrow_mut().attack_enemy(enemy);
-      }
-    });
+    let mut attackers: Vec<&Rc<RefCell<Squad>>> = self
+      .squads
+      .iter()
+      .filter(|squad| squads_ids.contains(&squad.borrow().id))
+      .collect();
 
-    SquadsManager::manage_hunters(self);
+    attackers
+      .iter()
+      .for_each(|squad| squad.borrow_mut().attack_enemy(enemy));
+
+    SquadsManager::manage_single_hunters_group(&mut attackers);
   }
 
   pub fn search_for_enemies(
@@ -195,14 +199,11 @@ impl Faction {
   }
 
   pub fn update_squads_centers(&mut self) {
-    self
-      .squads
-      .iter_mut()
-      .for_each(|ref_cell_squad| {
-        let mut squad = ref_cell_squad.borrow_mut();
-        squad.update_center();
-        squad.check_units_correctness();
-      });
+    self.squads.iter_mut().for_each(|ref_cell_squad| {
+      let mut squad = ref_cell_squad.borrow_mut();
+      squad.update_center();
+      squad.check_units_correctness();
+    });
   }
 
   pub fn manage_hunters(&mut self) {

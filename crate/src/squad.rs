@@ -21,8 +21,8 @@ pub struct Squad {
   pub squad_details: &'static SquadDetails,
   pub was_moved_in_previous_loop: bool,
   pub stored_track_destination: Option<(f32, f32)>, // to store destination, bc units are regrouping rn
-  pub last_center_point: (f32, f32), // it's pub only bc
-                                     // in squads_manager we are calc distance, to detect if aim is coming closer or farther
+  pub last_center_point: (f32, f32),                // it's pub only bc
+                                                    // in squads_manager we are calc distance, to detect if aim is coming closer or farther
 }
 
 impl Squad {
@@ -112,7 +112,6 @@ impl Squad {
     //   // TODO: calc segment, from squad_center thought closest_point to outsite (like plus 5?)
     //   // also handle case when distance is 0, then add 5, check if it's okay, if not, minsu 5, and this is have to be okay
     // }
-    
     if clear_aim {
       self.shared.aim = Weak::new();
       self.shared.secondary_aim = Weak::new();
@@ -180,7 +179,6 @@ impl Squad {
         .borrow()
         .check_if_too_far_from_squad_center(&self.shared)
     });
-  
     if coherency_not_kept {
       if self.stored_track_destination.is_none() {
         let track_len = self.shared.track.len();
@@ -190,16 +188,26 @@ impl Squad {
         } else {
           None
         };
-        self.add_target(self.shared.center_point.0, self.shared.center_point.1 , false);
+        self.add_target(
+          self.shared.center_point.0,
+          self.shared.center_point.1,
+          false,
+        );
         self.stored_track_destination = point_to_store;
       }
     } else if let Some(stored_track_destination) = self.stored_track_destination {
       self.stored_track_destination = None;
-      self.add_target(stored_track_destination.0, stored_track_destination.1 , false);
+      self.add_target(
+        stored_track_destination.0,
+        stored_track_destination.1,
+        false,
+      );
     } else {
       // if coherency is kept,
       self.members.iter().for_each(|ref_cell_unit| {
-        ref_cell_unit.borrow_mut().check_state_correctness(&self.shared);
+        ref_cell_unit
+          .borrow_mut()
+          .check_state_correctness(&self.shared);
       });
     }
   }
