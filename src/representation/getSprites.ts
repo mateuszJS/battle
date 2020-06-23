@@ -97,7 +97,6 @@ const getSprites = () => {
         if (previousPhase !== currentPhase) {
           previousPhase = currentPhase
           movieClip.animationSpeed = 0.4
-          // movieClip.onFrameChange = null
           movieClip.gotoAndStop(framesPeriods.RUN.first)
           const indexOfStartingFrame = getIndexOfStartingFrame(
             angle,
