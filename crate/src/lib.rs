@@ -32,13 +32,16 @@ mod factory;
 mod id_generator;
 mod look_up_table;
 // public just to import it in bench
+mod bullets_manager;
 pub mod position_utils;
 mod squad;
 mod squad_types;
 mod unit;
+mod weapon_types;
 
 use wasm_bindgen::prelude::*;
 
+use bullets_manager::BulletsManager;
 use constants::{
   MANAGE_HUNTERS_PERIOD, SEARCH_FOR_ENEMIES_PERIOD, THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER,
   UPDATE_SQUAD_CENTER_PERIOD,
@@ -52,6 +55,7 @@ const INDEX_OF_USER_FACTION: usize = 0;
 
 pub struct World {
   all_squads: Vec<Weak<RefCell<Squad>>>,
+  bullets_manager: BulletsManager,
 }
 
 #[wasm_bindgen]
@@ -79,7 +83,10 @@ impl Universe {
     }
 
     ObstaclesLazyStatics::init_and_get_obstacles_handler(Some(obstacles_data));
-    let world = World { all_squads: vec![] };
+    let world = World {
+      all_squads: vec![],
+      bullets_manager: BulletsManager::new(),
+    };
 
     Universe {
       factions,
@@ -190,16 +197,25 @@ impl Universe {
     if *time % SEARCH_FOR_ENEMIES_PERIOD == 0 {
       Universe::run_squad_manager(factions, world);
     }
+
+    world.bullets_manager.update();
   }
 
-  pub fn get_universe_data(&self) -> js_sys::Float32Array {
+  pub fn get_universe_data(&mut self) -> js_sys::Float32Array {
     let universe_representation: Vec<f32> = self
       .factions
       .iter()
       .flat_map(|faction| faction.get_representation())
       .collect();
 
-    js_sys::Float32Array::from(&universe_representation[..])
+    let result = [
+      &universe_representation[..],
+      &[4.0],
+      &self.world.bullets_manager.get_representation(),
+    ]
+    .concat();
+
+    js_sys::Float32Array::from(&result[..])
   }
 
   pub fn create_squad(&mut self, squad_type_representation: u8) -> bool {

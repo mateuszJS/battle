@@ -2,15 +2,18 @@ use crate::id_generator::IdGenerator;
 use crate::position_utils::PositionUtils;
 use crate::squad_types::{get_squad_details, SquadDetails, SquadType};
 use crate::unit::{Unit, STATE_IDLE, STATE_RUN};
+use crate::weapon_types::WeaponType;
+
+use crate::World;
 use std::cell::RefCell;
-use std::rc::Rc;
-use std::rc::Weak;
+use std::rc::{Rc, Weak};
 
 pub struct SquadUnitSharedDataSet {
   pub center_point: (f32, f32),
   pub track: Vec<(f32, f32)>,
   pub aim: Weak<RefCell<Squad>>,
   pub secondary_aim: Weak<RefCell<Squad>>,
+  pub weapon_type: &'static WeaponType,
 }
 
 pub struct Squad {
@@ -27,11 +30,12 @@ pub struct Squad {
 
 impl Squad {
   pub fn new(faction_id: u32, squad_type: SquadType) -> Squad {
+    let details = get_squad_details(&squad_type);
     Squad {
       id: IdGenerator::generate_id(),
       faction_id,
       members: vec![],
-      squad_details: get_squad_details(&squad_type),
+      squad_details: details,
       last_center_point: (0.0, 0.0),
       was_moved_in_previous_loop: true,
       stored_track_destination: None,
@@ -40,6 +44,7 @@ impl Squad {
         track: vec![],
         aim: Weak::new(),
         secondary_aim: Weak::new(),
+        weapon_type: &details.weapon_type,
       },
     }
   }
@@ -59,12 +64,12 @@ impl Squad {
     shared.center_point = (sum_x / members.len() as f32, sum_y / members.len() as f32);
   }
 
-  pub fn update(&mut self) {
+  pub fn update(&mut self, world: &mut World) {
     let shared = &self.shared;
     self
       .members
       .iter_mut()
-      .for_each(|unit| unit.borrow_mut().update(shared));
+      .for_each(|unit| unit.borrow_mut().update(shared, &mut world.bullets_manager));
   }
 
   pub fn get_representation(&self) -> Vec<f32> {

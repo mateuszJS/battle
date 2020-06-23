@@ -11,6 +11,7 @@ import Factory from '~/representation/Factory'
 import Unit from '~/representation/Unit'
 import UnitsFactory from '~/representation/UnitFactory'
 import { USER_FACTION_ID } from 'Consts'
+import BulletFactory from '~/representation/BulletFactory'
 
 const render = (
   delta: number,
@@ -88,10 +89,19 @@ const render = (
         index = newIndexValue
         break
       }
+      case 4.0: {
+        // bullet
+        BulletFactory.create(universeData.slice(index + 1))
+        index = universeLength
+        break
+      }
       default:
         debugger
     }
   }
+
+  BulletFactory.update()
+
   // updateStage()
   // window.flamesUpdaters.forEach(update => update())
   // window.smokeContainer.elements.forEach(EffectsFactory.updateSmoke)

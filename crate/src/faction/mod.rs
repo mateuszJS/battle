@@ -99,11 +99,11 @@ impl Faction {
     self
       .squads
       .iter()
-      .for_each(|squad| squad.borrow_mut().update());
+      .for_each(|squad| squad.borrow_mut().update(world));
     self
       .squads_during_creation
       .iter_mut()
-      .for_each(|squad_during_creation| squad_during_creation.squad.update());
+      .for_each(|squad_during_creation| squad_during_creation.squad.update(world));
 
     self.update_squads_during_creation(world);
   }

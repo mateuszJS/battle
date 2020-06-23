@@ -1,3 +1,4 @@
+use crate::bullets_manager::BulletsManager;
 use crate::constants::{
   MANAGE_HUNTERS_PERIOD, MATH_PI, MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS, NORMAL_SQUAD_RADIUS,
   WEAPON_RANGE,
@@ -280,9 +281,20 @@ impl Unit {
     // TODO: else with removing aim from squad?
   }
 
-  fn update_shoot(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
+  fn update_shoot(
+    &mut self,
+    squad_shared_info: &SquadUnitSharedDataSet,
+    bullet_manager: &mut BulletsManager,
+  ) {
     if self.time_to_next_shoot == 0 {
-      // make shoot, create bullet, change state to let know for representation that shoot was created
+      bullet_manager.add(
+        self.x,
+        self.y,
+        self.angle,
+        squad_shared_info.weapon_type,
+        self.aim.clone(),
+      );
+
       let random = LookUpTable::get_random() - 0.5;
       self.time_to_next_shoot = if random.abs() > 0.4 {
         // 25% chances to reload
@@ -295,13 +307,17 @@ impl Unit {
     }
   }
 
-  pub fn update(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
+  pub fn update(
+    &mut self,
+    squad_shared_info: &SquadUnitSharedDataSet,
+    bullet_manager: &mut BulletsManager,
+  ) {
     match self.state {
       STATE_FLY => self.update_fly(),
       STATE_GETUP => self.update_getup(squad_shared_info),
       STATE_RUN => self.update_run(squad_shared_info),
       STATE_IDLE => self.update_idle(squad_shared_info),
-      STATE_SHOOT => self.update_shoot(squad_shared_info),
+      STATE_SHOOT => self.update_shoot(squad_shared_info, bullet_manager),
       _ => {}
     }
   }
