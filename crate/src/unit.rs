@@ -287,20 +287,23 @@ impl Unit {
     bullet_manager: &mut BulletsManager,
   ) {
     if self.time_to_next_shoot == 0 {
+      let weapon = squad_shared_info.weapon;
+      let random = LookUpTable::get_random() - 0.5;
+
       bullet_manager.add(
+        self.id as f32,
         self.x,
         self.y,
-        self.angle,
-        squad_shared_info.weapon_type,
+        self.angle + random * weapon.scatter,
+        &squad_shared_info.weapon.name,
         self.aim.clone(),
       );
 
-      let random = LookUpTable::get_random() - 0.5;
-      self.time_to_next_shoot = if random.abs() > 0.4 {
+      self.time_to_next_shoot = if random.abs() > weapon.chances_to_reload {
         // 25% chances to reload
-        200
+        weapon.reload_time
       } else {
-        40
+        weapon.shoot_time
       };
     } else {
       self.time_to_next_shoot -= 1;

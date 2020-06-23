@@ -48,7 +48,7 @@ const framesData = [
   },
 ]
 
-const framesPeriods = framesData.reduce((result, item, index, array) => {
+export const framesPeriods = framesData.reduce((result, item, index, array) => {
   const first = index === 0 ? 0 : result[array[index - 1].name].last + 1
   return {
     ...result,

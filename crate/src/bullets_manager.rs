@@ -4,8 +4,7 @@ use std::cell::RefCell;
 use std::rc::Weak;
 
 struct BulletRepresentation {
-  x: f32,
-  y: f32,
+  unit_id: f32,
   angle: f32,
   speed: f32,
   representation_id: f32,
@@ -33,6 +32,7 @@ impl BulletsManager {
 
   pub fn add(
     &mut self,
+    unit_id: f32,
     x: f32,
     y: f32,
     angle: f32,
@@ -43,13 +43,12 @@ impl BulletsManager {
     if let Some(ref_cell_aim) = weak_aim.upgrade() {
       let aim = ref_cell_aim.borrow();
       let distance = (x - aim.x).hypot(y - aim.y);
-      let lifetime = distance / weapon_details.speed;
+      let lifetime = distance / weapon_details.bullets_speed;
 
       self.bullets_representation.push(BulletRepresentation {
-        x,
-        y,
+        unit_id,
         angle,
-        speed: weapon_details.speed,
+        speed: weapon_details.bullets_speed,
         representation_id: weapon_details.representation_id,
         lifetime,
       });
@@ -76,8 +75,7 @@ impl BulletsManager {
       .flat_map(|bullet| {
         vec![
           bullet.representation_id,
-          bullet.x,
-          bullet.y,
+          bullet.unit_id,
           bullet.angle,
           bullet.speed,
           bullet.lifetime,

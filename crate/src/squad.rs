@@ -2,7 +2,7 @@ use crate::id_generator::IdGenerator;
 use crate::position_utils::PositionUtils;
 use crate::squad_types::{get_squad_details, SquadDetails, SquadType};
 use crate::unit::{Unit, STATE_IDLE, STATE_RUN};
-use crate::weapon_types::WeaponType;
+use crate::weapon_types::Weapon;
 
 use crate::World;
 use std::cell::RefCell;
@@ -13,7 +13,7 @@ pub struct SquadUnitSharedDataSet {
   pub track: Vec<(f32, f32)>,
   pub aim: Weak<RefCell<Squad>>,
   pub secondary_aim: Weak<RefCell<Squad>>,
-  pub weapon_type: &'static WeaponType,
+  pub weapon: &'static Weapon,
 }
 
 pub struct Squad {
@@ -44,7 +44,7 @@ impl Squad {
         track: vec![],
         aim: Weak::new(),
         secondary_aim: Weak::new(),
-        weapon_type: &details.weapon_type,
+        weapon: &details.weapon,
       },
     }
   }

@@ -1,4 +1,4 @@
-use crate::weapon_types::WeaponType;
+use crate::weapon_types::{Weapon, STANDARD_RIFLE_DETAILS};
 
 pub enum SquadType {
   Solider,
@@ -12,7 +12,7 @@ pub struct SquadDetails {
   pub representation_type: f32,
   pub unit_model_offset_y: f32, // for selection
   pub selection_threshold: f32, // for selection
-  pub weapon_type: WeaponType,
+  pub weapon: &'static Weapon,
 }
 
 static SOLIDER_DETAILS: SquadDetails = SquadDetails {
@@ -25,7 +25,7 @@ static SOLIDER_DETAILS: SquadDetails = SquadDetails {
   representation_type: 2.0,
   selection_threshold: 40.0,
   unit_model_offset_y: 20.0,
-  weapon_type: WeaponType::StandardRifle,
+  weapon: &STANDARD_RIFLE_DETAILS,
 };
 
 pub fn get_squad_details(squad_type: &SquadType) -> &'static SquadDetails {

@@ -91,7 +91,10 @@ const render = (
       }
       case 4.0: {
         // bullet
-        BulletFactory.create(universeData.slice(index + 1))
+        BulletFactory.create(
+          universeData.slice(index + 1),
+          universeRepresentation,
+        )
         index = universeLength
         break
       }
