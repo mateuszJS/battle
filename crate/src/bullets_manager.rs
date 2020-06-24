@@ -38,11 +38,13 @@ impl BulletsManager {
     angle: f32,
     weapon_type: &'static WeaponType,
     weak_aim: Weak<RefCell<Unit>>,
+    distance_mod: f32,
+    hit: bool,
   ) {
     let weapon_details = get_weapon_details(weapon_type);
     if let Some(ref_cell_aim) = weak_aim.upgrade() {
       let aim = ref_cell_aim.borrow();
-      let distance = (x - aim.x).hypot(y - aim.y);
+      let distance = (x - aim.x).hypot(y - aim.y) * distance_mod;
       let lifetime = distance / weapon_details.bullets_speed;
 
       self.bullets_representation.push(BulletRepresentation {
@@ -52,11 +54,14 @@ impl BulletsManager {
         representation_id: weapon_details.representation_id,
         lifetime,
       });
-      self.bullets_data.push(BulletData {
-        weapon_type,
-        aim: weak_aim,
-        lifetime,
-      });
+
+      if hit {
+        self.bullets_data.push(BulletData {
+          weapon_type,
+          aim: weak_aim,
+          lifetime,
+        });
+      }
     }
   }
 

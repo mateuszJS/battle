@@ -22,6 +22,7 @@ const STATE_GETUP: u8 = 3;
 const STATE_DIE: u8 = 0;
 
 const REPRESENTATION_LENGTH: usize = 7;
+const MAX_WEAPON_DEVIATION_TO_HIT: f32 = 0.25;
 
 pub struct Unit {
   pub id: u32,
@@ -289,17 +290,28 @@ impl Unit {
     if self.time_to_next_shoot == 0 {
       let weapon = squad_shared_info.weapon;
       let random = LookUpTable::get_random() - 0.5;
+      let random_abs = random.abs();
+      let weapon_deviation = random * weapon.scatter;
+      let distance_mod = 1.0
+        + weapon_deviation
+          * if (random_abs * 10.0) as u8 % 2 == 0 {
+            -1.0
+          } else {
+            1.0
+          };
 
       bullet_manager.add(
         self.id as f32,
         self.x,
         self.y,
-        self.angle + random * weapon.scatter,
+        self.angle + weapon_deviation,
         &squad_shared_info.weapon.name,
         self.aim.clone(),
+        distance_mod,
+        weapon_deviation.abs() < MAX_WEAPON_DEVIATION_TO_HIT,
       );
 
-      self.time_to_next_shoot = if random.abs() > weapon.chances_to_reload {
+      self.time_to_next_shoot = if random_abs > weapon.chances_to_reload {
         // 25% chances to reload
         weapon.reload_time
       } else {
