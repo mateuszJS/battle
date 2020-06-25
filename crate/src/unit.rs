@@ -109,6 +109,32 @@ impl Unit {
     self.state != STATE_DIE && self.state != STATE_FLY && self.state != STATE_GETUP
   }
 
+  fn check_if_can_go_to_next_point_on_track(
+    &self,
+    squad_shared_info: &SquadUnitSharedDataSet,
+  ) -> bool {
+    let obstacles_lines = ObstaclesLazyStatics::get_obstacles_lines();
+    let next_track_point = squad_shared_info.track[1];
+    let start_point = Point {
+      id: 0,
+      x: self.x,
+      y: self.y,
+    };
+    let end_point = Point {
+      id: 0,
+      x: next_track_point.0,
+      y: next_track_point.1,
+    };
+    let line_to_next_track_point = Line {
+      p1: &start_point,
+      p2: &end_point,
+    };
+
+    !obstacles_lines
+      .iter()
+      .any(|obstacle_line| BasicUtils::check_intersection(&line_to_next_track_point, obstacle_line))
+  }
+
   pub fn change_state_to_run_though_track(
     &mut self,
     squad_shared_info: &SquadUnitSharedDataSet,
@@ -118,46 +144,16 @@ impl Unit {
       self.track_index = 0;
     }
 
-    // increase self.track_index by one if possible ----- START
     self.track_index += if self.check_if_close_to_squad_center(squad_shared_info) {
-      // AND doesn't GETUP at this moment!
-      // when GETUP then always check if you are not closer to the next point!
-      if self.track_index == squad_shared_info.track.len() as i8 - 1 {
-        0
-      } else {
-        1 // it won't work when unit is in idle (after get up)
-      }
+      1
     } else {
-      let obstacles_lines = ObstaclesLazyStatics::get_obstacles_lines();
-      // ------------START checking intersection-------------------
-      let next_track_point = squad_shared_info.track[1];
-      let start_point = Point {
-        id: 0,
-        x: self.x,
-        y: self.y,
-      };
-      let end_point = Point {
-        id: 0,
-        x: next_track_point.0,
-        y: next_track_point.1,
-      };
-      let line_to_next_track_point = Line {
-        p1: &start_point,
-        p2: &end_point,
-      };
-
-      let cannot_go_to_next_point_directly = obstacles_lines.iter().any(|obstacle_line| {
-        BasicUtils::check_intersection(&line_to_next_track_point, obstacle_line)
-      });
-
-      if cannot_go_to_next_point_directly {
-        0
-      } else {
+      if self.check_if_can_go_to_next_point_on_track(squad_shared_info) {
         1
+      } else {
+        0
       }
-      // ------------END checking intersection-------------------
     };
-    // select correct self.track_index ----- END
+
     if self.can_change_state() {
       self.state = STATE_RUN;
       self.go_to_current_point_on_track(squad_shared_info);
@@ -181,12 +177,18 @@ impl Unit {
     );
   }
 
+  fn is_target_achieved(&self) -> bool {
+    (self.x - self.target_x).hypot(self.y - self.target_y) < self.squad_details.movement_speed
+  }
+
   fn update_run(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
-    if (self.x - self.target_x).hypot(self.y - self.target_y) < self.squad_details.movement_speed {
+    if self.is_target_achieved() {
       if squad_shared_info.track.len() as i8 - 1 == self.track_index || self.track_index == -1 {
         self.track_index = -1;
         // --------------- handle hunting ----------------- START
-        if let Some(ref_cell_aim) = squad_shared_info.aim.upgrade() {
+        if squad_shared_info.stored_track_destination.is_some() {
+          self.change_state_to_idle(squad_shared_info);
+        } else if let Some(ref_cell_aim) = squad_shared_info.aim.upgrade() {
           // check if you are in range with aim, if no, go ahead, so there won't be effect like
           // to avoid effect like stopping and running all the time
           if ref_cell_aim.borrow().was_moved_in_previous_loop {
@@ -249,7 +251,7 @@ impl Unit {
     // TODO: else with removing aim from squad?
   }
 
-  fn change_state_to_shoot(&mut self, aim: Rc<RefCell<Squad>>, is_squad_primary_aim: bool) {
+  fn change_state_to_shoot(&mut self, aim: Rc<RefCell<Squad>>, is_important_aim: bool) {
     let borrowed_members = &aim.borrow().members;
     let (weak_unit_aim, distance) =
       borrowed_members
@@ -270,16 +272,14 @@ impl Unit {
         self.state = STATE_SHOOT;
         self.angle = angle;
         self.aim = weak_unit_aim;
-      } else if is_squad_primary_aim {
-        // TODO: actually, if squad will regorup (or at least this one unit)
-        // then should be in range
+      } else if is_important_aim {
+        // TODO: not sure if shouldn't go to the correct position in the squad
         self.set_target(
           angle.sin() * WEAPON_RANGE + unit_aim.x,
           -angle.cos() * WEAPON_RANGE + unit_aim.y,
         );
       }
     }
-    // TODO: else with removing aim from squad?
   }
 
   fn update_shoot(

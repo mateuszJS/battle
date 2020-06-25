@@ -1,7 +1,7 @@
 use crate::id_generator::IdGenerator;
 use crate::position_utils::PositionUtils;
 use crate::squad_types::{get_squad_details, SquadDetails, SquadType};
-use crate::unit::{Unit, STATE_IDLE, STATE_RUN};
+use crate::unit::{Unit, STATE_RUN};
 use crate::weapon_types::Weapon;
 
 use crate::World;
@@ -14,6 +14,7 @@ pub struct SquadUnitSharedDataSet {
   pub aim: Weak<RefCell<Squad>>,
   pub secondary_aim: Weak<RefCell<Squad>>,
   pub weapon: &'static Weapon,
+  pub stored_track_destination: Option<(f32, f32)>, // to store destination, bc units are regrouping rn
 }
 
 pub struct Squad {
@@ -23,9 +24,8 @@ pub struct Squad {
   pub shared: SquadUnitSharedDataSet,
   pub squad_details: &'static SquadDetails,
   pub was_moved_in_previous_loop: bool,
-  pub stored_track_destination: Option<(f32, f32)>, // to store destination, bc units are regrouping rn
-  pub last_center_point: (f32, f32),                // it's pub only bc
-                                                    // in squads_manager we are calc distance, to detect if aim is coming closer or farther
+  pub last_center_point: (f32, f32), // it's pub only bc
+                                     // in squads_manager we are calc distance, to detect if aim is coming closer or farther
 }
 
 impl Squad {
@@ -38,9 +38,9 @@ impl Squad {
       squad_details: details,
       last_center_point: (0.0, 0.0),
       was_moved_in_previous_loop: true,
-      stored_track_destination: None,
       shared: SquadUnitSharedDataSet {
         center_point: (0.0, 0.0),
+        stored_track_destination: None,
         track: vec![],
         aim: Weak::new(),
         secondary_aim: Weak::new(),
@@ -51,7 +51,7 @@ impl Squad {
 
   pub fn update_center(&mut self) {
     let Self {
-      ref mut members,
+      ref members,
       ref mut shared,
       ..
     } = self;
@@ -122,8 +122,8 @@ impl Squad {
       self.shared.secondary_aim = Weak::new();
     }
 
-    if self.stored_track_destination.is_some() {
-      self.stored_track_destination = Some((destination_x, destination_y));
+    if self.shared.stored_track_destination.is_some() {
+      self.shared.stored_track_destination = Some((destination_x, destination_y));
       return;
     }
 
@@ -185,7 +185,7 @@ impl Squad {
         .check_if_too_far_from_squad_center(&self.shared)
     });
     if coherency_not_kept {
-      if self.stored_track_destination.is_none() {
+      if self.shared.stored_track_destination.is_none() {
         let track_len = self.shared.track.len();
         // store point, instead of saving to "self" because self.add_target is checking self
         let point_to_store = if track_len > 0 {
@@ -198,10 +198,10 @@ impl Squad {
           self.shared.center_point.1,
           false,
         );
-        self.stored_track_destination = point_to_store;
+        self.shared.stored_track_destination = point_to_store;
       }
-    } else if let Some(stored_track_destination) = self.stored_track_destination {
-      self.stored_track_destination = None;
+    } else if let Some(stored_track_destination) = self.shared.stored_track_destination {
+      self.shared.stored_track_destination = None;
       self.add_target(
         stored_track_destination.0,
         stored_track_destination.1,
