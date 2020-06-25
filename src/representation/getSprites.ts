@@ -7,7 +7,7 @@ import {
 } from './utils'
 
 type FramesPeriods = {
-  [key in 'IDLE' | 'SHOOT' | 'RUN' | 'FLY' | 'GETUP']: {
+  [key in 'IDLE' | 'SHOOT' | 'RUN' | 'FLY' | 'GETUP' | 'DIE']: {
     first: number
     sides: number
     length: number
@@ -178,6 +178,16 @@ const getSprites = () => {
           Math.floor(getUppingProgress * (framesPeriods.GETUP.length - 1))
         movieClip.gotoAndStop(indexOfCurrentFrame)
         previousPhase = 'getup'
+      },
+      goToDie(angle: number) {
+        const indexOfStartingFrame = getIndexOfStartingFrame(
+          angle,
+          framesPeriods.FLY,
+        )
+        movieClip.onFrameChange = getCallbackStopOnLastFrame(
+          indexOfStartingFrame + framesPeriods.FLY.length - 1,
+        )
+        movieClip.gotoAndPlay(indexOfStartingFrame)
       },
     }
   }

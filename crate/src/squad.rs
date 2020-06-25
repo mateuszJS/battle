@@ -178,7 +178,9 @@ impl Squad {
   }
 
   pub fn check_units_correctness(&mut self) {
-    // Firstly, check coherency
+    // firstly check if any die
+    // check if any unit has status DIE, then remove from squad, and etc.
+    // second, check coherency
     let coherency_not_kept = self.members.iter().any(|ref_cell_unit| {
       ref_cell_unit
         .borrow()

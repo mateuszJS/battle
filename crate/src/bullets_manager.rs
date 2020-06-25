@@ -67,10 +67,23 @@ impl BulletsManager {
 
   pub fn update(&mut self) {
     self
+    .bullets_data
+    .iter_mut()
+    .for_each(|bullet| {
+      if bullet.lifetime <= std::f32::EPSILON {
+        if let Some(ref_cell_aim) = bullet.aim.upgrade() {
+          let weapon_details = get_weapon_details(bullet.weapon_type);
+          ref_cell_aim.borrow_mut().take_damage(weapon_details.damage);
+        }
+      }
+    });
+
+    // combine those two into one, bc unit still fails
+    self
       .bullets_data
-      .iter_mut()
-      .filter(|bullet| bullet.lifetime <= std::f32::EPSILON)
-      .for_each(|bullet| bullet.lifetime -= 1.0);
+      .retain(|bullet| bullet.lifetime > std::f32::EPSILON);
+    
+    self.bullets_data.iter_mut().for_each(|bullet| bullet.lifetime -= 1.0);
   }
 
   pub fn get_representation(&mut self) -> Vec<f32> {

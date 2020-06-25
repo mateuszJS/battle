@@ -41,6 +41,7 @@ pub struct Unit {
   squad_details: &'static SquadDetails,
   time_to_next_shoot: u16,
   aim: Weak<RefCell<Unit>>,
+  hp: u16,
 }
 
 impl Unit {
@@ -65,6 +66,7 @@ impl Unit {
       squad_details,
       time_to_next_shoot: 0,
       aim: Weak::new(),
+      hp: squad_details.hp,
     }
   }
 
@@ -229,6 +231,8 @@ impl Unit {
 
   fn update_idle(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {}
 
+  fn update_die(&mut self) {}
+
   pub fn check_state_correctness(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
     if self.state == STATE_IDLE {
       self.change_state_to_idle(squad_shared_info);
@@ -333,6 +337,7 @@ impl Unit {
       STATE_RUN => self.update_run(squad_shared_info),
       STATE_IDLE => self.update_idle(squad_shared_info),
       STATE_SHOOT => self.update_shoot(squad_shared_info, bullet_manager),
+      STATE_DIE => self.update_die(),
       _ => {}
     }
   }
@@ -358,5 +363,19 @@ impl Unit {
   pub fn set_position_offset(&mut self, offset_x: f32, offset_y: f32) {
     self.position_offset_x = offset_x;
     self.position_offset_y = offset_y;
+  }
+
+  fn change_state_to_die(&mut self) {
+    self.state = STATE_DIE;
+    self.mod_x = 0.;
+    self.mod_y = 0.;
+  }
+
+  pub fn take_damage(&mut self, damage: u16) {
+    self.hp -= damage;
+    log!("{}", self.hp);
+    if self.hp <= 0 {
+      self.change_state_to_die();
+    }
   }
 }

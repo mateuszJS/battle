@@ -98,6 +98,10 @@ class Unit {
         this.frameUpdaters.goToGetUp(angle, firstStateParam)
         break
       }
+      case State.DIE: {
+        this.frameUpdaters.goToDie(angle)
+        break
+      }
     }
 
     this.previousFramesFactors = { state, angle }
