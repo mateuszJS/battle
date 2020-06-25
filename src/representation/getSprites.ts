@@ -96,19 +96,17 @@ const getSprites = () => {
         const currentPhase = `run${Math.round(angle * 100)}`
         if (previousPhase !== currentPhase) {
           previousPhase = currentPhase
-          movieClip.animationSpeed = 0.4
-          movieClip.gotoAndStop(framesPeriods.RUN.first)
           const indexOfStartingFrame = getIndexOfStartingFrame(
             angle,
             framesPeriods.RUN,
           )
           const indexOfLastFrame =
             indexOfStartingFrame + framesPeriods.RUN.length
-          movieClip.gotoAndPlay(indexOfStartingFrame)
           movieClip.onFrameChange = getCallbackGoToFirstOnLastFrame(
             indexOfStartingFrame,
             indexOfLastFrame,
           )
+          movieClip.gotoAndPlay(indexOfStartingFrame)
         }
       },
       goToShoot(angle: number, shootProgress: number) {
@@ -128,13 +126,13 @@ const getSprites = () => {
         if (isShoot) {
           const indexOfLastFrame =
             indexOfStartingFrame + framesPeriods.SHOOT.length
-          movieClip.gotoAndPlay(indexOfStartingFrame)
           // actually we cold create frames with half of shotY
           // and after the last frame, just animate in reverse, to first frame
           movieClip.onFrameChange = getCallbackGoToFirstOnLastFrameAndStop(
             indexOfStartingFrame,
             indexOfLastFrame,
           )
+          movieClip.gotoAndPlay(indexOfStartingFrame)
         }
 
         // movieClip.gotoAndStop(framesPeriods.SHOOT.first)
@@ -163,10 +161,10 @@ const getSprites = () => {
           movieClip.stop()
         } else if (flyingProgress <= 4 && previousPhase === 'fly_middle') {
           previousPhase = 'fly_down'
-          movieClip.play()
           movieClip.onFrameChange = getCallbackStopOnLastFrame(
             indexOfStartingFrame + framesPeriods.FLY.length - 1,
           )
+          movieClip.play()
         }
       },
       goToGetUp(angle: number, getUppingProgress: number) {
@@ -174,12 +172,12 @@ const getSprites = () => {
           angle,
           framesPeriods.GETUP,
         )
+        movieClip.onFrameChange = null
         const indexOfCurrentFrame =
           indexOfStartingFrame +
           Math.floor(getUppingProgress * (framesPeriods.GETUP.length - 1))
         movieClip.gotoAndStop(indexOfCurrentFrame)
         previousPhase = 'getup'
-        movieClip.onFrameChange = null
       },
     }
   }
