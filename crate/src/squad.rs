@@ -149,7 +149,7 @@ impl Squad {
     } = self;
     members.iter_mut().for_each(|unit| {
       if unit.borrow().state == STATE_RUN {
-        unit.borrow_mut().change_state_to_idle(shared);
+        unit.borrow_mut().stop_running(shared);
       }
     });
   }

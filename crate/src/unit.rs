@@ -195,10 +195,10 @@ impl Unit {
           // to avoid effect like stopping and running all the time
           if ref_cell_aim.borrow().was_moved_in_previous_loop {
             // in this case it's current loop, because "update" goes after updating the "was_moved_in_previous_loop"
-            self.set_target(
-              self.mod_x * MANAGE_HUNTERS_PERIOD as f32 + self.target_x,
-              self.mod_y * MANAGE_HUNTERS_PERIOD as f32 + self.target_y,
-            );
+            // self.set_target(
+            //   self.mod_x * MANAGE_HUNTERS_PERIOD as f32 + self.target_x,
+            //   self.mod_y * MANAGE_HUNTERS_PERIOD as f32 + self.target_y,
+            // );
           } else {
             self.change_state_to_shoot(ref_cell_aim, true);
           }
@@ -216,7 +216,14 @@ impl Unit {
     }
   }
 
-  pub fn change_state_to_idle(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
+  pub fn stop_running(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
+    if self.track_index != -1 || self.state == STATE_RUN {
+      self.track_index = -1;
+      self.change_state_to_idle(squad_shared_info);
+    }
+  }
+
+  fn change_state_to_idle(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
     self.mod_x = 0.0;
     self.mod_y = 0.0;
     self.state = STATE_IDLE;
@@ -372,10 +379,10 @@ impl Unit {
   }
 
   pub fn take_damage(&mut self, damage: u16) {
-    self.hp -= damage;
-    log!("{}", self.hp);
-    if self.hp <= 0 {
-      self.change_state_to_die();
-    }
+    // self.hp -= damage;
+    // log!("{}", self.hp);
+    // if self.hp <= 0 {
+    //   self.change_state_to_die();
+    // }
   }
 }
