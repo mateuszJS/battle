@@ -118,12 +118,9 @@ impl Universe {
   }
 
   fn run_squad_manager(factions: &mut Vec<Faction>, world: &mut World) {
-    world.all_squads = world
+    world
       .all_squads
-      .clone()
-      .into_iter()
-      .filter(|weak_squad| weak_squad.upgrade().is_some())
-      .collect();
+      .retain(|weak_squad| weak_squad.upgrade().is_some());
 
     // collect squads which moved
     let all_moved_squads: Vec<Rc<RefCell<Squad>>> = world
