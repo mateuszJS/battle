@@ -19,7 +19,7 @@ pub const STATE_RUN: u8 = 6;
 const STATE_SHOOT: u8 = 5;
 pub const STATE_IDLE: u8 = 4;
 const STATE_GETUP: u8 = 3;
-const STATE_DIE: u8 = 0;
+pub const STATE_DIE: u8 = 0;
 
 const REPRESENTATION_LENGTH: usize = 7;
 const MAX_WEAPON_DEVIATION_TO_HIT: f32 = 0.25;
@@ -41,7 +41,7 @@ pub struct Unit {
   squad_details: &'static SquadDetails,
   time_to_next_shoot: u16,
   aim: Weak<RefCell<Unit>>,
-  hp: u16,
+  hp: i16,
 }
 
 impl Unit {
@@ -188,9 +188,11 @@ impl Unit {
       if squad_shared_info.track.len() as i8 - 1 == self.track_index || self.track_index == -1 {
         self.track_index = -1;
         // --------------- handle hunting ----------------- START
-        if squad_shared_info.stored_track_destination.is_some() {
-          self.change_state_to_idle(squad_shared_info);
-        } else if let Some(ref_cell_aim) = squad_shared_info.aim.upgrade() {
+        // if squad_shared_info.stored_track_destination.is_some() {
+        //   self.change_state_to_idle(squad_shared_info);
+        // // stay and don't
+        // } else
+        if let Some(ref_cell_aim) = squad_shared_info.aim.upgrade() {
           // check if you are in range with aim, if no, go ahead, so there won't be effect like
           // to avoid effect like stopping and running all the time
           if ref_cell_aim.borrow().was_moved_in_previous_loop {
@@ -200,7 +202,7 @@ impl Unit {
             //   self.mod_y * MANAGE_HUNTERS_PERIOD as f32 + self.target_y,
             // );
           } else {
-            self.change_state_to_shoot(ref_cell_aim, true);
+            self.change_state_to_shoot(ref_cell_aim, true, squad_shared_info);
           }
         // --------------- handle hunting ----------------- END
         } else {
@@ -229,10 +231,16 @@ impl Unit {
     self.state = STATE_IDLE;
     if self.track_index != -1 {
       self.go_to_current_point_on_track(squad_shared_info);
-    } else if let Some(aim) = squad_shared_info.aim.upgrade() {
-      self.change_state_to_shoot(aim, true);
+    } else if squad_shared_info.aim.upgrade().is_some()
+    // && squad_shared_info.stored_track_destination.is_none()
+    {
+      self.change_state_to_shoot(
+        squad_shared_info.aim.upgrade().unwrap(),
+        true,
+        squad_shared_info,
+      );
     } else if let Some(secondary_aim) = squad_shared_info.secondary_aim.upgrade() {
-      self.change_state_to_shoot(secondary_aim, false);
+      self.change_state_to_shoot(secondary_aim, false, squad_shared_info);
     }
   }
 
@@ -258,11 +266,17 @@ impl Unit {
       if distance > WEAPON_RANGE {
         self.change_state_to_idle(squad_shared_info);
       }
+    } else {
+      self.change_state_to_idle(squad_shared_info);
     }
-    // TODO: else with removing aim from squad?
   }
 
-  fn change_state_to_shoot(&mut self, aim: Rc<RefCell<Squad>>, is_important_aim: bool) {
+  fn change_state_to_shoot(
+    &mut self,
+    aim: Rc<RefCell<Squad>>,
+    is_important_aim: bool,
+    squad_shared_info: &SquadUnitSharedDataSet,
+  ) {
     let borrowed_members = &aim.borrow().members;
     let (weak_unit_aim, distance) =
       borrowed_members
@@ -283,8 +297,8 @@ impl Unit {
         self.state = STATE_SHOOT;
         self.angle = angle;
         self.aim = weak_unit_aim;
-      } else if is_important_aim {
-        // TODO: not sure if shouldn't go to the correct position in the squad
+      } else if is_important_aim && squad_shared_info.stored_track_destination.is_none() {
+        // TODO: not sure if shouldn't go to the unit own position in the squad (center + offset)
         self.set_target(
           angle.sin() * WEAPON_RANGE + unit_aim.x,
           -angle.cos() * WEAPON_RANGE + unit_aim.y,
@@ -374,15 +388,14 @@ impl Unit {
 
   fn change_state_to_die(&mut self) {
     self.state = STATE_DIE;
-    self.mod_x = 0.;
-    self.mod_y = 0.;
+    self.mod_x = 0.0;
+    self.mod_y = 0.0;
   }
 
-  pub fn take_damage(&mut self, damage: u16) {
-    // self.hp -= damage;
-    // log!("{}", self.hp);
-    // if self.hp <= 0 {
-    //   self.change_state_to_die();
-    // }
+  pub fn take_damage(&mut self, damage: u8) {
+    self.hp -= damage as i16;
+    if self.hp <= 0 {
+      self.change_state_to_die();
+    }
   }
 }

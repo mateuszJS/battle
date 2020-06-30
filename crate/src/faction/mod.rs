@@ -204,6 +204,35 @@ impl Faction {
       squad.update_center();
       squad.check_units_correctness();
     });
+
+    if self.id == 1 {
+      // log!(
+      //   "{:?}",
+      //   self
+      //     .squads
+      //     .iter()
+      //     .filter(|squad| squad.borrow().shared.stored_track_destination.is_some())
+      //     .map(|squad| squad.borrow().id)
+      //     .collect::<Vec<u32>>()
+      // );
+      log!(
+        "{:?}",
+        self
+          .squads
+          .iter()
+          .filter(|squad| squad.borrow().shared.stored_track_destination.is_some())
+          // .map()
+          .collect::<Vec<_>>()
+          .len(),
+        // self.members.iter().any(|ref_cell_unit| {
+        //     ref_cell_unit
+        //       .borrow()
+        //       .check_if_too_far_from_squad_center(&self.shared)
+        //   });
+      );
+    }
+
+    self.squads.retain(|squad| squad.borrow().members.len() > 0);
   }
 
   pub fn manage_hunters(&mut self) {

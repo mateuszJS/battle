@@ -1,7 +1,7 @@
 use crate::id_generator::IdGenerator;
 use crate::position_utils::PositionUtils;
 use crate::squad_types::{get_squad_details, SquadDetails, SquadType};
-use crate::unit::{Unit, STATE_RUN};
+use crate::unit::{Unit, STATE_DIE, STATE_RUN};
 use crate::weapon_types::Weapon;
 
 use crate::World;
@@ -142,16 +142,15 @@ impl Squad {
   }
 
   pub fn stop_running(&mut self) {
-    let Self {
-      ref mut members,
-      ref shared,
-      ..
-    } = self;
-    members.iter_mut().for_each(|unit| {
-      if unit.borrow().state == STATE_RUN {
-        unit.borrow_mut().stop_running(shared);
-      }
-    });
+    if self.shared.stored_track_destination.is_none() {
+      self.members.iter().for_each(|unit| {
+        if unit.borrow().state == STATE_RUN {
+          unit.borrow_mut().stop_running(&self.shared);
+        }
+      });
+    } else {
+      self.shared.stored_track_destination = None;
+    }
   }
 
   pub fn attack_enemy(&mut self, enemy: &Weak<RefCell<Squad>>) {
@@ -165,7 +164,8 @@ impl Squad {
   pub fn was_center_point_changed(&self) -> bool {
     (self.shared.center_point.0 - self.last_center_point.0)
       .hypot(self.shared.center_point.1 - self.last_center_point.1)
-      >= std::f32::EPSILON
+      >= 30.0 // std::f32::EPSILON
+              // TODO: find a better solution
   }
 
   pub fn update_moved_status(&mut self) {
@@ -178,8 +178,7 @@ impl Squad {
   }
 
   pub fn check_units_correctness(&mut self) {
-    // firstly check if any die
-    // check if any unit has status DIE, then remove from squad, and etc.
+    self.remove_died_members();
     // second, check coherency
     let coherency_not_kept = self.members.iter().any(|ref_cell_unit| {
       ref_cell_unit
@@ -191,24 +190,27 @@ impl Squad {
         let track_len = self.shared.track.len();
         // store point, instead of saving to "self" because self.add_target is checking self
         let point_to_store = if track_len > 0 {
-          Some(self.shared.track[track_len - 1])
+          self.shared.track[track_len - 1]
         } else {
-          None
+          (-1.0, -1.0)
         };
         self.add_target(
           self.shared.center_point.0,
           self.shared.center_point.1,
           false,
         );
-        self.shared.stored_track_destination = point_to_store;
+        self.shared.stored_track_destination = Some(point_to_store);
       }
     } else if let Some(stored_track_destination) = self.shared.stored_track_destination {
       self.shared.stored_track_destination = None;
-      self.add_target(
-        stored_track_destination.0,
-        stored_track_destination.1,
-        false,
-      );
+      if stored_track_destination.0 >= 0.0 {
+        // if smaller, then
+        self.add_target(
+          stored_track_destination.0,
+          stored_track_destination.1,
+          false,
+        );
+      }
     } else {
       // if coherency is kept,
       self.members.iter().for_each(|ref_cell_unit| {
@@ -219,8 +221,13 @@ impl Squad {
     }
   }
 
-  pub fn remove_member(&mut self) {
-    // TODO: self.members.remove
-    self.recalculate_members_positions();
+  pub fn remove_died_members(&mut self) {
+    // let number_of_members = self.members.len();
+    self
+      .members
+      .retain(|member| member.borrow().state != STATE_DIE);
+    // if number_of_members != self.members.len() {
+    //   self.recalculate_members_positions();
+    // }
   }
 }

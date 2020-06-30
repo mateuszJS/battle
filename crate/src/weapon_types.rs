@@ -9,7 +9,7 @@ pub struct Weapon {
   pub shoot_time: u16,
   pub scatter: f32,
   pub bullets_speed: f32,
-  pub damage: u16,
+  pub damage: u8,
   pub representation_id: f32,
 }
 

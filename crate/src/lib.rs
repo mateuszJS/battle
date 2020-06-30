@@ -134,7 +134,7 @@ impl Universe {
           .upgrade()
           .unwrap()
           .borrow()
-          .was_moved_in_previous_loop
+          .was_center_point_changed()
         {
           Some(weak_squad.upgrade().unwrap())
         } else {

@@ -152,7 +152,16 @@ impl SquadsManager {
     idle_squads.iter().for_each(|ref_cell_squad| {
       let mut squad = ref_cell_squad.borrow_mut();
       let squad_center_point = squad.shared.center_point;
-      let enemies_squads = if squad.was_moved_in_previous_loop || squad.was_center_point_changed() {
+      let enemies_squads = if squad.was_center_point_changed()
+        || squad.shared.secondary_aim.upgrade().is_none()
+        || squad
+          .shared
+          .secondary_aim
+          .upgrade()
+          .unwrap()
+          .borrow()
+          .was_center_point_changed()
+      {
         &all_enemies_squads
       } else {
         // didn't move previously, and also now didn't move

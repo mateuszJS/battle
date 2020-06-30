@@ -180,14 +180,17 @@ const getSprites = () => {
         previousPhase = 'getup'
       },
       goToDie(angle: number) {
-        const indexOfStartingFrame = getIndexOfStartingFrame(
-          angle,
-          framesPeriods.FLY,
-        )
-        movieClip.onFrameChange = getCallbackStopOnLastFrame(
-          indexOfStartingFrame + framesPeriods.FLY.length - 1,
-        )
-        movieClip.gotoAndPlay(indexOfStartingFrame)
+        if (previousPhase !== 'die') {
+          previousPhase = 'die'
+          const indexOfStartingFrame = getIndexOfStartingFrame(
+            angle,
+            framesPeriods.FLY,
+          )
+          movieClip.onFrameChange = getCallbackStopOnLastFrame(
+            indexOfStartingFrame + framesPeriods.FLY.length - 1,
+          )
+          movieClip.gotoAndPlay(indexOfStartingFrame)
+        }
       },
     }
   }
