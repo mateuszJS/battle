@@ -231,14 +231,8 @@ impl Unit {
     self.state = STATE_IDLE;
     if self.track_index != -1 {
       self.go_to_current_point_on_track(squad_shared_info);
-    } else if squad_shared_info.aim.upgrade().is_some()
-    // && squad_shared_info.stored_track_destination.is_none()
-    {
-      self.change_state_to_shoot(
-        squad_shared_info.aim.upgrade().unwrap(),
-        true,
-        squad_shared_info,
-      );
+    } else if let Some(aim) = squad_shared_info.aim.upgrade() {
+      self.change_state_to_shoot(aim, true, squad_shared_info);
     } else if let Some(secondary_aim) = squad_shared_info.secondary_aim.upgrade() {
       self.change_state_to_shoot(secondary_aim, false, squad_shared_info);
     }
@@ -292,13 +286,13 @@ impl Unit {
         });
     if let Some(ref_cell_unit_aim) = weak_unit_aim.upgrade() {
       let unit_aim = ref_cell_unit_aim.borrow();
-      let angle = (unit_aim.x - self.x).atan2(self.y - unit_aim.y);
       if distance <= WEAPON_RANGE {
         self.state = STATE_SHOOT;
-        self.angle = angle;
+        self.angle = (unit_aim.x - self.x).atan2(self.y - unit_aim.y);
         self.aim = weak_unit_aim;
       } else if is_important_aim && squad_shared_info.stored_track_destination.is_none() {
         // TODO: not sure if shouldn't go to the unit own position in the squad (center + offset)
+        let angle = (self.x - unit_aim.x).atan2(unit_aim.y - self.y);
         self.set_target(
           angle.sin() * WEAPON_RANGE + unit_aim.x,
           -angle.cos() * WEAPON_RANGE + unit_aim.y,
