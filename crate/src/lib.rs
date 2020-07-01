@@ -272,12 +272,19 @@ impl Universe {
     js_sys::Float32Array::from(&summary[..])
   }
 
-  fn is_it_attack(world: &World, target_x: f32, target_y: f32) -> Option<&Weak<RefCell<Squad>>> {
+  fn is_it_attack(
+    world: &World,
+    target_x: f32,
+    target_y: f32,
+    user_faction_id: u32,
+  ) -> Option<&Weak<RefCell<Squad>>> {
     let mut selected_enemy_squad = None;
-
     for weak_squad in world.all_squads.iter() {
       if let Some(unwrapper_squad) = weak_squad.upgrade() {
         let squad = unwrapper_squad.borrow();
+        if squad.faction_id == user_faction_id {
+          continue;
+        }
         if squad.faction_id != INDEX_OF_USER_FACTION as u32
           && (squad.shared.center_point.0 - target_x).hypot(squad.shared.center_point.1 - target_y)
             < THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER
@@ -312,27 +319,28 @@ impl Universe {
     let squads_ids = raw_squads_ids.into_iter().map(|id| id as u32).collect();
 
     let user_faction = &mut factions[INDEX_OF_USER_FACTION];
-    let selected_enemy_units = match Universe::is_it_attack(world, target_x, target_y) {
-      Some(squad) => {
-        user_faction.attack_enemy(squads_ids, squad);
-        let upgraded_squad = squad.upgrade();
-        if upgraded_squad.is_some() {
-          upgraded_squad
-            .unwrap()
-            .borrow()
-            .members
-            .iter()
-            .map(|unit| unit.borrow().id as f32)
-            .collect()
-        } else {
+    let selected_enemy_units =
+      match Universe::is_it_attack(world, target_x, target_y, user_faction.id) {
+        Some(squad) => {
+          user_faction.attack_enemy(squads_ids, squad);
+          let upgraded_squad = squad.upgrade();
+          if upgraded_squad.is_some() {
+            upgraded_squad
+              .unwrap()
+              .borrow()
+              .members
+              .iter()
+              .map(|unit| unit.borrow().id as f32)
+              .collect()
+          } else {
+            vec![]
+          }
+        }
+        None => {
+          user_faction.move_squads(squads_ids, target_x, target_y);
           vec![]
         }
-      }
-      None => {
-        user_faction.move_squads(squads_ids, target_x, target_y);
-        vec![]
-      }
-    };
+      };
     js_sys::Float32Array::from(&selected_enemy_units[..])
   }
 }
