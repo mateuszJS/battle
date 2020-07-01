@@ -192,22 +192,22 @@ impl Unit {
         //   self.change_state_to_idle(squad_shared_info);
         // // stay and don't
         // } else
-        if let Some(ref_cell_aim) = squad_shared_info.aim.upgrade() {
-          // check if you are in range with aim, if no, go ahead, so there won't be effect like
-          // to avoid effect like stopping and running all the time
-          if ref_cell_aim.borrow().was_moved_in_previous_loop {
-            // in this case it's current loop, because "update" goes after updating the "was_moved_in_previous_loop"
-            // self.set_target(
-            //   self.mod_x * MANAGE_HUNTERS_PERIOD as f32 + self.target_x,
-            //   self.mod_y * MANAGE_HUNTERS_PERIOD as f32 + self.target_y,
-            // );
-          } else {
-            self.change_state_to_shoot(ref_cell_aim, true, squad_shared_info);
-          }
+        // if let Some(ref_cell_aim) = squad_shared_info.aim.upgrade() {
+        // check if you are in range with aim, if no, go ahead, so there won't be effect like
+        // to avoid effect like stopping and running all the time
+        // if ref_cell_aim.borrow().was_moved_in_previous_loop {
+        // in this case it's current loop, because "update" goes after updating the "was_moved_in_previous_loop"
+        // self.set_target(
+        //   self.mod_x * MANAGE_HUNTERS_PERIOD as f32 + self.target_x,
+        //   self.mod_y * MANAGE_HUNTERS_PERIOD as f32 + self.target_y,
+        // );
+        // } else {
+        // self.change_state_to_shoot(ref_cell_aim, true, squad_shared_info);
+        // }
         // --------------- handle hunting ----------------- END
-        } else {
-          self.change_state_to_idle(squad_shared_info);
-        }
+        // } else {
+        self.change_state_to_idle(squad_shared_info);
+      // }
       } else {
         self.track_index += 1;
         self.go_to_current_point_on_track(squad_shared_info);
