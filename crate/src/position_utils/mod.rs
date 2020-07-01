@@ -9,8 +9,6 @@ use track_utils::TrackUtils;
 
 const MAX_NUMBER_OF_UNITS_IN_SQUAD: usize = 7;
 
-type PositionPoint = (i16, i16);
-
 pub struct PositionUtils {}
 
 impl PositionUtils {
@@ -65,6 +63,10 @@ impl PositionUtils {
     aim: (f32, f32),
   ) -> Vec<(f32, f32)> {
     // TODO: handle different ranges
-    CalcPositions::calc_attackers_positions(aim, squads_average_position, number_of_needed_positions)
+    CalcPositions::calc_attackers_positions(
+      aim,
+      squads_average_position,
+      number_of_needed_positions,
+    )
   }
 }

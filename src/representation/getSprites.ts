@@ -6,6 +6,15 @@ import {
   getCallbackGoToFirstOnLastFrameAndStop,
 } from './utils'
 
+const STATE_IDLE_BASE = 1000
+const STATE_SHOOT_BASE = 2000
+const STATE_RUN_BASE = 3000
+const STATE_FLY_UP_BASE = 4000
+const STATE_FLY_MIDDLE_BASE = 5000
+const STATE_FLY_DOWN_BASE = 6000
+const STATE_GETUP_BASE = 7000
+const STATE_DIE_BASE = 8000
+
 type FramesPeriods = {
   [key in 'IDLE' | 'SHOOT' | 'RUN' | 'FLY' | 'GETUP' | 'DIE']: {
     first: number
@@ -76,12 +85,12 @@ const getSprites = () => {
     movieClip.animationSpeed = 0.01
     movieClip.scale.set(0.7)
     movieClip.stop()
-    let previousPhase = ''
+    let previousPhase = 0
 
     return {
       movieClip,
       goToIdle(angle: number) {
-        const currentPhase = `idle${Math.round(angle * 100)}`
+        const currentPhase = STATE_IDLE_BASE + Math.round(angle * 100)
         if (previousPhase !== currentPhase) {
           previousPhase = currentPhase
           movieClip.onFrameChange = null
@@ -93,7 +102,7 @@ const getSprites = () => {
         }
       },
       goToRun(angle: number) {
-        const currentPhase = `run${Math.round(angle * 100)}`
+        const currentPhase = STATE_RUN_BASE + Math.round(angle * 100)
         if (previousPhase !== currentPhase) {
           previousPhase = currentPhase
           const indexOfStartingFrame = getIndexOfStartingFrame(
@@ -111,19 +120,23 @@ const getSprites = () => {
       },
       goToShoot(angle: number, shootProgress: number) {
         const isShoot = shootProgress === 0
-        const indexOfStartingFrame = getIndexOfStartingFrame(
-          angle,
-          framesPeriods.SHOOT,
-        )
-        const currentPhase = `shoot${indexOfStartingFrame}`
+        const currentPhase = STATE_SHOOT_BASE + Math.round(angle * 100)
 
         if (previousPhase !== currentPhase) {
           previousPhase = currentPhase
           movieClip.onFrameChange = null
+          const indexOfStartingFrame = getIndexOfStartingFrame(
+            angle,
+            framesPeriods.SHOOT,
+          )
           movieClip.gotoAndStop(indexOfStartingFrame)
         }
 
         if (isShoot) {
+          const indexOfStartingFrame = getIndexOfStartingFrame(
+            angle,
+            framesPeriods.SHOOT,
+          )
           const indexOfLastFrame =
             indexOfStartingFrame + framesPeriods.SHOOT.length
           // actually we cold create frames with half of shotY
@@ -149,18 +162,21 @@ const getSprites = () => {
           currentFrame < framesPeriods.FLY.first ||
           currentFrame > framesPeriods.FLY.last
         ) {
-          previousPhase = 'fly_up'
+          previousPhase = STATE_FLY_UP_BASE
           movieClip.onFrameChange = null
           movieClip.animationSpeed = 0.3
           movieClip.gotoAndPlay(indexOfStartingFrame)
         } else if (
-          previousPhase === 'fly_up' &&
+          previousPhase === STATE_FLY_UP_BASE &&
           currentFrame > indexOfStartingFrame + framesPeriods.FLY.length / 2 - 1
         ) {
-          previousPhase = 'fly_middle'
+          previousPhase = STATE_FLY_MIDDLE_BASE
           movieClip.stop()
-        } else if (flyingProgress <= 4 && previousPhase === 'fly_middle') {
-          previousPhase = 'fly_down'
+        } else if (
+          flyingProgress <= 4 &&
+          previousPhase === STATE_FLY_MIDDLE_BASE
+        ) {
+          previousPhase = STATE_FLY_DOWN_BASE
           movieClip.onFrameChange = getCallbackStopOnLastFrame(
             indexOfStartingFrame + framesPeriods.FLY.length - 1,
           )
@@ -177,11 +193,11 @@ const getSprites = () => {
           indexOfStartingFrame +
           Math.floor(getUppingProgress * (framesPeriods.GETUP.length - 1))
         movieClip.gotoAndStop(indexOfCurrentFrame)
-        previousPhase = 'getup'
+        previousPhase = STATE_GETUP_BASE
       },
       goToDie(angle: number) {
-        if (previousPhase !== 'die') {
-          previousPhase = 'die'
+        if (previousPhase !== STATE_DIE_BASE) {
+          previousPhase = STATE_DIE_BASE
           const indexOfStartingFrame = getIndexOfStartingFrame(
             angle,
             framesPeriods.FLY,

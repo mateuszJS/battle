@@ -80,11 +80,10 @@ impl Squad {
       .collect()
   }
 
-  pub fn add_member(&mut self, position_x: f32, position_y: f32, unit_angle: f32) {
+  pub fn add_member(&mut self, position_x: f32, position_y: f32) {
     self.members.push(Rc::new(RefCell::new(Unit::new(
       position_x,
       position_y,
-      unit_angle,
       self.squad_details,
     ))));
 

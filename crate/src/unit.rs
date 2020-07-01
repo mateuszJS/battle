@@ -1,7 +1,6 @@
 use crate::bullets_manager::BulletsManager;
 use crate::constants::{
-  MANAGE_HUNTERS_PERIOD, MATH_PI, MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS, NORMAL_SQUAD_RADIUS,
-  WEAPON_RANGE,
+  MATH_PI, MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS, NORMAL_SQUAD_RADIUS, WEAPON_RANGE,
 };
 use crate::id_generator::IdGenerator;
 use crate::look_up_table::LookUpTable;
@@ -45,19 +44,16 @@ pub struct Unit {
 }
 
 impl Unit {
-  pub fn new(x: f32, y: f32, angle: f32, squad_details: &'static SquadDetails) -> Unit {
-    let seed_throwing_strength = LookUpTable::get_random(); // TODO: move it to factory code, or faction
-    let throwing_strength = 8.0 + seed_throwing_strength * 15.0;
-
+  pub fn new(x: f32, y: f32, squad_details: &'static SquadDetails) -> Unit {
     Unit {
       id: IdGenerator::generate_id(),
       x,
       y,
-      angle: (angle + MATH_PI) % (MATH_PI * 2.0),
-      state: STATE_FLY,
+      angle: 0.0,
+      state: STATE_IDLE,
       get_upping_progress: 0.0,
-      mod_x: angle.sin() * throwing_strength,
-      mod_y: -angle.cos() * throwing_strength,
+      mod_x: 0.0,
+      mod_y: 0.0,
       target_x: 0.0,
       target_y: 0.0,
       position_offset_x: 0.0,
@@ -68,6 +64,14 @@ impl Unit {
       aim: Weak::new(),
       hp: squad_details.hp,
     }
+  }
+
+  pub fn change_state_to_fly(&mut self, angle: f32, strength: f32) {
+    self.state = STATE_FLY;
+    self.angle = angle + MATH_PI;
+    self.mod_x = angle.sin() * strength;
+    self.mod_y = -angle.cos() * strength;
+    // check destination to don't overlap with obstacle
   }
 
   fn update_fly(&mut self) {
@@ -238,10 +242,6 @@ impl Unit {
     }
   }
 
-  fn update_idle(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {}
-
-  fn update_die(&mut self) {}
-
   pub fn check_state_correctness(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
     if self.state == STATE_IDLE {
       self.change_state_to_idle(squad_shared_info);
@@ -291,7 +291,6 @@ impl Unit {
         self.angle = (unit_aim.x - self.x).atan2(self.y - unit_aim.y);
         self.aim = weak_unit_aim;
       } else if is_important_aim && squad_shared_info.stored_track_destination.is_none() {
-        // TODO: not sure if shouldn't go to the unit own position in the squad (center + offset)
         let angle = (self.x - unit_aim.x).atan2(unit_aim.y - self.y);
         self.set_target(
           angle.sin() * WEAPON_RANGE + unit_aim.x,
@@ -350,9 +349,7 @@ impl Unit {
       STATE_FLY => self.update_fly(),
       STATE_GETUP => self.update_getup(squad_shared_info),
       STATE_RUN => self.update_run(squad_shared_info),
-      STATE_IDLE => self.update_idle(squad_shared_info),
       STATE_SHOOT => self.update_shoot(squad_shared_info, bullet_manager),
-      STATE_DIE => self.update_die(),
       _ => {}
     }
   }
