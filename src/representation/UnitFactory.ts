@@ -11,14 +11,20 @@ class UnitsFactory {
     this.layerGroup = layerGroup
   }
 
-  static createUnit(x: number, y: number, angle: number, state: number) {
+  static createUnit(
+    x: number,
+    y: number,
+    angle: number,
+    isEnemy: boolean,
+    state: number,
+  ) {
     const { movieClip, ...frameUpdaters } = this.getSoliderSprite()
     const graphicParams = {
       sortingLayer: this.layerGroup,
       container: new PIXI.Container(),
       movieClip: movieClip,
       frameUpdaters,
-      selectionSprite: getMySelection(),
+      selectionSprite: getMySelection(isEnemy),
     }
 
     return new Unit(x, y, angle, graphicParams)

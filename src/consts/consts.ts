@@ -25,3 +25,4 @@ export const MIN_CAMERA_X = -(MAP_WIDTH - window.innerWidth)
 export const MIN_CAMERA_Y = -(MAP_HEIGHT - window.innerHeight)
 export const START_MOVING_CAMERA_BOUNDARY = 100
 export const HALF_UNIT_HEIGHT = 20
+export const USER_FACTION_ID = 1

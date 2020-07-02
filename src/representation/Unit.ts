@@ -77,14 +77,13 @@ class Unit {
     this.graphics.x = x
     this.graphics.y = y
 
-    // isShoot won't be stored in this.previousState
     switch (state) {
       case State.IDLE: {
         this.frameUpdaters.goToIdle(angle)
         break
       }
       case State.SHOOT: {
-        this.frameUpdaters.goToShoot(angle)
+        this.frameUpdaters.goToShoot(angle, firstStateParam)
         break
       }
       case State.RUN: {
@@ -97,6 +96,10 @@ class Unit {
       }
       case State.GETUP: {
         this.frameUpdaters.goToGetUp(angle, firstStateParam)
+        break
+      }
+      case State.DIE: {
+        this.frameUpdaters.goToDie(angle)
         break
       }
     }

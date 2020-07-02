@@ -2,6 +2,8 @@ mod a_star;
 
 use super::basic_utils::{BasicUtils, Line, Point};
 use super::obstacles_lazy_statics::ObstaclesLazyStatics;
+use super::CalcPositions;
+use crate::constants::{MATH_PI, NORMAL_SQUAD_RADIUS};
 use a_star::AStar;
 use std::collections::HashMap;
 
@@ -75,5 +77,63 @@ impl TrackUtils {
         ObstaclesLazyStatics::get_permanent_connection_graph(),
       )
     }
+  }
+
+  pub fn shift_track_from_obstacles<'a>(track: Vec<&'a Point>) -> Vec<(f32, f32)> {
+    let last_index = track.len() - 1;
+
+    track.iter().enumerate().map(|(index, point)| {
+      if index == 0 || index == last_index {
+        /*
+        TODO: correct the last point, to be not so close to obstacle
+        1. find the nearest line
+        2. check if distance to the nearest line is less than NORMAL_SQUAD_RADIUS
+        3. if is less, then move point away by (NORMAL_SQUAD_RADIUS - distance)
+        */
+        (point.x, point.y)
+      } else {
+        let previous_point = track[index - 1];
+        let next_point = track[index + 1];
+
+        let from_previous_point_angle = (point.x - previous_point.x).atan2(previous_point.y - point.y);
+        let from_next_point_angle = (point.x - next_point.x).atan2(next_point.y - point.y);
+
+        if (from_previous_point_angle - from_next_point_angle).abs() % MATH_PI <= std::f32::EPSILON { // straight line
+          // in this case it's impossible to figure out, on
+          // which site are obstacles (if are even on one site)
+          let angle = from_previous_point_angle + MATH_PI / 2.0;
+          let maybe_correct_point = (
+            (angle.sin() * NORMAL_SQUAD_RADIUS + point.x) as i16,
+            (-angle.cos() * NORMAL_SQUAD_RADIUS + point.y) as i16,
+          );
+
+          if CalcPositions::get_is_point_inside_any_obstacle((maybe_correct_point.0 - 1, maybe_correct_point.1 - 1))
+            || // -1 and +1 to handle case when it's rectangle, and maybe_correct_point is on the boundary/stroke
+            CalcPositions::get_is_point_inside_any_obstacle((maybe_correct_point.0 + 1, maybe_correct_point.1 + 1))
+          {
+            let correct_angle = angle + MATH_PI;
+            (
+              correct_angle.sin() * NORMAL_SQUAD_RADIUS + point.x,
+              -correct_angle.cos() * NORMAL_SQUAD_RADIUS + point.y,
+            )
+          } else {
+            (
+              angle.sin() * NORMAL_SQUAD_RADIUS + point.x,
+              -angle.cos() * NORMAL_SQUAD_RADIUS + point.y,
+            )
+          }
+        } else {
+          // https://rosettacode.org/wiki/Averages/Mean_angle#Rust
+          let sin_mean = (from_previous_point_angle.sin() + from_next_point_angle.sin()) / 2.0;
+          let cos_mean = (from_previous_point_angle.cos() + from_next_point_angle.cos()) / 2.0;
+          let mean_angle = sin_mean.atan2(cos_mean);
+
+          (
+            mean_angle.sin() * NORMAL_SQUAD_RADIUS + point.x,
+            -mean_angle.cos() * NORMAL_SQUAD_RADIUS + point.y,
+          )
+        }
+      }
+    }).collect()
   }
 }

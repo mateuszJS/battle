@@ -3,10 +3,20 @@ import {
   getIndexOfStartingFrame,
   getCallbackStopOnLastFrame,
   getCallbackGoToFirstOnLastFrame,
+  getCallbackGoToFirstOnLastFrameAndStop,
 } from './utils'
 
+const STATE_IDLE_BASE = 1000
+const STATE_SHOOT_BASE = 2000
+const STATE_RUN_BASE = 3000
+const STATE_FLY_UP_BASE = 4000
+const STATE_FLY_MIDDLE_BASE = 5000
+const STATE_FLY_DOWN_BASE = 6000
+const STATE_GETUP_BASE = 7000
+const STATE_DIE_BASE = 8000
+
 type FramesPeriods = {
-  [key in 'IDLE' | 'SHOOT' | 'RUN' | 'FLY' | 'GETUP']: {
+  [key in 'IDLE' | 'SHOOT' | 'RUN' | 'FLY' | 'GETUP' | 'DIE']: {
     first: number
     sides: number
     length: number
@@ -47,7 +57,7 @@ const framesData = [
   },
 ]
 
-const framesPeriods = framesData.reduce((result, item, index, array) => {
+export const framesPeriods = framesData.reduce((result, item, index, array) => {
   const first = index === 0 ? 0 : result[array[index - 1].name].last + 1
   return {
     ...result,
@@ -75,14 +85,15 @@ const getSprites = () => {
     movieClip.animationSpeed = 0.01
     movieClip.scale.set(0.7)
     movieClip.stop()
-    let previousPhase = ''
+    let previousPhase = 0
 
     return {
       movieClip,
       goToIdle(angle: number) {
-        const currentPhase = `idle${Math.round(angle * 100)}`
+        const currentPhase = STATE_IDLE_BASE + Math.round(angle * 100)
         if (previousPhase !== currentPhase) {
           previousPhase = currentPhase
+          movieClip.onFrameChange = null
           const indexOfStartingFrame = getIndexOfStartingFrame(
             angle,
             framesPeriods.IDLE,
@@ -91,29 +102,53 @@ const getSprites = () => {
         }
       },
       goToRun(angle: number) {
-        const currentPhase = `run${Math.round(angle * 100)}`
+        const currentPhase = STATE_RUN_BASE + Math.round(angle * 100)
         if (previousPhase !== currentPhase) {
           previousPhase = currentPhase
-          movieClip.animationSpeed = 0.4
-          movieClip.onFrameChange = null
-          movieClip.gotoAndStop(framesPeriods.RUN.first)
           const indexOfStartingFrame = getIndexOfStartingFrame(
             angle,
             framesPeriods.RUN,
           )
           const indexOfLastFrame =
             indexOfStartingFrame + framesPeriods.RUN.length
-          movieClip.gotoAndPlay(indexOfStartingFrame)
           movieClip.onFrameChange = getCallbackGoToFirstOnLastFrame(
             indexOfStartingFrame,
             indexOfLastFrame,
           )
+          movieClip.gotoAndPlay(indexOfStartingFrame)
         }
       },
-      goToShoot(angle: number) {
-        // stop at end frame
-        // call again if isShoot = true
-        movieClip.gotoAndStop(framesPeriods.SHOOT.first)
+      goToShoot(angle: number, shootProgress: number) {
+        const isShoot = shootProgress === 0
+        const currentPhase = STATE_SHOOT_BASE + Math.round(angle * 100)
+
+        if (previousPhase !== currentPhase) {
+          previousPhase = currentPhase
+          movieClip.onFrameChange = null
+          const indexOfStartingFrame = getIndexOfStartingFrame(
+            angle,
+            framesPeriods.SHOOT,
+          )
+          movieClip.gotoAndStop(indexOfStartingFrame)
+        }
+
+        if (isShoot) {
+          const indexOfStartingFrame = getIndexOfStartingFrame(
+            angle,
+            framesPeriods.SHOOT,
+          )
+          const indexOfLastFrame =
+            indexOfStartingFrame + framesPeriods.SHOOT.length
+          // actually we cold create frames with half of shotY
+          // and after the last frame, just animate in reverse, to first frame
+          movieClip.onFrameChange = getCallbackGoToFirstOnLastFrameAndStop(
+            indexOfStartingFrame,
+            indexOfLastFrame,
+          )
+          movieClip.gotoAndPlay(indexOfStartingFrame)
+        }
+
+        // movieClip.gotoAndStop(framesPeriods.SHOOT.first)
       },
       goToFly(angle: number, flyingProgress: number) {
         // stop and last frame
@@ -127,21 +162,25 @@ const getSprites = () => {
           currentFrame < framesPeriods.FLY.first ||
           currentFrame > framesPeriods.FLY.last
         ) {
-          previousPhase = 'fly_up'
+          previousPhase = STATE_FLY_UP_BASE
+          movieClip.onFrameChange = null
           movieClip.animationSpeed = 0.3
           movieClip.gotoAndPlay(indexOfStartingFrame)
         } else if (
-          previousPhase === 'fly_up' &&
+          previousPhase === STATE_FLY_UP_BASE &&
           currentFrame > indexOfStartingFrame + framesPeriods.FLY.length / 2 - 1
         ) {
-          previousPhase = 'fly_middle'
+          previousPhase = STATE_FLY_MIDDLE_BASE
           movieClip.stop()
-        } else if (flyingProgress <= 4 && previousPhase === 'fly_middle') {
-          previousPhase = 'fly_down'
-          movieClip.play()
+        } else if (
+          flyingProgress <= 4 &&
+          previousPhase === STATE_FLY_MIDDLE_BASE
+        ) {
+          previousPhase = STATE_FLY_DOWN_BASE
           movieClip.onFrameChange = getCallbackStopOnLastFrame(
             indexOfStartingFrame + framesPeriods.FLY.length - 1,
           )
+          movieClip.play()
         }
       },
       goToGetUp(angle: number, getUppingProgress: number) {
@@ -149,11 +188,25 @@ const getSprites = () => {
           angle,
           framesPeriods.GETUP,
         )
+        movieClip.onFrameChange = null
         const indexOfCurrentFrame =
           indexOfStartingFrame +
           Math.floor(getUppingProgress * (framesPeriods.GETUP.length - 1))
         movieClip.gotoAndStop(indexOfCurrentFrame)
-        previousPhase = 'getup'
+        previousPhase = STATE_GETUP_BASE
+      },
+      goToDie(angle: number) {
+        if (previousPhase !== STATE_DIE_BASE) {
+          previousPhase = STATE_DIE_BASE
+          const indexOfStartingFrame = getIndexOfStartingFrame(
+            angle,
+            framesPeriods.FLY,
+          )
+          movieClip.onFrameChange = getCallbackStopOnLastFrame(
+            indexOfStartingFrame + framesPeriods.FLY.length - 1,
+          )
+          movieClip.gotoAndPlay(indexOfStartingFrame)
+        }
       },
     }
   }

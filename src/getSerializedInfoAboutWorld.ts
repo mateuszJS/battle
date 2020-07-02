@@ -1,10 +1,11 @@
+import { USER_FACTION_ID } from 'Consts'
 import { obstaclesDebug } from '~/debug'
 
 const OBSTACLES_DIVIDER = -1
 
 const players = [
   {
-    id: 1,
+    id: USER_FACTION_ID,
     base: {
       x: 100,
       y: 100,

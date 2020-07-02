@@ -126,6 +126,8 @@ const setup = () => {
   window.sceneX = 0
   window.sceneY = 0
 
+  universe.create_enemy_squad(mapIconToRepresentationType('solider'))
+
   window.app.ticker.add((delta: number) => {
     mouseController.updateScenePosition()
 

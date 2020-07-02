@@ -5,11 +5,14 @@
 // import influenceController from '~/ai/influenceMap'
 // import aiController from '~/ai/ai'
 // import Icons from '~/modules/icons'
+import REPRESENTATION_IDS from './representationsIds'
 import * as representationUpdaters from './representationUpdaters'
 import { UniverseRepresentation } from '../setup'
 import Factory from '~/representation/Factory'
 import Unit from '~/representation/Unit'
 import UnitsFactory from '~/representation/UnitFactory'
+import { USER_FACTION_ID } from 'Consts'
+import BulletFactory from '~/representation/BulletFactory'
 
 const render = (
   delta: number,
@@ -30,15 +33,13 @@ const render = (
     const nextItemType = universeData[index]
 
     switch (nextItemType) {
-      case 0.0: {
-        // faction
+      case REPRESENTATION_IDS.FACTION: {
         const indexOfId = index + 1
         factionId = universeData[indexOfId]
         index = indexOfId + 1
         break
       }
-      case 1.0: {
-        //  factory
+      case REPRESENTATION_IDS.ENEMY_FACTORY: {
         const indexOfId = index + 1
         const newIndexValue = indexOfId + 3
         const factoryId = universeData[indexOfId]
@@ -50,8 +51,7 @@ const render = (
         index = newIndexValue
         break
       }
-      case 2.0: {
-        // squad -> solider
+      case REPRESENTATION_IDS.SOLIDER: {
         const indexOfId = index + 1
         const newIndexValue = indexOfId + 6
         const unitId = universeData[indexOfId]
@@ -66,6 +66,7 @@ const render = (
             universeData[indexOfId + 1],
             universeData[indexOfId + 2],
             universeData[indexOfId + 3],
+            factionId === USER_FACTION_ID,
             universeData[indexOfId + 4],
           )
         }
@@ -73,8 +74,7 @@ const render = (
         index = newIndexValue
         break
       }
-      case 3.0: {
-        // user factory
+      case REPRESENTATION_IDS.USER_FACTORY: {
         const indexOfId = index + 1
         const newIndexValue = indexOfId + 7
         const factoryId = universeData[indexOfId]
@@ -86,10 +86,21 @@ const render = (
         index = newIndexValue
         break
       }
+      case REPRESENTATION_IDS.BULLETS: {
+        BulletFactory.create(
+          universeData.slice(index + 1),
+          universeRepresentation,
+        )
+        index = universeLength
+        break
+      }
       default:
         debugger
     }
   }
+
+  BulletFactory.update()
+
   // updateStage()
   // window.flamesUpdaters.forEach(update => update())
   // window.smokeContainer.elements.forEach(EffectsFactory.updateSmoke)
