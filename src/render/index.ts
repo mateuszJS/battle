@@ -5,6 +5,7 @@
 // import influenceController from '~/ai/influenceMap'
 // import aiController from '~/ai/ai'
 // import Icons from '~/modules/icons'
+import REPRESENTATION_IDS from './representationsIds'
 import * as representationUpdaters from './representationUpdaters'
 import { UniverseRepresentation } from '../setup'
 import Factory from '~/representation/Factory'
@@ -32,15 +33,13 @@ const render = (
     const nextItemType = universeData[index]
 
     switch (nextItemType) {
-      case 0.0: {
-        // faction
+      case REPRESENTATION_IDS.FACTION: {
         const indexOfId = index + 1
         factionId = universeData[indexOfId]
         index = indexOfId + 1
         break
       }
-      case 1.0: {
-        //  factory
+      case REPRESENTATION_IDS.ENEMY_FACTORY: {
         const indexOfId = index + 1
         const newIndexValue = indexOfId + 3
         const factoryId = universeData[indexOfId]
@@ -52,8 +51,7 @@ const render = (
         index = newIndexValue
         break
       }
-      case 2.0: {
-        // squad -> solider
+      case REPRESENTATION_IDS.SOLIDER: {
         const indexOfId = index + 1
         const newIndexValue = indexOfId + 6
         const unitId = universeData[indexOfId]
@@ -76,8 +74,7 @@ const render = (
         index = newIndexValue
         break
       }
-      case 3.0: {
-        // user factory
+      case REPRESENTATION_IDS.USER_FACTORY: {
         const indexOfId = index + 1
         const newIndexValue = indexOfId + 7
         const factoryId = universeData[indexOfId]
@@ -89,8 +86,7 @@ const render = (
         index = newIndexValue
         break
       }
-      case 4.0: {
-        // bullet
+      case REPRESENTATION_IDS.BULLETS: {
         BulletFactory.create(
           universeData.slice(index + 1),
           universeRepresentation,

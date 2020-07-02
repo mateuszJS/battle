@@ -1,6 +1,7 @@
 use crate::constants::{MATH_PI, MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE};
 use crate::id_generator::IdGenerator;
 use crate::look_up_table::LookUpTable;
+use crate::representations_ids::{ENEMY_FACTORY_REPRESENTATION_ID, USER_FACTORY_REPRESENTATION_ID};
 use crate::squad_types::{get_squad_details, SquadType};
 
 const PORTAL_WIDTH: f32 = 400.0;
@@ -53,7 +54,11 @@ impl Factory {
   }
 
   pub fn get_representation(&self) -> Vec<f32> {
-    let factory_type = if self.owner_user { 3.0 } else { 1.0 };
+    let factory_type = if self.owner_user {
+      USER_FACTORY_REPRESENTATION_ID
+    } else {
+      ENEMY_FACTORY_REPRESENTATION_ID
+    };
     let progress = if self.owner_user && self.production_line.len() > 0 {
       self.production_line[0].current_time as f32 / self.production_line[0].total_time as f32
     } else {

@@ -1,3 +1,4 @@
+use crate::representations_ids::SOLIDER_REPRESENTATION_ID;
 use crate::weapon_types::{Weapon, STANDARD_RIFLE_DETAILS};
 
 pub enum SquadType {
@@ -22,7 +23,7 @@ static SOLIDER_DETAILS: SquadDetails = SquadDetails {
   members_number: 7,
   // predicted max number of units in squad in utils is 7 MAX_NUMBER_OF_UNITS_IN_SQUAD
   // to increase that number have to update calc position in squad
-  representation_type: 2.0,
+  representation_type: SOLIDER_REPRESENTATION_ID,
   selection_threshold: 40.0,
   unit_model_offset_y: 20.0,
   weapon: &STANDARD_RIFLE_DETAILS,

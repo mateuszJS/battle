@@ -1,8 +1,8 @@
 mod squads_manager;
-
 use crate::constants::MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE;
 use crate::look_up_table::LookUpTable;
 use crate::position_utils::PositionUtils;
+use crate::representations_ids::FACTION_REPRESENTATION_ID;
 use crate::squad::Squad;
 use crate::squad_types::SquadType;
 use crate::unit::STATE_IDLE;
@@ -120,7 +120,7 @@ impl Faction {
 
   pub fn get_representation(&self) -> Vec<f32> {
     let start_representation = [
-      &[0.0, self.id as f32],
+      &[FACTION_REPRESENTATION_ID, self.id as f32],
       &self.factory.get_representation()[..],
     ]
     .concat();

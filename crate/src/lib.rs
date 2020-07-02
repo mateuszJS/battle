@@ -34,6 +34,7 @@ mod look_up_table;
 // public just to import it in bench
 mod bullets_manager;
 pub mod position_utils;
+mod representations_ids;
 mod squad;
 mod squad_types;
 mod unit;
@@ -49,6 +50,7 @@ use constants::{
 use faction::Faction;
 use factory::Factory;
 use position_utils::obstacles_lazy_statics::ObstaclesLazyStatics;
+use representations_ids::BULLETS_REPRESENTATION_ID;
 use squad::Squad;
 
 const INDEX_OF_USER_FACTION: usize = 0;
@@ -207,7 +209,7 @@ impl Universe {
 
     let result = [
       &universe_representation[..],
-      &[4.0],
+      &[BULLETS_REPRESENTATION_ID],
       &self.world.bullets_manager.get_representation(),
     ]
     .concat();
