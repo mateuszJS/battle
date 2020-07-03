@@ -15,7 +15,6 @@ declare global {
     allSquads: Squad[][]
     hunters: Unit[][]
     hutningTimer: number
-    timer: number
     icons: IIcon[]
     allSelectedUnits: Unit[]
     mapWidth: number

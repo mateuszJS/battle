@@ -214,6 +214,31 @@
       left: 0;
     }
 
+    #abilities-list {
+      display: flex;
+      background-color: #888;
+      margin: 0 0 10px;
+      padding: 0;
+    }
+
+    #abilities-list li {
+      display: block;
+      background: #ddd;
+      margin-right: 10px
+    }
+
+    #unit-avatar {
+      background: #aaa;
+    }
+
+    #selection-wrapper {
+      position: fixed;
+      bottom: 60px;
+      right: 0;
+      background-color: #333;
+      padding: 10px;
+    }
+
     #factory-list {
       position: fixed;
       bottom: 0;
@@ -250,6 +275,20 @@
   <div id="game-layout">
     <div id="res-counter"></div>
     <ul id="shop-list"></ul>
+    <div id="selection-wrapper">
+      <ul id="abilities-list">
+        <li>
+          <img width="50" height="50" />
+        </li>
+        <li>
+          <img width="50" height="50" />
+        </li>
+        <li>
+          <img width="50" height="50" />
+        </li>
+      </ul>
+      <img id="unit-avatar" width="150" height="200" />
+    </div>
     <ul id="factory-list"></ul>
   </div>
   <div id="menu">
