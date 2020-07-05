@@ -1,3 +1,4 @@
+import REPRESENTATION_IDS from '~/render/representationsIds'
 import Unit from './Unit'
 import createSoliderSprite from './getSprites'
 import getMySelection from './getMySelection'
@@ -27,7 +28,7 @@ class UnitsFactory {
       selectionSprite: getMySelection(isEnemy),
     }
 
-    return new Unit(x, y, angle, graphicParams)
+    return new Unit(x, y, angle, graphicParams, REPRESENTATION_IDS.SOLIDER)
   }
 }
 

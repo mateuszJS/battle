@@ -3,6 +3,7 @@ import { Universe } from '../../crate/pkg/index'
 import { UniverseRepresentation } from '../setup'
 import { tracksDebug } from '~/debug'
 import Unit from '~/representation/Unit'
+import updateUI from './updateUI'
 
 class SelectionController {
   private startPoint: null | Point
@@ -65,18 +66,25 @@ class SelectionController {
       unit.select()
       this.selectedUnits.push(unit)
     })
+
+    updateUI((this.universeRepresentation[unitsIds[0]] as Unit).type)
   }
 
   public startSelection(point: Point) {
     this.startPoint = point
+    this.clearSelection()
+  }
+
+  private clearSelection() {
     this.selectedUnits.forEach(unit => unit.deselect())
     this.selectedUnits = []
+    updateUI()
   }
+
   public updateSelection({ x, y }: Point) {
     if (!this.startPoint) return
 
-    this.selectedUnits.forEach(unit => unit.deselect())
-    this.selectedUnits = []
+    this.clearSelection()
 
     this.selectUnits(
       Math.min(this.startPoint.x, x),

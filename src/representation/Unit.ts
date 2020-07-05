@@ -26,13 +26,17 @@ class Unit {
   private frameUpdaters: FrameUpdaters
   private selectionSprite: PIXI.Sprite
   private indicator: PIXI.Graphics
-  public previousFramesFactors: {
-    // has impact of current frame
-    state: State
-    angle: number
-  }
+  public type: number
 
-  constructor(x: number, y: number, angle: number, pixiStuff: PixiUnitStuff) {
+  constructor(
+    x: number,
+    y: number,
+    angle: number,
+    pixiStuff: PixiUnitStuff,
+    type: number,
+  ) {
+    this.type = type
+
     this.graphics = pixiStuff.container
     this.movieClip = pixiStuff.movieClip
     this.frameUpdaters = pixiStuff.frameUpdaters
@@ -103,8 +107,6 @@ class Unit {
         break
       }
     }
-
-    this.previousFramesFactors = { state, angle }
   }
 
   remove() {
