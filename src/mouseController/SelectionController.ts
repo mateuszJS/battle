@@ -3,7 +3,7 @@ import { Universe } from '../../crate/pkg/index'
 import { UniverseRepresentation } from '../setup'
 import { tracksDebug } from '~/debug'
 import Unit from '~/representation/Unit'
-import updateUI from './updateUI'
+import { addAbilitiesButton, hideAbilitiesButtons } from '~/buttons/abilities'
 
 class SelectionController {
   private startPoint: null | Point
@@ -61,13 +61,22 @@ class SelectionController {
     const squadsIds = result.subarray(indexOfDivider + 1)
     this.selectedSquads = squadsIds
 
+    const iconsPayload: number[][] = []
+    let collectedUnits: number[] = []
+
     unitsIds.forEach(id => {
+      if (id === -1) {
+        iconsPayload.push(collectedUnits)
+        collectedUnits = []
+        return
+      }
       const unit = this.universeRepresentation[id] as Unit
       unit.select()
       this.selectedUnits.push(unit)
+      collectedUnits.push(id)
     })
 
-    updateUI((this.universeRepresentation[unitsIds[0]] as Unit).type)
+    addAbilitiesButton(this.universeRepresentation, iconsPayload, squadsIds)
   }
 
   public startSelection(point: Point) {
@@ -78,7 +87,7 @@ class SelectionController {
   private clearSelection() {
     this.selectedUnits.forEach(unit => unit.deselect())
     this.selectedUnits = []
-    updateUI()
+    hideAbilitiesButtons()
   }
 
   public updateSelection({ x, y }: Point) {
@@ -105,6 +114,8 @@ class SelectionController {
   }
 
   public endSelection() {
+    if (!this.startPoint) return
+
     this.selectionRectangle.clear()
     if (this.selectedUnits.length === 0) {
       this.selectUnits(

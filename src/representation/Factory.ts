@@ -1,4 +1,9 @@
 import EffectsFactory from '~/representation/EffectFactory'
+import {
+  addItemToProductionLine,
+  removeItemFromProductionLine,
+  updateItemInProductionLine,
+} from '~/buttons/factory'
 
 const portalProperties = [
   {
@@ -93,13 +98,6 @@ class Factory {
 
     this.x = x
     this.y = y
-    this.productionLine = [
-      { id: 0, node: null },
-      { id: 0, node: null },
-      { id: 0, node: null },
-      { id: 0, node: null },
-      { id: 0, node: null },
-    ]
   }
 
   turnOnProduction() {
@@ -122,33 +120,14 @@ class Factory {
 
   updateProductionLine(progress: number, data: number[]) {
     for (let i = 0; i < data.length; i++) {
-      const representationItem = this.productionLine[i]
-      if ((representationItem && representationItem.id) !== data[i]) {
-        if (data[i]) {
-          const button = document.createElement('button')
-          button.className = 'solider'
-
-          this.productionLine[i] = {
-            id: data[i],
-            node: button,
-          }
-          document
-            .getElementById('factory-list')
-            .appendChild(this.productionLine[i].node)
-        } else {
-          document
-            .getElementById('factory-list')
-            .removeChild(this.productionLine[i].node)
-          this.productionLine[i] = {
-            id: 0,
-            node: null,
-          }
-        }
+      if (data[i]) {
+        addItemToProductionLine(i, data[i])
+      } else {
+        removeItemFromProductionLine(i)
       }
     }
-
     if (progress !== 0) {
-      this.productionLine[0].node.style.opacity = `${progress}`
+      updateItemInProductionLine(progress)
     }
   }
 }

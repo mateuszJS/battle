@@ -33,21 +33,22 @@ class MouseController {
       universe,
       universeRepresentation,
     )
-
-    window.app.view.addEventListener('mousedown', this.onMouseDown)
-    window.app.view.addEventListener('mouseup', this.onMouseUp)
+    window.app.stage.interactive = true
+    window.app.stage.on('mousedown', this.onMouseDown)
+    window.app.stage.on('rightdown', this.onMouseRightBtnDown)
+    window.app.stage.on('mouseup', this.onMouseUp)
     window.app.view.addEventListener('mousemove', this.onMouseMove)
     window.app.view.addEventListener('mouseleave', this.onMouseLeave)
 
     anglesDebug()
   }
 
-  private onMouseDown = ({ button: mouseButton }: MouseEvent) => {
-    if (mouseButton === MOUSE_LEFT_BUTTON) {
-      this.selectionController.startSelection(this.absoluteMousePosition)
-    } else if (mouseButton === MOUSE_RIGHT_BUTTON) {
-      this.selectionController.consumeSelection(this.absoluteMousePosition)
-    }
+  private onMouseDown = () => {
+    this.selectionController.startSelection(this.absoluteMousePosition)
+  }
+
+  private onMouseRightBtnDown = () => {
+    this.selectionController.consumeSelection(this.absoluteMousePosition)
   }
 
   private onMouseMove = (event: MouseEvent) => {

@@ -237,7 +237,7 @@ impl Universe {
     end_y: f32,
   ) -> js_sys::Float32Array {
     let mut selected_units_ids: Vec<Vec<f32>> = vec![];
-    let mut selected_squads_ids: Vec<f32> = vec![0.0];
+    let mut selected_squads_ids: Vec<f32> = vec![0.0]; // 0.0 is divider between squads and units ids
     self
       .factions
       .iter()
@@ -249,13 +249,13 @@ impl Universe {
             for ref_cell_unit in read_squad.members.iter() {
               let unit = ref_cell_unit.borrow();
               if unit.x > start_x && unit.x < end_x && unit.y > start_y && unit.y < end_y {
-                selected_units_ids.push(
-                  read_squad
-                    .members
-                    .iter()
-                    .map(|squad_member| squad_member.borrow().id as f32)
-                    .collect(),
-                );
+                let mut members_ids: Vec<f32> = read_squad
+                  .members
+                  .iter()
+                  .map(|squad_member| squad_member.borrow().id as f32)
+                  .collect();
+                members_ids.push(-1.0); // -1.0 is divider between each squad
+                selected_units_ids.push(members_ids);
                 selected_squads_ids.push(read_squad.id as f32);
                 break;
               }
