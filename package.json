@@ -40,6 +40,6 @@
   },
   "dependencies": {
     "pixi-layers": "^0.2.2",
-    "pixi.js": "^5.1.5"
+    "pixi.js": "^5.3.3"
   }
 }

@@ -345,4 +345,13 @@ impl Universe {
       };
     js_sys::Float32Array::from(&selected_enemy_units[..])
   }
+
+  pub fn use_ability(&mut self, raw_squads_ids: Vec<f32>, target_x: f32, target_y: f32) {
+    log!(
+      "squads with id: {:?} will throw grenade to x: {}, y: {}",
+      raw_squads_ids,
+      target_x,
+      target_y
+    );
+  }
 }

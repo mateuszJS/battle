@@ -28,4 +28,5 @@ export default [
   'assets/warriorRegularAvatar.png',
   'assets/soliderLaserAvatar.png',
   'assets/soliderRegularAvatar.png',
+  'assets/grenade_icon_blue.png',
 ]

@@ -3,7 +3,12 @@ import { Universe } from '../../crate/pkg/index'
 import { UniverseRepresentation } from '../setup'
 import { tracksDebug } from '~/debug'
 import Unit from '~/representation/Unit'
-import { addAbilitiesButton, hideAbilitiesButtons } from '~/buttons/abilities'
+import {
+  addAbilitiesButton,
+  hideAbilitiesButtons,
+  selectAllSimilarAbilities,
+  deselectAllSimilarAbilities,
+} from '~/buttons/abilities'
 
 class SelectionController {
   private startPoint: null | Point
@@ -12,11 +17,9 @@ class SelectionController {
   private universeRepresentation: UniverseRepresentation
   private selectedUnits: Unit[]
   private selectedSquads: Float32Array
+  private selectedAbility: number | null
 
-  constructor(
-    universe: Universe,
-    universeRepresentation: UniverseRepresentation,
-  ) {
+  constructor(universe: Universe, universeRepresentation: UniverseRepresentation) {
     this.universe = universe
     this.universeRepresentation = universeRepresentation
     this.selectedUnits = []
@@ -24,16 +27,18 @@ class SelectionController {
     this.startPoint = null
     this.selectionRectangle = new PIXI.Graphics()
     window.app.stage.addChild(this.selectionRectangle)
+    this.selectedAbility = null
   }
 
   public consumeSelection({ x, y }: Point) {
+    if (this.selectedAbility) {
+      this.deselectAbility()
+      return
+    }
+
     // const tracks = this.universe.move_units(this.selectedSquads, x, y)
     // tracksDebug(tracks)
-    const selectedEnemyUnitsIds = this.universe.move_units(
-      this.selectedSquads,
-      x,
-      y,
-    )
+    const selectedEnemyUnitsIds = this.universe.move_units(this.selectedSquads, x, y)
 
     if (selectedEnemyUnitsIds.length === 0) return
 
@@ -76,10 +81,30 @@ class SelectionController {
       collectedUnits.push(id)
     })
 
-    addAbilitiesButton(this.universeRepresentation, iconsPayload, squadsIds)
+    addAbilitiesButton(this.universeRepresentation, iconsPayload, squadsIds, (abilityId: number) =>
+      this.selectAbility(abilityId),
+    )
+  }
+
+  private selectAbility(abilityId: number) {
+    window.app.stage.cursor = "url('assets/aim_icon.png'),auto"
+    selectAllSimilarAbilities(abilityId, Array.from(this.selectedSquads))
+    // select for all the squads with the same and available ability
+    this.selectedAbility = abilityId
+  }
+
+  private deselectAbility() {
+    deselectAllSimilarAbilities(this.selectedAbility, Array.from(this.selectedSquads))
+    window.app.stage.cursor = 'default'
+    this.selectedAbility = null
   }
 
   public startSelection(point: Point) {
+    if (this.selectedAbility) {
+      this.universe.use_ability(this.selectedSquads, point.x, point.y)
+      this.deselectAbility()
+      return
+    }
     this.startPoint = point
     this.clearSelection()
   }
