@@ -197,7 +197,7 @@ impl Universe {
       Universe::run_squad_manager(factions, world);
     }
 
-    world.bullets_manager.update();
+    world.bullets_manager.update(factions);
   }
 
   pub fn get_universe_data(&mut self) -> js_sys::Float32Array {
@@ -313,6 +313,7 @@ impl Universe {
     target_x: f32,
     target_y: f32,
   ) -> js_sys::Float32Array {
+    log!("{:?} {} {}", raw_squads_ids, target_x, target_y);
     let Universe {
       ref mut factions,
       ref world,
@@ -347,11 +348,8 @@ impl Universe {
   }
 
   pub fn use_ability(&mut self, raw_squads_ids: Vec<f32>, target_x: f32, target_y: f32) {
-    log!(
-      "squads with id: {:?} will throw grenade to x: {}, y: {}",
-      raw_squads_ids,
-      target_x,
-      target_y
-    );
+    let squads_ids = raw_squads_ids.into_iter().map(|id| id as u32).collect();
+    let user_faction = &mut self.factions[INDEX_OF_USER_FACTION];
+    user_faction.use_ability(squads_ids, target_x, target_y);
   }
 }

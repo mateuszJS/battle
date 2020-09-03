@@ -87,10 +87,7 @@ const render = (
         break
       }
       case REPRESENTATION_IDS.BULLETS: {
-        BulletFactory.create(
-          universeData.slice(index + 1),
-          universeRepresentation,
-        )
+        BulletFactory.create(universeData.slice(index + 1), universeRepresentation)
         index = universeLength
         break
       }

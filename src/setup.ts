@@ -11,10 +11,7 @@ import initializeMouseController from './mouseController'
 import getSerializedInfoAboutWorld from './getSerializedInfoAboutWorld'
 import { createFactoryButtons } from './buttons/factory'
 import REPRESENTATION_IDS from '~/render/representationsIds'
-import {
-  updateAbilitiesButtons,
-  clearAbilitiesIcons,
-} from '~/buttons/abilities'
+import { updateAbilitiesButtons, clearAbilitiesIcons } from '~/buttons/abilities'
 
 export type UniverseRepresentation = {
   [id: number]: Factory | Unit
@@ -52,18 +49,13 @@ const setup = () => {
     universeRepresentation[factoryId] = factoryRepresentation
 
     if (factionId === USER_FACTION_ID) {
-      createFactoryButtons(
-        factoriesInitData[i + 2],
-        factoriesInitData[i + 3],
-        type => universe.create_squad(type),
+      createFactoryButtons(factoriesInitData[i + 2], factoriesInitData[i + 3], type =>
+        universe.create_squad(type),
       )
     }
   }
 
-  const mouseController = new initializeMouseController(
-    universe,
-    universeRepresentation,
-  )
+  const mouseController = new initializeMouseController(universe, universeRepresentation)
 
   window.sceneX = 0
   window.sceneY = 0

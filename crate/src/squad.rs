@@ -9,6 +9,7 @@ use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 
 pub struct SquadUnitSharedDataSet {
+  pub ability_target: Option<(f32, f32)>,
   pub center_point: (f32, f32),
   pub track: Vec<(f32, f32)>,
   pub aim: Weak<RefCell<Squad>>,
@@ -39,6 +40,7 @@ impl Squad {
       last_center_point: (0.0, 0.0),
       was_moved_in_previous_loop: true,
       shared: SquadUnitSharedDataSet {
+        ability_target: None,
         center_point: (0.0, 0.0),
         stored_track_destination: None,
         track: vec![],
@@ -65,7 +67,7 @@ impl Squad {
   }
 
   pub fn update(&mut self, world: &mut World) {
-    let shared = &self.shared;
+    let shared = &mut self.shared;
     self
       .members
       .iter_mut()
@@ -116,6 +118,8 @@ impl Squad {
     //   // TODO: calc segment, from squad_center thought closest_point to outsite (like plus 5?)
     //   // also handle case when distance is 0, then add 5, check if it's okay, if not, minsu 5, and this is have to be okay
     // }
+    self.shared.ability_target = None;
+
     if clear_aim {
       self.shared.aim = Weak::new();
       self.shared.secondary_aim = Weak::new();
@@ -155,6 +159,7 @@ impl Squad {
   pub fn attack_enemy(&mut self, enemy: &Weak<RefCell<Squad>>) {
     self.shared.aim = Weak::clone(enemy);
     self.shared.secondary_aim = Weak::new();
+    self.shared.ability_target = None;
     // self.shared.track = vec![];
     // if, stop running only if the squad is running
     self.stop_running();
@@ -228,5 +233,9 @@ impl Squad {
     // if number_of_members != self.members.len() {
     //   self.recalculate_members_positions();
     // }
+  }
+
+  pub fn start_using_ability(&mut self, target: (f32, f32)) {
+    self.shared.ability_target = Some(target);
   }
 }

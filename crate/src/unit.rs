@@ -235,6 +235,10 @@ impl Unit {
     self.state = STATE_IDLE;
     if self.track_index != -1 {
       self.go_to_current_point_on_track(squad_shared_info);
+    } else if let Some(ability_target) = squad_shared_info.ability_target {
+      if (self.x - ability_target.0).hypot(self.y - ability_target.1) <= WEAPON_RANGE {
+        self.state = STATE_ABILITY;
+      }
     } else if let Some(aim) = squad_shared_info.aim.upgrade() {
       self.change_state_to_shoot(aim, true, squad_shared_info);
     } else if let Some(secondary_aim) = squad_shared_info.secondary_aim.upgrade() {
@@ -340,9 +344,21 @@ impl Unit {
     }
   }
 
+  fn update_ability(
+    &mut self,
+    squad_shared_info: &mut SquadUnitSharedDataSet,
+    bullet_manager: &mut BulletsManager,
+  ) {
+    if let Some(ability_target) = squad_shared_info.ability_target {
+      bullet_manager.throw_grenade(self.id as f32, self.x, self.y, ability_target);
+      squad_shared_info.ability_target = None; // for grenade it works, but for jump when every unit needs to make a jump NOT!
+    }
+    self.change_state_to_idle(squad_shared_info);
+  }
+
   pub fn update(
     &mut self,
-    squad_shared_info: &SquadUnitSharedDataSet,
+    squad_shared_info: &mut SquadUnitSharedDataSet,
     bullet_manager: &mut BulletsManager,
   ) {
     match self.state {
@@ -350,6 +366,7 @@ impl Unit {
       STATE_GETUP => self.update_getup(squad_shared_info),
       STATE_RUN => self.update_run(squad_shared_info),
       STATE_SHOOT => self.update_shoot(squad_shared_info, bullet_manager),
+      STATE_ABILITY => self.update_ability(squad_shared_info, bullet_manager),
       _ => {}
     }
   }

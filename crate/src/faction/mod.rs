@@ -1,5 +1,8 @@
 mod squads_manager;
-use crate::constants::MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE;
+use crate::constants::{
+  ATTACKERS_DISTANCE, MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE, MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS,
+  WEAPON_RANGE,
+};
 use crate::look_up_table::LookUpTable;
 use crate::position_utils::PositionUtils;
 use crate::representations_ids::FACTION_REPRESENTATION_ID;
@@ -161,7 +164,7 @@ impl Faction {
   }
 
   pub fn attack_enemy(&mut self, squads_ids: Vec<u32>, enemy: &Weak<RefCell<Squad>>) {
-    let mut attackers: Vec<&Rc<RefCell<Squad>>> = self
+    let attackers: Vec<&Rc<RefCell<Squad>>> = self
       .squads
       .iter()
       .filter(|squad| squads_ids.contains(&squad.borrow().id))
@@ -171,7 +174,18 @@ impl Faction {
       .iter()
       .for_each(|squad| squad.borrow_mut().attack_enemy(enemy));
 
-    SquadsManager::manage_single_hunters_group(&mut attackers);
+    let aim_position = enemy.upgrade().unwrap().borrow().shared.center_point;
+
+    let mut attackers_out_of_range: Vec<&Rc<RefCell<Squad>>> = attackers
+      .into_iter()
+      .filter(|squad| {
+        let squad_position = squad.borrow().shared.center_point;
+        (squad_position.0 - aim_position.0).hypot(squad_position.1 - aim_position.1)
+          > ATTACKERS_DISTANCE
+      })
+      .collect();
+
+    SquadsManager::set_positions_in_range(&mut attackers_out_of_range, aim_position, false);
   }
 
   pub fn search_for_enemies(
@@ -220,5 +234,35 @@ impl Faction {
 
   pub fn manage_hunters(&mut self) {
     SquadsManager::manage_hunters(self);
+  }
+
+  pub fn use_ability(&mut self, squads_ids: Vec<u32>, target_x: f32, target_y: f32) {
+    let target = (target_x, target_y);
+    let squads: Vec<&Rc<RefCell<Squad>>> = self
+      .squads
+      .iter()
+      .filter(|squad| squads_ids.contains(&squad.borrow().id))
+      .collect();
+
+    let mut squads_out_of_range: Vec<&Rc<RefCell<Squad>>> = squads
+      .clone()
+      .into_iter()
+      .filter(|ref_cell_squad| {
+        let mut squad = ref_cell_squad.borrow_mut();
+        let squad_position = squad.shared.center_point;
+        let out_of_range = (squad_position.0 - target_x).hypot(squad_position.1 - target_y)
+          > WEAPON_RANGE - MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS;
+        if !out_of_range {
+          squad.stop_running();
+        }
+        out_of_range
+      })
+      .collect();
+
+    SquadsManager::set_positions_in_range(&mut squads_out_of_range, target, true);
+
+    squads
+      .iter()
+      .for_each(|rc_hunter| rc_hunter.borrow_mut().start_using_ability(target));
   }
 }
