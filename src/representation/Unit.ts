@@ -1,5 +1,6 @@
 import EffectFactory from './EffectFactory'
 import { FrameUpdaters } from './getSprites'
+import { ObjectType } from '~/render/representationsIds'
 
 type PixiUnitStuff = {
   sortingLayer: PIXI.display.Group
@@ -26,15 +27,9 @@ class Unit {
   private frameUpdaters: FrameUpdaters
   private selectionSprite: PIXI.Sprite
   private indicator: PIXI.Graphics
-  public type: number
+  public type: ObjectType
 
-  constructor(
-    x: number,
-    y: number,
-    angle: number,
-    pixiStuff: PixiUnitStuff,
-    type: number,
-  ) {
+  constructor(x: number, y: number, angle: number, pixiStuff: PixiUnitStuff, type: ObjectType) {
     this.type = type
 
     this.graphics = pixiStuff.container
@@ -71,17 +66,12 @@ class Unit {
     }
   }
 
-  update(
-    state: State,
-    x: number,
-    y: number,
-    angle: number,
-    firstStateParam: number,
-  ) {
+  update(state: State, x: number, y: number, angle: number, firstStateParam: number) {
     this.graphics.x = x
     this.graphics.y = y
 
     switch (state) {
+      case State.ABILITY:
       case State.IDLE: {
         this.frameUpdaters.goToIdle(angle)
         break

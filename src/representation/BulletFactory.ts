@@ -1,8 +1,14 @@
 import { UniverseRepresentation } from '~/setup'
 import { framesPeriods } from '~/representation/getSprites'
+import { disableAbility } from '~/buttons/abilities'
+import Unit from './Unit'
+
+const STANDARD_RIFLE = 1.0
+const GRENADE = 2.0
+const HIT_THE_GROUND = 3.0
 
 const MAP_TYPE_TO_GRAPHIC_CONSTRUCTOR = {
-  1.0: () => {
+  [STANDARD_RIFLE]: () => {
     const graphics = new PIXI.Graphics()
     graphics.beginFill(0xff0000)
     graphics.drawRect(0, 0, 2, 14)
@@ -10,31 +16,46 @@ const MAP_TYPE_TO_GRAPHIC_CONSTRUCTOR = {
     graphics.y = -7
     return graphics
   },
-  2.0: () => {
+  [GRENADE]: () => {
     const graphics = new PIXI.Graphics()
     graphics.beginFill(0x00ff00)
-    graphics.drawRect(0, 0, 5, 5)
+    graphics.drawRect(0, 0, 10, 10)
     graphics.x = -5
     graphics.y = -5
+    return graphics
+  },
+  [HIT_THE_GROUND]: () => {
+    const graphics = new PIXI.Graphics()
+    graphics.beginFill(0xff0000)
+    graphics.drawRect(0, 0, 50, 50)
+    graphics.x = -25
+    graphics.y = -25
     return graphics
   },
 }
 
 const MAP_TYPE_TO_UPDATE_FUNC = {
-  1.0: (
+  [STANDARD_RIFLE]: (
     bullet: Bullet,
     x: number,
     y: number,
     angle: number,
     speed: number,
-    lifetime: number,
+    initialLifetime: number,
   ) => () => {
     bullet.sprite.x += bullet.modX
     bullet.sprite.y += bullet.modY
   },
-  2.0: (bullet: Bullet, x: number, y: number, angle: number, speed: number, lifetime: number) => {
-    const aimX = Math.sin(angle) * speed * lifetime + x,
-      aimY = -Math.cos(angle) * speed * lifetime + y,
+  [GRENADE]: (
+    bullet: Bullet,
+    x: number,
+    y: number,
+    angle: number,
+    speed: number,
+    initialLifetime: number,
+  ) => {
+    const aimX = Math.sin(angle) * speed * initialLifetime + x,
+      aimY = -Math.cos(angle) * speed * initialLifetime + y,
       centerX = (x + aimX) / 2,
       centerY = (y + aimY) / 2 - 100,
       A1 = -(x ** 2) + centerX ** 2,
@@ -54,6 +75,18 @@ const MAP_TYPE_TO_UPDATE_FUNC = {
       bullet.sprite.x += bullet.modX
       bullet.sprite.y = a * bullet.sprite.x ** 2 + b * bullet.sprite.x + c
     }
+  },
+  [HIT_THE_GROUND]: (
+    bullet: Bullet,
+    x: number,
+    y: number,
+    angle: number,
+    speed: number,
+    initialLifetime: number,
+  ) => () => {
+    bullet.sprite.scale.set(1 + bullet.lifetime / initialLifetime)
+    bullet.sprite.alpha = bullet.lifetime / initialLifetime
+    bullet.sprite.rotation = bullet.lifetime * 0.1
   },
 }
 
@@ -92,9 +125,19 @@ const getAngle = (currentFrame: number) => {
 class BulletFactory {
   private static bullets: Bullet[] = []
 
-  static getBulletPosition(unit) {
-    const angle = getAngle(unit.movieClip.currentFrame)
-    return [unit.graphics.x + Math.sin(angle) * 45, unit.graphics.y - 30 - Math.cos(angle) * 45]
+  static getBulletPosition(type: number, unit: Unit) {
+    switch (type) {
+      case STANDARD_RIFLE: {
+        const angle = getAngle(unit.movieClip.currentFrame)
+        return [unit.graphics.x + Math.sin(angle) * 45, unit.graphics.y - 30 - Math.cos(angle) * 45]
+      }
+      case GRENADE: {
+        return [unit.graphics.x, unit.graphics.y - 30]
+      }
+      case HIT_THE_GROUND: {
+        return [unit.graphics.x, unit.graphics.y]
+      }
+    }
   }
 
   static create(bulletsData: number[], universeRepresentation: UniverseRepresentation) {
@@ -102,9 +145,13 @@ class BulletFactory {
       const type = bulletsData[i]
       const unitId = bulletsData[i + 1]
 
-      const [x, y] = this.getBulletPosition(universeRepresentation[unitId])
+      const [x, y] = this.getBulletPosition(type, universeRepresentation[unitId] as Unit)
       this.bullets.push(new Bullet(type, x, y, bulletsData.slice(i + 2, i + 5)))
       this.createBoom(bulletsData.slice(i, i + 3))
+
+      if (type === GRENADE) {
+        disableAbility(unitId)
+      }
     }
   }
 
@@ -117,7 +164,6 @@ class BulletFactory {
       } else {
         bullet.lifetime -= 1
         bullet.update()
-        // update the bullet
         return true
       }
     })

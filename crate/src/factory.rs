@@ -2,11 +2,13 @@ use crate::constants::{MATH_PI, MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE};
 use crate::id_generator::IdGenerator;
 use crate::look_up_table::LookUpTable;
 use crate::representations_ids::{ENEMY_FACTORY_REPRESENTATION_ID, USER_FACTORY_REPRESENTATION_ID};
+use crate::representations_ids::{RAPTOR_REPRESENTATION_ID, SOLIDER_REPRESENTATION_ID};
 use crate::squad_types::{get_squad_details, SquadType};
 
-const PORTAL_WIDTH: f32 = 400.0;
+const SOLIDER_REPRESENTATION_ID_U8: u8 = SOLIDER_REPRESENTATION_ID as u8;
+const RAPTOR_REPRESENTATION_ID_U8: u8 = RAPTOR_REPRESENTATION_ID as u8;
 
-const SOLIDER_REPRESENTATION_ID: u8 = 2;
+const PORTAL_WIDTH: f32 = 400.0;
 
 struct ProducedSquad {
   squad_type_representation: u8,
@@ -87,7 +89,8 @@ impl Factory {
   pub fn add_squad_to_production_line(&mut self, squad_type_representation: u8) -> bool {
     if self.production_line.len() < MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE {
       let squad_type = match squad_type_representation {
-        SOLIDER_REPRESENTATION_ID => SquadType::Solider,
+        SOLIDER_REPRESENTATION_ID_U8 => SquadType::Solider,
+        RAPTOR_REPRESENTATION_ID_U8 => SquadType::Raptor,
         _ => SquadType::Solider,
       };
       let squad_details = get_squad_details(&squad_type);

@@ -65,10 +65,7 @@ class Factory {
     gateBottom.x = props.gateBottom.x
     gateBottom.y = props.gateBottom.y
 
-    const portalFX = EffectsFactory.createPortalEffect(
-      props.portalEffect.x,
-      props.portalEffect.y,
-    )
+    const portalFX = EffectsFactory.createPortalEffect(props.portalEffect.x, props.portalEffect.y)
 
     portalFX.height = props.portalEffect.height
     portalFX.width = props.portalEffect.width

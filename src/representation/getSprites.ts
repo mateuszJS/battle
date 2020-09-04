@@ -73,10 +73,7 @@ export const framesPeriods = framesData.reduce((result, item, index, array) => {
 
 const getSprites = () => {
   const frames = framesData.reduce(
-    (result, { sides, length, getName }) => [
-      ...result,
-      ...getFrames(sides * length, getName),
-    ],
+    (result, { sides, length, getName }) => [...result, ...getFrames(sides * length, getName)],
     [],
   )
 
@@ -94,10 +91,7 @@ const getSprites = () => {
         if (previousPhase !== currentPhase) {
           previousPhase = currentPhase
           movieClip.onFrameChange = null
-          const indexOfStartingFrame = getIndexOfStartingFrame(
-            angle,
-            framesPeriods.IDLE,
-          )
+          const indexOfStartingFrame = getIndexOfStartingFrame(angle, framesPeriods.IDLE)
           movieClip.gotoAndStop(indexOfStartingFrame)
         }
       },
@@ -105,12 +99,8 @@ const getSprites = () => {
         const currentPhase = STATE_RUN_BASE + Math.round(angle * 100)
         if (previousPhase !== currentPhase) {
           previousPhase = currentPhase
-          const indexOfStartingFrame = getIndexOfStartingFrame(
-            angle,
-            framesPeriods.RUN,
-          )
-          const indexOfLastFrame =
-            indexOfStartingFrame + framesPeriods.RUN.length
+          const indexOfStartingFrame = getIndexOfStartingFrame(angle, framesPeriods.RUN)
+          const indexOfLastFrame = indexOfStartingFrame + framesPeriods.RUN.length
           movieClip.onFrameChange = getCallbackGoToFirstOnLastFrame(
             indexOfStartingFrame,
             indexOfLastFrame,
@@ -125,20 +115,13 @@ const getSprites = () => {
         if (previousPhase !== currentPhase) {
           previousPhase = currentPhase
           movieClip.onFrameChange = null
-          const indexOfStartingFrame = getIndexOfStartingFrame(
-            angle,
-            framesPeriods.SHOOT,
-          )
+          const indexOfStartingFrame = getIndexOfStartingFrame(angle, framesPeriods.SHOOT)
           movieClip.gotoAndStop(indexOfStartingFrame)
         }
 
         if (isShoot) {
-          const indexOfStartingFrame = getIndexOfStartingFrame(
-            angle,
-            framesPeriods.SHOOT,
-          )
-          const indexOfLastFrame =
-            indexOfStartingFrame + framesPeriods.SHOOT.length
+          const indexOfStartingFrame = getIndexOfStartingFrame(angle, framesPeriods.SHOOT)
+          const indexOfLastFrame = indexOfStartingFrame + framesPeriods.SHOOT.length
           // actually we cold create frames with half of shotY
           // and after the last frame, just animate in reverse, to first frame
           movieClip.onFrameChange = getCallbackGoToFirstOnLastFrameAndStop(
@@ -152,16 +135,10 @@ const getSprites = () => {
       },
       goToFly(angle: number, flyingProgress: number) {
         // stop and last frame
-        const indexOfStartingFrame = getIndexOfStartingFrame(
-          angle,
-          framesPeriods.FLY,
-        )
+        const indexOfStartingFrame = getIndexOfStartingFrame(angle, framesPeriods.FLY)
 
         const { currentFrame } = movieClip
-        if (
-          currentFrame < framesPeriods.FLY.first ||
-          currentFrame > framesPeriods.FLY.last
-        ) {
+        if (currentFrame < framesPeriods.FLY.first || currentFrame > framesPeriods.FLY.last) {
           previousPhase = STATE_FLY_UP_BASE
           movieClip.onFrameChange = null
           movieClip.animationSpeed = 0.3
@@ -172,10 +149,7 @@ const getSprites = () => {
         ) {
           previousPhase = STATE_FLY_MIDDLE_BASE
           movieClip.stop()
-        } else if (
-          flyingProgress <= 4 &&
-          previousPhase === STATE_FLY_MIDDLE_BASE
-        ) {
+        } else if (flyingProgress <= 4 && previousPhase === STATE_FLY_MIDDLE_BASE) {
           previousPhase = STATE_FLY_DOWN_BASE
           movieClip.onFrameChange = getCallbackStopOnLastFrame(
             indexOfStartingFrame + framesPeriods.FLY.length - 1,
@@ -184,24 +158,17 @@ const getSprites = () => {
         }
       },
       goToGetUp(angle: number, getUppingProgress: number) {
-        const indexOfStartingFrame = getIndexOfStartingFrame(
-          angle,
-          framesPeriods.GETUP,
-        )
+        const indexOfStartingFrame = getIndexOfStartingFrame(angle, framesPeriods.GETUP)
         movieClip.onFrameChange = null
         const indexOfCurrentFrame =
-          indexOfStartingFrame +
-          Math.floor(getUppingProgress * (framesPeriods.GETUP.length - 1))
+          indexOfStartingFrame + Math.floor(getUppingProgress * (framesPeriods.GETUP.length - 1))
         movieClip.gotoAndStop(indexOfCurrentFrame)
         previousPhase = STATE_GETUP_BASE
       },
       goToDie(angle: number) {
         if (previousPhase !== STATE_DIE_BASE) {
           previousPhase = STATE_DIE_BASE
-          const indexOfStartingFrame = getIndexOfStartingFrame(
-            angle,
-            framesPeriods.FLY,
-          )
+          const indexOfStartingFrame = getIndexOfStartingFrame(angle, framesPeriods.FLY)
           movieClip.onFrameChange = getCallbackStopOnLastFrame(
             indexOfStartingFrame + framesPeriods.FLY.length - 1,
           )
@@ -212,9 +179,6 @@ const getSprites = () => {
   }
 }
 
-export type FrameUpdaters = Omit<
-  ReturnType<ReturnType<typeof getSprites>>,
-  'movieClip'
->
+export type FrameUpdaters = Omit<ReturnType<ReturnType<typeof getSprites>>, 'movieClip'>
 
 export default getSprites

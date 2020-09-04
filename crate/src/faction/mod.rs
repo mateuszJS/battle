@@ -236,12 +236,22 @@ impl Faction {
     SquadsManager::manage_hunters(self);
   }
 
-  pub fn use_ability(&mut self, squads_ids: Vec<u32>, target_x: f32, target_y: f32) {
+  pub fn use_ability(
+    &mut self,
+    squads_ids: Vec<u32>,
+    ability_id: u8,
+    target_x: f32,
+    target_y: f32,
+  ) {
     let target = (target_x, target_y);
     let squads: Vec<&Rc<RefCell<Squad>>> = self
       .squads
       .iter()
-      .filter(|squad| squads_ids.contains(&squad.borrow().id))
+      .filter(|ref_cell_squad| {
+        let squad = ref_cell_squad.borrow();
+        squads_ids.contains(&squad.id)
+          && squad.squad_details.representation_type as u8 == ability_id
+      })
       .collect();
 
     let mut squads_out_of_range: Vec<&Rc<RefCell<Squad>>> = squads

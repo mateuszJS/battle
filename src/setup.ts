@@ -17,10 +17,6 @@ export type UniverseRepresentation = {
   [id: number]: Factory | Unit
 }
 
-// const grenade = new PIXI.Sprite(window.app.loader.resources['assets/grenade-icon.png'].texture);
-// grenade.width = SETTINGS.ABILITY_ICON_SIZE;
-// grenade.height = SETTINGS.ABILITY_ICON_SIZE;
-
 const setup = () => {
   EffectsFactory.initialize()
 

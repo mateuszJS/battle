@@ -18,9 +18,7 @@ const addBackground = () => {
   }
   for (let i = 0; i < 4; i++) {
     const rotatedTexture = new PIXI.Texture(
-      window.app.loader.resources[
-        'assets/quarted_of_map.jpg'
-      ].texture.baseTexture,
+      window.app.loader.resources['assets/quarted_of_map.jpg'].texture.baseTexture,
       undefined,
       undefined,
       undefined,
@@ -33,9 +31,7 @@ const addBackground = () => {
     mapQuarted.y = Math.floor(i / 2) * (window.mapHeight / 2)
     map.addChild(mapQuarted)
   }
-  const center = new PIXI.Sprite(
-    window.app.loader.resources['assets/map_center.png'].texture,
-  )
+  const center = new PIXI.Sprite(window.app.loader.resources['assets/map_center.png'].texture)
   center.anchor.set(0.5)
   center.width = window.mapWidth / 3
   center.height = window.mapHeight / 3

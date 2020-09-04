@@ -1,4 +1,4 @@
-import REPRESENTATION_IDS from '~/render/representationsIds'
+import REPRESENTATION_IDS, { ObjectType } from '~/render/representationsIds'
 import Unit from './Unit'
 import createSoliderSprite from './getSprites'
 import getMySelection from './getMySelection'
@@ -18,6 +18,7 @@ class UnitsFactory {
     angle: number,
     isEnemy: boolean,
     state: number,
+    type: ObjectType,
   ) {
     const { movieClip, ...frameUpdaters } = this.getSoliderSprite()
     const graphicParams = {
@@ -28,7 +29,11 @@ class UnitsFactory {
       selectionSprite: getMySelection(isEnemy),
     }
 
-    return new Unit(x, y, angle, graphicParams, REPRESENTATION_IDS.SOLIDER)
+    if (type === REPRESENTATION_IDS.RAPTOR) {
+      graphicParams.movieClip.tint = 0xffff00
+    }
+
+    return new Unit(x, y, angle, graphicParams, type)
   }
 }
 

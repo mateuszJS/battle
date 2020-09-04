@@ -101,7 +101,7 @@ class SelectionController {
 
   public startSelection(point: Point) {
     if (this.selectedAbility) {
-      this.universe.use_ability(this.selectedSquads, point.x, point.y)
+      this.universe.use_ability(this.selectedSquads, this.selectedAbility, point.x, point.y)
       this.deselectAbility()
       return
     }

@@ -48,4 +48,6 @@ declare global {
       strength: number
     }
   }
+
+  type ValueOf<T> = T[keyof T]
 }

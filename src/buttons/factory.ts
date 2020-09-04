@@ -4,6 +4,7 @@ const ICON_SIZE = 30
 
 const MAP_ID_TO_RESOURCE = {
   [REPRESENTATION_IDS.SOLIDER]: 'assets/soliderRegularAvatar.png',
+  [REPRESENTATION_IDS.RAPTOR]: 'assets/soliderRegularAvatar.png',
 } as const
 
 type RepresentationId = keyof typeof MAP_ID_TO_RESOURCE
@@ -39,9 +40,7 @@ const addNewIcon = (
   representationId: RepresentationId,
   onClick?: VoidFunction,
 ) => {
-  const icon = new PIXI.Sprite(
-    PIXI.Texture.from(MAP_ID_TO_RESOURCE[representationId]),
-  )
+  const icon = new PIXI.Sprite(PIXI.Texture.from(MAP_ID_TO_RESOURCE[representationId]))
   icon.x = x
   icon.y = y
   icon.width = ICON_SIZE
@@ -68,11 +67,8 @@ const addItemToBuyList = (
   representationId: RepresentationId,
   createItemCallback: (representationId: RepresentationId) => void,
 ) => {
-  const sprite = addNewIcon(
-    icons.buyList.length * ICON_SIZE,
-    0,
-    representationId,
-    () => createItemCallback(representationId),
+  const sprite = addNewIcon(icons.buyList.length * ICON_SIZE, 0, representationId, () =>
+    createItemCallback(representationId),
   )
   icons.buyList.push({
     representationId,
@@ -96,16 +92,13 @@ export const createFactoryButtons = (
   window.app.stage.addChild(icons.productionListContainer)
 
   addItemToBuyList(REPRESENTATION_IDS.SOLIDER, createItemCallback)
+  addItemToBuyList(REPRESENTATION_IDS.RAPTOR, createItemCallback)
 }
 
 export const addItemToProductionLine = (index: number, type: number) => {
   if (icons.productionList[index]) return
 
-  const icon = addNewIcon(
-    icons.productionList.length * ICON_SIZE,
-    0,
-    type as RepresentationId,
-  )
+  const icon = addNewIcon(icons.productionList.length * ICON_SIZE, 0, type as RepresentationId)
   icons.productionList[index] = icon
   icons.productionListContainer.addChild(icon)
 }

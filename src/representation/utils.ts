@@ -7,18 +7,13 @@ const getAngleOffsetInFrames = (angle: number, numberOfSides: number) => {
   const singleAngleSlice = (2 * Math.PI) / numberOfSides
   const centeredAngle = angle - singleAngleSlice / 2
 
-  const positiveCenteredAngle =
-    centeredAngle < 0 ? centeredAngle + Math.PI * 2 : centeredAngle
-  const framesAngle = // remove when sprites will be prepared correctly
-    Math.abs(positiveCenteredAngle - 2 * Math.PI) + 2 * Math.PI * 0.75
+  const positiveCenteredAngle = centeredAngle < 0 ? centeredAngle + Math.PI * 2 : centeredAngle
+  const framesAngle = Math.abs(positiveCenteredAngle - 2 * Math.PI) + 2 * Math.PI * 0.75 // remove when sprites will be prepared correctly
   const preparedAngle = framesAngle % (Math.PI * 2)
   return Math.floor(preparedAngle / singleAngleSlice)
 }
 
-export const getFrames = (
-  numberOfIteration: number,
-  getTextureName: (id: string) => string,
-) => {
+export const getFrames = (numberOfIteration: number, getTextureName: (id: string) => string) => {
   const frames: PIXI.Texture[] = []
   for (let i = 0; i < numberOfIteration; i++) {
     const formattedNumber = getFormattedNumber(i)
@@ -44,20 +39,14 @@ export const getCallbackStopOnLastFrame = (lastFrame: number) =>
     }
   }
 
-export const getCallbackGoToFirstOnLastFrame = (
-  firstFrame: number,
-  lastFrame: number,
-) =>
+export const getCallbackGoToFirstOnLastFrame = (firstFrame: number, lastFrame: number) =>
   function() {
     if (this.currentFrame >= lastFrame) {
       this.gotoAndPlay(firstFrame)
     }
   }
 
-export const getCallbackGoToFirstOnLastFrameAndStop = (
-  firstFrame: number,
-  lastFrame: number,
-) =>
+export const getCallbackGoToFirstOnLastFrameAndStop = (firstFrame: number, lastFrame: number) =>
   function() {
     if (this.currentFrame >= lastFrame) {
       this.gotoAndStop(firstFrame)

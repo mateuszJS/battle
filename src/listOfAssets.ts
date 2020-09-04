@@ -28,5 +28,11 @@ export default [
   'assets/warriorRegularAvatar.png',
   'assets/soliderLaserAvatar.png',
   'assets/soliderRegularAvatar.png',
+  'assets/ability_progress_bar_saturated.png',
   'assets/grenade_icon_blue.png',
+  'assets/grenade_icon_blue_hover.png',
+  'assets/grenade_icon_blue_greyscale.png',
+  'assets/wing_icon_blue.png',
+  'assets/wing_icon_blue_hover.png',
+  'assets/wing_icon_blue_greyscale.png',
 ]

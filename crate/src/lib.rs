@@ -347,9 +347,15 @@ impl Universe {
     js_sys::Float32Array::from(&selected_enemy_units[..])
   }
 
-  pub fn use_ability(&mut self, raw_squads_ids: Vec<f32>, target_x: f32, target_y: f32) {
+  pub fn use_ability(
+    &mut self,
+    raw_squads_ids: Vec<f32>,
+    ability_id: f32,
+    target_x: f32,
+    target_y: f32,
+  ) {
     let squads_ids = raw_squads_ids.into_iter().map(|id| id as u32).collect();
     let user_faction = &mut self.factions[INDEX_OF_USER_FACTION];
-    user_faction.use_ability(squads_ids, target_x, target_y);
+    user_faction.use_ability(squads_ids, ability_id as u8, target_x, target_y);
   }
 }

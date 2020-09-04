@@ -1,6 +1,7 @@
 pub enum WeaponType {
   StandardRifle,
   Grenade,
+  HitTheGround,
 }
 
 pub struct Weapon {
@@ -39,9 +40,22 @@ pub static GRENADE_DETAILS: Weapon = Weapon {
   explosion_range: 200.0,
 };
 
+pub static HIT_THE_GROUND: Weapon = Weapon {
+  name: WeaponType::HitTheGround,
+  chances_to_reload: 0.0,
+  reload_time: 0,
+  shoot_time: 0,
+  scatter: 0.0, // (smaller -> more precise)
+  bullets_speed: 0.0,
+  damage: 15,
+  representation_id: 3.0,
+  explosion_range: 80.0,
+};
+
 pub fn get_weapon_details(weapon_type: &WeaponType) -> &'static Weapon {
   match *weapon_type {
     WeaponType::StandardRifle => &STANDARD_RIFLE_DETAILS,
     WeaponType::Grenade => &GRENADE_DETAILS,
+    WeaponType::HitTheGround => &HIT_THE_GROUND,
   }
 }
