@@ -1,7 +1,7 @@
 use crate::id_generator::IdGenerator;
 use crate::position_utils::PositionUtils;
 use crate::squad_types::{get_squad_details, SquadDetails, SquadType};
-use crate::unit::{Unit, STATE_DIE, STATE_RUN};
+use crate::unit::{Unit, STATE_ABILITY, STATE_DIE, STATE_RUN};
 use crate::weapon_types::Weapon;
 
 use crate::World;
@@ -109,6 +109,8 @@ impl Squad {
   }
 
   pub fn add_target(&mut self, destination_x: f32, destination_y: f32, clear_aim: bool) {
+    // TODO: block changing target when is using ability rn
+
     // let is_center_inside_obstacle =
     //   CalcPositions::get_is_point_inside_any_obstacle((destination_x as i16, destination_y as i16));
     // if is_center_inside_obstacle {
@@ -118,9 +120,8 @@ impl Squad {
     //   // TODO: calc segment, from squad_center thought closest_point to outsite (like plus 5?)
     //   // also handle case when distance is 0, then add 5, check if it's okay, if not, minsu 5, and this is have to be okay
     // }
-    self.shared.ability_target = None;
-
     if clear_aim {
+      self.shared.ability_target = None;
       self.shared.aim = Weak::new();
       self.shared.secondary_aim = Weak::new();
     }
@@ -184,12 +185,17 @@ impl Squad {
   pub fn check_units_correctness(&mut self) {
     self.remove_died_members();
     // second, check coherency
+    let is_during_using_ability = self
+      .members
+      .iter()
+      .any(|ref_cell_unit| ref_cell_unit.borrow().state == STATE_ABILITY);
     let coherency_not_kept = self.members.iter().any(|ref_cell_unit| {
       ref_cell_unit
         .borrow()
         .check_if_too_far_from_squad_center(&self.shared)
     });
-    if coherency_not_kept {
+    if is_during_using_ability { // TODO: check if every member did a jump (used ability)
+    } else if coherency_not_kept {
       if self.shared.stored_track_destination.is_none() {
         let track_len = self.shared.track.len();
         // store point, instead of saving to "self" because self.add_target is checking self
@@ -206,6 +212,8 @@ impl Squad {
         self.shared.stored_track_destination = Some(point_to_store);
       }
     } else if let Some(stored_track_destination) = self.shared.stored_track_destination {
+      // it's the next step of previous if, if coherency is kept and some track was stored
+      // (bc keeping coherency is more important) then restore old track
       self.shared.stored_track_destination = None;
       if stored_track_destination.0 >= 0.0 {
         // if smaller, then

@@ -6,13 +6,14 @@ use crate::id_generator::IdGenerator;
 use crate::look_up_table::LookUpTable;
 use crate::position_utils::basic_utils::{BasicUtils, Line, Point};
 use crate::position_utils::obstacles_lazy_statics::ObstaclesLazyStatics;
+use crate::representations_ids::{RAPTOR_REPRESENTATION_ID, SOLIDER_REPRESENTATION_ID};
 use crate::squad::{Squad, SquadUnitSharedDataSet};
 use crate::squad_types::SquadDetails;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::rc::Weak;
 
-const STATE_ABILITY: u8 = 8;
+pub const STATE_ABILITY: u8 = 8;
 const STATE_FLY: u8 = 7;
 pub const STATE_RUN: u8 = 6;
 const STATE_SHOOT: u8 = 5;
@@ -22,6 +23,9 @@ pub const STATE_DIE: u8 = 0;
 
 const REPRESENTATION_LENGTH: usize = 7;
 const MAX_WEAPON_DEVIATION_TO_HIT: f32 = 0.25;
+const RAPTOR_REPRESENTATION_ID_U8: u8 = RAPTOR_REPRESENTATION_ID as u8;
+const SOLIDER_REPRESENTATION_ID_U8: u8 = SOLIDER_REPRESENTATION_ID as u8;
+const JUMPING_SPEED: f32 = 8.5;
 
 pub struct Unit {
   pub id: u32,
@@ -67,11 +71,13 @@ impl Unit {
   }
 
   pub fn change_state_to_fly(&mut self, angle: f32, strength: f32) {
-    self.state = STATE_FLY;
-    self.angle = angle + MATH_PI;
-    self.mod_x = angle.sin() * strength;
-    self.mod_y = -angle.cos() * strength;
-    // check destination to don't overlap with obstacle
+    if self.state != STATE_ABILITY {
+      self.state = STATE_FLY;
+      self.angle = angle + MATH_PI;
+      self.mod_x = angle.sin() * strength;
+      self.mod_y = -angle.cos() * strength;
+      // check destination to don't overlap with obstacle
+    }
   }
 
   fn update_fly(&mut self) {
@@ -237,7 +243,7 @@ impl Unit {
       self.go_to_current_point_on_track(squad_shared_info);
     } else if let Some(ability_target) = squad_shared_info.ability_target {
       if (self.x - ability_target.0).hypot(self.y - ability_target.1) <= WEAPON_RANGE {
-        self.state = STATE_ABILITY;
+        self.change_state_to_ability(squad_shared_info)
       }
     } else if let Some(aim) = squad_shared_info.aim.upgrade() {
       self.change_state_to_shoot(aim, true, squad_shared_info);
@@ -344,7 +350,47 @@ impl Unit {
     }
   }
 
+  fn change_state_to_ability(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
+    self.state = STATE_ABILITY;
+    match self.squad_details.representation_type as u8 {
+      RAPTOR_REPRESENTATION_ID_U8 => {
+        let target = squad_shared_info.ability_target.unwrap();
+        // let distance = (self.x - target.0).hypot(self.y - target.1);
+        self.angle = (target.0 - self.x).hypot(self.y - target.1);
+        self.mod_x = self.angle.sin() * JUMPING_SPEED;
+        self.mod_y = -self.angle.cos() * JUMPING_SPEED;
+        // squad_shared_info
+      }
+      _ => {}
+    }
+  }
+
   fn update_ability(
+    &mut self,
+    squad_shared_info: &mut SquadUnitSharedDataSet,
+    bullet_manager: &mut BulletsManager,
+  ) {
+    match self.squad_details.representation_type as u8 {
+      SOLIDER_REPRESENTATION_ID_U8 => self.throw_grenade(squad_shared_info, bullet_manager),
+      RAPTOR_REPRESENTATION_ID_U8 => self.jump(squad_shared_info, bullet_manager),
+      _ => {}
+    }
+  }
+
+  fn jump(
+    &mut self,
+    squad_shared_info: &mut SquadUnitSharedDataSet,
+    bullet_manager: &mut BulletsManager,
+  ) {
+    let target = squad_shared_info.ability_target.unwrap();
+    if (self.x - target.0).hypot(self.y - target.1) < JUMPING_SPEED {
+    } else {
+      self.x += self.mod_x;
+      self.y += self.mod_y;
+    }
+  }
+
+  fn throw_grenade(
     &mut self,
     squad_shared_info: &mut SquadUnitSharedDataSet,
     bullet_manager: &mut BulletsManager,
@@ -401,9 +447,11 @@ impl Unit {
   }
 
   pub fn take_damage(&mut self, damage: u8) {
-    self.hp -= damage as i16;
-    if self.hp <= 0 {
-      self.change_state_to_die();
+    if self.state != STATE_ABILITY && self.state != STATE_FLY {
+      self.hp -= damage as i16;
+      if self.hp <= 0 {
+        self.change_state_to_die();
+      }
     }
   }
 }
