@@ -243,7 +243,6 @@ impl Faction {
     target_x: f32,
     target_y: f32,
   ) {
-    let target = (target_x, target_y);
     let squads: Vec<&Rc<RefCell<Squad>>> = self
       .squads
       .iter()
@@ -254,25 +253,40 @@ impl Faction {
       })
       .collect();
 
-    let mut squads_out_of_range: Vec<&Rc<RefCell<Squad>>> = squads
+    let positions = PositionUtils::get_squads_positions(squads.len(), target_x, target_y);
+
+    let squads_out_of_range: Vec<Option<&Rc<RefCell<Squad>>>> = squads
       .clone()
       .into_iter()
-      .filter(|ref_cell_squad| {
+      .enumerate()
+      .map(|(index, ref_cell_squad)| {
         let mut squad = ref_cell_squad.borrow_mut();
         let squad_position = squad.shared.center_point;
-        let out_of_range = (squad_position.0 - target_x).hypot(squad_position.1 - target_y)
+        let target = positions[index];
+        let out_of_range = (squad_position.0 - target.0).hypot(squad_position.1 - target.1)
           > WEAPON_RANGE - MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS;
         if !out_of_range {
           squad.stop_running();
+          None
+        } else {
+          Some(ref_cell_squad)
         }
-        out_of_range
       })
       .collect();
 
-    SquadsManager::set_positions_in_range(&mut squads_out_of_range, target, true);
-
-    squads
+    squads_out_of_range
       .iter()
-      .for_each(|rc_hunter| rc_hunter.borrow_mut().start_using_ability(target));
+      .enumerate()
+      .for_each(|(index, option_squad)| {
+        if let Some(squad) = option_squad {
+          let target = positions[index];
+          SquadsManager::set_positions_in_range(&mut vec![squad], target, true);
+        }
+      });
+
+    squads.iter().enumerate().for_each(|(index, rc_hunter)| {
+      let target = positions[index];
+      rc_hunter.borrow_mut().start_using_ability(target)
+    });
   }
 }
