@@ -9,6 +9,8 @@ use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 
 pub struct SquadUnitSharedDataSet {
+  pub units_started_using_ability: bool,
+  pub units_which_finished_using_ability: u8,
   pub ability_target: Option<(f32, f32)>,
   pub center_point: (f32, f32),
   pub track: Vec<(f32, f32)>,
@@ -40,6 +42,8 @@ impl Squad {
       last_center_point: (0.0, 0.0),
       was_moved_in_previous_loop: true,
       shared: SquadUnitSharedDataSet {
+        units_started_using_ability: false,
+        units_which_finished_using_ability: 0,
         ability_target: None,
         center_point: (0.0, 0.0),
         stored_track_destination: None,
@@ -109,8 +113,9 @@ impl Squad {
   }
 
   pub fn add_target(&mut self, destination_x: f32, destination_y: f32, clear_aim: bool) {
-    // TODO: block changing target when is using ability rn
-
+    if self.is_during_using_ability() {
+      return;
+    }
     // let is_center_inside_obstacle =
     //   CalcPositions::get_is_point_inside_any_obstacle((destination_x as i16, destination_y as i16));
     // if is_center_inside_obstacle {
@@ -120,7 +125,7 @@ impl Squad {
     //   // TODO: calc segment, from squad_center thought closest_point to outsite (like plus 5?)
     //   // also handle case when distance is 0, then add 5, check if it's okay, if not, minsu 5, and this is have to be okay
     // }
-    if clear_aim {
+    if clear_aim || self.shared.ability_target.is_some() {
       self.shared.ability_target = None;
       self.shared.aim = Weak::new();
       self.shared.secondary_aim = Weak::new();
@@ -146,6 +151,10 @@ impl Squad {
   }
 
   pub fn stop_running(&mut self) {
+    if self.is_during_using_ability() {
+      return;
+    }
+
     if self.shared.stored_track_destination.is_none() {
       self.members.iter().for_each(|unit| {
         if unit.borrow().state == STATE_RUN {
@@ -158,6 +167,9 @@ impl Squad {
   }
 
   pub fn attack_enemy(&mut self, enemy: &Weak<RefCell<Squad>>) {
+    if self.is_during_using_ability() {
+      return;
+    }
     self.shared.aim = Weak::clone(enemy);
     self.shared.secondary_aim = Weak::new();
     self.shared.ability_target = None;
@@ -182,20 +194,37 @@ impl Squad {
     }
   }
 
+  fn is_during_using_ability(&self) -> bool {
+    self.shared.units_started_using_ability
+      && self.shared.units_which_finished_using_ability < self.members.len() as u8
+  }
+
   pub fn check_units_correctness(&mut self) {
     self.remove_died_members();
-    // second, check coherency
-    let is_during_using_ability = self
-      .members
-      .iter()
-      .any(|ref_cell_unit| ref_cell_unit.borrow().state == STATE_ABILITY);
+
+    if self.is_during_using_ability() {
+      return;
+    }
+    if self.shared.ability_target.is_some()
+      && self.shared.units_which_finished_using_ability == self.members.len() as u8
+    {
+      self.shared.ability_target = None;
+      self.shared.units_which_finished_using_ability = 0;
+      self.shared.units_started_using_ability = false;
+      self.members.iter().for_each(|ref_cell_unit| {
+        ref_cell_unit
+          .borrow_mut()
+          .change_state_to_idle(&self.shared)
+      })
+    }
+
     let coherency_not_kept = self.members.iter().any(|ref_cell_unit| {
       ref_cell_unit
         .borrow()
         .check_if_too_far_from_squad_center(&self.shared)
     });
-    if is_during_using_ability { // TODO: check if every member did a jump (used ability)
-    } else if coherency_not_kept {
+
+    if coherency_not_kept {
       if self.shared.stored_track_destination.is_none() {
         let track_len = self.shared.track.len();
         // store point, instead of saving to "self" because self.add_target is checking self
@@ -244,6 +273,9 @@ impl Squad {
   }
 
   pub fn start_using_ability(&mut self, target: (f32, f32)) {
+    if self.is_during_using_ability() {
+      return;
+    }
     self.shared.ability_target = Some(target);
   }
 }

@@ -118,7 +118,10 @@ impl Unit {
   }
 
   fn can_change_state(&mut self) -> bool {
-    self.state != STATE_DIE && self.state != STATE_FLY && self.state != STATE_GETUP
+    self.state != STATE_DIE
+      && self.state != STATE_FLY
+      && self.state != STATE_GETUP
+      && self.state != STATE_ABILITY
   }
 
   fn check_if_can_go_to_next_point_on_track(
@@ -235,7 +238,7 @@ impl Unit {
     }
   }
 
-  fn change_state_to_idle(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
+  pub fn change_state_to_idle(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
     self.mod_x = 0.0;
     self.mod_y = 0.0;
     self.state = STATE_IDLE;
@@ -354,11 +357,15 @@ impl Unit {
     self.state = STATE_ABILITY;
     match self.squad_details.representation_type as u8 {
       RAPTOR_REPRESENTATION_ID_U8 => {
-        let target = squad_shared_info.ability_target.unwrap();
+        let ability_target = squad_shared_info.ability_target.unwrap();
+        let target_x = ability_target.0 + self.position_offset_x;
+        let target_y = ability_target.1 + self.position_offset_y;
         // let distance = (self.x - target.0).hypot(self.y - target.1);
-        self.angle = (target.0 - self.x).hypot(self.y - target.1);
+        self.angle = (target_x - self.x).atan2(self.y - target_y);
         self.mod_x = self.angle.sin() * JUMPING_SPEED;
         self.mod_y = -self.angle.cos() * JUMPING_SPEED;
+        self.get_upping_progress = 1.0;
+        // self.get_upping_progress = self.x;
         // squad_shared_info
       }
       _ => {}
@@ -382,8 +389,18 @@ impl Unit {
     squad_shared_info: &mut SquadUnitSharedDataSet,
     bullet_manager: &mut BulletsManager,
   ) {
-    let target = squad_shared_info.ability_target.unwrap();
-    if (self.x - target.0).hypot(self.y - target.1) < JUMPING_SPEED {
+    if self.get_upping_progress < std::f32::EPSILON {
+      return;
+    }
+    if !squad_shared_info.units_started_using_ability {
+      squad_shared_info.units_started_using_ability = true
+    }
+    let ability_target = squad_shared_info.ability_target.unwrap();
+    let target_x = ability_target.0 + self.position_offset_x;
+    let target_y = ability_target.1 + self.position_offset_y;
+    if (self.x - target_x).hypot(self.y - target_y) < JUMPING_SPEED {
+      squad_shared_info.units_which_finished_using_ability += 1;
+      self.get_upping_progress = 0.0;
     } else {
       self.x += self.mod_x;
       self.y += self.mod_y;
@@ -430,6 +447,7 @@ impl Unit {
         STATE_FLY => self.mod_x.hypot(self.mod_y),
         STATE_GETUP => self.get_upping_progress,
         STATE_SHOOT => self.time_to_next_shoot as f32,
+        // STATE_ABILITY => (self.get_upping_progress - self.,
         _ => 0.0,
       },
     ]

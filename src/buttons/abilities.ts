@@ -180,23 +180,26 @@ export const hideAbilitiesButtons = () => {
 
 export const updateAbilitiesButtons = (universeRepresentation: UniverseRepresentation) => {
   Object.values(abilities).forEach(ability => {
-    if (!ability.container.visible) return
-
     if (ability.renewTime !== 0) {
+      ability.renewTime--
+
+      if (!ability.container.visible) return
+
       if (!ability.mask.visible) {
         ability.disableAbilitySprite.visible = true
         ability.progressBar.visible = true
         ability.mask.visible = true
       }
-      ability.renewTime--
       const progress = ability.renewTime / ability.renewTimeTotal
       ability.mask.scale.set(1, progress)
       ability.progressBar.y = (1 - progress) * ICON_HEIGHT
-    } else if (ability.mask.visible) {
+    } else if (ability.container.visible && ability.mask.visible) {
       ability.disableAbilitySprite.visible = false
       ability.progressBar.visible = false
       ability.mask.visible = false
     }
+
+    if (!ability.container.visible) return
 
     const newPosition = getAbilityIconPosition(universeRepresentation, ability.unitsIds)
     ability.container.x = newPosition.x
