@@ -1,4 +1,5 @@
 import { MAP_WIDTH, MAP_HEIGHT } from 'Consts'
+import getTexture from '~/getTexture'
 
 const addBackground = () => {
   window.mapWidth = Math.floor(window.innerWidth / 50) * 50 * 3
@@ -40,20 +41,12 @@ const addBackground = () => {
   map.addChild(center)
 
   /*Transform parts of map, to one texture */
-  const baseRenderTexture = new PIXI.BaseRenderTexture({
-    width: window.mapWidth,
-    height: window.mapHeight,
-    scaleMode: PIXI.SCALE_MODES.LINEAR,
-    resolution: 1,
-  })
-  const renderTexture = new PIXI.RenderTexture(baseRenderTexture)
-  window.app.renderer.render(map, renderTexture)
-
+  const renderTexture = getTexture(map, window.mapWidth, window.mapHeight)
   const mapSprite = new PIXI.Sprite(renderTexture)
   mapSprite.width = MAP_WIDTH
   mapSprite.height = MAP_HEIGHT
+
   return mapSprite
-  // map.destroy(true);
 }
 
 export default addBackground

@@ -1,31 +1,45 @@
 import REPRESENTATION_IDS from '~/render/representationsIds'
 import { UniverseRepresentation } from '~/setup'
 import Unit from '~/representation/Unit'
+import getTexture from '~/getTexture'
 
 const ICON_WIDTH = 62 * 0.9
 const ICON_HEIGHT = 47 * 0.9
 const ICON_VERTICAL_OFFSET = -120
 
-// const progressBarTexture = PIXI.Texture.from('assets/ability_progress_bar.png')
-const progressBarTexture = PIXI.Texture.from('assets/ability_progress_bar_saturated.png')
+const progressBarTexture = PIXI.Texture.from('assets/ability_progress_bar.png')
 
 const MAP_ID_TO_ABILITY_DETAILS = {
   [REPRESENTATION_IDS.SOLIDER]: {
-    // +1 just to don't overlap
     iconNormal: PIXI.Texture.from('assets/grenade_icon_blue.png'),
     iconHover: PIXI.Texture.from('assets/grenade_icon_blue_hover.png'),
-    iconDisabled: PIXI.Texture.from('assets/grenade_icon_blue_greyscale.png'),
     renewTimeTotal: 1200,
   },
   [REPRESENTATION_IDS.RAPTOR]: {
     iconNormal: PIXI.Texture.from('assets/wing_icon_blue.png'),
     iconHover: PIXI.Texture.from('assets/wing_icon_blue_hover.png'),
-    iconDisabled: PIXI.Texture.from('assets/wing_icon_blue_greyscale.png'),
     renewTimeTotal: 1200,
   },
 } as const
 
 type RepresentationId = keyof typeof MAP_ID_TO_ABILITY_DETAILS
+
+const getDisableIconTexture = (representationId: RepresentationId) => {
+  const sprite = new PIXI.Sprite(MAP_ID_TO_ABILITY_DETAILS[representationId].iconNormal)
+  sprite.width = ICON_WIDTH
+  sprite.height = ICON_HEIGHT
+
+  const colorMatrix = new PIXI.filters.ColorMatrixFilter()
+  sprite.filters = [colorMatrix]
+  colorMatrix.desaturate()
+
+  const container = new PIXI.Container()
+  container.addChild(sprite)
+
+  return getTexture(container, ICON_WIDTH, ICON_HEIGHT, {
+    texture: false,
+  })
+}
 
 type Ability = {
   unitsIds: number[]
@@ -66,9 +80,7 @@ const addNewIcon = (
   mask.y = ICON_HEIGHT
   container.addChild(mask)
 
-  const disableAbilitySprite = new PIXI.Sprite(
-    MAP_ID_TO_ABILITY_DETAILS[representationId].iconDisabled,
-  )
+  const disableAbilitySprite = new PIXI.Sprite(getDisableIconTexture(representationId))
   disableAbilitySprite.width = ICON_WIDTH
   disableAbilitySprite.height = ICON_HEIGHT
   disableAbilitySprite.mask = mask
@@ -194,6 +206,7 @@ export const updateAbilitiesButtons = (universeRepresentation: UniverseRepresent
       ability.mask.scale.set(1, progress)
       ability.progressBar.y = (1 - progress) * ICON_HEIGHT
     } else if (ability.container.visible && ability.mask.visible) {
+      ability.container.interactive = true
       ability.disableAbilitySprite.visible = false
       ability.progressBar.visible = false
       ability.mask.visible = false
@@ -226,7 +239,7 @@ export const selectAllSimilarAbilities = (abilityId: number, squadsIds: number[]
   squadsIds.forEach(squadId => {
     const ability = abilities[squadId]
     if (ability.container.visible && ability.renewTime === 0 && ability.type === abilityId) {
-      ability.container.interactive = false
+      ability.container.interactive = false // to disable changing texture by hover (and unhover)
       ability.sprite.texture = MAP_ID_TO_ABILITY_DETAILS[ability.type].iconHover
     }
   })
@@ -236,7 +249,7 @@ export const deselectAllSimilarAbilities = (type: number, squadsIds: number[]) =
   squadsIds.forEach(squadId => {
     const ability = abilities[squadId]
     if (ability.container.visible && ability.renewTime === 0 && ability.type === type) {
-      ability.container.interactive = true
+      ability.container.interactive = true // can hover now
       ability.sprite.texture = MAP_ID_TO_ABILITY_DETAILS[ability.type].iconNormal
     }
   })
@@ -245,4 +258,5 @@ export const deselectAllSimilarAbilities = (type: number, squadsIds: number[]) =
 export const disableAbility = (unitId: number) => {
   const ability = Object.values(abilities).find(ability => ability.unitsIds.includes(unitId))
   ability.renewTime = ability.renewTimeTotal
+  ability.container.interactive = false
 }
