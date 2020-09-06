@@ -1,6 +1,7 @@
 import EffectFactory from './EffectFactory'
 import { FrameUpdaters } from './getSprites'
 import { ObjectType } from '~/render/representationsIds'
+import { UpdateAbilityCallback } from './UnitFactory'
 
 type PixiUnitStuff = {
   sortingLayer: PIXI.display.Group
@@ -24,14 +25,22 @@ enum State {
 class Unit {
   public graphics: PIXI.Container
   public movieClip: PIXI.AnimatedSprite
-  private frameUpdaters: FrameUpdaters
+  public frameUpdaters: FrameUpdaters
+  public type: ObjectType
   private selectionSprite: PIXI.Sprite
   private indicator: PIXI.Graphics
-  public type: ObjectType
+  private updateAbility: UpdateAbilityCallback
 
-  constructor(x: number, y: number, angle: number, pixiStuff: PixiUnitStuff, type: ObjectType) {
+  constructor(
+    x: number,
+    y: number,
+    angle: number,
+    pixiStuff: PixiUnitStuff,
+    type: ObjectType,
+    updateAbility: UpdateAbilityCallback,
+  ) {
     this.type = type
-
+    this.updateAbility = updateAbility.bind(this)
     this.graphics = pixiStuff.container
     this.movieClip = pixiStuff.movieClip
     this.frameUpdaters = pixiStuff.frameUpdaters
@@ -72,6 +81,9 @@ class Unit {
 
     switch (state) {
       case State.ABILITY:
+        this.updateAbility(x, y, angle, firstStateParam)
+        break
+
       case State.IDLE: {
         this.frameUpdaters.goToIdle(angle)
         break

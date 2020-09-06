@@ -144,10 +144,10 @@ class SelectionController {
     this.selectionRectangle.clear()
     if (this.selectedUnits.length === 0) {
       this.selectUnits(
-        this.startPoint.x - 20,
-        this.startPoint.x + 20,
-        this.startPoint.y - 20 + HALF_UNIT_HEIGHT,
-        this.startPoint.y + 20 + HALF_UNIT_HEIGHT,
+        this.startPoint.x - 30,
+        this.startPoint.x + 30,
+        this.startPoint.y - 30 + HALF_UNIT_HEIGHT,
+        this.startPoint.y + 30 + HALF_UNIT_HEIGHT,
       )
     }
     this.startPoint = null

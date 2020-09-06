@@ -25,7 +25,7 @@ const REPRESENTATION_LENGTH: usize = 7;
 const MAX_WEAPON_DEVIATION_TO_HIT: f32 = 0.25;
 const RAPTOR_REPRESENTATION_ID_U8: u8 = RAPTOR_REPRESENTATION_ID as u8;
 const SOLIDER_REPRESENTATION_ID_U8: u8 = SOLIDER_REPRESENTATION_ID as u8;
-const JUMPING_SPEED: f32 = 8.5;
+const JUMPING_SPEED: f32 = 5.0;
 
 pub struct Unit {
   pub id: u32,
@@ -45,6 +45,7 @@ pub struct Unit {
   time_to_next_shoot: u16,
   aim: Weak<RefCell<Unit>>,
   hp: i16,
+  ability_start_point: f32,
 }
 
 impl Unit {
@@ -67,6 +68,7 @@ impl Unit {
       time_to_next_shoot: 0,
       aim: Weak::new(),
       hp: squad_details.hp,
+      ability_start_point: 0.0,
     }
   }
 
@@ -364,9 +366,8 @@ impl Unit {
         self.angle = (target_x - self.x).atan2(self.y - target_y);
         self.mod_x = self.angle.sin() * JUMPING_SPEED;
         self.mod_y = -self.angle.cos() * JUMPING_SPEED;
-        self.get_upping_progress = 1.0;
-        // self.get_upping_progress = self.x;
-        // squad_shared_info
+        self.ability_start_point = self.x;
+        self.get_upping_progress = 0.0;
       }
       _ => {}
     }
@@ -389,7 +390,7 @@ impl Unit {
     squad_shared_info: &mut SquadUnitSharedDataSet,
     bullet_manager: &mut BulletsManager,
   ) {
-    if self.get_upping_progress < std::f32::EPSILON {
+    if self.get_upping_progress < 0.0 {
       return;
     }
     if !squad_shared_info.units_started_using_ability {
@@ -400,10 +401,11 @@ impl Unit {
     let target_y = ability_target.1 + self.position_offset_y;
     if (self.x - target_x).hypot(self.y - target_y) < JUMPING_SPEED {
       squad_shared_info.units_which_finished_using_ability += 1;
-      self.get_upping_progress = 0.0;
+      self.get_upping_progress = -1.0;
     } else {
       self.x += self.mod_x;
       self.y += self.mod_y;
+      self.get_upping_progress = (self.x - self.ability_start_point) / (target_x - self.ability_start_point);
     }
   }
 
@@ -447,7 +449,7 @@ impl Unit {
         STATE_FLY => self.mod_x.hypot(self.mod_y),
         STATE_GETUP => self.get_upping_progress,
         STATE_SHOOT => self.time_to_next_shoot as f32,
-        // STATE_ABILITY => (self.get_upping_progress - self.,
+        STATE_ABILITY => self.get_upping_progress,
         _ => 0.0,
       },
     ]
