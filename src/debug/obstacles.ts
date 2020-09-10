@@ -3,7 +3,7 @@ let graph = null
 const debug = (result: number[][][]) => {
   if (!graph) {
     graph = new PIXI.Graphics()
-    window.app.stage.addChild(graph)
+    window.world.addChild(graph)
   }
 
   graph.clear()

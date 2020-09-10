@@ -4,7 +4,6 @@ import { ObjectType } from '~/render/representationsIds'
 import { UpdateAbilityCallback } from './UnitFactory'
 
 type PixiUnitStuff = {
-  sortingLayer: PIXI.display.Group
   container: PIXI.Container
   movieClip: PIXI.AnimatedSprite
   frameUpdaters: FrameUpdaters
@@ -30,8 +29,10 @@ class Unit {
   private selectionSprite: PIXI.Sprite
   private indicator: PIXI.Graphics
   private updateAbility: UpdateAbilityCallback
+  private id: number
 
   constructor(
+    id: number,
     x: number,
     y: number,
     angle: number,
@@ -39,6 +40,7 @@ class Unit {
     type: ObjectType,
     updateAbility: UpdateAbilityCallback,
   ) {
+    this.id = id
     this.type = type
     this.updateAbility = updateAbility.bind(this)
     this.graphics = pixiStuff.container
@@ -51,13 +53,11 @@ class Unit {
     this.movieClip.x = -this.movieClip.width / 2
     this.movieClip.y = -this.movieClip.height * 0.7
 
-    this.graphics.parentGroup = pixiStuff.sortingLayer
-
     this.graphics.x = x
     this.graphics.y = y
     this.frameUpdaters.goToFly(angle, Number.MAX_SAFE_INTEGER)
 
-    window.app.stage.addChild(this.graphics)
+    window.world.addChild(this.graphics)
     EffectFactory.createBoomEffect(x, y)
 
     this.indicator = new PIXI.Graphics()
@@ -105,16 +105,11 @@ class Unit {
         break
       }
       case State.DIE: {
-        this.frameUpdaters.goToDie(angle)
+        this.deselect()
+        this.frameUpdaters.goToDie(angle, this.id)
         break
       }
     }
-  }
-
-  remove() {
-    window.app.stage.removeChild(this.graphics)
-    this.graphics.destroy()
-    this.graphics = undefined
   }
 
   select() {

@@ -1,7 +1,7 @@
 import { MAP_WIDTH, MAP_HEIGHT } from 'Consts'
 import getTexture from '~/getTexture'
 
-const addBackground = () => {
+const createBackgroundTexture = () => {
   window.mapWidth = Math.floor(window.innerWidth / 50) * 50 * 3
   window.mapHeight = Math.floor(window.innerHeight / 50) * 50 * 3
   const map = new PIXI.Container()
@@ -49,4 +49,4 @@ const addBackground = () => {
   return mapSprite
 }
 
-export default addBackground
+export default createBackgroundTexture

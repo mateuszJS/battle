@@ -19,20 +19,14 @@ class MouseController {
   private mouseY: number
   private selectionController: SelectionController
 
-  constructor(
-    universe: Universe,
-    universeRepresentation: UniverseRepresentation,
-  ) {
+  constructor(universe: Universe, universeRepresentation: UniverseRepresentation) {
     this.modX = 0
     this.modY = 0
     this.sceneX = 0
     this.sceneY = 0
     this.mouseX = 0
     this.mouseY = 0
-    this.selectionController = new SelectionController(
-      universe,
-      universeRepresentation,
-    )
+    this.selectionController = new SelectionController(universe, universeRepresentation)
     window.app.stage.interactive = true
     window.app.stage.on('mousedown', this.onMouseDown)
     window.app.stage.on('rightdown', this.onMouseRightBtnDown)
@@ -55,10 +49,7 @@ class MouseController {
     this.mouseX = event.clientX
     this.mouseY = event.clientY
 
-    const { modX, modY } = getCameraPositionModificators(
-      this.mouseX,
-      this.mouseY,
-    )
+    const { modX, modY } = getCameraPositionModificators(this.mouseX, this.mouseY)
     this.modX = modX
     this.modY = modY
     this.selectionController.updateSelection(this.absoluteMousePosition)
@@ -81,16 +72,8 @@ class MouseController {
   }
 
   public updateScenePosition() {
-    this.sceneX = Utils.clamp(
-      MIN_CAMERA_X,
-      this.sceneX + this.modX,
-      MAX_CAMERA_X,
-    )
-    this.sceneY = Utils.clamp(
-      MIN_CAMERA_Y,
-      this.sceneY + this.modY,
-      MAX_CAMERA_Y,
-    )
+    this.sceneX = Utils.clamp(MIN_CAMERA_X, this.sceneX + this.modX, MAX_CAMERA_X)
+    this.sceneY = Utils.clamp(MIN_CAMERA_Y, this.sceneY + this.modY, MAX_CAMERA_Y)
 
     window.app.stage.x = this.sceneX
     window.app.stage.y = this.sceneY

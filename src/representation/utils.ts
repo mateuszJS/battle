@@ -39,6 +39,18 @@ export const getCallbackStopOnLastFrame = (lastFrame: number) =>
     }
   }
 
+export const getCallbackStopOnLastFrameAndRunCustomCallback = (
+  lastFrame: number,
+  customCallback: VoidFunction,
+) =>
+  function() {
+    if (this.currentFrame >= lastFrame) {
+      this.onFrameChange = null
+      this.gotoAndStop(lastFrame)
+      customCallback()
+    }
+  }
+
 export const getCallbackGoToFirstOnLastFrame = (firstFrame: number, lastFrame: number) =>
   function() {
     if (this.currentFrame >= lastFrame) {

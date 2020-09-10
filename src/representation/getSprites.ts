@@ -4,6 +4,7 @@ import {
   getCallbackStopOnLastFrame,
   getCallbackGoToFirstOnLastFrame,
   getCallbackGoToFirstOnLastFrameAndStop,
+  getCallbackStopOnLastFrameAndRunCustomCallback,
 } from './utils'
 
 const STATE_IDLE_BASE = 1000
@@ -78,6 +79,8 @@ const getSprites = () => {
   )
 
   return () => {
+    const container = new PIXI.Container()
+
     const movieClip = new PIXI.AnimatedSprite(frames)
     movieClip.animationSpeed = 0.01
     movieClip.scale.set(0.7)
@@ -85,6 +88,7 @@ const getSprites = () => {
     let previousPhase = 0
 
     return {
+      container,
       movieClip,
       goToIdle(angle: number) {
         const currentPhase = STATE_IDLE_BASE + Math.round(angle * 100)
@@ -165,13 +169,19 @@ const getSprites = () => {
         movieClip.gotoAndStop(indexOfCurrentFrame)
         previousPhase = STATE_GETUP_BASE
       },
-      goToDie(angle: number) {
+      goToDie(angle: number, id: number) {
         if (previousPhase !== STATE_DIE_BASE) {
           previousPhase = STATE_DIE_BASE
           const indexOfStartingFrame = getIndexOfStartingFrame(angle, framesPeriods.FLY)
-          movieClip.onFrameChange = getCallbackStopOnLastFrame(
+
+          movieClip.onFrameChange = getCallbackStopOnLastFrameAndRunCustomCallback(
             indexOfStartingFrame + framesPeriods.FLY.length - 1,
+            () => {
+              window.world.removeChild(container)
+              window.universeRepresentation[id] = undefined
+            },
           )
+
           movieClip.gotoAndPlay(indexOfStartingFrame)
         }
       },
@@ -179,6 +189,9 @@ const getSprites = () => {
   }
 }
 
-export type FrameUpdaters = Omit<ReturnType<ReturnType<typeof getSprites>>, 'movieClip'>
+export type FrameUpdaters = Omit<
+  ReturnType<ReturnType<typeof getSprites>>,
+  'movieClip' | 'container'
+>
 
 export default getSprites

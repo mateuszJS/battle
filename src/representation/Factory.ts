@@ -50,7 +50,6 @@ class Factory {
     x: number,
     y: number,
     angle: number,
-    sortingLayer: PIXI.display.Group,
   ) {
     const safeAngle = (angle + 2 * Math.PI * 0.75) % (Math.PI * 2)
     // index = 0, 1, 2, 3
@@ -74,13 +73,9 @@ class Factory {
     gateTop.anchor.set(0.5, props.gateTop.anchorY)
     gateBottom.anchor.set(0.5, props.gateBottom.anchorY)
 
-    gateBottom.parentGroup = sortingLayer
-    portalFX.parentGroup = sortingLayer
-    gateTop.parentGroup = sortingLayer
-
-    window.app.stage.addChild(gateBottom)
-    window.app.stage.addChild(portalFX)
-    window.app.stage.addChild(gateTop)
+    window.world.addChild(gateBottom)
+    window.world.addChild(portalFX)
+    window.world.addChild(gateTop)
 
     const sprites = [gateBottom, portalFX, gateTop]
     sprites.forEach(child => {

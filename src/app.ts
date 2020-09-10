@@ -1,5 +1,4 @@
 import * as PIXI from 'pixi.js'
-window.PIXI = PIXI
 import 'pixi-layers'
 
 import listOfAssets from './listOfAssets'

@@ -104,7 +104,7 @@ class Bullet {
     sprite.y = y
     sprite.angle = (angle * 180) / Math.PI
     sprite.addChild(MAP_TYPE_TO_GRAPHIC_CONSTRUCTOR[type]())
-    window.app.stage.addChild(sprite)
+    window.world.addChild(sprite)
 
     this.sprite = sprite
     this.lifetime = lifetime
@@ -159,7 +159,7 @@ class BulletFactory {
     this.bullets = this.bullets.filter(bullet => {
       if (bullet.lifetime <= 0) {
         // create boom
-        window.app.stage.removeChild(bullet.sprite)
+        window.world.removeChild(bullet.sprite)
         return false
       } else {
         bullet.lifetime -= 1

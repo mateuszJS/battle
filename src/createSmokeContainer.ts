@@ -11,7 +11,8 @@ const createSmokeContainer = () => {
     }),
     elements: [],
   }
-  window.app.stage.addChild(window.smokeContainer.graphics)
+  // NOTE: I have update it to window.world, but nto sure if we are using it
+  window.world.addChild(window.smokeContainer.graphics)
 }
 
 export default createSmokeContainer

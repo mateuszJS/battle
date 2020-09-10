@@ -2,7 +2,7 @@ import UnitFactory from '~/representation/UnitFactory'
 import Unit from '~/representation/Unit'
 import EffectsFactory from '~/representation/EffectFactory'
 import getSortableLayer from '~/modules/getSortableLayer'
-import addBackground from './addBackground'
+import createBackgroundTexture from './createBackgroundTexture'
 import render from './render'
 import { USER_FACTION_ID } from 'Consts'
 import { Universe } from '../crate/pkg/index'
@@ -18,13 +18,14 @@ export type UniverseRepresentation = {
 }
 
 const setup = () => {
+  const mapSprite = createBackgroundTexture()
+  getSortableLayer(mapSprite)
   EffectsFactory.initialize()
 
-  const mapSprite = addBackground()
-  const sortingLayer = getSortableLayer(mapSprite)
-  UnitFactory.initializationTypes(sortingLayer)
+  UnitFactory.initializationTypes()
 
   const universeRepresentation: UniverseRepresentation = {}
+  window.universeRepresentation = universeRepresentation // used to remove unit
 
   const serializedInfoAboutWorld = getSerializedInfoAboutWorld()
   const universe = Universe.new(
@@ -40,7 +41,6 @@ const setup = () => {
       factoriesInitData[i + 2], // x
       factoriesInitData[i + 3], // y
       factoriesInitData[i + 4], // angle
-      sortingLayer,
     )
     universeRepresentation[factoryId] = factoryRepresentation
 
@@ -52,9 +52,6 @@ const setup = () => {
   }
 
   const mouseController = new initializeMouseController(universe, universeRepresentation)
-
-  window.sceneX = 0
-  window.sceneY = 0
 
   universe.create_enemy_squad(REPRESENTATION_IDS.SOLIDER)
 

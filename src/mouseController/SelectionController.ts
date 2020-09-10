@@ -26,7 +26,7 @@ class SelectionController {
     this.selectedSquads = new Float32Array()
     this.startPoint = null
     this.selectionRectangle = new PIXI.Graphics()
-    window.app.stage.addChild(this.selectionRectangle)
+    window.ui.addChild(this.selectionRectangle)
     this.selectedAbility = null
   }
 

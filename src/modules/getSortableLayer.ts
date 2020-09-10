@@ -3,13 +3,14 @@ const getSortableLayer = (background: PIXI.Sprite) => {
     sprite.zOrder = sprite.y
   })
 
+  window.world = new PIXI.display.Layer(sortableLayer)
+  window.ui = new PIXI.Container()
+
   window.app.stage = new PIXI.display.Stage()
-  window.app.stage.sortableChildren = true
 
-  window.app.stage.addChild(background)
-
-  window.app.stage.addChild(new PIXI.display.Layer(sortableLayer))
-  return sortableLayer
+  window.app.stage.addChild(background) // prob should be included in window.world
+  window.app.stage.addChild(window.world)
+  window.app.stage.addChild(window.ui)
 }
 
 export default getSortableLayer

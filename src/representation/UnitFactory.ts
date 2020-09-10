@@ -34,14 +34,13 @@ const MAP_UPDATE_ABILITY = {
 
 class UnitsFactory {
   private static getSoliderSprite: ReturnType<typeof createSoliderSprite>
-  private static layerGroup: PIXI.display.Group
 
-  static initializationTypes(layerGroup: PIXI.display.Group) {
+  static initializationTypes() {
     this.getSoliderSprite = createSoliderSprite()
-    this.layerGroup = layerGroup
   }
 
   static createUnit(
+    id: number,
     x: number,
     y: number,
     angle: number,
@@ -49,10 +48,9 @@ class UnitsFactory {
     state: number,
     type: ObjectType,
   ) {
-    const { movieClip, ...frameUpdaters } = this.getSoliderSprite()
+    const { movieClip, container, ...frameUpdaters } = this.getSoliderSprite()
     const graphicParams = {
-      sortingLayer: this.layerGroup,
-      container: new PIXI.Container(),
+      container,
       movieClip: movieClip,
       frameUpdaters,
       selectionSprite: getMySelection(isEnemy),
@@ -62,7 +60,7 @@ class UnitsFactory {
       graphicParams.movieClip.tint = 0xffff00
     }
 
-    return new Unit(x, y, angle, graphicParams, type, MAP_UPDATE_ABILITY[type])
+    return new Unit(id, x, y, angle, graphicParams, type, MAP_UPDATE_ABILITY[type])
   }
 }
 

@@ -85,11 +85,11 @@ export const createFactoryButtons = (
 ) => {
   icons.buyListContainer.x = x
   icons.buyListContainer.y = y
-  window.app.stage.addChild(icons.buyListContainer)
+  window.ui.addChild(icons.buyListContainer)
 
   icons.productionListContainer.x = x
   icons.productionListContainer.y = y + ICON_SIZE
-  window.app.stage.addChild(icons.productionListContainer)
+  window.ui.addChild(icons.productionListContainer)
 
   addItemToBuyList(REPRESENTATION_IDS.SOLIDER, createItemCallback)
   addItemToBuyList(REPRESENTATION_IDS.RAPTOR, createItemCallback)

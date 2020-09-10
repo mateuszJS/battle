@@ -162,7 +162,7 @@ export const addAbilitiesButton = (
         () => selectAbility(unit.type),
       )
 
-      window.app.stage.addChild(container)
+      window.ui.addChild(container)
 
       abilities[squadId] = {
         unitsIds: sameSquadUnits,
