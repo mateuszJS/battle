@@ -3,6 +3,9 @@ import Unit from './Unit'
 import createSoliderSprite from './getSprites'
 import getMySelection from './getMySelection'
 
+const MAX_JUMP_HEIGHT = 1200
+// the same constant exists in rust
+
 export type UpdateAbilityCallback = (
   x: number,
   y: number,
@@ -25,9 +28,8 @@ const MAP_UPDATE_ABILITY = {
     angle: number,
     firstStateParam: number,
   ) {
-    const progress = 0.25 - Math.pow(0.5 - Math.max(firstStateParam, 0), 2)
-    this.graphics.y = y - progress * 1200
-    this.graphics.scale.set(1 + progress * 1.5)
+    this.graphics.y = y - firstStateParam * MAX_JUMP_HEIGHT
+    this.graphics.scale.set(1 + firstStateParam * 1.5)
     this.frameUpdaters.goToIdle(angle)
   },
 }

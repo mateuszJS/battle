@@ -1,5 +1,5 @@
 const getTexture = (
-  display: PIXI.Sprite | PIXI.Container,
+  display: PIXI.Sprite | PIXI.Container | PIXI.Mesh,
   width: number,
   height: number,
   destroyProps: Parameters<PIXI.Container['destroy']>[0] = {},

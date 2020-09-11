@@ -46,7 +46,7 @@ pub static HIT_THE_GROUND: Weapon = Weapon {
   reload_time: 0,
   shoot_time: 0,
   scatter: 0.0, // (smaller -> more precise)
-  bullets_speed: 0.0,
+  bullets_speed: 1.0,
   damage: 15,
   representation_id: 3.0,
   explosion_range: 80.0,

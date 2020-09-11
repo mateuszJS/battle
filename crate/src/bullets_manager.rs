@@ -33,8 +33,15 @@ impl BulletsManager {
     }
   }
 
-  pub fn throw_grenade(&mut self, unit_id: f32, source_x: f32, source_y: f32, target: (f32, f32)) {
-    let weapon_details = get_weapon_details(&WeaponType::Grenade);
+  pub fn add_explosion(
+    &mut self,
+    unit_id: f32,
+    source_x: f32,
+    source_y: f32,
+    target: (f32, f32),
+    weapon_type: &'static WeaponType,
+  ) {
+    let weapon_details = get_weapon_details(weapon_type);
     let distance = (source_x - target.0).hypot(source_y - target.1);
     let lifetime = distance / weapon_details.bullets_speed;
     let angle = (target.0 - source_x).atan2(source_y - target.1);
@@ -48,14 +55,33 @@ impl BulletsManager {
     });
 
     self.bullets_data.push(BulletData {
-      weapon_type: &WeaponType::Grenade,
+      weapon_type: weapon_type,
       aim: Weak::new(),
       lifetime,
       target: Some(target),
     });
   }
 
-  pub fn add(
+  pub fn add_fake_bullet(
+    &mut self,
+    unit_id: f32,
+    distance: f32,
+    angle: f32,
+    weapon_type: &'static WeaponType,
+  ) {
+    let weapon_details = get_weapon_details(weapon_type);
+    let lifetime = distance / weapon_details.bullets_speed;
+
+    self.bullets_representation.push(BulletRepresentation {
+      unit_id,
+      angle,
+      speed: weapon_details.bullets_speed,
+      representation_id: weapon_details.representation_id,
+      lifetime,
+    });
+  }
+
+  pub fn add_bullet(
     &mut self,
     unit_id: f32,
     x: f32,

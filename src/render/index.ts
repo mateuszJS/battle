@@ -7,7 +7,7 @@
 // import Icons from '~/modules/icons'
 import REPRESENTATION_IDS, { ObjectType } from './representationsIds'
 import * as representationUpdaters from './representationUpdaters'
-import { UniverseRepresentation } from '../setup'
+import { UniverseRepresentation } from '~/initGame'
 import Factory from '~/representation/Factory'
 import Unit from '~/representation/Unit'
 import UnitsFactory from '~/representation/UnitFactory'

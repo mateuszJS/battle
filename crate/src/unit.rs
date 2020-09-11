@@ -9,6 +9,7 @@ use crate::position_utils::obstacles_lazy_statics::ObstaclesLazyStatics;
 use crate::representations_ids::{RAPTOR_REPRESENTATION_ID, SOLIDER_REPRESENTATION_ID};
 use crate::squad::{Squad, SquadUnitSharedDataSet};
 use crate::squad_types::SquadDetails;
+use crate::weapon_types::WeaponType;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::rc::Weak;
@@ -26,6 +27,7 @@ const MAX_WEAPON_DEVIATION_TO_HIT: f32 = 0.25;
 const RAPTOR_REPRESENTATION_ID_U8: u8 = RAPTOR_REPRESENTATION_ID as u8;
 const SOLIDER_REPRESENTATION_ID_U8: u8 = SOLIDER_REPRESENTATION_ID as u8;
 const JUMPING_SPEED: f32 = 5.0;
+const MAX_JUMP_HEIGHT: f32 = 1200.0; // the same constant exists in JS
 
 pub struct Unit {
   pub id: u32,
@@ -333,7 +335,7 @@ impl Unit {
             1.0
           };
 
-      bullet_manager.add(
+      bullet_manager.add_bullet(
         self.id as f32,
         self.x,
         self.y,
@@ -368,6 +370,7 @@ impl Unit {
         self.mod_y = -self.angle.cos() * JUMPING_SPEED;
         self.ability_start_point = self.x;
         self.get_upping_progress = 0.0;
+        self.time_to_next_shoot = 0;
       }
       _ => {}
     }
@@ -399,13 +402,46 @@ impl Unit {
     let ability_target = squad_shared_info.ability_target.unwrap();
     let target_x = ability_target.0 + self.position_offset_x;
     let target_y = ability_target.1 + self.position_offset_y;
-    if (self.x - target_x).hypot(self.y - target_y) < JUMPING_SPEED {
+
+    if self.get_upping_progress > 0.99 {
       squad_shared_info.units_which_finished_using_ability += 1;
       self.get_upping_progress = -1.0;
+      bullet_manager.add_explosion(
+        self.id as f32,
+        self.x,
+        self.y,
+        (self.x, self.y),
+        &WeaponType::HitTheGround,
+      )
     } else {
-      self.x += self.mod_x;
-      self.y += self.mod_y;
-      self.get_upping_progress = (self.x - self.ability_start_point) / (target_x - self.ability_start_point);
+      let acceleration = if self.get_upping_progress < 0.7 {
+        1.3 - self.get_upping_progress
+      } else {
+        self.get_upping_progress * 4.0
+      };
+
+      if self.get_upping_progress > 0.3 && self.get_upping_progress < 0.7 {
+        if self.time_to_next_shoot == 0 {
+          let random = LookUpTable::get_random() - 0.5;
+          let y_modifier = self.calc_jump_progress() * MAX_JUMP_HEIGHT;
+          let unit_y = self.y - y_modifier;
+          let aim_x = target_x + random * 140.0;
+          let aim_y = target_y + random * 140.0;
+          bullet_manager.add_fake_bullet(
+            self.id as f32,
+            (self.x - aim_x).hypot(unit_y - aim_y) + random * 0.1,
+            (aim_x - self.x).atan2(unit_y - aim_y),
+            &WeaponType::StandardRifle,
+          );
+          self.time_to_next_shoot = 10
+        } else {
+          self.time_to_next_shoot -= 1;
+        }
+      }
+      self.x += self.mod_x * acceleration;
+      self.y += self.mod_y * acceleration;
+      self.get_upping_progress =
+        (self.x - self.ability_start_point) / (target_x - self.ability_start_point);
     }
   }
 
@@ -415,10 +451,20 @@ impl Unit {
     bullet_manager: &mut BulletsManager,
   ) {
     if let Some(ability_target) = squad_shared_info.ability_target {
-      bullet_manager.throw_grenade(self.id as f32, self.x, self.y, ability_target);
+      bullet_manager.add_explosion(
+        self.id as f32,
+        self.x,
+        self.y,
+        ability_target,
+        &WeaponType::Grenade,
+      );
       squad_shared_info.ability_target = None; // for grenade it works, but for jump when every unit needs to make a jump NOT!
     }
     self.change_state_to_idle(squad_shared_info);
+  }
+
+  fn calc_jump_progress(&self) -> f32 {
+    0.25 - (0.5 - self.get_upping_progress.max(0.0)).powi(2)
   }
 
   pub fn update(
@@ -449,7 +495,7 @@ impl Unit {
         STATE_FLY => self.mod_x.hypot(self.mod_y),
         STATE_GETUP => self.get_upping_progress,
         STATE_SHOOT => self.time_to_next_shoot as f32,
-        STATE_ABILITY => self.get_upping_progress,
+        STATE_ABILITY => self.calc_jump_progress(),
         _ => 0.0,
       },
     ]

@@ -1,5 +1,5 @@
 import REPRESENTATION_IDS from '~/render/representationsIds'
-import { UniverseRepresentation } from '~/setup'
+import { UniverseRepresentation } from '~/initGame'
 import Unit from '~/representation/Unit'
 import getTexture from '~/getTexture'
 

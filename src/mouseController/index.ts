@@ -2,7 +2,7 @@ import Utils from 'Utils'
 import { MIN_CAMERA_X, MAX_CAMERA_X, MIN_CAMERA_Y, MAX_CAMERA_Y } from 'Consts'
 
 import { Universe } from '../../crate/pkg/index'
-import { UniverseRepresentation } from '../setup'
+import { UniverseRepresentation } from '~/initGame'
 import SelectionController from './SelectionController'
 import getCameraPositionModificators from './getCameraPositionModificators'
 import { anglesDebug } from '~/debug'
