@@ -9,7 +9,6 @@ window.startGame = () => {
   const app = new PIXI.Application({
     width: window.innerWidth,
     height: window.innerHeight,
-    backgroundColor: 0x000000,
   })
   document.body.appendChild(app.view)
   window.app = app

@@ -35,4 +35,5 @@ export default [
   'assets/wing_icon_blue_hover.png',
   'assets/start_btn.png',
   'assets/pure_background_with_traced_images.jpg',
+  'assets/pure_background_with_traced_images copy.jpg',
 ]
