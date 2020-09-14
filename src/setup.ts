@@ -1,6 +1,6 @@
 import { DropShadowFilter } from '@pixi/filter-drop-shadow'
 import getTexture from '~/getTexture'
-import createBackgroundTexture from './createBackgroundTexture'
+
 const setup = () => {
   const backgroundTexture = PIXI.Texture.from('assets/pure_background_with_traced_images copy.jpg')
   const startBtnBaseTexture = PIXI.Texture.from('assets/start_btn.png')
@@ -12,25 +12,6 @@ const setup = () => {
   const btnHeight = 189
   const btnX = 0.12281855 * window.innerWidth
   const btnY = 0.230086694 * window.innerHeight
-  /* eslint-disable prettier/prettier */
-  const geometry = new PIXI.Geometry()
-    .addAttribute('aVertexPosition',
-        [
-          btnX + 0, 0 + btnY,
-          btnX + btnWidth, 0 + btnY,
-          btnX + btnWidth, btnHeight + btnY,
-          btnX + 0, btnHeight + btnY,
-        ], 2)
-    .addAttribute('aUvs',
-        [
-          0, 0,
-          1, 0,
-          1, 1,
-          0, 1,
-        ], 2)
-    .addIndex([0, 1, 2, 0, 2, 3])
-    // .interleave();
-  /* eslint-enable prettier/prettier */
 
   const vertexShader = `
 
@@ -74,26 +55,75 @@ const setup = () => {
   vec3 colorBurn (vec3 target, vec3 blend){
     return 1.0 - (1.0 - blend) / target;
   }
+
+  float colorBurnEnhancedSingleColor (float Sca, float Dca, float Sa, float Da) {
+    if (Sca == 0.0 && Dca == Da) {
+      return Sa * Da + Dca * (1.0 - Sa);
+    } else if (Sca == 0.0) {
+      return Dca * (1.0 - Sa);
+    }
+
+    return Sa * Da * (1.0 - min(1.0, (1.0 - Dca/Da) * Sa/Sca)) + Sca * (1.0 - Da) + Dca * (1.0 - Sa);
+  }
+
   vec3 colorBurnEnhanced (vec4 target, vec4 blend){
     // https://dev.w3.org/SVG/modules/compositing/master/
     float Sa = target.a;
     float Da = blend.a;
     vec3 Dca = blend.rgb;
     vec3 Sca = target.rgb;
-    return Sa * Da * (1.0 - min(vec3(1.0), (1.0 - Dca/Da) * Sa/Sca)) + Sca * (1.0 - Da) + Dca * (1.0 - Sa);
+
+    vec3 dest;
+    dest.r = colorBurnEnhancedSingleColor(Sca.r, Dca.r, Sa, Da);
+    dest.g = colorBurnEnhancedSingleColor(Sca.g, Dca.g, Sa, Da);
+    dest.b = colorBurnEnhancedSingleColor(Sca.b, Dca.b, Sa, Da);
+    return dest;
+
+    // if (Sca == 0.0 && Dca == Da) {
+    //   return Sa * Da + Dca * (1.0 - Sa);
+    // } else if (Sca == 0.0) {
+    //   return Dca * (1.0 - Sa);
+    // }
+
+    // return Sa * Da * (1.0 - min(1.0, (1.0 - Dca/Da) * Sa/Sca)) + Sca * (1.0 - Da) + Dca * (1.0 - Sa);
   }
 
-  vec3 overlay (vec3 target, vec3 blend){
-    // if(target > 0.5) {
-    //   return screen(blend, 2 * target - 1.0);
-    // }
-    // return multiply(blend, 2.0 * target);
-
+  vec3 overlay (vec3 target, vec3 blend) {
     vec3 temp;
     temp.x = (target.x > 0.5) ? (1.0-(1.0-2.0*(target.x-0.5))*(1.0-blend.x)) : (2.0*target.x)*blend.x;
     temp.y = (target.y > 0.5) ? (1.0-(1.0-2.0*(target.y-0.5))*(1.0-blend.y)) : (2.0*target.y)*blend.y;
     temp.z = (target.z > 0.5) ? (1.0-(1.0-2.0*(target.z-0.5))*(1.0-blend.z)) : (2.0*target.z)*blend.z;
     return temp;
+  }
+
+  float overlayEnhancedSingleColor (float Sca, float Dca, float Sa, float Da) {
+    if (2.0 * Dca <= Da) {
+      return 2.0 * Sca * Dca + Sca * (1.0 - Da) + Dca * (1.0 - Sa);
+    }
+    return Sca * (1.0 + Da) + Dca * (1.0 + Sa) - 2.0 * Dca * Sca - Da * Sa;
+  }
+
+  vec3 overlayEnhanced (vec4 target, vec4 blend) {
+    float Sa = target.a;
+    float Da = blend.a;
+    vec3 Dca = blend.rgb;
+    vec3 Sca = target.rgb;
+
+    vec3 dest;
+    dest.r = overlayEnhancedSingleColor(target.r, blend.r, target.a, blend.a);
+    dest.g = overlayEnhancedSingleColor(target.g, blend.g, target.a, blend.a);
+    dest.b = overlayEnhancedSingleColor(target.b, blend.b, target.a, blend.a);
+    return dest;
+  //   if 2 × Dca <= Da
+  //   Dca' = 2 × Sca × Dca + Sca × (1 - Da) + Dca × (1 - Sa)
+  // otherwise
+  //        = Sca × (1 + Da) + Dca × (1 + Sa) - 2 × Dca × Sca - Da × Sa
+
+    // vec3 temp;
+    // temp.x = (target.x > 0.5) ? (1.0-(1.0-2.0*(target.x-0.5))*(1.0-blend.x)) : (2.0*target.x)*blend.x;
+    // temp.y = (target.y > 0.5) ? (1.0-(1.0-2.0*(target.y-0.5))*(1.0-blend.y)) : (2.0*target.y)*blend.y;
+    // temp.z = (target.z > 0.5) ? (1.0-(1.0-2.0*(target.z-0.5))*(1.0-blend.z)) : (2.0*target.z)*blend.z;
+    // return temp;
   }
 
 
@@ -121,7 +151,15 @@ const setup = () => {
       // gl_FragColor = vec4(blendColorBurn(mapSample.rgb, textureSample.rgb), textureSample.a);
     } else {
       // gl_FragColor = textureSample;
+      // gl_FragColor = vec4(1.0, 1.0, 1.0, textureSample.a);
+
+      // this one gives cool effect (and maybe t's correct);
       gl_FragColor = vec4(overlay(textureSample.rgb, mapSample.rgb), textureSample.a);
+
+      // this is wrong, bc overlayEnhanced returns premultipled alpha, but looks correct prob
+      // gl_FragColor = vec4(overlayEnhanced(textureSample, mapSample) * textureSample.a, textureSample.a);
+      // gl_FragColor = vec4(overlayEnhanced(textureSample, mapSample), 1.0);
+      
     }
   }
 
@@ -204,32 +242,38 @@ const setup = () => {
   btnShadowBase.x = btnX
   btnShadowBase.y = btnY
 
-  btnShadowBase.filters = [
-    new DropShadowFilter({
-      distance: 0,
-      blur: 3,
-      alpha: 1,
-      quality: 5,
-      color: 0x663e03,
-      // color: 0x361e02,
-      // color: 0x824d08,
-      // color: 0x915506,
-      // color: 0x7f5c05,
-      shadowOnly: true,
-    }),
-  ]
+  const dropShadowFilter = new DropShadowFilter({
+    distance: 0,
+    blur: 3,
+    alpha: 1,
+    quality: 5,
+    color: 0x663e03,
+    // color: 0x361e02,
+    // color: 0x824d08,
+    // color: 0x915506,
+    // color: 0x7f5c05,
+    shadowOnly: true,
+  })
+
+  btnShadowBase.filters = [dropShadowFilter]
+  const dropShadowFilterPadding = btnShadowBase.filters[0].padding
 
   const btnShadowTexture = getTexture(
     btnShadowBase,
-    btnWidth,
-    btnHeight,
+    btnWidth + 2 * dropShadowFilterPadding,
+    btnHeight + 2 * dropShadowFilterPadding,
     {
       texture: false,
       baseTexture: false,
     },
-    btnX,
-    btnY,
+    btnX - dropShadowFilterPadding,
+    btnY - dropShadowFilterPadding,
   )
+  const xxx = new PIXI.Sprite(btnShadowTexture)
+  xxx.x = 500
+  xxx.y = 100
+  window.app.stage.addChild(xxx)
+  // return
 
   const btnShadowShader = PIXI.Shader.from(vertexShader, fragmentShader, {
     uTextureSampler2: btnShadowTexture,
@@ -241,7 +285,28 @@ const setup = () => {
     uColorBurn: false,
   })
 
-  const btnShadowMesh = new PIXI.Mesh(geometry, btnShadowShader as PIXI.MeshMaterial)
+  const shadowGeometry = new PIXI.Geometry()
+    .addAttribute(
+      'aVertexPosition',
+      [
+        /* eslint-disable prettier/prettier */
+        btnX + 0 - dropShadowFilterPadding, 0 + btnY - dropShadowFilterPadding,
+        btnX + btnWidth + dropShadowFilterPadding, 0 + btnY - dropShadowFilterPadding,
+        btnX + btnWidth + dropShadowFilterPadding, btnHeight + btnY + dropShadowFilterPadding,
+        btnX + 0 - dropShadowFilterPadding, btnHeight + btnY + dropShadowFilterPadding,
+        /* eslint-enable prettier/prettier */
+      ],
+      2,
+    )
+    .addAttribute('aUvs', [0, 0, 1, 0, 1, 1, 0, 1], 2)
+    .addIndex([0, 1, 2, 0, 2, 3])
+  // .interleave();
+
+  const btnShadowMesh = new PIXI.Mesh(shadowGeometry, btnShadowShader as PIXI.MeshMaterial)
+  // window.app.stage.addChild(btnShadowMesh)
+  // btnShadowMesh.x = 500
+  // btnShadowMesh.y = 350
+  // return
 
   const btnFaceSprite = new PIXI.Sprite(PIXI.Texture.from('assets/start_btn.png'))
   btnFaceSprite.width = btnWidth
@@ -256,14 +321,14 @@ const setup = () => {
 
   const startBtnContainerTexture = getTexture(
     btnContainer,
-    btnWidth,
-    btnHeight,
+    btnWidth + 2 * dropShadowFilterPadding,
+    btnHeight + 2 * dropShadowFilterPadding,
     {
       texture: false,
       baseTexture: false,
     },
-    btnX,
-    btnY,
+    btnX - dropShadowFilterPadding,
+    btnY - dropShadowFilterPadding,
   )
 
   const btnContainerShader = PIXI.Shader.from(vertexShader, fragmentShader, {
@@ -272,41 +337,68 @@ const setup = () => {
     uMapSize: [window.innerWidth, window.innerHeight],
     uColorBurn: true,
   })
-  const btnMesh = new PIXI.Mesh(geometry, btnContainerShader as PIXI.MeshMaterial)
-  window.app.stage.addChild(btnMesh)
-  // window.app.stage.addChild(new PIXI.Sprite(PIXI.Texture.from('assets/goooosh.png')))
-  return
+  const btnMesh = new PIXI.Mesh(shadowGeometry, btnContainerShader as PIXI.MeshMaterial)
+  // btnMesh.x = dropShadowFilterPadding
+  // btnMesh.y = dropShadowFilterPadding
+  // window.app.stage.addChild(btnMesh)
+  // return
+  const boundaries = shadowGeometry.getBuffer('aVertexPosition').data
+
   const startBtnTexture = getTexture(
     btnMesh,
-    btnWidth,
-    btnHeight,
+    boundaries[2],
+    boundaries[5],
     {
       texture: false,
       baseTexture: false,
     },
-    btnX,
-    btnY,
+    boundaries[0],
+    boundaries[1],
   )
 
   const containerSprite = new PIXI.projection.Sprite2d(startBtnTexture)
-  containerSprite.x = btnX
-  containerSprite.y = btnY
+  // window.app.stage.addChild(containerSprite)
+  // return
+
+  // height (left side) 199 / 175 = 1.137
+  // height (right side) 160 / 175 = 0.914
+  // y (left top corner) 24 / 175 = 0.137
+  // y (right top corner) 15 / 175 = 0.086
+  // x: 162 / 162
+  // y: 189 / 165
+
+  // x: 505 / 505
+  // y: 189 / 214
+
+  // x: 505 / 505
+  // y: 364 / 374
+
+  // x: 162
+  // y: 364
   // containerSprite.x = 0.12281855 * window.innerWidth
   // containerSprite.y = 0.230086694 * window.innerHeight
+  const btnBoundary = new PIXI.Rectangle(
+    containerSprite.x,
+    containerSprite.y,
+    containerSprite.width,
+    containerSprite.height,
+  )
+  const btnLeftHeight = containerSprite.height * 1.137
+  const btnRightHeight = containerSprite.height * 0.914
+  const leftTopOffsetY = containerSprite.height * -0.137
+  const rightTopOffsetY = containerSprite.height * 0.086
+  console.log('btnBoundary', btnBoundary)
+  containerSprite.proj.mapSprite(containerSprite, [
+    { x: btnBoundary.x, y: btnBoundary.y + leftTopOffsetY },
+    { x: btnBoundary.x + btnBoundary.width, y: btnBoundary.y + rightTopOffsetY },
+    { x: btnBoundary.x + btnBoundary.width, y: btnBoundary.y + rightTopOffsetY + btnRightHeight },
+    { x: btnBoundary.x, y: btnBoundary.y + btnBoundary.height },
+  ])
 
-  // containerSprite.proj.mapQuad(
-  //   new PIXI.Rectangle(containerSprite.x, containerSprite.y, btnWidth, btnHeight),
-  //   [
-  //     { x: containerSprite.x, y: containerSprite.y },
-  //     { x: containerSprite.x + btnWidth, y: containerSprite.y * 0.8 },
-  //     { x: containerSprite.x + btnWidth, y: (containerSprite.y + btnHeight) * 0.8 },
-  //     { x: containerSprite.x, y: containerSprite.y + btnHeight },
-  //   ],
-  // )
+  containerSprite.x = boundaries[0]
+  containerSprite.y = boundaries[1]
 
   window.app.stage.addChild(containerSprite)
-
-  // window.app.ticker.add((delta: number) => {})
 }
 
 export default setup

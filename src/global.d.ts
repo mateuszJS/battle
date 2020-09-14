@@ -1,4 +1,4 @@
-import { UniverseRepresentation } from '~/setup'
+import { UniverseRepresentation } from '~/initGame'
 
 declare global {
   interface Window {
