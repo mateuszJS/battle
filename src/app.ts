@@ -5,7 +5,11 @@ import 'pixi-projection'
 import listOfAssets from './listOfAssets'
 import setup from './setup'
 
-window.startGame = () => {
+const startGame = () => {
+  document.oncontextmenu = document.body.oncontextmenu = function() {
+    return false
+  }
+
   const app = new PIXI.Application({
     width: window.innerWidth,
     height: window.innerHeight,
@@ -15,3 +19,5 @@ window.startGame = () => {
 
   app.loader.add(listOfAssets).load(setup)
 }
+
+startGame()
