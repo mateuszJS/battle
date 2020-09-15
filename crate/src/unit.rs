@@ -13,6 +13,7 @@ use crate::weapon_types::WeaponType;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::rc::Weak;
+use crate::position_utils::calc_positions::CalcPositions;
 
 pub const STATE_ABILITY: u8 = 8;
 const STATE_FLY: u8 = 7;
@@ -80,6 +81,11 @@ impl Unit {
       self.angle = angle + MATH_PI;
       self.mod_x = angle.sin() * strength;
       self.mod_y = -angle.cos() * strength;
+      // https://socratic.org/questions/what-is-the-formula-for-time-from-a-changing-velocity#MathJax-Element-8-Frame
+      let time = strength * 0.95.powi(x) < 0.035
+      let distance = strength * time + 0.5 * -0.95 * time.powi(2);
+      let distance = strength * time + 0.5 * -0.05 * time.powi(2);
+      CalcPositions::get_is_point_inside_any_obstacle(x as i16, y as i16);
       // check destination to don't overlap with obstacle
     }
   }
