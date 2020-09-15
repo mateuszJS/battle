@@ -24,7 +24,10 @@ const createItem = (
   const btnBaseSprite = new PIXI.Sprite(texture)
   btnBaseSprite.width = btnBaseWidth
   btnBaseSprite.height = btnBaseHeight
-  const btnBaseTextureResized = getTexture(btnBaseSprite, btnBaseWidth, btnBaseHeight)
+  const btnBaseTextureResized = getTexture(btnBaseSprite, btnBaseWidth, btnBaseHeight, {
+    texture: false,
+    baseTexture: false,
+  })
   // looks like Sprite2d has to receive texture in correct size
   let btnPerspectiveTexture
   if (projectionPointsY) {

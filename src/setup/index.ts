@@ -9,16 +9,23 @@ const setup = () => {
   const dividerTexture = PIXI.Texture.from('assets/divider.png')
   const background = new PIXI.Sprite(backgroundTexture)
   const menuContainer = new PIXI.Container()
-  window.app.stage.addChild(menuContainer)
   // TODO: read difference between mesh and shader AND pixi filters
 
-  //==========================================================================================
-
+  window.app.stage.addChild(menuContainer)
   menuContainer.addChild(background)
+
+  const handleResize = debounce(onResize, 1000)
+  window.addEventListener('resize', handleResize)
+
+  const onClickStart = () => {
+    window.removeEventListener('resize', handleResize)
+    initGame()
+    menuContainer.visible = false
+  }
 
   let itemsToClear = []
 
-  const onResize = () => {
+  function onResize() {
     itemsToClear.forEach(item => menuContainer.removeChild(item))
     window.app.renderer.resize(window.innerWidth, window.innerHeight)
     background.width = window.innerWidth
@@ -43,9 +50,7 @@ const setup = () => {
     startBtn.on('pointerout', function() {
       this.tint = 0xffffff
     })
-    startBtn.on('click', function() {
-      initGame()
-    })
+    startBtn.on('click', onClickStart)
 
     const donateBtn = createItem(
       donateBtnTexture,
@@ -87,7 +92,6 @@ const setup = () => {
     menuContainer.addChild(...itemsToClear)
   }
 
-  window.addEventListener('resize', debounce(onResize, 1000))
   onResize()
 }
 
