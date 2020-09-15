@@ -198,6 +198,7 @@ export const updateAbilitiesButtons = (universeRepresentation: UniverseRepresent
       if (!ability.container.visible) return
 
       if (!ability.mask.visible) {
+        // is disabled texture visible
         ability.disableAbilitySprite.visible = true
         ability.progressBar.visible = true
         ability.mask.visible = true
@@ -205,11 +206,13 @@ export const updateAbilitiesButtons = (universeRepresentation: UniverseRepresent
       const progress = ability.renewTime / ability.renewTimeTotal
       ability.mask.scale.set(1, progress)
       ability.progressBar.y = (1 - progress) * ICON_HEIGHT
-    } else if (ability.container.visible && ability.mask.visible) {
+    } else {
       ability.container.interactive = true
-      ability.disableAbilitySprite.visible = false
-      ability.progressBar.visible = false
-      ability.mask.visible = false
+      if (ability.mask.visible) {
+        ability.disableAbilitySprite.visible = false
+        ability.progressBar.visible = false
+        ability.mask.visible = false
+      }
     }
 
     if (!ability.container.visible) return

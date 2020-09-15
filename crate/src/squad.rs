@@ -125,7 +125,8 @@ impl Squad {
     //   // TODO: calc segment, from squad_center thought closest_point to outsite (like plus 5?)
     //   // also handle case when distance is 0, then add 5, check if it's okay, if not, minsu 5, and this is have to be okay
     // }
-    if clear_aim || self.shared.ability_target.is_some() {
+    if clear_aim {
+      // if clear_aim || self.shared.ability_target.is_some() {
       self.shared.ability_target = None;
       self.shared.aim = Weak::new();
       self.shared.secondary_aim = Weak::new();
