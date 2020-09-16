@@ -313,7 +313,6 @@ impl Universe {
     target_x: f32,
     target_y: f32,
   ) -> js_sys::Float32Array {
-    log!("{:?} {} {}", raw_squads_ids, target_x, target_y);
     let Universe {
       ref mut factions,
       ref world,

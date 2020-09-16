@@ -52,6 +52,7 @@ type Ability = {
   type: RepresentationId
   renewTime: number
   renewTimeTotal: number
+  selected: boolean
 }
 
 let abilities: {
@@ -151,6 +152,7 @@ export const addAbilitiesButton = (
   units.forEach(sameSquadUnits => {
     const position = getAbilityIconPosition(universeRepresentation, sameSquadUnits)
     const squadId = squadsIds[squadsIdsIndex]
+    sameSquadUnits.forEach(unitId => ((universeRepresentation[unitId] as Unit).squadId = squadId))
     squadsIdsIndex++
 
     if (!abilities[squadId]) {
@@ -175,6 +177,7 @@ export const addAbilitiesButton = (
         type: unit.type as RepresentationId,
         renewTime: 0,
         renewTimeTotal: MAP_ID_TO_ABILITY_DETAILS[unit.type].renewTimeTotal,
+        selected: false,
       }
     } else if (!abilities[squadId].container.visible) {
       abilities[squadId].container.visible = true
@@ -207,7 +210,9 @@ export const updateAbilitiesButtons = (universeRepresentation: UniverseRepresent
       ability.mask.scale.set(1, progress)
       ability.progressBar.y = (1 - progress) * ICON_HEIGHT
     } else {
-      ability.container.interactive = true
+      if (!ability.selected) {
+        ability.container.interactive = true
+      }
       if (ability.mask.visible) {
         ability.disableAbilitySprite.visible = false
         ability.progressBar.visible = false
@@ -244,6 +249,7 @@ export const selectAllSimilarAbilities = (abilityId: number, squadsIds: number[]
     if (ability.container.visible && ability.renewTime === 0 && ability.type === abilityId) {
       ability.container.interactive = false // to disable changing texture by hover (and unhover)
       ability.sprite.texture = MAP_ID_TO_ABILITY_DETAILS[ability.type].iconHover
+      ability.selected = true
     }
   })
 }
@@ -254,12 +260,21 @@ export const deselectAllSimilarAbilities = (type: number, squadsIds: number[]) =
     if (ability.container.visible && ability.renewTime === 0 && ability.type === type) {
       ability.container.interactive = true // can hover now
       ability.sprite.texture = MAP_ID_TO_ABILITY_DETAILS[ability.type].iconNormal
+      ability.selected = false
     }
   })
 }
 
-export const disableAbility = (unitId: number) => {
-  const ability = Object.values(abilities).find(ability => ability.unitsIds.includes(unitId))
+export const disableAbility = (squadId: number) => {
+  const ability = abilities[squadId]
   ability.renewTime = ability.renewTimeTotal
   ability.container.interactive = false
+}
+
+export const getAllSimilarAvailableAbilitiesIds = (): Float32Array => {
+  const squadsIdsToCastAbility = Object.values(abilities)
+    .filter(ability => ability.selected)
+    .map(ability => ability.squadId)
+
+  return new Float32Array(squadsIdsToCastAbility)
 }

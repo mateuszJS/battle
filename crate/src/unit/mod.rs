@@ -1,3 +1,5 @@
+mod utils;
+
 use crate::bullets_manager::BulletsManager;
 use crate::constants::{
   MATH_PI, MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS, NORMAL_SQUAD_RADIUS, WEAPON_RANGE,
@@ -13,7 +15,7 @@ use crate::weapon_types::WeaponType;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::rc::Weak;
-use crate::position_utils::calc_positions::CalcPositions;
+use utils::{Utils, FLY_DECELERATION, FLY_MIN_SPEED};
 
 pub const STATE_ABILITY: u8 = 8;
 const STATE_FLY: u8 = 7;
@@ -78,15 +80,10 @@ impl Unit {
   pub fn change_state_to_fly(&mut self, angle: f32, strength: f32) {
     if self.state != STATE_ABILITY {
       self.state = STATE_FLY;
-      self.angle = angle + MATH_PI;
-      self.mod_x = angle.sin() * strength;
-      self.mod_y = -angle.cos() * strength;
-      // https://socratic.org/questions/what-is-the-formula-for-time-from-a-changing-velocity#MathJax-Element-8-Frame
-      let time = strength * 0.95.powi(x) < 0.035
-      let distance = strength * time + 0.5 * -0.95 * time.powi(2);
-      let distance = strength * time + 0.5 * -0.05 * time.powi(2);
-      CalcPositions::get_is_point_inside_any_obstacle(x as i16, y as i16);
-      // check destination to don't overlap with obstacle
+      self.angle = (angle + MATH_PI) % (2.0 * MATH_PI);
+      let fly_mods = Utils::get_fly_mods(angle, self.x, self.y, strength);
+      self.mod_x = fly_mods.0;
+      self.mod_y = fly_mods.1;
     }
   }
 
@@ -94,10 +91,10 @@ impl Unit {
     self.x += self.mod_x;
     self.y += self.mod_y;
 
-    self.mod_x *= 0.95;
-    self.mod_y *= 0.95;
+    self.mod_x *= FLY_DECELERATION;
+    self.mod_y *= FLY_DECELERATION;
 
-    if self.mod_x.hypot(self.mod_y) < 0.035 {
+    if self.mod_x.hypot(self.mod_y) <= FLY_MIN_SPEED {
       self.change_state_to_getup();
     }
   }
@@ -465,8 +462,12 @@ impl Unit {
         &WeaponType::Grenade,
       );
       squad_shared_info.ability_target = None; // for grenade it works, but for jump when every unit needs to make a jump NOT!
+    } else {
+      // We can do it at the same time as add explosion but then get_representation
+      // will never returns self.state = ABILITY_STATE
+      // so ability icon will never be disabled
+      self.change_state_to_idle(squad_shared_info);
     }
-    self.change_state_to_idle(squad_shared_info);
   }
 
   fn calc_jump_progress(&self) -> f32 {

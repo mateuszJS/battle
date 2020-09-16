@@ -2,6 +2,7 @@ import EffectFactory from './EffectFactory'
 import { FrameUpdaters } from './getSprites'
 import { ObjectType } from '~/render/representationsIds'
 import { UpdateAbilityCallback } from './UnitFactory'
+import { disableAbility } from '~/buttons/abilities'
 
 type PixiUnitStuff = {
   container: PIXI.Container
@@ -26,6 +27,8 @@ class Unit {
   public movieClip: PIXI.AnimatedSprite
   public frameUpdaters: FrameUpdaters
   public type: ObjectType
+  public squadId?: number // value is set when ability icon will be created
+  // bc it's only used to disable ability for the whole squad
   private selectionSprite: PIXI.Sprite
   private indicator: PIXI.Graphics
   private updateAbility: UpdateAbilityCallback
@@ -81,6 +84,7 @@ class Unit {
 
     switch (state) {
       case State.ABILITY:
+        disableAbility(this.squadId)
         this.updateAbility(x, y, angle, firstStateParam)
         break
 

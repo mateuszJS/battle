@@ -8,6 +8,7 @@ import {
   hideAbilitiesButtons,
   selectAllSimilarAbilities,
   deselectAllSimilarAbilities,
+  getAllSimilarAvailableAbilitiesIds,
 } from '~/buttons/abilities'
 
 class SelectionController {
@@ -17,7 +18,7 @@ class SelectionController {
   private universeRepresentation: UniverseRepresentation
   private selectedUnits: Unit[]
   private selectedSquads: Float32Array
-  private selectedAbility: number | null
+  private selectedAbilityType: number | null
 
   constructor(universe: Universe, universeRepresentation: UniverseRepresentation) {
     this.universe = universe
@@ -27,11 +28,11 @@ class SelectionController {
     this.startPoint = null
     this.selectionRectangle = new PIXI.Graphics()
     window.ui.addChild(this.selectionRectangle)
-    this.selectedAbility = null
+    this.selectedAbilityType = null
   }
 
   public consumeSelection({ x, y }: Point) {
-    if (this.selectedAbility) {
+    if (this.selectedAbilityType) {
       this.deselectAbility()
       return
     }
@@ -90,18 +91,23 @@ class SelectionController {
     window.app.stage.cursor = "url('assets/aim_icon.png'),auto"
     selectAllSimilarAbilities(abilityId, Array.from(this.selectedSquads))
     // select for all the squads with the same and available ability
-    this.selectedAbility = abilityId
+    this.selectedAbilityType = abilityId
   }
 
   private deselectAbility() {
-    deselectAllSimilarAbilities(this.selectedAbility, Array.from(this.selectedSquads))
+    deselectAllSimilarAbilities(this.selectedAbilityType, Array.from(this.selectedSquads))
     window.app.stage.cursor = 'default'
-    this.selectedAbility = null
+    this.selectedAbilityType = null
   }
 
   public startSelection(point: Point) {
-    if (this.selectedAbility) {
-      this.universe.use_ability(this.selectedSquads, this.selectedAbility, point.x, point.y)
+    if (this.selectedAbilityType) {
+      this.universe.use_ability(
+        getAllSimilarAvailableAbilitiesIds(),
+        this.selectedAbilityType,
+        point.x,
+        point.y,
+      )
       this.deselectAbility()
       return
     }
@@ -126,6 +132,7 @@ class SelectionController {
       Math.min(this.startPoint.y, y),
       Math.max(this.startPoint.y, y),
     )
+    window.ui.interactiveChildren = false
     this.selectionRectangle.clear()
     this.selectionRectangle.lineStyle(2, 0x00ff00, 1)
     this.selectionRectangle.beginFill(0x00ff00, 0.2)
@@ -141,6 +148,7 @@ class SelectionController {
   public endSelection() {
     if (!this.startPoint) return
 
+    window.ui.interactiveChildren = true
     this.selectionRectangle.clear()
     if (this.selectedUnits.length === 0) {
       this.selectUnits(
