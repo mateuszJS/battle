@@ -19,7 +19,6 @@ struct ProducedSquad {
 
 pub struct Factory {
   pub id: u32,
-  pub hp: f32,
   pub x: f32,
   pub y: f32,
   pub angle: f32,
@@ -29,10 +28,9 @@ pub struct Factory {
 // FYI: the main think that factory does is create unit, this is how it looks like
 // 1.
 impl Factory {
-  pub fn new(x: f32, y: f32, angle: f32, owner_user: bool) -> Factory {
+  pub fn new(id: u32, x: f32, y: f32, angle: f32, owner_user: bool) -> Factory {
     Factory {
-      id: IdGenerator::generate_id(),
-      hp: 100.0,
+      id,
       x,
       y,
       angle,

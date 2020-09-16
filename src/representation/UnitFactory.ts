@@ -46,7 +46,7 @@ class UnitsFactory {
     x: number,
     y: number,
     angle: number,
-    isEnemy: boolean,
+    isAllianceUnit: boolean,
     state: number,
     type: ObjectType,
   ) {
@@ -55,7 +55,7 @@ class UnitsFactory {
       container,
       movieClip: movieClip,
       frameUpdaters,
-      selectionSprite: getMySelection(isEnemy),
+      selectionSprite: getMySelection(isAllianceUnit),
     }
 
     if (type === REPRESENTATION_IDS.RAPTOR) {

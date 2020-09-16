@@ -3,6 +3,7 @@ import { Universe } from '../../crate/pkg/index'
 import { UniverseRepresentation } from '~/initGame'
 import { tracksDebug } from '~/debug'
 import Unit from '~/representation/Unit'
+import Factory from '~/representation/Factory'
 import {
   addAbilitiesButton,
   hideAbilitiesButtons,
@@ -44,13 +45,13 @@ class SelectionController {
     if (selectedEnemyUnitsIds.length === 0) return
 
     selectedEnemyUnitsIds.forEach(id => {
-      const unit = this.universeRepresentation[id] as Unit
+      const unit = this.universeRepresentation[id] as Unit | Factory
       unit.select()
     })
 
     setTimeout(() => {
       selectedEnemyUnitsIds.forEach(id => {
-        const unit = this.universeRepresentation[id] as Unit
+        const unit = this.universeRepresentation[id] as Unit | Factory
         unit.deselect()
       })
     }, 2000)

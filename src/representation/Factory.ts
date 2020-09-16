@@ -4,6 +4,7 @@ import {
   removeItemFromProductionLine,
   updateItemInProductionLine,
 } from '~/buttons/factory'
+import getMySelection from './getMySelection'
 
 const portalProperties = [
   {
@@ -44,6 +45,7 @@ class Factory {
   private y: number
   private portalFX: PIXI.AnimatedSprite
   private productionLine: ProductionItem[]
+  private selection: PIXI.Sprite
 
   constructor(
     // factionId: number,
@@ -90,6 +92,14 @@ class Factory {
 
     this.x = x
     this.y = y
+
+    const selection = getMySelection(false)
+    selection.x = x
+    selection.y = y
+    selection.width = 200
+    selection.height = 200
+    window.world.addChild(selection)
+    this.selection = selection
   }
 
   turnOnProduction() {
@@ -121,6 +131,14 @@ class Factory {
     if (progress !== 0) {
       updateItemInProductionLine(progress)
     }
+  }
+
+  select() {
+    this.selection.visible = true
+  }
+
+  deselect() {
+    this.selection.visible = false
   }
 }
 

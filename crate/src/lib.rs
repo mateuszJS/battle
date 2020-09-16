@@ -71,6 +71,10 @@ pub struct Universe {
 impl Universe {
   pub fn new(factions_data: Vec<f32>, obstacles_data: Vec<f32>) -> Universe {
     let mut factions: Vec<Faction> = vec![];
+    let mut world = World {
+      all_squads: vec![],
+      bullets_manager: BulletsManager::new(),
+    };
 
     let mut i = 0;
     while i < factions_data.len() {
@@ -80,15 +84,12 @@ impl Universe {
         factions_data[i + 2],
         factions_data[i + 3],
         i == 0,
+        &mut world,
       ));
       i += 4;
     }
 
     ObstaclesLazyStatics::init_and_get_obstacles_handler(Some(obstacles_data));
-    let world = World {
-      all_squads: vec![],
-      bullets_manager: BulletsManager::new(),
-    };
 
     Universe {
       factions,
@@ -177,18 +178,18 @@ impl Universe {
         faction.manage_hunters();
       }
 
-      if *time % 1000 == 0 && faction.id == 2 && faction.squads.len() > 0 {
-        let squad_id = faction.squads[0].borrow().id;
-        faction.move_squads(
-          vec![squad_id],
-          if faction.squads[0].borrow().shared.center_point.0 > 2000.0 {
-            200.0
-          } else {
-            2200.0
-          },
-          1300.0,
-        );
-      }
+      // if *time % 1000 == 0 && faction.id == 2 && faction.squads.len() > 0 {
+      //   let squad_id = faction.squads[0].borrow().id;
+      //   faction.move_squads(
+      //     vec![squad_id],
+      //     if faction.squads[0].borrow().shared.center_point.0 > 2000.0 {
+      //       200.0
+      //     } else {
+      //       2200.0
+      //     },
+      //     1300.0,
+      //   );
+      // }
       faction.resources += 1;
       faction.update(world);
     });
@@ -197,7 +198,7 @@ impl Universe {
       Universe::run_squad_manager(factions, world);
     }
 
-    world.bullets_manager.update(factions);
+    world.bullets_manager.update(&world.all_squads);
   }
 
   pub fn get_universe_data(&mut self) -> js_sys::Float32Array {

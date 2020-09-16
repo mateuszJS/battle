@@ -1,9 +1,12 @@
-use crate::representations_ids::{RAPTOR_REPRESENTATION_ID, SOLIDER_REPRESENTATION_ID};
-use crate::weapon_types::{Weapon, STANDARD_RIFLE_DETAILS};
+use crate::representations_ids::{
+  NON_REPRESENTATION_ID, RAPTOR_REPRESENTATION_ID, SOLIDER_REPRESENTATION_ID,
+};
+use crate::weapon_types::{Weapon, NON_WEAPON, STANDARD_RIFLE_DETAILS};
 
 pub enum SquadType {
   Solider,
   Raptor,
+  Portal,
 }
 
 pub struct SquadDetails {
@@ -43,9 +46,21 @@ static RAPTOR_DETAILS: SquadDetails = SquadDetails {
   weapon: &STANDARD_RIFLE_DETAILS,
 };
 
+static PORTAL_DETAILS: SquadDetails = SquadDetails {
+  movement_speed: 0.0,
+  hp: 2000,
+  production_time: 0,
+  members_number: 1,
+  representation_type: NON_REPRESENTATION_ID,
+  selection_threshold: 100.0,
+  unit_model_offset_y: 40.0,
+  weapon: &NON_WEAPON,
+};
+
 pub fn get_squad_details(squad_type: &SquadType) -> &'static SquadDetails {
   match *squad_type {
     SquadType::Solider => &SOLIDER_DETAILS,
     SquadType::Raptor => &RAPTOR_DETAILS,
+    SquadType::Portal => &PORTAL_DETAILS,
   }
 }

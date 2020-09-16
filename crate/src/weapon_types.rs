@@ -52,6 +52,18 @@ pub static HIT_THE_GROUND: Weapon = Weapon {
   explosion_range: 80.0,
 };
 
+pub static NON_WEAPON: Weapon = Weapon {
+  name: WeaponType::HitTheGround,
+  chances_to_reload: 0.0,
+  reload_time: 0,
+  shoot_time: 0,
+  scatter: 0.0,
+  bullets_speed: 0.0,
+  damage: 0,
+  representation_id: 0.0,
+  explosion_range: 0.0,
+};
+
 pub fn get_weapon_details(weapon_type: &WeaponType) -> &'static Weapon {
   match *weapon_type {
     WeaponType::StandardRifle => &STANDARD_RIFLE_DETAILS,

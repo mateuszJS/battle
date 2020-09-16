@@ -117,11 +117,12 @@ impl BulletsManager {
     }
   }
 
-  fn do_explosion(bullet: &BulletData, factions: &mut Vec<Faction>) {
+  fn do_explosion(bullet: &BulletData, all_squads: &Vec<Weak<RefCell<Squad>>>) {
     let weapon_details = get_weapon_details(bullet.weapon_type);
     let target = bullet.target.unwrap();
-    factions.iter_mut().for_each(|faction: &mut Faction| {
-      faction.squads.iter_mut().for_each(|ref_cell_squad| {
+
+    all_squads.iter().for_each(|weak_squad| {
+      if let Some(ref_cell_squad) = weak_squad.upgrade() {
         let mut squad: std::cell::RefMut<Squad> = ref_cell_squad.borrow_mut();
         let squad_center = squad.shared.center_point;
         let squad_in_range = (squad_center.0 - target.0).hypot(squad_center.1 - target.1)
@@ -138,15 +139,15 @@ impl BulletsManager {
             }
           })
         }
-      })
+      }
     })
   }
 
-  pub fn update(&mut self, factions: &mut Vec<Faction>) {
+  pub fn update(&mut self, all_squads: &Vec<Weak<RefCell<Squad>>>) {
     self.bullets_data.iter_mut().for_each(|bullet| {
       if bullet.lifetime <= std::f32::EPSILON {
         if bullet.target.is_some() {
-          BulletsManager::do_explosion(bullet, factions);
+          BulletsManager::do_explosion(bullet, all_squads);
         } else {
           if let Some(ref_cell_aim) = bullet.aim.upgrade() {
             let weapon_details = get_weapon_details(bullet.weapon_type);

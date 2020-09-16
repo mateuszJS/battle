@@ -28,6 +28,7 @@ pub struct Faction {
   pub squads: Vec<Rc<RefCell<Squad>>>, // call borrow() and share that Ref<Squad>, if it's not possible then wrap in Rc like Vec<Rc<RefCell<Squad>>>
   pub factory: Factory,
   pub squads_during_creation: Vec<SquadDuringCreation>,
+  pub portal: Rc<RefCell<Squad>>,
 }
 
 impl Faction {
@@ -37,13 +38,22 @@ impl Faction {
     factory_y: f32,
     factory_angle: f32,
     is_user: bool,
+    world: &mut World,
   ) -> Faction {
-    let factory = Factory::new(factory_x, factory_y, factory_angle, is_user);
+    let mut portal = Squad::new(id, SquadType::Portal);
+    portal.add_member(factory_x, factory_y);
+    portal.update_center();
+    let portal_id = portal.members[0].borrow().id;
+    let factory = Factory::new(portal_id, factory_x, factory_y, factory_angle, is_user);
+    let portal_squad = Rc::new(RefCell::new(portal));
+    world.all_squads.push(Rc::downgrade(&portal_squad));
+
     Faction {
       id,
       factory,
       resources: 0,
       squads: vec![],
+      portal: portal_squad,
       squads_during_creation: vec![],
     }
   }
@@ -246,11 +256,7 @@ impl Faction {
     let squads: Vec<&Rc<RefCell<Squad>>> = self
       .squads
       .iter()
-      .filter(|ref_cell_squad| {
-        let squad = ref_cell_squad.borrow();
-        squads_ids.contains(&squad.id)
-          && squad.squad_details.representation_type as u8 == ability_id
-      })
+      .filter(|ref_cell_squad| squads_ids.contains(&ref_cell_squad.borrow().id))
       .collect();
 
     let positions = PositionUtils::get_squads_positions(squads.len(), target_x, target_y);
