@@ -10,7 +10,7 @@ const drawCircle = (x, y) => {
 const debug = (result: Float32Array) => {
   if (!graph) {
     graph = new PIXI.Graphics()
-    window.app.stage.addChild(graph)
+    window.world.addChild(graph)
   }
 
   let i = 2

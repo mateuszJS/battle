@@ -3,7 +3,7 @@ let testElbows = null
 const debug = () => {
   if (!testElbows) {
     testElbows = new PIXI.Graphics()
-    window.app.stage.addChild(testElbows)
+    window.world.addChild(testElbows)
   }
 
   const correct = []
@@ -31,11 +31,7 @@ const debug = () => {
 
     testElbows.beginFill(0x000000, 1)
     testElbows.lineStyle(0)
-    testElbows.drawCircle(
-      inAdirection.x - 2.5 + pointB.x,
-      inAdirection.y - 2.5 + pointB.y,
-      5,
-    )
+    testElbows.drawCircle(inAdirection.x - 2.5 + pointB.x, inAdirection.y - 2.5 + pointB.y, 5)
     testElbows.endFill()
 
     const inCdirection = {
@@ -45,20 +41,13 @@ const debug = () => {
 
     testElbows.beginFill(0x000000, 1)
     testElbows.lineStyle(0)
-    testElbows.drawCircle(
-      inCdirection.x - 2.5 + pointB.x,
-      inCdirection.y - 2.5 + pointB.y,
-      5,
-    )
+    testElbows.drawCircle(inCdirection.x - 2.5 + pointB.x, inCdirection.y - 2.5 + pointB.y, 5)
     testElbows.endFill()
     const centerPoint = {
       x: (inAdirection.x + inCdirection.x) / 2 + pointB.x,
       y: (inAdirection.y + inCdirection.y) / 2 + pointB.y,
     }
-    const angleCenterToB = Math.atan2(
-      pointB.x - centerPoint.x,
-      centerPoint.y - pointB.y,
-    )
+    const angleCenterToB = Math.atan2(pointB.x - centerPoint.x, centerPoint.y - pointB.y)
 
     const finalPoint = {
       x: Math.sin(angleCenterToB) * 50 + pointB.x,

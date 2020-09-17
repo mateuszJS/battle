@@ -1,8 +1,10 @@
 import EffectFactory from './EffectFactory'
 import { FrameUpdaters } from './getSprites'
+import { ObjectType } from '~/render/representationsIds'
+import { UpdateAbilityCallback } from './UnitFactory'
+import { disableAbility } from '~/buttons/abilities'
 
 type PixiUnitStuff = {
-  sortingLayer: PIXI.display.Group
   container: PIXI.Container
   movieClip: PIXI.AnimatedSprite
   frameUpdaters: FrameUpdaters
@@ -23,16 +25,27 @@ enum State {
 class Unit {
   public graphics: PIXI.Container
   public movieClip: PIXI.AnimatedSprite
-  private frameUpdaters: FrameUpdaters
+  public frameUpdaters: FrameUpdaters
+  public type: ObjectType
+  public squadId?: number // value is set when ability icon will be created
+  // bc it's only used to disable ability for the whole squad
   private selectionSprite: PIXI.Sprite
   private indicator: PIXI.Graphics
-  public previousFramesFactors: {
-    // has impact of current frame
-    state: State
-    angle: number
-  }
+  private updateAbility: UpdateAbilityCallback
+  private id: number
 
-  constructor(x: number, y: number, angle: number, pixiStuff: PixiUnitStuff) {
+  constructor(
+    id: number,
+    x: number,
+    y: number,
+    angle: number,
+    pixiStuff: PixiUnitStuff,
+    type: ObjectType,
+    updateAbility: UpdateAbilityCallback,
+  ) {
+    this.id = id
+    this.type = type
+    this.updateAbility = updateAbility.bind(this)
     this.graphics = pixiStuff.container
     this.movieClip = pixiStuff.movieClip
     this.frameUpdaters = pixiStuff.frameUpdaters
@@ -43,13 +56,11 @@ class Unit {
     this.movieClip.x = -this.movieClip.width / 2
     this.movieClip.y = -this.movieClip.height * 0.7
 
-    this.graphics.parentGroup = pixiStuff.sortingLayer
-
     this.graphics.x = x
     this.graphics.y = y
     this.frameUpdaters.goToFly(angle, Number.MAX_SAFE_INTEGER)
 
-    window.app.stage.addChild(this.graphics)
+    window.world.addChild(this.graphics)
     EffectFactory.createBoomEffect(x, y)
 
     this.indicator = new PIXI.Graphics()
@@ -67,17 +78,16 @@ class Unit {
     }
   }
 
-  update(
-    state: State,
-    x: number,
-    y: number,
-    angle: number,
-    firstStateParam: number,
-  ) {
+  update(state: State, x: number, y: number, angle: number, firstStateParam: number) {
     this.graphics.x = x
     this.graphics.y = y
 
     switch (state) {
+      case State.ABILITY:
+        disableAbility(this.squadId)
+        this.updateAbility(x, y, angle, firstStateParam)
+        break
+
       case State.IDLE: {
         this.frameUpdaters.goToIdle(angle)
         break
@@ -99,18 +109,11 @@ class Unit {
         break
       }
       case State.DIE: {
-        this.frameUpdaters.goToDie(angle)
+        this.deselect()
+        this.frameUpdaters.goToDie(angle, this.id)
         break
       }
     }
-
-    this.previousFramesFactors = { state, angle }
-  }
-
-  remove() {
-    window.app.stage.removeChild(this.graphics)
-    this.graphics.destroy()
-    this.graphics = undefined
   }
 
   select() {

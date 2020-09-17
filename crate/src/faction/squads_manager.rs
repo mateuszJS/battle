@@ -95,21 +95,15 @@ impl SquadsManager {
     (sum_x / hunters.len() as f32, sum_y / hunters.len() as f32)
   }
 
-  pub fn manage_single_hunters_group(hunters: &mut Vec<&Rc<RefCell<Squad>>>) {
-    let aim_position = hunters[0]
-      .borrow()
-      .shared
-      .aim
-      .upgrade()
-      .unwrap()
-      .borrow()
-      .shared
-      .center_point;
+  pub fn set_positions_in_range(
+    hunters: &mut Vec<&Rc<RefCell<Squad>>>,
+    target: (f32, f32),
+    clear_the_aim_to_attack: bool,
+  ) {
     let mut positions = PositionUtils::get_attackers_position(
       hunters.len(),
       SquadsManager::calc_hunters_center(hunters),
-      600.0,
-      aim_position,
+      target,
     );
 
     positions.sort_by(|a, b| (a.1).partial_cmp(&b.1).unwrap());
@@ -124,7 +118,7 @@ impl SquadsManager {
     hunters.iter().enumerate().for_each(|(index, squad)| {
       let position = positions[index % positions_number];
       let mut mut_squad = squad.borrow_mut();
-      mut_squad.add_target(position.0, position.1, false);
+      mut_squad.add_target(position.0, position.1, clear_the_aim_to_attack);
     });
   }
 
@@ -188,7 +182,17 @@ impl SquadsManager {
 
     hunters.values_mut().for_each(|squads_list| {
       // mutable to be able to sort
-      SquadsManager::manage_single_hunters_group(squads_list);
+      let aim_position = squads_list[0]
+        .borrow()
+        .shared
+        .aim
+        .upgrade()
+        .unwrap()
+        .borrow()
+        .shared
+        .center_point;
+
+      SquadsManager::set_positions_in_range(squads_list, aim_position, false);
     });
   }
 }

@@ -45,7 +45,7 @@ use wasm_bindgen::prelude::*;
 use bullets_manager::BulletsManager;
 use constants::{
   MANAGE_HUNTERS_PERIOD, SEARCH_FOR_ENEMIES_PERIOD, THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER,
-  UPDATE_SQUAD_CENTER_PERIOD,
+  UPDATE_SQUAD_CENTER_PERIOD, WEAPON_RANGE,
 };
 use faction::Faction;
 use factory::Factory;
@@ -71,6 +71,10 @@ pub struct Universe {
 impl Universe {
   pub fn new(factions_data: Vec<f32>, obstacles_data: Vec<f32>) -> Universe {
     let mut factions: Vec<Faction> = vec![];
+    let mut world = World {
+      all_squads: vec![],
+      bullets_manager: BulletsManager::new(),
+    };
 
     let mut i = 0;
     while i < factions_data.len() {
@@ -80,15 +84,12 @@ impl Universe {
         factions_data[i + 2],
         factions_data[i + 3],
         i == 0,
+        &mut world,
       ));
       i += 4;
     }
 
     ObstaclesLazyStatics::init_and_get_obstacles_handler(Some(obstacles_data));
-    let world = World {
-      all_squads: vec![],
-      bullets_manager: BulletsManager::new(),
-    };
 
     Universe {
       factions,
@@ -177,18 +178,18 @@ impl Universe {
         faction.manage_hunters();
       }
 
-      if *time % 1000 == 0 && faction.id == 2 && faction.squads.len() > 0 {
-        let squad_id = faction.squads[0].borrow().id;
-        faction.move_squads(
-          vec![squad_id],
-          if faction.squads[0].borrow().shared.center_point.0 > 2000.0 {
-            200.0
-          } else {
-            2200.0
-          },
-          1300.0,
-        );
-      }
+      // if *time % 1000 == 0 && faction.id == 2 && faction.squads.len() > 0 {
+      //   let squad_id = faction.squads[0].borrow().id;
+      //   faction.move_squads(
+      //     vec![squad_id],
+      //     if faction.squads[0].borrow().shared.center_point.0 > 2000.0 {
+      //       200.0
+      //     } else {
+      //       2200.0
+      //     },
+      //     1300.0,
+      //   );
+      // }
       faction.resources += 1;
       faction.update(world);
     });
@@ -197,7 +198,7 @@ impl Universe {
       Universe::run_squad_manager(factions, world);
     }
 
-    world.bullets_manager.update();
+    world.bullets_manager.update(&world.all_squads);
   }
 
   pub fn get_universe_data(&mut self) -> js_sys::Float32Array {
@@ -237,7 +238,7 @@ impl Universe {
     end_y: f32,
   ) -> js_sys::Float32Array {
     let mut selected_units_ids: Vec<Vec<f32>> = vec![];
-    let mut selected_squads_ids: Vec<f32> = vec![0.0];
+    let mut selected_squads_ids: Vec<f32> = vec![0.0]; // 0.0 is divider between squads and units ids
     self
       .factions
       .iter()
@@ -249,13 +250,13 @@ impl Universe {
             for ref_cell_unit in read_squad.members.iter() {
               let unit = ref_cell_unit.borrow();
               if unit.x > start_x && unit.x < end_x && unit.y > start_y && unit.y < end_y {
-                selected_units_ids.push(
-                  read_squad
-                    .members
-                    .iter()
-                    .map(|squad_member| squad_member.borrow().id as f32)
-                    .collect(),
-                );
+                let mut members_ids: Vec<f32> = read_squad
+                  .members
+                  .iter()
+                  .map(|squad_member| squad_member.borrow().id as f32)
+                  .collect();
+                members_ids.push(-1.0); // -1.0 is divider between each squad
+                selected_units_ids.push(members_ids);
                 selected_squads_ids.push(read_squad.id as f32);
                 break;
               }
@@ -344,5 +345,42 @@ impl Universe {
         }
       };
     js_sys::Float32Array::from(&selected_enemy_units[..])
+  }
+
+  pub fn use_ability(
+    &mut self,
+    raw_squads_ids: Vec<f32>,
+    ability_id: f32,
+    target_x: f32,
+    target_y: f32,
+  ) {
+    let squads_ids = raw_squads_ids.into_iter().map(|id| id as u32).collect();
+    let user_faction = &mut self.factions[INDEX_OF_USER_FACTION];
+    user_faction.use_ability(squads_ids, ability_id as u8, target_x, target_y);
+  }
+
+  pub fn get_influence(&self) -> js_sys::Float32Array {
+    let scale = 10.0 / 600.0;
+    let influence = self
+      .factions
+      .iter()
+      .flat_map(|faction: &Faction| {
+        let squads_influence = faction
+          .squads
+          .iter()
+          .flat_map(|ref_cell_squad: &Rc<RefCell<Squad>>| {
+            let squad = ref_cell_squad.borrow();
+            vec![
+              squad.shared.center_point.0 * scale,
+              squad.shared.center_point.1 * scale,
+              (squad.members.len() as f32) * squad.squad_details.influence_value,
+              WEAPON_RANGE * scale,
+            ]
+          })
+          .collect::<Vec<f32>>();
+        [&[-1.0, faction.id as f32][..], &squads_influence[..]].concat()
+      })
+      .collect::<Vec<f32>>();
+    js_sys::Float32Array::from(&influence[..])
   }
 }

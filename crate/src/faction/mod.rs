@@ -1,5 +1,8 @@
 mod squads_manager;
-use crate::constants::MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE;
+use crate::constants::{
+  ATTACKERS_DISTANCE, MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE, MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS,
+  WEAPON_RANGE,
+};
 use crate::look_up_table::LookUpTable;
 use crate::position_utils::PositionUtils;
 use crate::representations_ids::FACTION_REPRESENTATION_ID;
@@ -25,6 +28,7 @@ pub struct Faction {
   pub squads: Vec<Rc<RefCell<Squad>>>, // call borrow() and share that Ref<Squad>, if it's not possible then wrap in Rc like Vec<Rc<RefCell<Squad>>>
   pub factory: Factory,
   pub squads_during_creation: Vec<SquadDuringCreation>,
+  pub portal: Rc<RefCell<Squad>>,
 }
 
 impl Faction {
@@ -34,13 +38,22 @@ impl Faction {
     factory_y: f32,
     factory_angle: f32,
     is_user: bool,
+    world: &mut World,
   ) -> Faction {
-    let factory = Factory::new(factory_x, factory_y, factory_angle, is_user);
+    let mut portal = Squad::new(id, SquadType::Portal);
+    portal.add_member(factory_x, factory_y);
+    portal.update_center();
+    let portal_id = portal.members[0].borrow().id;
+    let factory = Factory::new(portal_id, factory_x, factory_y, factory_angle, is_user);
+    let portal_squad = Rc::new(RefCell::new(portal));
+    world.all_squads.push(Rc::downgrade(&portal_squad));
+
     Faction {
       id,
       factory,
       resources: 0,
       squads: vec![],
+      portal: portal_squad,
       squads_during_creation: vec![],
     }
   }
@@ -161,7 +174,7 @@ impl Faction {
   }
 
   pub fn attack_enemy(&mut self, squads_ids: Vec<u32>, enemy: &Weak<RefCell<Squad>>) {
-    let mut attackers: Vec<&Rc<RefCell<Squad>>> = self
+    let attackers: Vec<&Rc<RefCell<Squad>>> = self
       .squads
       .iter()
       .filter(|squad| squads_ids.contains(&squad.borrow().id))
@@ -171,7 +184,18 @@ impl Faction {
       .iter()
       .for_each(|squad| squad.borrow_mut().attack_enemy(enemy));
 
-    SquadsManager::manage_single_hunters_group(&mut attackers);
+    let aim_position = enemy.upgrade().unwrap().borrow().shared.center_point;
+
+    let mut attackers_out_of_range: Vec<&Rc<RefCell<Squad>>> = attackers
+      .into_iter()
+      .filter(|squad| {
+        let squad_position = squad.borrow().shared.center_point;
+        (squad_position.0 - aim_position.0).hypot(squad_position.1 - aim_position.1)
+          > ATTACKERS_DISTANCE
+      })
+      .collect();
+
+    SquadsManager::set_positions_in_range(&mut attackers_out_of_range, aim_position, false);
   }
 
   pub fn search_for_enemies(
@@ -220,5 +244,55 @@ impl Faction {
 
   pub fn manage_hunters(&mut self) {
     SquadsManager::manage_hunters(self);
+  }
+
+  pub fn use_ability(
+    &mut self,
+    squads_ids: Vec<u32>,
+    ability_id: u8,
+    target_x: f32,
+    target_y: f32,
+  ) {
+    let squads: Vec<&Rc<RefCell<Squad>>> = self
+      .squads
+      .iter()
+      .filter(|ref_cell_squad| squads_ids.contains(&ref_cell_squad.borrow().id))
+      .collect();
+
+    let positions = PositionUtils::get_squads_positions(squads.len(), target_x, target_y);
+
+    let squads_out_of_range: Vec<Option<&Rc<RefCell<Squad>>>> = squads
+      .clone()
+      .into_iter()
+      .enumerate()
+      .map(|(index, ref_cell_squad)| {
+        let mut squad = ref_cell_squad.borrow_mut();
+        let squad_position = squad.shared.center_point;
+        let target = positions[index];
+        let out_of_range = (squad_position.0 - target.0).hypot(squad_position.1 - target.1)
+          > WEAPON_RANGE - MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS;
+        if !out_of_range {
+          squad.stop_running();
+          None
+        } else {
+          Some(ref_cell_squad)
+        }
+      })
+      .collect();
+
+    squads_out_of_range
+      .iter()
+      .enumerate()
+      .for_each(|(index, option_squad)| {
+        if let Some(squad) = option_squad {
+          let target = positions[index];
+          SquadsManager::set_positions_in_range(&mut vec![squad], target, true);
+        }
+      });
+
+    squads.iter().enumerate().for_each(|(index, rc_hunter)| {
+      let target = positions[index];
+      rc_hunter.borrow_mut().start_using_ability(target)
+    });
   }
 }

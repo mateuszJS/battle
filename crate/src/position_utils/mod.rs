@@ -59,7 +59,6 @@ impl PositionUtils {
   pub fn get_attackers_position(
     number_of_needed_positions: usize,
     squads_average_position: (f32, f32),
-    range: f32,
     aim: (f32, f32),
   ) -> Vec<(f32, f32)> {
     // TODO: handle different ranges

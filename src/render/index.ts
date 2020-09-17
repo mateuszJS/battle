@@ -5,9 +5,9 @@
 // import influenceController from '~/ai/influenceMap'
 // import aiController from '~/ai/ai'
 // import Icons from '~/modules/icons'
-import REPRESENTATION_IDS from './representationsIds'
+import REPRESENTATION_IDS, { ObjectType } from './representationsIds'
 import * as representationUpdaters from './representationUpdaters'
-import { UniverseRepresentation } from '../setup'
+import { UniverseRepresentation } from '~/initGame'
 import Factory from '~/representation/Factory'
 import Unit from '~/representation/Unit'
 import UnitsFactory from '~/representation/UnitFactory'
@@ -63,11 +63,13 @@ const render = (
           )
         } else {
           universeRepresentation[unitId] = UnitsFactory.createUnit(
+            unitId,
             universeData[indexOfId + 1],
             universeData[indexOfId + 2],
             universeData[indexOfId + 3],
             factionId === USER_FACTION_ID,
             universeData[indexOfId + 4],
+            REPRESENTATION_IDS.SOLIDER,
           )
         }
 
@@ -87,11 +89,33 @@ const render = (
         break
       }
       case REPRESENTATION_IDS.BULLETS: {
-        BulletFactory.create(
-          universeData.slice(index + 1),
-          universeRepresentation,
-        )
+        BulletFactory.create(universeData.slice(index + 1), universeRepresentation)
         index = universeLength
+        break
+      }
+      case REPRESENTATION_IDS.RAPTOR: {
+        const indexOfId = index + 1
+        const newIndexValue = indexOfId + 6
+        const unitId = universeData[indexOfId]
+        const unit = universeRepresentation[unitId]
+        if (unit) {
+          representationUpdaters.updateUnit(
+            unit as Unit,
+            universeData.slice(indexOfId + 1, newIndexValue),
+          )
+        } else {
+          universeRepresentation[unitId] = UnitsFactory.createUnit(
+            unitId,
+            universeData[indexOfId + 1],
+            universeData[indexOfId + 2],
+            universeData[indexOfId + 3],
+            factionId === USER_FACTION_ID,
+            universeData[indexOfId + 4],
+            REPRESENTATION_IDS.RAPTOR,
+          )
+        }
+
+        index = newIndexValue
         break
       }
       default:

@@ -1,4 +1,10 @@
 import EffectsFactory from '~/representation/EffectFactory'
+import {
+  addItemToProductionLine,
+  removeItemFromProductionLine,
+  updateItemInProductionLine,
+} from '~/buttons/factory'
+import getMySelection from './getMySelection'
 
 const portalProperties = [
   {
@@ -39,13 +45,13 @@ class Factory {
   private y: number
   private portalFX: PIXI.AnimatedSprite
   private productionLine: ProductionItem[]
+  private selection: PIXI.Sprite
 
   constructor(
     // factionId: number,
     x: number,
     y: number,
     angle: number,
-    sortingLayer: PIXI.display.Group,
   ) {
     const safeAngle = (angle + 2 * Math.PI * 0.75) % (Math.PI * 2)
     // index = 0, 1, 2, 3
@@ -60,10 +66,7 @@ class Factory {
     gateBottom.x = props.gateBottom.x
     gateBottom.y = props.gateBottom.y
 
-    const portalFX = EffectsFactory.createPortalEffect(
-      props.portalEffect.x,
-      props.portalEffect.y,
-    )
+    const portalFX = EffectsFactory.createPortalEffect(props.portalEffect.x, props.portalEffect.y)
 
     portalFX.height = props.portalEffect.height
     portalFX.width = props.portalEffect.width
@@ -72,13 +75,9 @@ class Factory {
     gateTop.anchor.set(0.5, props.gateTop.anchorY)
     gateBottom.anchor.set(0.5, props.gateBottom.anchorY)
 
-    gateBottom.parentGroup = sortingLayer
-    portalFX.parentGroup = sortingLayer
-    gateTop.parentGroup = sortingLayer
-
-    window.app.stage.addChild(gateBottom)
-    window.app.stage.addChild(portalFX)
-    window.app.stage.addChild(gateTop)
+    window.world.addChild(gateBottom)
+    window.world.addChild(portalFX)
+    window.world.addChild(gateTop)
 
     const sprites = [gateBottom, portalFX, gateTop]
     sprites.forEach(child => {
@@ -93,13 +92,14 @@ class Factory {
 
     this.x = x
     this.y = y
-    this.productionLine = [
-      { id: 0, node: null },
-      { id: 0, node: null },
-      { id: 0, node: null },
-      { id: 0, node: null },
-      { id: 0, node: null },
-    ]
+
+    const selection = getMySelection(false)
+    selection.x = x
+    selection.y = y
+    selection.width = 200
+    selection.height = 200
+    window.world.addChild(selection)
+    this.selection = selection
   }
 
   turnOnProduction() {
@@ -122,34 +122,23 @@ class Factory {
 
   updateProductionLine(progress: number, data: number[]) {
     for (let i = 0; i < data.length; i++) {
-      const representationItem = this.productionLine[i]
-      if ((representationItem && representationItem.id) !== data[i]) {
-        if (data[i]) {
-          const button = document.createElement('button')
-          button.className = 'solider'
-
-          this.productionLine[i] = {
-            id: data[i],
-            node: button,
-          }
-          document
-            .getElementById('factory-list')
-            .appendChild(this.productionLine[i].node)
-        } else {
-          document
-            .getElementById('factory-list')
-            .removeChild(this.productionLine[i].node)
-          this.productionLine[i] = {
-            id: 0,
-            node: null,
-          }
-        }
+      if (data[i]) {
+        addItemToProductionLine(i, data[i])
+      } else {
+        removeItemFromProductionLine(i)
       }
     }
-
     if (progress !== 0) {
-      this.productionLine[0].node.style.opacity = `${progress}`
+      updateItemInProductionLine(progress)
     }
+  }
+
+  select() {
+    this.selection.visible = true
+  }
+
+  deselect() {
+    this.selection.visible = false
   }
 }
 

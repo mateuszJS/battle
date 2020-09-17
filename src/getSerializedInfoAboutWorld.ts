@@ -43,9 +43,7 @@ const getSerializedInfoAboutWorld = (): {
   obstacles: Float32Array
 } => {
   obstaclesDebug(obstacles)
-  const serializedPlayers = players
-    .map(({ id, base }) => [id, base.x, base.y, base.angle])
-    .flat()
+  const serializedPlayers = players.map(({ id, base }) => [id, base.x, base.y, base.angle]).flat()
   const serializedObstacles = obstacles
     .map(obstaclePoints => [...obstaclePoints.flat(), OBSTACLES_DIVIDER])
     .flat()

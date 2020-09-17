@@ -15,7 +15,7 @@ module.exports = {
 	},
 	devtool: 'eval-source-map',
 	resolve: {
-    extensions: ['.js', '.ts', '.wasm'],
+    extensions: ['.js', '.ts', '.wasm', '.vert', '.frag'],
   },
   stats: { // looks like the 'minimal', but with colors
     all: false,
@@ -40,6 +40,10 @@ module.exports = {
 						}
 					}
 				]
+      },
+      {
+				test: /\.(vert|frag)$/,
+				use: 'raw-loader'
 			},
     ]
 	},
