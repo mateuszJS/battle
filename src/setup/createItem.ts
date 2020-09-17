@@ -1,7 +1,7 @@
 import { DropShadowFilter } from '@pixi/filter-drop-shadow'
 import getTexture from '~/getTexture'
 import getPerspectiveTexture from './getPerspectiveTexture'
-import fragmentShader from './shared.frag'
+import overlayFragmentShader from './overlay.frag'
 import vertexShader from './shared.vert'
 
 const createItem = (
@@ -29,7 +29,7 @@ const createItem = (
     baseTexture: false,
   })
   // looks like Sprite2d has to receive texture in correct size
-  let btnPerspectiveTexture
+  let btnPerspectiveTexture: PIXI.RenderTexture
   if (projectionPointsY) {
     const sprite2d = new PIXI.projection.Sprite2d(btnBaseTextureResized)
     btnPerspectiveTexture = getPerspectiveTexture(sprite2d, projectionPointsY)
@@ -77,14 +77,13 @@ const createItem = (
   // menuContainer.addChild(ccc)
   // return
 
-  const btnShadowShader = PIXI.Shader.from(vertexShader, fragmentShader, {
+  const btnShadowShader = PIXI.Shader.from(vertexShader, overlayFragmentShader, {
     uTextureSampler2: btnShadowTexture,
     uMapSampler2: backgroundTexture,
     uMapSize: [window.innerWidth, window.innerHeight],
-    uColorBurn: false,
   })
 
-  const shadowGeometry = new PIXI.Geometry()
+  const geometry = new PIXI.Geometry()
     .addAttribute(
       'aVertexPosition',
       [
@@ -105,7 +104,7 @@ const createItem = (
     .addIndex([0, 1, 2, 0, 2, 3])
   // .interleave();
 
-  const btnShadowMesh = new PIXI.Mesh(shadowGeometry, btnShadowShader as PIXI.MeshMaterial)
+  const btnShadowMesh = new PIXI.Mesh(geometry, btnShadowShader as PIXI.MeshMaterial)
 
   // TO TEST OVERLAY
   // menuContainer.addChild(background)
@@ -135,15 +134,13 @@ const createItem = (
     btnShadowY,
   )
 
-  const btnContainerShader = PIXI.Shader.from(vertexShader, fragmentShader, {
-    uTextureSampler2: startBtnContainerTexture,
-    uMapSampler2: backgroundTexture,
-    uMapSize: [window.innerWidth, window.innerHeight],
-    uColorBurn: true,
-  })
-  const btnMesh = new PIXI.Mesh(shadowGeometry, btnContainerShader as PIXI.MeshMaterial)
-
-  return btnMesh
+  return {
+    geometry,
+    texture: startBtnContainerTexture,
+    perspectiveTexture: btnPerspectiveTexture,
+    x: btnBaseX,
+    y: btnBaseY,
+  }
 }
 
 export default createItem

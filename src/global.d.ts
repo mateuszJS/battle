@@ -9,6 +9,7 @@ declare global {
     mapWidth: number
     mapHeight: number
     startGame: (playersList: string[]) => void
+    setAlpha: (x: number) => void
   }
 
   interface Point {

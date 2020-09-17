@@ -1,7 +1,7 @@
 use crate::id_generator::IdGenerator;
 use crate::position_utils::PositionUtils;
 use crate::squad_types::{get_squad_details, SquadDetails, SquadType};
-use crate::unit::{Unit, STATE_ABILITY, STATE_DIE, STATE_RUN};
+use crate::unit::{Unit, STATE_ABILITY, STATE_DIE};
 use crate::weapon_types::Weapon;
 
 use crate::World;
@@ -158,9 +158,7 @@ impl Squad {
 
     if self.shared.stored_track_destination.is_none() {
       self.members.iter().for_each(|unit| {
-        if unit.borrow().state == STATE_RUN {
-          unit.borrow_mut().stop_running(&self.shared);
-        }
+        unit.borrow_mut().stop_running(&self.shared);
       });
     } else {
       self.shared.stored_track_destination = None;
@@ -278,5 +276,8 @@ impl Squad {
       return;
     }
     self.shared.ability_target = Some(target);
+    self.members.iter().for_each(|unit| {
+      unit.borrow_mut().change_state_to_idle(&self.shared);
+    });
   }
 }
