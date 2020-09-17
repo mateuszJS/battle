@@ -88,14 +88,10 @@ const createItem = (
       'aVertexPosition',
       [
         /* eslint-disable prettier/prettier */
-        btnShadowX,
-        btnShadowY,
-        btnShadowX + btnShadowWidth,
-        btnShadowY,
-        btnShadowX + btnShadowWidth,
-        btnShadowY + btnShadowHeight,
-        btnShadowX,
-        btnShadowY + btnShadowHeight,
+        btnShadowX, btnShadowY,
+        btnShadowX + btnShadowWidth, btnShadowY,
+        btnShadowX + btnShadowWidth, btnShadowY + btnShadowHeight,
+        btnShadowX, btnShadowY + btnShadowHeight,
         /* eslint-enable prettier/prettier */
       ],
       2,

@@ -1,7 +1,7 @@
 use crate::id_generator::IdGenerator;
 use crate::position_utils::PositionUtils;
 use crate::squad_types::{get_squad_details, SquadDetails, SquadType};
-use crate::unit::{Unit, STATE_ABILITY, STATE_DIE};
+use crate::unit::{Unit, STATE_DIE};
 use crate::weapon_types::Weapon;
 
 use crate::World;

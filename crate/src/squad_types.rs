@@ -18,6 +18,7 @@ pub struct SquadDetails {
   pub unit_model_offset_y: f32, // for selection
   pub selection_threshold: f32, // for selection
   pub weapon: &'static Weapon,
+  pub influence_value: f32,
 }
 
 static SOLIDER_DETAILS: SquadDetails = SquadDetails {
@@ -31,6 +32,7 @@ static SOLIDER_DETAILS: SquadDetails = SquadDetails {
   selection_threshold: 40.0,
   unit_model_offset_y: 20.0,
   weapon: &STANDARD_RIFLE_DETAILS,
+  influence_value: 0.1,
 };
 
 static RAPTOR_DETAILS: SquadDetails = SquadDetails {
@@ -44,6 +46,7 @@ static RAPTOR_DETAILS: SquadDetails = SquadDetails {
   selection_threshold: 40.0,
   unit_model_offset_y: 20.0,
   weapon: &STANDARD_RIFLE_DETAILS,
+  influence_value: 0.1,
 };
 
 static PORTAL_DETAILS: SquadDetails = SquadDetails {
@@ -55,6 +58,7 @@ static PORTAL_DETAILS: SquadDetails = SquadDetails {
   selection_threshold: 100.0,
   unit_model_offset_y: 40.0,
   weapon: &NON_WEAPON,
+  influence_value: 0.1,
 };
 
 pub fn get_squad_details(squad_type: &SquadType) -> &'static SquadDetails {

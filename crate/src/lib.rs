@@ -45,7 +45,7 @@ use wasm_bindgen::prelude::*;
 use bullets_manager::BulletsManager;
 use constants::{
   MANAGE_HUNTERS_PERIOD, SEARCH_FOR_ENEMIES_PERIOD, THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER,
-  UPDATE_SQUAD_CENTER_PERIOD,
+  UPDATE_SQUAD_CENTER_PERIOD, WEAPON_RANGE,
 };
 use faction::Faction;
 use factory::Factory;
@@ -357,5 +357,30 @@ impl Universe {
     let squads_ids = raw_squads_ids.into_iter().map(|id| id as u32).collect();
     let user_faction = &mut self.factions[INDEX_OF_USER_FACTION];
     user_faction.use_ability(squads_ids, ability_id as u8, target_x, target_y);
+  }
+
+  pub fn get_influence(&self) -> js_sys::Float32Array {
+    let scale = 10.0 / 600.0;
+    let influence = self
+      .factions
+      .iter()
+      .flat_map(|faction: &Faction| {
+        let squads_influence = faction
+          .squads
+          .iter()
+          .flat_map(|ref_cell_squad: &Rc<RefCell<Squad>>| {
+            let squad = ref_cell_squad.borrow();
+            vec![
+              squad.shared.center_point.0 * scale,
+              squad.shared.center_point.1 * scale,
+              (squad.members.len() as f32) * squad.squad_details.influence_value,
+              WEAPON_RANGE * scale,
+            ]
+          })
+          .collect::<Vec<f32>>();
+        [&[-1.0, faction.id as f32][..], &squads_influence[..]].concat()
+      })
+      .collect::<Vec<f32>>();
+    js_sys::Float32Array::from(&influence[..])
   }
 }
