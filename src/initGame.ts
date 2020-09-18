@@ -76,6 +76,7 @@ const initGame = () => {
 
     if (timeToClearAbilitiesIcons % 200 === 0) {
       const influence = universe.get_influence()
+      // updateInfluenceMap(new Float32Array([500.0, 500.0, 100, 200]))
       updateInfluenceMap(influence)
     }
 

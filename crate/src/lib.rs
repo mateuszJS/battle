@@ -360,7 +360,6 @@ impl Universe {
   }
 
   pub fn get_influence(&self) -> js_sys::Float32Array {
-    let scale = 10.0 / 600.0;
     let influence = self
       .factions
       .iter()
@@ -371,14 +370,16 @@ impl Universe {
           .flat_map(|ref_cell_squad: &Rc<RefCell<Squad>>| {
             let squad = ref_cell_squad.borrow();
             vec![
-              squad.shared.center_point.0 * scale,
-              squad.shared.center_point.1 * scale,
+              squad.shared.center_point.0,
+              squad.shared.center_point.1,
               (squad.members.len() as f32) * squad.squad_details.influence_value,
-              WEAPON_RANGE * scale,
+              WEAPON_RANGE,
             ]
           })
           .collect::<Vec<f32>>();
-        [&[-1.0, faction.id as f32][..], &squads_influence[..]].concat()
+        squads_influence
+        //   .collect::<Vec<f32>>();
+        // [&[-1.0, faction.id as f32][..], &squads_influence[..]].concat()
       })
       .collect::<Vec<f32>>();
     js_sys::Float32Array::from(&influence[..])
