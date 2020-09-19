@@ -377,9 +377,7 @@ impl Universe {
             ]
           })
           .collect::<Vec<f32>>();
-        squads_influence
-        //   .collect::<Vec<f32>>();
-        // [&[-1.0, faction.id as f32][..], &squads_influence[..]].concat()
+        [&[-1.0, faction.id as f32][..], &squads_influence[..]].concat()
       })
       .collect::<Vec<f32>>();
     js_sys::Float32Array::from(&influence[..])
