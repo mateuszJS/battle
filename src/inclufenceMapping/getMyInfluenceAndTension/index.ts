@@ -1,7 +1,6 @@
 import getTexture from '~/getTexture'
 import fragmentShader from './fragment.frag'
 import vertexShader from './vertex.vert'
-import { SCALE } from '../consts'
 
 const getFactionDataAndRest = (input: Float32Array) => {
   const factionEndIndex = input.indexOf(-1)
@@ -22,32 +21,22 @@ const getFactionDataAndRest = (input: Float32Array) => {
 
 const shaders: { [key: number]: PIXI.Shader } = {}
 
-const addFactionInfluence = (input: Float32Array) => {
-  const mapWidth = window.mapWidth * SCALE
-  const mapHeight = window.mapHeight * SCALE
+const getMyInfluenceAndTension = (
+  input: Float32Array,
+  geometry: PIXI.Geometry,
+  mapWidth: number,
+  mapHeight: number,
+) => {
   const uScale = Math.min(window.mapWidth, window.mapHeight)
   const uMapSize = [window.mapWidth, window.mapHeight]
-  const geometry = new PIXI.Geometry()
-    .addAttribute(
-      'aVertexPosition',
-      [
-        /* eslint-disable prettier/prettier */
-        0, 0,
-        mapWidth, 0,
-        mapWidth, mapHeight,
-        0, mapHeight,
-        /* eslint-enable prettier/prettier */
-      ],
-      2,
-    )
-    .addIndex([0, 1, 2, 0, 2, 3])
 
   const allFactionsData: { [key: number]: PIXI.Texture } = {}
-
+  console.log(input)
   let restData = input.slice(1) // without first -1
   let uAccTexture
   while (restData.length) {
     const { id, data, rest } = getFactionDataAndRest(restData)
+    console.log(id, data)
     restData = rest
 
     if (!data.length) continue
@@ -71,4 +60,4 @@ const addFactionInfluence = (input: Float32Array) => {
   return allFactionsData
 }
 
-export default addFactionInfluence
+export default getMyInfluenceAndTension
