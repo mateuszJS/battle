@@ -1,26 +1,6 @@
 import getTexture from '~/getTexture'
 import fragmentShader from './fragment.frag'
 import vertexShader from './vertex.vert'
-import { MAP_WIDTH, MAP_HEIGHT } from 'Consts'
-
-const errorInput = new Float32Array([
-  -1,
-  1,
-  205.2810821533203,
-  252.26524353027344,
-  0.05999999865889549,
-  600,
-  676.2890625,
-  94.77820587158203,
-  0.05999999865889549,
-  600,
-  -1,
-  2,
-  1019.48291015625,
-  1063.8466796875,
-  0.07000000029802322,
-  600,
-])
 
 const getFactionDataAndRest = (input: Float32Array) => {
   const factionEndIndex = input.indexOf(-1)
@@ -48,12 +28,9 @@ const getMyInfluenceAndTension = (
   mapHeight: number,
   scale: number,
 ) => {
-  const uScale = Math.min(mapWidth, mapHeight)
-  const uMapSize = [mapWidth, mapHeight]
-
   const allFactionsData: Array<{
     id: number
-    texture: PIXI.Texture
+    texture: PIXI.RenderTexture
     data: Float32Array
   }> = []
 
@@ -69,7 +46,7 @@ const getMyInfluenceAndTension = (
       shaders[data.length] = PIXI.Shader.from(
         vertexShader,
         fragmentShader.replace(/XX/g, data.length.toString()),
-        { uScale, uMapSize, scale },
+        { uScale: scale, uMapSize: [mapWidth, mapHeight] },
       )
     }
 

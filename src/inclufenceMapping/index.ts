@@ -1,5 +1,6 @@
 import getMyInfluenceAndTension from './getMyInfluenceAndTension'
 import getInfluenceAndVulnerabilityMap from './getInfluenceAndVulnerabilityMap'
+import getBestPlace from './getBestPlace'
 import { MAP_WIDTH, MAP_HEIGHT } from 'Consts'
 
 const SCALE = 0.1 // 100 / 600 // the same is in lib.rs
@@ -51,11 +52,11 @@ export const updateInfluenceMap = (influence: Float32Array) => {
         'aVertexPosition',
         [
           /* eslint-disable prettier/prettier */
-        0, 0,
-        mapWidth, 0,
-        mapWidth, mapHeight,
-        0, mapHeight,
-        /* eslint-enable prettier/prettier */
+          0, 0,
+          mapWidth, 0,
+          mapWidth, mapHeight,
+          0, mapHeight,
+          /* eslint-enable prettier/prettier */
         ],
         2,
       )
@@ -63,14 +64,14 @@ export const updateInfluenceMap = (influence: Float32Array) => {
       .addIndex([0, 1, 2, 0, 2, 3])
   }
 
-  const firstFactionVulnerabilityMap = getInfluenceAndVulnerabilityMap(
+  const firstFactionInflueneceAndVulnerabilityMap = getInfluenceAndVulnerabilityMap(
     myInfluenceTextures[0],
     tensionMap,
     vulnerabilityGeometry,
     mapWidth,
     mapHeight,
   )
-  firstFactionVulnerabilityMap.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST
+  firstFactionInflueneceAndVulnerabilityMap.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST
 
   const { mode } = window
   let sprite
@@ -83,12 +84,51 @@ export const updateInfluenceMap = (influence: Float32Array) => {
   } else if (mode === 2) {
     sprite = new PIXI.Sprite(tensionMap)
   } else {
-    sprite = new PIXI.Sprite(firstFactionVulnerabilityMap)
+    sprite = new PIXI.Sprite(firstFactionInflueneceAndVulnerabilityMap)
   }
+  sprite.filters = [new PIXI.filters.AlphaFilter(10.0)]
   sprite.width = MAP_WIDTH
   sprite.height = MAP_HEIGHT
 
   container.addChild(sprite)
+
+  const faction = myInfluencesList[0]
+  if (faction.data.length > 6) {
+    // there is any squad
+    const myInfluencePixels = window.app.renderer.extract.pixels(faction.texture)
+    const influenceAndVulnerabilityMapPixels = window.app.renderer.extract.pixels(
+      firstFactionInflueneceAndVulnerabilityMap,
+    )
+    const squadId = faction.data[5]
+    const squadX = faction.data[6]
+    const squadY = faction.data[7]
+    // console.log(faction.data)
+    // console.log(squadX, squadY)
+    const x = Math.round(squadX * SCALE)
+    const y = Math.round(squadY * SCALE)
+    const textureIndex = mapWidth * 4 * y + x * 4
+    // TODO: isntead of calculating in JS, we should create one useful texture for wasm, and do everything there
+    const isSafe =
+      myInfluencePixels[textureIndex] * 0.7 < influenceAndVulnerabilityMapPixels[textureIndex]
+    if (isSafe) {
+      const placesBySafe = getBestPlace(
+        firstFactionInflueneceAndVulnerabilityMap,
+        x,
+        y,
+        1.0,
+        vulnerabilityGeometry,
+        mapWidth,
+        mapHeight,
+        SCALE,
+      )
+      const placesBySafePixels = window.app.renderer.extract.pixels(placesBySafe)
+      const index = findMaxIndex(placesBySafePixels)
+      const resultX = index % (4 * mapWidth)
+      const resultY = Math.floor(index / (mapWidth * 4))
+      console.log(resultX, resultY)
+    }
+    // console.log(myInfluencePixels.length, mapHeight * mapWidth * 4)
+  }
 
   // sprite.width = 500
   // sprite.height = 500

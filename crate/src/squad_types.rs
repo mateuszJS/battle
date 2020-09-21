@@ -46,7 +46,7 @@ static RAPTOR_DETAILS: SquadDetails = SquadDetails {
   selection_threshold: 40.0,
   unit_model_offset_y: 20.0,
   weapon: &STANDARD_RIFLE_DETAILS,
-  influence_value: 0.02,
+  influence_value: 0.013,
 };
 
 static PORTAL_DETAILS: SquadDetails = SquadDetails {
