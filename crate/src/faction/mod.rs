@@ -1,8 +1,9 @@
 mod squads_manager;
 use crate::constants::{
-  ATTACKERS_DISTANCE, MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE, MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS,
-  WEAPON_RANGE,
+  FACTORY_INFLUENCE_RANGE, FACTORY_INFLUENCE_VALUE, ATTACKERS_DISTANCE, MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE, MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS,
+  WEAPON_RANGE, INFLUENCE_MAP_SCALE,
 };
+
 use crate::look_up_table::LookUpTable;
 use crate::position_utils::PositionUtils;
 use crate::representations_ids::FACTION_REPRESENTATION_ID;
@@ -293,6 +294,46 @@ impl Faction {
     squads.iter().enumerate().for_each(|(index, rc_hunter)| {
       let target = positions[index];
       rc_hunter.borrow_mut().start_using_ability(target)
+    });
+  }
+
+  pub fn get_influence(&self) -> Vec<f32> {
+    let faction_info_and_portal_influence = [
+      -1.0,
+      self.id as f32,
+      0.0,
+      self.factory.x,
+      self.factory.y,
+      FACTORY_INFLUENCE_VALUE,
+      FACTORY_INFLUENCE_RANGE,
+    ];
+
+    let squads_influence = self
+      .squads
+      .iter()
+      .flat_map(|ref_cell_squad: &Rc<RefCell<Squad>>| {
+        let squad = ref_cell_squad.borrow();
+        vec![
+          squad.id as f32,
+          squad.shared.center_point.0,
+          squad.shared.center_point.1,
+          (squad.members.len() as f32) * squad.squad_details.influence_value,
+          WEAPON_RANGE * 1.2,
+        ]
+      })
+      .collect::<Vec<f32>>();
+    [
+      &faction_info_and_portal_influence[..],
+      &squads_influence[..],
+    ].concat()
+  }
+
+  pub fn do_ai(&mut self, texture: Vec<u8>) {
+    let squads = self.squads.iter().filter(|ref_cell_squad| {
+      let squad = ref_cell_aim.borrow();
+      let x = squad.center_point.0 * INFLUENCE_MAP_SCALE;
+      let y = squad.center_point.1 * INFLUENCE_MAP_SCALE;
+      let textureIndex = mapWidth * 4 * y.floor() + x.floor() * 4;
     });
   }
 }

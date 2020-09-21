@@ -44,7 +44,7 @@ use wasm_bindgen::prelude::*;
 
 use bullets_manager::BulletsManager;
 use constants::{
-  FACTORY_INFLUENCE_RANGE, FACTORY_INFLUENCE_VALUE, MANAGE_HUNTERS_PERIOD,
+  MANAGE_HUNTERS_PERIOD,
   SEARCH_FOR_ENEMIES_PERIOD, THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER,
   UPDATE_SQUAD_CENTER_PERIOD, WEAPON_RANGE,
 };
@@ -364,36 +364,15 @@ impl Universe {
     let influence = self
       .factions
       .iter()
-      .flat_map(|faction: &Faction| {
-        let squads_influence = faction
-          .squads
-          .iter()
-          .flat_map(|ref_cell_squad: &Rc<RefCell<Squad>>| {
-            let squad = ref_cell_squad.borrow();
-            vec![
-              squad.id as f32,
-              squad.shared.center_point.0,
-              squad.shared.center_point.1,
-              (squad.members.len() as f32) * squad.squad_details.influence_value,
-              WEAPON_RANGE * 1.2,
-            ]
-          })
-          .collect::<Vec<f32>>();
-        [
-          &[
-            -1.0,
-            faction.id as f32,
-            0.0,
-            faction.factory.x,
-            faction.factory.y,
-            FACTORY_INFLUENCE_VALUE,
-            FACTORY_INFLUENCE_RANGE,
-          ][..],
-          &squads_influence[..],
-        ]
-        .concat()
-      })
+      .flat_map(|faction| faction.get_influence())
       .collect::<Vec<f32>>();
     js_sys::Float32Array::from(&influence[..])
+  }
+
+  pub fn do_ai(&mut self, faction_id: u32, texture: Vec<u8>) {
+    let faction_option = self.factions.iter().find(|faction| faction.id == faction_id);
+    if let Some(faction) = faction_option {
+      faction.do_ai(texture: Vec<u8>);
+    }
   }
 }
