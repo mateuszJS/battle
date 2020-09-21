@@ -3,6 +3,7 @@ precision mediump float;
 uniform float uInfluence[XX];
 uniform float uScale;
 uniform sampler2D uAccTexture;
+uniform float scale;
 
 varying vec2 vCoord;
 varying vec2 vCoordNormal;
@@ -10,8 +11,8 @@ varying vec2 vCoordNormal;
 void main() {
   float value = 0.0;
   for (int i=0; i<XX; i+=4) {
-    float dis = distance(vCoord, vec2(uInfluence[i], uInfluence[i + 1])) / uScale;
-    float max_range = uInfluence[i + 3] / uScale;
+    float dis = distance(vCoord, vec2(uInfluence[i], uInfluence[i + 1]) * scale);
+    float max_range = uInfluence[i + 3] * scale;
     if (dis < max_range) {
       value += ((max_range - dis) / max_range) * uInfluence[i + 2];
     }

@@ -1,7 +1,8 @@
 import getMyInfluenceAndTension from './getMyInfluenceAndTension'
 import getInfluenceAndVulnerabilityMap from './getInfluenceAndVulnerabilityMap'
+import { MAP_WIDTH, MAP_HEIGHT } from 'Consts'
 
-const SCALE = 1 // 100 / 600 // the same is in lib.rs
+const SCALE = 0.1 // 100 / 600 // the same is in lib.rs
 
 let container: PIXI.Container
 let influenceGeometry: PIXI.Geometry
@@ -13,8 +14,8 @@ export const updateInfluenceMap = (influence: Float32Array) => {
   if (!influence.length) return
 
   if (!influenceGeometry) {
-    mapWidth = window.mapWidth * SCALE
-    mapHeight = window.mapHeight * SCALE
+    mapWidth = MAP_WIDTH * SCALE
+    mapHeight = MAP_HEIGHT * SCALE
     influenceGeometry = new PIXI.Geometry()
       .addAttribute(
         'aVertexPosition',
@@ -39,8 +40,9 @@ export const updateInfluenceMap = (influence: Float32Array) => {
     influenceGeometry,
     mapWidth,
     mapHeight,
+    SCALE,
   )
-  const myInfluenceTextures = Object.values(myInfluencesList) // red channel
+  const myInfluenceTextures = Object.values(myInfluencesList).map(influInfo => influInfo.texture) // red channel
   const tensionMap = myInfluenceTextures[myInfluenceTextures.length - 1] // green channel
 
   if (!vulnerabilityGeometry) {
@@ -68,7 +70,24 @@ export const updateInfluenceMap = (influence: Float32Array) => {
     mapWidth,
     mapHeight,
   )
-  const sprite = new PIXI.Sprite(firstFactionVulnerabilityMap)
+
+  const { mode } = window
+  let sprite
+  if (mode === 0) {
+    // is black area myInfluenceTextures[0]
+    sprite = new PIXI.Sprite(myInfluenceTextures[0])
+  } else if (mode === 1) {
+    // is black area myInfluenceTextures[0]
+    sprite = new PIXI.Sprite(myInfluenceTextures[1])
+  } else if (mode === 2) {
+    sprite = new PIXI.Sprite(tensionMap)
+  } else {
+    sprite = new PIXI.Sprite(firstFactionVulnerabilityMap)
+  }
+  sprite.alpha = 0.4
+  sprite.width = MAP_WIDTH
+  sprite.height = MAP_HEIGHT
+
   container.addChild(sprite)
 
   // sprite.width = 500
