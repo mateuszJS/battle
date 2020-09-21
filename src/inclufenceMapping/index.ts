@@ -70,6 +70,7 @@ export const updateInfluenceMap = (influence: Float32Array) => {
     mapWidth,
     mapHeight,
   )
+  firstFactionVulnerabilityMap.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST
 
   const { mode } = window
   let sprite
@@ -84,7 +85,6 @@ export const updateInfluenceMap = (influence: Float32Array) => {
   } else {
     sprite = new PIXI.Sprite(firstFactionVulnerabilityMap)
   }
-  sprite.alpha = 0.4
   sprite.width = MAP_WIDTH
   sprite.height = MAP_HEIGHT
 

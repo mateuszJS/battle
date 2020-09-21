@@ -84,7 +84,6 @@ const getMyInfluenceAndTension = (
     })
   }
 
-  // texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST
   return allFactionsData
 }
 
