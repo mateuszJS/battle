@@ -1,9 +1,8 @@
 import getMyInfluenceAndTension from './getMyInfluenceAndTension'
 import getInfluenceAndVulnerabilityMap from './getInfluenceAndVulnerabilityMap'
 import getBestPlace from './getBestPlace'
-import { MAP_WIDTH, MAP_HEIGHT } from 'Consts'
-
-const SCALE = 0.1 // 100 / 600 // the same is in lib.rs
+import { MAP_WIDTH, MAP_HEIGHT, INFLUENCE_MAP_SCALE } from 'Consts'
+import { Universe } from '../../crate/pkg/index'
 
 let container: PIXI.Container
 let influenceGeometry: PIXI.Geometry
@@ -11,12 +10,12 @@ let vulnerabilityGeometry: PIXI.Geometry
 let mapWidth: number
 let mapHeight: number
 
-export const updateInfluenceMap = (influence: Float32Array) => {
+export const updateInfluenceMap = (influence: Float32Array, universe: Universe) => {
   if (!influence.length) return
 
   if (!influenceGeometry) {
-    mapWidth = MAP_WIDTH * SCALE
-    mapHeight = MAP_HEIGHT * SCALE
+    mapWidth = MAP_WIDTH * INFLUENCE_MAP_SCALE
+    mapHeight = MAP_HEIGHT * INFLUENCE_MAP_SCALE
     influenceGeometry = new PIXI.Geometry()
       .addAttribute(
         'aVertexPosition',
@@ -41,7 +40,7 @@ export const updateInfluenceMap = (influence: Float32Array) => {
     influenceGeometry,
     mapWidth,
     mapHeight,
-    SCALE,
+    INFLUENCE_MAP_SCALE,
   )
   const myInfluenceTextures = Object.values(myInfluencesList).map(influInfo => influInfo.texture) // red channel
   const tensionMap = myInfluenceTextures[myInfluenceTextures.length - 1] // green channel
@@ -104,29 +103,30 @@ export const updateInfluenceMap = (influence: Float32Array) => {
     const squadY = faction.data[7]
     // console.log(faction.data)
     // console.log(squadX, squadY)
-    const x = Math.round(squadX * SCALE)
-    const y = Math.round(squadY * SCALE)
+    const x = Math.round(squadX * INFLUENCE_MAP_SCALE)
+    const y = Math.round(squadY * INFLUENCE_MAP_SCALE)
     const textureIndex = mapWidth * 4 * y + x * 4
     // TODO: isntead of calculating in JS, we should create one useful texture for wasm, and do everything there
     const isSafe =
       myInfluencePixels[textureIndex] * 0.7 < influenceAndVulnerabilityMapPixels[textureIndex]
-    if (isSafe) {
-      const placesBySafe = getBestPlace(
-        firstFactionInflueneceAndVulnerabilityMap,
-        x,
-        y,
-        1.0,
-        vulnerabilityGeometry,
-        mapWidth,
-        mapHeight,
-        SCALE,
-      )
-      const placesBySafePixels = window.app.renderer.extract.pixels(placesBySafe)
-      const index = findMaxIndex(placesBySafePixels)
-      const resultX = index % (4 * mapWidth)
-      const resultY = Math.floor(index / (mapWidth * 4))
-      console.log(resultX, resultY)
-    }
+    universe.do_ai(faction.id, influenceAndVulnerabilityMapPixels)
+    // if (isSafe) {
+    // const placesBySafe = getBestPlace(
+    //   firstFactionInflueneceAndVulnerabilityMap,
+    //   x,
+    //   y,
+    //   1.0,
+    //   vulnerabilityGeometry,
+    //   mapWidth,
+    //   mapHeight,
+    //   SCALE,
+    // )
+    // const placesBySafePixels = window.app.renderer.extract.pixels(placesBySafe)
+    // const index = findMaxIndex(placesBySafePixels)
+    // const resultX = index % (4 * mapWidth)
+    // const resultY = Math.floor(index / (mapWidth * 4))
+    // console.log(resultX, resultY)
+    // }
     // console.log(myInfluencePixels.length, mapHeight * mapWidth * 4)
   }
 

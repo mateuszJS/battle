@@ -44,6 +44,10 @@ const createBackgroundTexture = () => {
   mapSprite.width = MAP_WIDTH
   mapSprite.height = MAP_HEIGHT
 
+  window.toggleBackground = () => {
+    mapSprite.visible = !mapSprite.visible
+  }
+
   return mapSprite
 }
 

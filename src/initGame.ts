@@ -58,6 +58,8 @@ const initGame = () => {
 
   let timeToClearAbilitiesIcons = 1000
 
+  window.toggleBackground()
+
   window.app.ticker.add((delta: number) => {
     mouseController.updateScenePosition()
 
@@ -75,7 +77,7 @@ const initGame = () => {
     if (timeToClearAbilitiesIcons % 200 === 0) {
       const influence = universe.get_influence()
       // updateInfluenceMap(new Float32Array([500.0, 500.0, 100, 200]))
-      updateInfluenceMap(influence)
+      updateInfluenceMap(influence, universe)
     }
 
     if (timeToClearAbilitiesIcons === 0) {

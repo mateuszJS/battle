@@ -1,7 +1,8 @@
+mod ai;
 mod squads_manager;
 use crate::constants::{
-  FACTORY_INFLUENCE_RANGE, FACTORY_INFLUENCE_VALUE, ATTACKERS_DISTANCE, MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE, MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS,
-  WEAPON_RANGE, INFLUENCE_MAP_SCALE,
+  ATTACKERS_DISTANCE, FACTORY_INFLUENCE_RANGE, FACTORY_INFLUENCE_VALUE,
+  MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE, MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS, WEAPON_RANGE,
 };
 
 use crate::look_up_table::LookUpTable;
@@ -12,6 +13,7 @@ use crate::squad_types::SquadType;
 use crate::unit::STATE_IDLE;
 use crate::Factory;
 use crate::World;
+use ai::ArtificialIntelligence;
 use squads_manager::SquadsManager;
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
@@ -30,6 +32,7 @@ pub struct Faction {
   pub factory: Factory,
   pub squads_during_creation: Vec<SquadDuringCreation>,
   pub portal: Rc<RefCell<Squad>>,
+  ai: ArtificialIntelligence,
 }
 
 impl Faction {
@@ -48,6 +51,7 @@ impl Faction {
     let factory = Factory::new(portal_id, factory_x, factory_y, factory_angle, is_user);
     let portal_squad = Rc::new(RefCell::new(portal));
     world.all_squads.push(Rc::downgrade(&portal_squad));
+    let ai = ArtificialIntelligence::new();
 
     Faction {
       id,
@@ -56,6 +60,7 @@ impl Faction {
       squads: vec![],
       portal: portal_squad,
       squads_during_creation: vec![],
+      ai,
     }
   }
 
@@ -325,15 +330,30 @@ impl Faction {
     [
       &faction_info_and_portal_influence[..],
       &squads_influence[..],
-    ].concat()
+    ]
+    .concat()
   }
 
-  pub fn do_ai(&mut self, texture: Vec<u8>) {
-    let squads = self.squads.iter().filter(|ref_cell_squad| {
-      let squad = ref_cell_aim.borrow();
-      let x = squad.center_point.0 * INFLUENCE_MAP_SCALE;
-      let y = squad.center_point.1 * INFLUENCE_MAP_SCALE;
-      let textureIndex = mapWidth * 4 * y.floor() + x.floor() * 4;
-    });
+  pub fn do_ai(&mut self, texture: &Vec<u8>, factions: &Vec<Faction>) {
+    let squads = self
+      .squads
+      .iter()
+      .map(|ref_cell_squad| ref_cell_squad.borrow_mut())
+      .collect();
+
+    let enemy_factories = factions
+      .iter()
+      .filter_map(|faction: &Faction| {
+        if faction.id != self.id {
+          Some((faction.factory.x, faction.factory.y))
+        } else {
+          None
+        }
+      })
+      .collect();
+
+    let squads_plans = self
+      .ai
+      .work(&self.factory, squads, texture, enemy_factories);
   }
 }
