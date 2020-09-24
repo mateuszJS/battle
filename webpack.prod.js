@@ -10,6 +10,6 @@ module.exports = merge(common, {
 	plugins: [
 		new UglifyJSPlugin(),
 		new webpack.optimize.ModuleConcatenationPlugin(),
-		new BundleAnalyzerPlugin()
+		// new BundleAnalyzerPlugin()
 	]
 })
