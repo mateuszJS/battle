@@ -55,7 +55,7 @@ class Factory {
   ) {
     const safeAngle = (angle + 2 * Math.PI * 0.75) % (Math.PI * 2)
     // index = 0, 1, 2, 3
-    const index = Math.floor(safeAngle / ((2 * Math.PI) / 8)) % 4
+    const index = 3 || Math.floor(safeAngle / ((2 * Math.PI) / 8)) % 4
     const gateBottom = new PIXI.Sprite(PIXI.Texture.from(`gate${index}a.png`))
     const gateTop = new PIXI.Sprite(PIXI.Texture.from(`gate${index}b.png`))
 

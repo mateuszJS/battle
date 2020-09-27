@@ -7,8 +7,8 @@ const players = [
   {
     id: USER_FACTION_ID,
     base: {
-      x: 100,
-      y: 100,
+      x: 250,
+      y: 250,
       angle: 2.25,
     },
   },

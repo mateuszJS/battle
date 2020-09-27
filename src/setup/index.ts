@@ -152,27 +152,17 @@ const setup = () => {
     })
 
     startBtnHoverMesh.on('pointerover', function() {
-      console.log('pointerover')
       isStartBtnHover = true
-      // startBtnMesh.visible = false
-      // startBtnMeshHover.visible = true
     })
     startBtnHoverMesh.on('pointerout', function() {
-      console.log('pointerout')
       isStartBtnHover = false
-      // startBtnMesh.visible = true
-      // startBtnMeshHover.visible = false
     })
-    startBtnMesh.on('click', onClickStart)
+    startBtnHoverMesh.on('click', onClickStart)
 
-    donateBtnMesh.on('pointerover', function() {
-      // donateBtnMesh.visible = false
-      // donateBtnMeshHover.visible = true
-    })
-    donateBtnMesh.on('pointerout', function() {
-      // donateBtnMesh.visible = true
-      // donateBtnMeshHover.visible = false
-    })
+    // donateBtnMesh.on('pointerover', function() {
+    // })
+    // donateBtnMesh.on('pointerout', function() {
+    // })
 
     itemsToClear = [...interactiveItems, dividerMesh]
     menuContainer.addChild(...itemsToClear)
