@@ -11,7 +11,7 @@ const blendColorBurn = (
     uTextureSampler2: sourceTexture,
     uMapSampler2: blendTexture,
     uMapSize: [window.innerWidth, window.innerHeight],
-    uTint: isTint ? [2.5, 0.5, 0.5, 2] : [1, 1, 1, 1],
+    uTint: isTint ? [2, 0.7, 0.7, 1.5] : [1, 1, 1, 1],
   })
 
   const destinationMesh = new PIXI.Mesh(geometry, shader as PIXI.MeshMaterial)

@@ -37,4 +37,5 @@ export default [
   'assets/donate_btn.png',
   'assets/pure_background_with_traced_images.jpg',
   'assets/divider.png',
+  'assets/btnStartHover.png',
 ]

@@ -17,7 +17,18 @@ const startGame = () => {
   document.body.appendChild(app.view)
   window.app = app
 
-  app.loader.add(listOfAssets).load(setup)
+  const progressNode = document.querySelector('#dynamic-loader') as SVGPathElement
+  const loader = app.loader.add(listOfAssets).load(setup)
+
+  loader.onProgress.add((loader: PIXI.Loader) => {
+    console.log(loader.progress)
+    const width = loader.progress * 75
+    progressNode.setAttribute('d', `M33 142h${width}v82h-${width}z`)
+  })
+
+  loader.onComplete.add(() => {
+    document.body.removeChild(document.querySelector('svg'))
+  })
 }
 
 startGame()
