@@ -21,8 +21,7 @@ const startGame = () => {
   const loader = app.loader.add(listOfAssets).load(setup)
 
   loader.onProgress.add((loader: PIXI.Loader) => {
-    console.log(loader.progress)
-    const width = loader.progress * 75
+    const width = 50 + Math.round(loader.progress * 7)
     progressNode.setAttribute('d', `M33 142h${width}v82h-${width}z`)
   })
 
