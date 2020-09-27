@@ -12,3 +12,11 @@ pub const MANAGE_HUNTERS_PERIOD: u32 = 2 * SEARCH_FOR_ENEMIES_PERIOD;
 // times 2 because in SEARCH_FOR_ENEMIES_PERIOD we update "was_moved_in_previous_loop" field
 // which is used in MANAGE_HUNTERS_PERIOD
 pub const UPDATE_SQUAD_CENTER_PERIOD: u32 = 5;
+
+pub const FACTORY_INFLUENCE_VALUE: f32 = 0.1;
+pub const FACTORY_INFLUENCE_RANGE: f32 = 350.0;
+pub const INFLUENCE_MAP_SCALE: f32 = 0.1;
+pub const MAP_WIDTH: f32 = 2700.0;
+pub const MAP_HEIGHT: f32 = 2100.0;
+pub const INFLUENCE_MAP_WIDTH: usize = (MAP_WIDTH * INFLUENCE_MAP_SCALE) as usize;
+pub const INFLUENCE_MAP_HEIGHT: usize = (MAP_HEIGHT * INFLUENCE_MAP_SCALE) as usize;

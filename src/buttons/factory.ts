@@ -1,6 +1,6 @@
 import REPRESENTATION_IDS from '~/render/representationsIds'
 
-const ICON_SIZE = 30
+const ICON_SIZE = 50
 
 const MAP_ID_TO_RESOURCE = {
   [REPRESENTATION_IDS.SOLIDER]: 'assets/soliderRegularAvatar.png',

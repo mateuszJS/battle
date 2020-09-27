@@ -12,7 +12,7 @@ import getSerializedInfoAboutWorld from './getSerializedInfoAboutWorld'
 import { createFactoryButtons } from './buttons/factory'
 import REPRESENTATION_IDS from '~/render/representationsIds'
 import { updateAbilitiesButtons, clearAbilitiesIcons } from '~/buttons/abilities'
-import { setupInfluenceMap, updateInfluenceMap } from '~/inclufenceMapping'
+import { updateInfluenceMap } from '~/inclufenceMapping'
 
 export type UniverseRepresentation = {
   [id: number]: Factory | Unit
@@ -58,7 +58,7 @@ const initGame = () => {
 
   let timeToClearAbilitiesIcons = 1000
 
-  setupInfluenceMap()
+  window.toggleBackground()
 
   window.app.ticker.add((delta: number) => {
     mouseController.updateScenePosition()
@@ -76,7 +76,8 @@ const initGame = () => {
 
     if (timeToClearAbilitiesIcons % 200 === 0) {
       const influence = universe.get_influence()
-      updateInfluenceMap(influence)
+      // updateInfluenceMap(new Float32Array([500.0, 500.0, 100, 200]))
+      updateInfluenceMap(influence, universe)
     }
 
     if (timeToClearAbilitiesIcons === 0) {

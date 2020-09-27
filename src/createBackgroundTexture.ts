@@ -2,8 +2,6 @@ import { MAP_WIDTH, MAP_HEIGHT } from 'Consts'
 import getTexture from '~/getTexture'
 
 const createBackgroundTexture = () => {
-  window.mapWidth = Math.floor(window.innerWidth / 50) * 50 * 3
-  window.mapHeight = Math.floor(window.innerHeight / 50) * 50 * 3
   const map = new PIXI.Container()
   const getRotate = (i: number): number => {
     switch (i) {
@@ -26,25 +24,29 @@ const createBackgroundTexture = () => {
       getRotate(i),
     )
     const mapQuarted = new PIXI.Sprite(rotatedTexture)
-    mapQuarted.width = window.mapWidth / 2
-    mapQuarted.height = window.mapHeight / 2
-    mapQuarted.x = (i % 2) * (window.mapWidth / 2)
-    mapQuarted.y = Math.floor(i / 2) * (window.mapHeight / 2)
+    mapQuarted.width = MAP_WIDTH / 2
+    mapQuarted.height = MAP_HEIGHT / 2
+    mapQuarted.x = (i % 2) * (MAP_WIDTH / 2)
+    mapQuarted.y = Math.floor(i / 2) * (MAP_HEIGHT / 2)
     map.addChild(mapQuarted)
   }
   const center = new PIXI.Sprite(window.app.loader.resources['assets/map_center.png'].texture)
   center.anchor.set(0.5)
-  center.width = window.mapWidth / 3
-  center.height = window.mapHeight / 3
-  center.x = window.mapWidth / 2
-  center.y = window.mapHeight / 2
+  center.width = MAP_WIDTH / 3
+  center.height = MAP_HEIGHT / 3
+  center.x = MAP_WIDTH / 2
+  center.y = MAP_HEIGHT / 2
   map.addChild(center)
 
   /*Transform parts of map, to one texture */
-  const renderTexture = getTexture(map, window.mapWidth, window.mapHeight)
+  const renderTexture = getTexture(map, MAP_WIDTH, MAP_HEIGHT)
   const mapSprite = new PIXI.Sprite(renderTexture)
   mapSprite.width = MAP_WIDTH
   mapSprite.height = MAP_HEIGHT
+
+  window.toggleBackground = () => {
+    mapSprite.visible = !mapSprite.visible
+  }
 
   return mapSprite
 }

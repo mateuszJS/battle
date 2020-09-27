@@ -13,6 +13,7 @@ const createItem = (
   proportionWidthToX: number,
   projectionPointsY: number[] | null,
   windowSize: number,
+  shadowOptions: ConstructorParameters<typeof DropShadowFilter>[0] = {},
 ) => {
   const verticalCenter = window.innerHeight / 2
   const horizontalCenter = window.innerWidth / 2
@@ -48,6 +49,7 @@ const createItem = (
     quality: 5,
     color: 0x663e03,
     shadowOnly: true,
+    ...shadowOptions,
   })
   btnShadowSprite.filters = [dropShadowFilter]
   const dropShadowFilterPadding = btnShadowSprite.filters[0].padding

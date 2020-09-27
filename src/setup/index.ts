@@ -1,11 +1,14 @@
 import debounce from 'debounce'
+import Utils from 'Utils'
 import initGame from '~/initGame'
 import createItem from './createItem'
 import blendColorBurn from './blendColorBurn'
+import hoverMesh from './hoverMesh'
 
 const setup = () => {
   const backgroundTexture = PIXI.Texture.from('assets/pure_background_with_traced_images.jpg')
   const startBtnPrimaryTexture = PIXI.Texture.from('assets/start_btn.png')
+  const startBtnPrimaryHoverTexture = PIXI.Texture.from('assets/btnStartHover.png')
   const donateBtnPrimaryTexture = PIXI.Texture.from('assets/donate_btn.png')
   const dividerPrimaryTexture = PIXI.Texture.from('assets/divider.png')
   const background = new PIXI.Sprite(backgroundTexture)
@@ -15,7 +18,7 @@ const setup = () => {
   window.app.stage.addChild(menuContainer)
   menuContainer.addChild(background)
 
-  const handleResize = debounce(onResize, 1000)
+  const handleResize = debounce(onResize, 500)
   window.addEventListener('resize', handleResize)
 
   const onClickStart = () => {
@@ -44,6 +47,26 @@ const setup = () => {
       [-0.137, 0.148, 1.057, 1],
       windowSize,
     )
+
+    const { texture: startBtnHoverTexture } = createItem(
+      startBtnPrimaryHoverTexture,
+      backgroundTexture,
+      -1.2,
+      0.14,
+      1.941,
+      1.4,
+      [-0.137, 0.148, 1.057, 1],
+      windowSize,
+      {
+        distance: 0,
+        blur: 3,
+        alpha: 2,
+        quality: 5,
+        color: 0xff0000,
+      },
+    )
+    const { mesh: startBtnHoverMesh, shader } = hoverMesh(startBtnHoverTexture, startBtnGeometry, 1)
+    // const startBtnHoverMesh = new Sprite(startBtnHoverTexture)
 
     const { geometry: donateBtnGeometry, texture: donateBtnTexture } = createItem(
       donateBtnPrimaryTexture,
@@ -76,58 +99,70 @@ const setup = () => {
       false,
     )
     const dividerMesh = blendColorBurn(dividerTexture, backgroundTexture, dividerGeometry, false)
-    const startBtnMeshHover = blendColorBurn(
+    const startBtnMeshAccent = blendColorBurn(
       startBtnTexture,
       backgroundTexture,
       startBtnGeometry,
       true,
     )
-    const donateBtnMeshHover = blendColorBurn(
+    const donateBtnMeshAccent = blendColorBurn(
       donateBtnTexture,
       backgroundTexture,
       donateBtnGeometry,
       true,
     )
     let time = 0
-    const startBtnAlphaFilter = new PIXI.filters.AlphaFilter(0)
-    const donateBtnAlphaFilter = new PIXI.filters.AlphaFilter(0)
+    const startBtnAccentAlphaFilter = new PIXI.filters.AlphaFilter(0)
+    const donateBtnAccentAlphaFilter = new PIXI.filters.AlphaFilter(0)
 
-    startBtnMeshHover.filters = [startBtnAlphaFilter]
-    donateBtnMeshHover.filters = [donateBtnAlphaFilter]
+    startBtnMeshAccent.filters = [startBtnAccentAlphaFilter]
+    donateBtnMeshAccent.filters = [donateBtnAccentAlphaFilter]
+
+    let startBtnHoverFactor = 0
+    let isStartBtnHover = false
 
     window.app.ticker.add((delta: number) => {
+      startBtnHoverFactor = Utils.clamp(
+        0,
+        startBtnHoverFactor + (isStartBtnHover ? 0.007 : -0.012),
+        1,
+      )
+      // if (startBtnHoverFactor !== shader.uniforms.factor) {
+      shader.uniforms.factor = startBtnHoverFactor
+      // }
+      // shader.uniforms.factor = (time % 100) / 100
       time++
-      startBtnAlphaFilter.alpha = (Math.sin(time / 50) - 0.8) * 3.030303
-      donateBtnAlphaFilter.alpha = (Math.cos(time / 50) - 0.8) * 3.030303
+      startBtnAccentAlphaFilter.alpha = (Math.sin(time / 30) - 0.5) * 2
+      donateBtnAccentAlphaFilter.alpha = (Math.cos(time / 30) - 0.5) * 2
     })
 
     // startBtnMeshHover.visible = false
     // donateBtnMeshHover.visible = false
 
-    const interactiveItems = [startBtnMesh, donateBtnMesh, startBtnMeshHover, donateBtnMeshHover]
+    const interactiveItems = [
+      startBtnMesh,
+      donateBtnMesh,
+      startBtnMeshAccent,
+      donateBtnMeshAccent,
+      startBtnHoverMesh,
+    ]
     interactiveItems.forEach(item => {
       item.interactive = true
       item.buttonMode = true
     })
 
-    startBtnMesh.on('pointerover', function() {
-      startBtnMesh.visible = false
-      startBtnMeshHover.visible = true
+    startBtnHoverMesh.on('pointerover', function() {
+      isStartBtnHover = true
     })
-    startBtnMeshHover.on('pointerout', function() {
-      startBtnMesh.visible = true
-      startBtnMeshHover.visible = false
+    startBtnHoverMesh.on('pointerout', function() {
+      isStartBtnHover = false
     })
-    startBtnMeshHover.on('click', onClickStart)
+    startBtnHoverMesh.on('click', onClickStart)
 
-    donateBtnMesh.on('pointerover', function() {
-      donateBtnMesh.visible = false
-      donateBtnMeshHover.visible = true
-    })
-    donateBtnMeshHover.on('pointerout', function() {
-      donateBtnMesh.visible = true
-      donateBtnMeshHover.visible = false
-    })
+    // donateBtnMesh.on('pointerover', function() {
+    // })
+    // donateBtnMesh.on('pointerout', function() {
+    // })
 
     itemsToClear = [...interactiveItems, dividerMesh]
     menuContainer.addChild(...itemsToClear)

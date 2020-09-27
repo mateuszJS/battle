@@ -6,10 +6,9 @@ declare global {
     ui: PIXI.Container
     universeRepresentation: UniverseRepresentation
     app: PIXI.Application
-    mapWidth: number
-    mapHeight: number
     startGame: (playersList: string[]) => void
-    setAlpha: (x: number) => void
+    toggleBackground: VoidFunction
+    mode: number
   }
 
   interface Point {
