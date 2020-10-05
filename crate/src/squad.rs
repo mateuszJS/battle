@@ -256,7 +256,7 @@ impl Squad {
       self.members.iter().for_each(|ref_cell_unit| {
         ref_cell_unit
           .borrow_mut()
-          .check_state_correctness(&self.shared);
+          .periodical_check_state_correctness(&self.shared);
       });
     }
   }

@@ -1,8 +1,6 @@
 use super::{Factory, Squad};
 use crate::constants::{INFLUENCE_MAP_SCALE, INFLUENCE_MAP_WIDTH};
 use std::cell::RefMut;
-use std::collections::HashMap;
-use std::rc::Rc;
 
 enum Plan {
   RunAway, // running away, don't care about enemies nearby until reach the safe place

@@ -1,5 +1,8 @@
+use crate::constants::NORMAL_SQUAD_RADIUS;
+use crate::position_utils::basic_utils::{BasicUtils, Line, Point};
 use crate::position_utils::calc_positions::CalcPositions;
-
+use crate::position_utils::obstacles_lazy_statics::ObstaclesLazyStatics;
+use crate::squad::SquadUnitSharedDataSet;
 pub const FLY_DECELERATION: f32 = 0.95;
 pub const FLY_MIN_SPEED: f32 = 0.035;
 const FLY_DISTANCE_PRECISION: f32 = 3.0;
@@ -43,5 +46,45 @@ impl Utils {
       angle.sin() * strength * factor,
       -angle.cos() * strength * factor,
     )
+  }
+
+  pub fn check_if_can_go_to_next_point_on_track(
+    x: f32,
+    y: f32,
+    squad_shared_info: &SquadUnitSharedDataSet,
+  ) -> bool {
+    // function used to check, if unit can run directly into next target
+    // (not current one, bc in most cases it's current position of the squad)
+    let obstacles_lines = ObstaclesLazyStatics::get_obstacles_lines();
+    let next_track_point = squad_shared_info.track[1];
+    let start_point = Point { id: 0, x, y };
+    let end_point = Point {
+      id: 0,
+      x: next_track_point.0,
+      y: next_track_point.1,
+    };
+    let line_to_next_track_point = Line {
+      p1: &start_point,
+      p2: &end_point,
+    };
+
+    !obstacles_lines
+      .iter()
+      .any(|obstacle_line| BasicUtils::check_intersection(&line_to_next_track_point, obstacle_line))
+  }
+
+  pub fn get_initial_track_index(x: f32, y: f32, squad_shared_info: &SquadUnitSharedDataSet) -> i8 {
+    let is_unit_close_to_squad_center = (squad_shared_info.center_point.0 - x)
+      .hypot(squad_shared_info.center_point.1 - y)
+      <= NORMAL_SQUAD_RADIUS + 20.0; // TODO: em, plus 20? why? it should be included in const
+    if is_unit_close_to_squad_center {
+      1
+    } else {
+      if Utils::check_if_can_go_to_next_point_on_track(x, y, squad_shared_info) {
+        1
+      } else {
+        0
+      }
+    }
   }
 }

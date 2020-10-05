@@ -175,7 +175,7 @@ impl Universe {
 
     factions.iter_mut().for_each(|faction: &mut Faction| {
       if *time % MANAGE_HUNTERS_PERIOD == 0 {
-        faction.manage_hunters();
+        // TODO: faction.manage_hunters();
       }
 
       // if *time % 1000 == 0 && faction.id == 2 && faction.squads.len() > 0 {

@@ -1,5 +1,4 @@
 mod ai;
-mod squads_manager;
 use crate::constants::{
   ATTACKERS_DISTANCE, FACTORY_INFLUENCE_RANGE, FACTORY_INFLUENCE_VALUE,
   MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE, MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS, WEAPON_RANGE,
@@ -14,7 +13,6 @@ use crate::unit::STATE_IDLE;
 use crate::Factory;
 use crate::World;
 use ai::ArtificialIntelligence;
-use squads_manager::SquadsManager;
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 
@@ -190,18 +188,18 @@ impl Faction {
       .iter()
       .for_each(|squad| squad.borrow_mut().attack_enemy(enemy));
 
-    let aim_position = enemy.upgrade().unwrap().borrow().shared.center_point;
+    // let aim_position = enemy.upgrade().unwrap().borrow().shared.center_point;
 
-    let mut attackers_out_of_range: Vec<&Rc<RefCell<Squad>>> = attackers
-      .into_iter()
-      .filter(|squad| {
-        let squad_position = squad.borrow().shared.center_point;
-        (squad_position.0 - aim_position.0).hypot(squad_position.1 - aim_position.1)
-          > ATTACKERS_DISTANCE
-      })
-      .collect();
+    // let mut attackers_out_of_range: Vec<&Rc<RefCell<Squad>>> = attackers
+    //   .into_iter()
+    //   .filter(|squad| {
+    //     let squad_position = squad.borrow().shared.center_point;
+    //     (squad_position.0 - aim_position.0).hypot(squad_position.1 - aim_position.1)
+    //       > ATTACKERS_DISTANCE
+    //   })
+    //   .collect();
 
-    SquadsManager::set_positions_in_range(&mut attackers_out_of_range, aim_position, false);
+    // SquadsManager::set_positions_in_range(&mut attackers_out_of_range, aim_position, false);
   }
 
   pub fn search_for_enemies(
@@ -225,17 +223,17 @@ impl Faction {
       })
       .collect();
 
-    let moved_enemies_squads: Vec<&Rc<RefCell<Squad>>> = squads_which_moved
-      .iter()
-      .filter(|squad| squad.borrow().faction_id != self.id)
-      .collect();
+    // let moved_enemies_squads: Vec<&Rc<RefCell<Squad>>> = squads_which_moved
+    //   .iter()
+    //   .filter(|squad| squad.borrow().faction_id != self.id)
+    //   .collect();
 
-    let all_enemies_squads: Vec<&Rc<RefCell<Squad>>> = all_squads
-      .iter()
-      .filter(|squad| squad.borrow().faction_id != self.id)
-      .collect();
+    // let all_enemies_squads: Vec<&Rc<RefCell<Squad>>> = all_squads
+    //   .iter()
+    //   .filter(|squad| squad.borrow().faction_id != self.id)
+    //   .collect();
 
-    SquadsManager::search_for_enemies(idle_squads, moved_enemies_squads, all_enemies_squads);
+    // SquadsManager::search_for_enemies(idle_squads, moved_enemies_squads, all_enemies_squads);
   }
 
   pub fn update_squads_centers(&mut self) {
@@ -248,8 +246,12 @@ impl Faction {
     self.squads.retain(|squad| squad.borrow().members.len() > 0);
   }
 
-  pub fn manage_hunters(&mut self) {
-    SquadsManager::manage_hunters(self);
+  fn get_squads_from_ids(&self, squads_ids: Vec<u32>) -> Vec<&Rc<RefCell<Squad>>> {
+    self
+      .squads
+      .iter()
+      .filter(|ref_cell_squad| squads_ids.contains(&ref_cell_squad.borrow().id))
+      .collect()
   }
 
   pub fn use_ability(
@@ -259,11 +261,7 @@ impl Faction {
     target_x: f32,
     target_y: f32,
   ) {
-    let squads: Vec<&Rc<RefCell<Squad>>> = self
-      .squads
-      .iter()
-      .filter(|ref_cell_squad| squads_ids.contains(&ref_cell_squad.borrow().id))
-      .collect();
+    let squads = self.get_squads_from_ids(squads_ids);
 
     let positions = PositionUtils::get_squads_positions(squads.len(), target_x, target_y);
 
@@ -286,15 +284,15 @@ impl Faction {
       })
       .collect();
 
-    squads_out_of_range
-      .iter()
-      .enumerate()
-      .for_each(|(index, option_squad)| {
-        if let Some(squad) = option_squad {
-          let target = positions[index];
-          SquadsManager::set_positions_in_range(&mut vec![squad], target, true);
-        }
-      });
+    // squads_out_of_range
+    //   .iter()
+    //   .enumerate()
+    //   .for_each(|(index, option_squad)| {
+    //     if let Some(squad) = option_squad {
+    //       let target = positions[index];
+    //       SquadsManager::set_positions_in_range(&mut vec![squad], target, true);
+    //     }
+    //   });
 
     squads.iter().enumerate().for_each(|(index, rc_hunter)| {
       let target = positions[index];
