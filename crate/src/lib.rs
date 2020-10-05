@@ -236,9 +236,9 @@ impl Universe {
     end_x: f32,
     start_y: f32,
     end_y: f32,
-  ) -> js_sys::Float32Array {
-    let mut selected_units_ids: Vec<Vec<f32>> = vec![];
-    let mut selected_squads_ids: Vec<f32> = vec![0.0]; // 0.0 is divider between squads and units ids
+  ) -> js_sys::Uint32Array {
+    let mut selected_units_ids: Vec<u32> = vec![];
+    let mut selected_squads_ids: Vec<u32> = vec![0]; // 0.0 is divider between squads and units ids
     self
       .factions
       .iter()
@@ -247,32 +247,26 @@ impl Universe {
         if index == INDEX_OF_USER_FACTION {
           faction.squads.iter().for_each(|squad| {
             let read_squad = squad.borrow();
-            for ref_cell_unit in read_squad.members.iter() {
+            let is_in_selection = read_squad.members.iter().any(|ref_cell_unit| {
               let unit = ref_cell_unit.borrow();
-              if unit.x > start_x && unit.x < end_x && unit.y > start_y && unit.y < end_y {
-                let mut members_ids: Vec<f32> = read_squad
-                  .members
-                  .iter()
-                  .map(|squad_member| squad_member.borrow().id as f32)
-                  .collect();
-                members_ids.push(-1.0); // -1.0 is divider between each squad
-                selected_units_ids.push(members_ids);
-                selected_squads_ids.push(read_squad.id as f32);
-                break;
-              }
+              unit.x > start_x && unit.x < end_x && unit.y > start_y && unit.y < end_y
+            });
+            if is_in_selection {
+              read_squad
+                .members
+                .iter()
+                .for_each(|squad_member| selected_units_ids.push(squad_member.borrow().id));
+              selected_units_ids.push(1); // 1.0 is divider between each squad
+              selected_squads_ids.push(read_squad.id);
             }
           })
         }
       });
 
-    let mut x: Vec<f32> = selected_units_ids
-      .into_iter()
-      .flat_map(|array| array.into_iter())
-      .collect();
-    let summary = [&x[..], &selected_squads_ids[..]].concat();
+    let summary = [&selected_units_ids[..], &selected_squads_ids[..]].concat();
 
     // read weird data on the beginning with "view", garbage collector?
-    js_sys::Float32Array::from(&summary[..])
+    js_sys::Uint32Array::from(&summary[..])
   }
 
   fn is_it_attack(
@@ -310,7 +304,7 @@ impl Universe {
 
   pub fn move_units(
     &mut self,
-    raw_squads_ids: Vec<f32>,
+    squads_ids: Vec<u32>,
     target_x: f32,
     target_y: f32,
   ) -> js_sys::Float32Array {
@@ -319,8 +313,6 @@ impl Universe {
       ref world,
       ..
     } = self;
-    let squads_ids = raw_squads_ids.into_iter().map(|id| id as u32).collect();
-
     let user_faction = &mut factions[INDEX_OF_USER_FACTION];
     let selected_enemy_units =
       match Universe::is_it_attack(world, target_x, target_y, user_faction.id) {
@@ -347,16 +339,9 @@ impl Universe {
     js_sys::Float32Array::from(&selected_enemy_units[..])
   }
 
-  pub fn use_ability(
-    &mut self,
-    raw_squads_ids: Vec<f32>,
-    ability_id: f32,
-    target_x: f32,
-    target_y: f32,
-  ) {
-    let squads_ids = raw_squads_ids.into_iter().map(|id| id as u32).collect();
+  pub fn use_ability(&mut self, squads_ids: Vec<u32>, target_x: f32, target_y: f32) {
     let user_faction = &mut self.factions[INDEX_OF_USER_FACTION];
-    user_faction.use_ability(squads_ids, ability_id as u8, target_x, target_y);
+    user_faction.use_ability(squads_ids, target_x, target_y);
   }
 
   pub fn get_influence(&self) -> js_sys::Float32Array {

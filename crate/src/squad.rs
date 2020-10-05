@@ -27,7 +27,7 @@ pub struct Squad {
   pub shared: SquadUnitSharedDataSet,
   pub squad_details: &'static SquadDetails,
   pub was_moved_in_previous_loop: bool,
-  pub last_center_point: (f32, f32), // it's pub only bc
+  pub last_center_point: (f32, f32), // it's pub only bc TODO: nto sure if useful, when we will introduce a grid
                                      // in squads_manager we are calc distance, to detect if aim is coming closer or farther
 }
 
@@ -67,7 +67,8 @@ impl Squad {
         let unit = ref_cell_unit.borrow();
         (sum_x + unit.x, sum_y + unit.y)
       });
-    shared.center_point = (sum_x / members.len() as f32, sum_y / members.len() as f32);
+    let members_len = members.len() as f32;
+    shared.center_point = (sum_x / members_len, sum_y / members_len);
   }
 
   pub fn update(&mut self, world: &mut World) {
@@ -113,7 +114,7 @@ impl Squad {
   }
 
   pub fn add_target(&mut self, destination_x: f32, destination_y: f32, clear_aim: bool) {
-    if self.is_during_using_ability() {
+    if self.is_allowed_to_take_task() {
       return;
     }
     // let is_center_inside_obstacle =
@@ -125,6 +126,8 @@ impl Squad {
     //   // TODO: calc segment, from squad_center thought closest_point to outsite (like plus 5?)
     //   // also handle case when distance is 0, then add 5, check if it's okay, if not, minsu 5, and this is have to be okay
     // }
+
+    // TODO: clearing aim should be moved to other method
     if clear_aim {
       // if clear_aim || self.shared.ability_target.is_some() {
       self.shared.ability_target = None;
@@ -132,6 +135,7 @@ impl Squad {
       self.shared.secondary_aim = Weak::new();
     }
 
+    // TODO: we should rename target, to something more describable, like dest_place
     if self.shared.stored_track_destination.is_some() {
       self.shared.stored_track_destination = Some((destination_x, destination_y));
       return;
@@ -148,14 +152,20 @@ impl Squad {
       unit
         .borrow_mut()
         .change_state_to_run_though_track(shared, true);
+      // it should just set track_index in units, nothing else
     });
   }
 
   pub fn stop_running(&mut self) {
-    if self.is_during_using_ability() {
+    // TODO: replace with method to clear all current things, target, ability, aim, stored_track_destination
+    // and call reset also in members, but remember that coherency is most important, then no reset in members
+    // but actually it's not used rn, will be in hunting prob used
+    // so maybe wait until we will rethink hunting
+    if self.is_allowed_to_take_task() {
       return;
     }
 
+    // TODO: rename stored_track_destination to indicate desire of keeping coherency
     if self.shared.stored_track_destination.is_none() {
       self.members.iter().for_each(|unit| {
         unit.borrow_mut().stop_running(&self.shared);
@@ -166,18 +176,21 @@ impl Squad {
   }
 
   pub fn attack_enemy(&mut self, enemy: &Weak<RefCell<Squad>>) {
-    if self.is_during_using_ability() {
+    if self.is_allowed_to_take_task() {
       return;
     }
     self.shared.aim = Weak::clone(enemy);
     self.shared.secondary_aim = Weak::new();
+    // TODO: secondary_aim can be useful if we are going to add running and shooting
     self.shared.ability_target = None;
     // self.shared.track = vec![];
     // if, stop running only if the squad is running
+    // TODO: replace it with calling reset
     self.stop_running();
   }
 
   pub fn was_center_point_changed(&self) -> bool {
+    // TODO: not sure if will be useful, grid should be better
     (self.shared.center_point.0 - self.last_center_point.0)
       .hypot(self.shared.center_point.1 - self.last_center_point.1)
       >= 30.0 // std::f32::EPSILON
@@ -185,6 +198,7 @@ impl Squad {
   }
 
   pub fn update_moved_status(&mut self) {
+    // TODO: not sure if will be useful, grid should be better
     self.was_moved_in_previous_loop = if self.was_center_point_changed() {
       self.last_center_point = self.shared.center_point;
       true
@@ -193,7 +207,7 @@ impl Squad {
     }
   }
 
-  fn is_during_using_ability(&self) -> bool {
+  fn is_allowed_to_take_task(&self) -> bool {
     self.shared.units_started_using_ability
       && self.shared.units_which_finished_using_ability < self.members.len() as u8
   }
@@ -201,15 +215,17 @@ impl Squad {
   pub fn check_units_correctness(&mut self) {
     self.remove_died_members();
 
-    if self.is_during_using_ability() {
+    if self.is_allowed_to_take_task() {
       return;
     }
+
     if self.shared.ability_target.is_some()
       && self.shared.units_which_finished_using_ability == self.members.len() as u8
     {
       self.shared.ability_target = None;
       self.shared.units_which_finished_using_ability = 0;
       self.shared.units_started_using_ability = false;
+      // TODO: don't check correctness here, just go forward, it should happen later, after check coherency
       self.members.iter().for_each(|ref_cell_unit| {
         ref_cell_unit
           .borrow_mut()
@@ -222,9 +238,11 @@ impl Squad {
         .borrow()
         .check_if_too_far_from_squad_center(&self.shared)
     });
-
     if coherency_not_kept {
       if self.shared.stored_track_destination.is_none() {
+        // TODO: Coherency is during the keeping
+        // but for example some units have achieved the target, and then got destructed and fly from that place, in that case we should recalculate target
+        // prob above if self.shared.stored_track_destination.is_none() should call in body only storing the point (stored_track_destination)
         let track_len = self.shared.track.len();
         // store point, instead of saving to "self" because self.add_target is checking self
         let point_to_store = if track_len > 0 {
@@ -232,6 +250,7 @@ impl Squad {
         } else {
           (-1.0, -1.0)
         };
+        // TODO: add target should be without any
         self.add_target(
           self.shared.center_point.0,
           self.shared.center_point.1,
@@ -272,7 +291,7 @@ impl Squad {
   }
 
   pub fn start_using_ability(&mut self, target: (f32, f32)) {
-    if self.is_during_using_ability() {
+    if self.is_allowed_to_take_task() {
       return;
     }
     self.shared.ability_target = Some(target);

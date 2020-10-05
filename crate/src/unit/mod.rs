@@ -213,6 +213,7 @@ impl Unit {
 
   pub fn change_state_to_idle(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
     // TODO: this function should set state, base on input: target, aim, ability
+    // it's check_correctness_state method, always should be called after check correctness for squad (bc if enemy can be out of whole squad range in shooting)
     self.mod_x = 0.0;
     self.mod_y = 0.0;
     self.state = STATE_IDLE;
@@ -492,7 +493,7 @@ impl Unit {
   }
 
   fn change_state_to_die(&mut self) {
-    // TODO: not sure but maybe also should be done in function which checking correctness, base on input: target, aim ,ability, hp, own_aim
+    // TODO: not sure but maybe also should be done in function which checking correctness, base on input: target, aim ,ability, hp, own_aim, is_aim_important
     self.state = STATE_DIE;
     self.mod_x = 0.0;
     self.mod_y = 0.0;

@@ -254,17 +254,12 @@ impl Faction {
       .collect()
   }
 
-  pub fn use_ability(
-    &mut self,
-    squads_ids: Vec<u32>,
-    ability_id: u8,
-    target_x: f32,
-    target_y: f32,
-  ) {
+  pub fn use_ability(&mut self, squads_ids: Vec<u32>, target_x: f32, target_y: f32) {
     let squads = self.get_squads_from_ids(squads_ids);
 
     let positions = PositionUtils::get_squads_positions(squads.len(), target_x, target_y);
 
+    // TODO: maybe it should be done along the attacks/hunters
     let squads_out_of_range: Vec<Option<&Rc<RefCell<Squad>>>> = squads
       .clone()
       .into_iter()

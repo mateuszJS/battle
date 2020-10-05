@@ -18,14 +18,14 @@ class SelectionController {
   private universe: Universe
   private universeRepresentation: UniverseRepresentation
   private selectedUnits: Unit[]
-  private selectedSquads: Float32Array
+  private selectedSquads: Uint32Array
   private selectedAbilityType: number | null
 
   constructor(universe: Universe, universeRepresentation: UniverseRepresentation) {
     this.universe = universe
     this.universeRepresentation = universeRepresentation
     this.selectedUnits = []
-    this.selectedSquads = new Float32Array()
+    this.selectedSquads = new Uint32Array()
     this.startPoint = null
     this.selectionRectangle = new PIXI.Graphics()
     window.ui.addChild(this.selectionRectangle)
@@ -60,10 +60,11 @@ class SelectionController {
   private selectUnits(x1: number, x2: number, y1: number, y2: number) {
     const result = this.universe.get_selected_units_ids(x1, x2, y1, y2)
     if (result.length === 1) {
-      this.selectedSquads = new Float32Array()
+      // there is only divider "0"
+      this.selectedSquads = new Uint32Array()
       return
-    } // it's only divider "0"
-    const indexOfDivider = result.indexOf(0)
+    }
+    const indexOfDivider = result.indexOf(0) // 0 -> divides between squads ids and units ids
     const unitsIds = result.subarray(0, indexOfDivider)
     const squadsIds = result.subarray(indexOfDivider + 1)
     this.selectedSquads = squadsIds
@@ -72,7 +73,8 @@ class SelectionController {
     let collectedUnits: number[] = []
 
     unitsIds.forEach(id => {
-      if (id === -1) {
+      if (id === 1) {
+        // 1 -> divider between each squad
         iconsPayload.push(collectedUnits)
         collectedUnits = []
         return
@@ -103,12 +105,7 @@ class SelectionController {
 
   public startSelection(point: Point) {
     if (this.selectedAbilityType) {
-      this.universe.use_ability(
-        getAllSimilarAvailableAbilitiesIds(),
-        this.selectedAbilityType,
-        point.x,
-        point.y,
-      )
+      this.universe.use_ability(getAllSimilarAvailableAbilitiesIds(), point.x, point.y)
       this.deselectAbility()
       return
     }
