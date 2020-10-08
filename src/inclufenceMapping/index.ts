@@ -138,5 +138,7 @@ export const updateInfluenceMap = (influence: Float32Array, universe: Universe) 
   // then just choose pixel with the highest value, get index, calc x and y
 
   // to figure out, somehow we have to know id of the squads under the pixels
-  window.world.addChild(container)
+  if (window.visibleInfluenceMap) {
+    window.world.addChild(container)
+  }
 }

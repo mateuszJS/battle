@@ -48,7 +48,8 @@ impl Faction {
     let portal_id = portal.members[0].borrow().id;
     let factory = Factory::new(portal_id, factory_x, factory_y, factory_angle, is_user);
     let portal_squad = Rc::new(RefCell::new(portal));
-    world.all_squads.push(Rc::downgrade(&portal_squad));
+    // TODO: add portal to grid!!!
+    // world.all_squads.push(Rc::downgrade(&portal_squad));
     let ai = ArtificialIntelligence::new();
 
     Faction {
@@ -104,7 +105,7 @@ impl Faction {
         self.squads_during_creation.remove(squad_index).squad,
       ));
       squad.borrow_mut().update_center();
-      world.all_squads.push(Rc::downgrade(&squad));
+      // world.all_squads.push(Rc::downgrade(&squad));
       self.squads.push(squad);
     }
   }

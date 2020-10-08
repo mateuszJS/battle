@@ -37,9 +37,11 @@ pub mod position_utils;
 mod representations_ids;
 mod squad;
 mod squad_types;
+mod squads_grid_manager;
 mod unit;
 mod weapon_types;
 
+use std::collections::HashMap;
 use wasm_bindgen::prelude::*;
 
 use bullets_manager::BulletsManager;
@@ -52,12 +54,13 @@ use factory::Factory;
 use position_utils::obstacles_lazy_statics::ObstaclesLazyStatics;
 use representations_ids::BULLETS_REPRESENTATION_ID;
 use squad::Squad;
+use squads_grid_manager::SquadsGridManager;
 
 const INDEX_OF_USER_FACTION: usize = 0;
 
 pub struct World {
-  all_squads: Vec<Weak<RefCell<Squad>>>,
   bullets_manager: BulletsManager,
+  squads_on_grid: HashMap<usize, Vec<Weak<RefCell<Squad>>>>,
 }
 
 #[wasm_bindgen]
@@ -72,7 +75,7 @@ impl Universe {
   pub fn new(factions_data: Vec<f32>, obstacles_data: Vec<f32>) -> Universe {
     let mut factions: Vec<Faction> = vec![];
     let mut world = World {
-      all_squads: vec![],
+      squads_on_grid: HashMap::new(),
       bullets_manager: BulletsManager::new(),
     };
 
@@ -121,42 +124,42 @@ impl Universe {
   }
 
   fn run_squad_manager(factions: &mut Vec<Faction>, world: &mut World) {
-    world
-      .all_squads
-      .retain(|weak_squad| weak_squad.upgrade().is_some());
+    // world
+    //   .all_squads
+    //   .retain(|weak_squad| weak_squad.upgrade().is_some());
 
     // collect squads which moved
-    let all_moved_squads: Vec<Rc<RefCell<Squad>>> = world
-      .all_squads
-      .iter()
-      .filter_map(|weak_squad| {
-        if weak_squad
-          .upgrade()
-          .unwrap()
-          .borrow()
-          .was_center_point_changed()
-        {
-          Some(weak_squad.upgrade().unwrap())
-        } else {
-          None
-        }
-      })
-      .collect();
+    // let all_moved_squads: Vec<Rc<RefCell<Squad>>> = world
+    //   .all_squads
+    //   .iter()
+    //   .filter_map(|weak_squad| {
+    //     if weak_squad
+    //       .upgrade()
+    //       .unwrap()
+    //       .borrow()
+    //       .was_center_point_changed()
+    //     {
+    //       Some(weak_squad.upgrade().unwrap())
+    //     } else {
+    //       None
+    //     }
+    //   })
+    //   .collect();
 
-    let all_squads: Vec<Rc<RefCell<Squad>>> = world
-      .all_squads
-      .iter()
-      .map(|squad| squad.upgrade().unwrap())
-      .collect();
+    // let all_squads: Vec<Rc<RefCell<Squad>>> = world
+    //   .all_squads
+    //   .iter()
+    //   .map(|squad| squad.upgrade().unwrap())
+    //   .collect();
 
     // search for enemy
-    factions.iter_mut().for_each(|faction: &mut Faction| {
-      faction.search_for_enemies(&all_moved_squads, &all_squads);
-    });
+    // factions.iter_mut().for_each(|faction: &mut Faction| {
+    //   faction.search_for_enemies(&all_moved_squads, &all_squads);
+    // });
 
-    world.all_squads.iter().for_each(|squad| {
-      squad.upgrade().unwrap().borrow_mut().update_moved_status();
-    });
+    // world.all_squads.iter().for_each(|squad| {
+    //   squad.upgrade().unwrap().borrow_mut().update_moved_status();
+    // });
   }
 
   pub fn update(&mut self) {
@@ -171,6 +174,8 @@ impl Universe {
       factions.iter_mut().for_each(|faction: &mut Faction| {
         faction.update_squads_centers();
       });
+
+      world.squads_on_grid = SquadsGridManager::create(factions)
     }
 
     factions.iter_mut().for_each(|faction: &mut Faction| {
@@ -198,7 +203,7 @@ impl Universe {
       Universe::run_squad_manager(factions, world);
     }
 
-    world.bullets_manager.update(&world.all_squads);
+    // world.bullets_manager.update(&world.all_squads);
   }
 
   pub fn get_universe_data(&mut self) -> js_sys::Float32Array {
@@ -276,29 +281,29 @@ impl Universe {
     user_faction_id: u32,
   ) -> Option<&Weak<RefCell<Squad>>> {
     let mut selected_enemy_squad = None;
-    for weak_squad in world.all_squads.iter() {
-      if let Some(unwrapper_squad) = weak_squad.upgrade() {
-        let squad = unwrapper_squad.borrow();
-        if squad.faction_id == user_faction_id {
-          continue;
-        }
-        if squad.faction_id != INDEX_OF_USER_FACTION as u32
-          && (squad.shared.center_point.0 - target_x).hypot(squad.shared.center_point.1 - target_y)
-            < THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER
-        {
-          let corrected_target_y = target_y + squad.squad_details.unit_model_offset_y;
-          for ref_cell_unit in squad.members.iter() {
-            let unit = ref_cell_unit.borrow();
-            if (unit.x - target_x).hypot(unit.y - corrected_target_y)
-              < squad.squad_details.selection_threshold
-            {
-              selected_enemy_squad = Some(weak_squad);
-              break;
-            };
-          }
-        };
-      };
-    }
+    // for weak_squad in world.all_squads.iter() {
+    //   if let Some(unwrapper_squad) = weak_squad.upgrade() {
+    //     let squad = unwrapper_squad.borrow();
+    //     if squad.faction_id == user_faction_id {
+    //       continue;
+    //     }
+    //     if squad.faction_id != INDEX_OF_USER_FACTION as u32
+    //       && (squad.shared.center_point.0 - target_x).hypot(squad.shared.center_point.1 - target_y)
+    //         < THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER
+    //     {
+    //       let corrected_target_y = target_y + squad.squad_details.unit_model_offset_y;
+    //       for ref_cell_unit in squad.members.iter() {
+    //         let unit = ref_cell_unit.borrow();
+    //         if (unit.x - target_x).hypot(unit.y - corrected_target_y)
+    //           < squad.squad_details.selection_threshold
+    //         {
+    //           selected_enemy_squad = Some(weak_squad);
+    //           break;
+    //         };
+    //       }
+    //     };
+    //   };
+    // }
     selected_enemy_squad
   }
 
@@ -361,5 +366,34 @@ impl Universe {
     // if let Some(faction) = faction_option {
     //   faction.do_ai(&texture, &self.factions);
     // }
+  }
+
+  pub fn get_grid(&self) -> js_sys::Float32Array {
+    let mut result = vec![];
+    for (key, squads_list) in &self.world.squads_on_grid {
+      let (x, y) = SquadsGridManager::get_real_position_from_index(*key);
+      result.push(x);
+      result.push(y);
+    }
+    js_sys::Float32Array::from(&result[..])
+  }
+  pub fn get_grid_area(&self) -> js_sys::Float32Array {
+    if self.factions[0].squads.len() == 0 {
+      return js_sys::Float32Array::from(&vec![][..]);
+    }
+
+    let (x, y) = self.factions[0].squads[0].borrow().shared.center_point;
+    let squads =
+      SquadsGridManager::get_squads_in_area(&self.world.squads_on_grid, x, y, WEAPON_RANGE);
+    // log!("{}", squads.len());
+    let result = squads
+      .iter()
+      .flat_map(|squad| {
+        let (x, y) = squad.upgrade().unwrap().borrow().shared.center_point;
+        vec![x, y]
+      })
+      .collect::<Vec<f32>>();
+
+    js_sys::Float32Array::from(&result[..])
   }
 }

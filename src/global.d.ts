@@ -7,7 +7,7 @@ declare global {
     universeRepresentation: UniverseRepresentation
     app: PIXI.Application
     startGame: (playersList: string[]) => void
-    toggleBackground: VoidFunction
+    visibleInfluenceMap: boolean
     mode: number
   }
 
