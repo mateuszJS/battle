@@ -169,10 +169,7 @@ impl Faction {
     let mut index = 0;
     self.squads.iter_mut().for_each(|squad| {
       if squads_ids.contains(&squad.borrow().id) {
-        let squad_target = position[index];
-        squad
-          .borrow_mut()
-          .add_target(squad_target.0, squad_target.1, true);
+        squad.borrow_mut().task_add_target(position[index]);
         index += 1;
       }
     });
@@ -187,7 +184,7 @@ impl Faction {
 
     attackers
       .iter()
-      .for_each(|squad| squad.borrow_mut().attack_enemy(enemy));
+      .for_each(|squad| squad.borrow_mut().task_attack_enemy(enemy));
 
     // let aim_position = enemy.upgrade().unwrap().borrow().shared.center_point;
 
@@ -241,6 +238,12 @@ impl Faction {
     self.squads.iter_mut().for_each(|ref_cell_squad| {
       let mut squad = ref_cell_squad.borrow_mut();
       squad.update_center();
+    });
+  }
+
+  pub fn check_squads_correctness(&mut self) {
+    self.squads.iter_mut().for_each(|ref_cell_squad| {
+      let mut squad = ref_cell_squad.borrow_mut();
       squad.check_units_correctness();
     });
 
@@ -272,7 +275,7 @@ impl Faction {
         let out_of_range = (squad_position.0 - target.0).hypot(squad_position.1 - target.1)
           > WEAPON_RANGE - MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS;
         if !out_of_range {
-          squad.stop_running();
+          // squad.stop_running();
           None
         } else {
           Some(ref_cell_squad)
@@ -292,7 +295,7 @@ impl Faction {
 
     squads.iter().enumerate().for_each(|(index, rc_hunter)| {
       let target = positions[index];
-      rc_hunter.borrow_mut().start_using_ability(target)
+      rc_hunter.borrow_mut().task_use_ability(target)
     });
   }
 

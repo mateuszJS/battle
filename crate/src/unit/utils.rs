@@ -48,20 +48,15 @@ impl Utils {
     )
   }
 
-  pub fn check_if_can_go_to_next_point_on_track(
-    x: f32,
-    y: f32,
-    squad_shared_info: &SquadUnitSharedDataSet,
-  ) -> bool {
+  pub fn check_if_can_go_to_point(x: f32, y: f32, point: (f32, f32)) -> bool {
     // function used to check, if unit can run directly into next target
     // (not current one, bc in most cases it's current position of the squad)
     let obstacles_lines = ObstaclesLazyStatics::get_obstacles_lines();
-    let next_track_point = squad_shared_info.track[1];
     let start_point = Point { id: 0, x, y };
     let end_point = Point {
       id: 0,
-      x: next_track_point.0,
-      y: next_track_point.1,
+      x: point.0,
+      y: point.1,
     };
     let line_to_next_track_point = Line {
       p1: &start_point,
@@ -73,17 +68,29 @@ impl Utils {
       .any(|obstacle_line| BasicUtils::check_intersection(&line_to_next_track_point, obstacle_line))
   }
 
-  pub fn get_initial_track_index(x: f32, y: f32, squad_shared_info: &SquadUnitSharedDataSet) -> i8 {
+  pub fn get_initial_track_index(
+    current_index: i8,
+    x: f32,
+    y: f32,
+    squad_shared_info: &SquadUnitSharedDataSet,
+  ) -> i8 {
     let is_unit_close_to_squad_center = (squad_shared_info.center_point.0 - x)
       .hypot(squad_shared_info.center_point.1 - y)
-      <= NORMAL_SQUAD_RADIUS + 20.0; // TODO: em, plus 20? why? it should be included in const
-    if is_unit_close_to_squad_center {
+      <= NORMAL_SQUAD_RADIUS + 10.0; // 10, in case if unit is little bit farther
+    if is_unit_close_to_squad_center && current_index == 0 {
       1
     } else {
-      if Utils::check_if_can_go_to_next_point_on_track(x, y, squad_shared_info) {
-        1
+      let is_next_point_exists = squad_shared_info.track.len() as i8 != current_index + 1;
+      if is_next_point_exists
+        && Utils::check_if_can_go_to_point(
+          x,
+          y,
+          squad_shared_info.track[(current_index + 1) as usize],
+        )
+      {
+        current_index + 1
       } else {
-        0
+        current_index
       }
     }
   }

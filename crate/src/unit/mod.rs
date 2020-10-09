@@ -1,9 +1,7 @@
 mod utils;
 
 use crate::bullets_manager::BulletsManager;
-use crate::constants::{
-  MATH_PI, MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS, NORMAL_SQUAD_RADIUS, WEAPON_RANGE,
-};
+use crate::constants::{MATH_PI, NORMAL_SQUAD_RADIUS, WEAPON_RANGE};
 use crate::id_generator::IdGenerator;
 use crate::look_up_table::LookUpTable;
 use crate::representations_ids::{RAPTOR_REPRESENTATION_ID, SOLIDER_REPRESENTATION_ID};
@@ -37,6 +35,7 @@ pub struct Unit {
   pub angle: f32,
   pub state: u8,
   pub get_upping_progress: f32, // <0, 1>, 0 -> start get up, 1 -> change state to IDLE
+  pub has_finished_using_ability: bool,
   mod_x: f32,
   mod_y: f32,
   target_x: f32,
@@ -72,6 +71,7 @@ impl Unit {
       aim: Weak::new(),
       hp: squad_details.hp,
       ability_start_point: 0.0,
+      has_finished_using_ability: false,
     }
   }
 
@@ -102,19 +102,11 @@ impl Unit {
     self.get_upping_progress = 0.0;
   }
 
-  fn update_getup(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
+  fn update_getup(&mut self, squad_shared_info: &mut SquadUnitSharedDataSet) {
     self.get_upping_progress += 0.01;
     if self.get_upping_progress >= 1.0 {
       self.change_state_to_idle(squad_shared_info);
     }
-  }
-
-  pub fn check_if_too_far_from_squad_center(
-    &self,
-    squad_shared_info: &SquadUnitSharedDataSet,
-  ) -> bool {
-    (squad_shared_info.center_point.0 - self.x).hypot(squad_shared_info.center_point.1 - self.y)
-      > MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS
   }
 
   fn can_change_state(&mut self) -> bool {
@@ -124,26 +116,9 @@ impl Unit {
       && self.state != STATE_ABILITY
   }
 
-  pub fn change_state_to_run_though_track(
-    &mut self,
-    squad_shared_info: &SquadUnitSharedDataSet,
-    from_start: bool, // after GETUP will be false, bc have to start with last point where was
-  ) {
-    // TODO: it should be more like two methods
-    // 1. Stop the squad, reset ability, aim, target, change state to IDLE
-    // 2. change_state_to_run_though_track
-    if from_start {
-      self.track_index = 0;
-    }
-
-    self.track_index = Utils::get_initial_track_index(self.x, self.y, squad_shared_info);
-
-    // it shouldn't be anything like this
-    // if unit should set state itself, depends of input: target, ability, aim!
-    if self.can_change_state() {
-      self.state = STATE_RUN;
-      self.go_to_current_point_on_track(squad_shared_info);
-    }
+  pub fn change_state_to_run(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
+    self.track_index =
+      Utils::get_initial_track_index(self.track_index, self.x, self.y, squad_shared_info);
   }
 
   fn set_target(&mut self, x: f32, y: f32) {
@@ -168,31 +143,8 @@ impl Unit {
       (self.x - self.target_x).hypot(self.y - self.target_y) < self.squad_details.movement_speed;
 
     if is_target_achieved {
-      // TODO: when there is update_run() and self.track_index == -1?!
-      if squad_shared_info.track.len() as i8 - 1 == self.track_index || self.track_index == -1 {
-        self.track_index = -1;
-        // --------------- handle hunting ----------------- START
-        // if squad_shared_info.stored_track_destination.is_some() {
-        //   self.change_state_to_idle(squad_shared_info);
-        // // stay and don't
-        // } else
-        // if let Some(ref_cell_aim) = squad_shared_info.aim.upgrade() {
-        // check if you are in range with aim, if no, go ahead, so there won't be effect like
-        // to avoid effect like stopping and running all the time
-        // if ref_cell_aim.borrow().was_moved_in_previous_loop {
-        // in this case it's current loop, because "update" goes after updating the "was_moved_in_previous_loop"
-        // self.set_target(
-        //   self.mod_x * MANAGE_HUNTERS_PERIOD as f32 + self.target_x,
-        //   self.mod_y * MANAGE_HUNTERS_PERIOD as f32 + self.target_y,
-        // );
-        // } else {
-        // self.change_state_to_shoot(ref_cell_aim, true, squad_shared_info);
-        // }
-        // --------------- handle hunting ----------------- END
-        // } else {
-        // TODO: there should be that method to reset everything
-        self.change_state_to_idle(squad_shared_info);
-      // }
+      if squad_shared_info.track.len() as i8 - 1 == self.track_index {
+        self.reset_state();
       } else {
         self.track_index += 1;
         self.go_to_current_point_on_track(squad_shared_info);
@@ -203,26 +155,33 @@ impl Unit {
     }
   }
 
-  pub fn stop_running(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
-    // TODO: replace with method to reset everything
-    if self.track_index != -1 || self.state == STATE_RUN {
-      self.track_index = -1;
-      self.change_state_to_idle(squad_shared_info);
+  pub fn reset_state(&mut self) {
+    // never call when is during using ability/keeping coherency
+    self.track_index = -1;
+    self.aim = Weak::new();
+
+    if self.can_change_state() {
+      self.state = STATE_IDLE;
+      self.mod_x = 0.0;
+      self.mod_y = 0.0;
     }
   }
 
-  pub fn change_state_to_idle(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
-    // TODO: this function should set state, base on input: target, aim, ability
+  pub fn set_correct_state(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
+    if !self.can_change_state() {
+      return;
+    }
+
     // it's check_correctness_state method, always should be called after check correctness for squad (bc if enemy can be out of whole squad range in shooting)
-    self.mod_x = 0.0;
-    self.mod_y = 0.0;
-    self.state = STATE_IDLE;
     if self.track_index != -1 {
+      // maybe just check if track_index === track.len() - 1
+      // and clear track in squad unit should stop
+      // and always when set new track also clear index
       self.go_to_current_point_on_track(squad_shared_info);
-    } else if let Some(ability_target) = squad_shared_info.ability_target {
-      if (self.x - ability_target.0).hypot(self.y - ability_target.1) <= WEAPON_RANGE {
-        self.change_state_to_ability(squad_shared_info)
-      }
+    } else if squad_shared_info.ability_target.is_some() {
+      // assuming that unit cannot be disrupted during using ability,
+      // unit is always able to use ability, then squad has ability_target and self.track_index == -1
+      self.change_state_to_ability(squad_shared_info)
     } else if let Some(aim) = squad_shared_info.aim.upgrade() {
       self.change_state_to_shoot(aim, true, squad_shared_info);
     } else if let Some(secondary_aim) = squad_shared_info.secondary_aim.upgrade() {
@@ -230,32 +189,32 @@ impl Unit {
     }
   }
 
-  pub fn periodical_check_state_correctness(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
-    // TODO: it should just call change_state_to_idle
-    // rethink it, bc it's related with huntinh
-    if self.state == STATE_IDLE {
-      self.change_state_to_idle(squad_shared_info);
-    } else if self.state == STATE_SHOOT {
-      self.check_correction_of_shooting_state(squad_shared_info);
-    }
-  }
+  // pub fn periodical_check_state_correctness(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
+  //   // TODO: it should just call change_state_to_idle
+  //   // rethink it, bc it's related with huntinh
+  //   if self.state == STATE_IDLE {
+  //     self.set_correct_state(squad_shared_info);
+  //   } else if self.state == STATE_SHOOT {
+  //     self.check_correction_of_shooting_state(squad_shared_info);
+  //   }
+  // }
 
-  fn check_correction_of_shooting_state(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
-    // TODO: not needed, will be replaced with change_state_to_idle, eventually can be used inside that method
-    // rethink it, bc it's related with huntinh
-    if let Some(ref_cell_aim) = self.aim.upgrade() {
-      let aim_pos = ref_cell_aim.borrow();
-      let angle = (aim_pos.x - self.x).atan2(self.y - aim_pos.y);
-      let distance = (aim_pos.x - self.x).hypot(aim_pos.y - self.y);
-      self.angle = angle;
+  // fn check_correction_of_shooting_state(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
+  //   // TODO: not needed, will be replaced with change_state_to_idle, eventually can be used inside that method
+  //   // rethink it, bc it's related with huntinh
+  //   if let Some(ref_cell_aim) = self.aim.upgrade() {
+  //     let aim_pos = ref_cell_aim.borrow();
+  //     let angle = (aim_pos.x - self.x).atan2(self.y - aim_pos.y);
+  //     let distance = (aim_pos.x - self.x).hypot(aim_pos.y - self.y);
+  //     self.angle = angle;
 
-      if distance > WEAPON_RANGE {
-        self.change_state_to_idle(squad_shared_info);
-      }
-    } else {
-      self.change_state_to_idle(squad_shared_info);
-    }
-  }
+  //     if distance > WEAPON_RANGE {
+  //       self.change_state_to_idle(squad_shared_info);
+  //     }
+  //   } else {
+  //     self.change_state_to_idle(squad_shared_info);
+  //   }
+  // }
 
   fn change_state_to_shoot(
     &mut self,
@@ -280,12 +239,13 @@ impl Unit {
         });
     if let Some(ref_cell_unit_aim) = nearest_weak_unit_aim.upgrade() {
       let unit_aim = ref_cell_unit_aim.borrow();
+      let angle = (self.x - unit_aim.x).atan2(unit_aim.y - self.y);
+
       if distance_to_nearest_unit_aim <= WEAPON_RANGE {
         self.state = STATE_SHOOT;
-        self.angle = (unit_aim.x - self.x).atan2(self.y - unit_aim.y);
+        self.angle = angle;
         self.aim = nearest_weak_unit_aim;
-      } else if is_important_aim && squad_shared_info.stored_track_destination.is_none() {
-        let angle = (self.x - unit_aim.x).atan2(unit_aim.y - self.y);
+      } else if is_important_aim {
         self.set_target(
           angle.sin() * WEAPON_RANGE + unit_aim.x,
           -angle.cos() * WEAPON_RANGE + unit_aim.y,
@@ -376,15 +336,13 @@ impl Unit {
     if self.get_upping_progress < 0.0 {
       return;
     }
-    if !squad_shared_info.units_started_using_ability {
-      squad_shared_info.units_started_using_ability = true
-    }
+    squad_shared_info.any_unit_started_using_ability = true;
     let ability_target = squad_shared_info.ability_target.unwrap();
     let target_x = ability_target.0 + self.position_offset_x;
     let target_y = ability_target.1 + self.position_offset_y;
 
     if self.get_upping_progress > 0.99 {
-      squad_shared_info.units_which_finished_using_ability += 1;
+      self.has_finished_using_ability = true;
       self.get_upping_progress = -1.0;
       bullet_manager.add_explosion(
         self.id as f32,
@@ -423,6 +381,11 @@ impl Unit {
       self.get_upping_progress =
         (self.x - self.ability_start_point) / (target_x - self.ability_start_point);
     }
+  }
+
+  fn change_state_to_idle(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
+    self.state = STATE_IDLE;
+    self.set_correct_state(squad_shared_info);
   }
 
   fn throw_grenade(

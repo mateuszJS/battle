@@ -46,7 +46,7 @@ use wasm_bindgen::prelude::*;
 
 use bullets_manager::BulletsManager;
 use constants::{
-  MANAGE_HUNTERS_PERIOD, SEARCH_FOR_ENEMIES_PERIOD, THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER,
+  CHECK_SQUADS_CORRECTNESS_PERIOD, MANAGE_HUNTERS_PERIOD, SEARCH_FOR_ENEMIES_PERIOD,
   UPDATE_SQUAD_CENTER_PERIOD, WEAPON_RANGE,
 };
 use faction::Faction;
@@ -176,6 +176,12 @@ impl Universe {
       });
 
       world.squads_on_grid = SquadsGridManager::create(factions)
+    }
+
+    if *time % CHECK_SQUADS_CORRECTNESS_PERIOD == 0 {
+      factions.iter_mut().for_each(|faction: &mut Faction| {
+        faction.check_squads_correctness();
+      });
     }
 
     factions.iter_mut().for_each(|faction: &mut Faction| {
