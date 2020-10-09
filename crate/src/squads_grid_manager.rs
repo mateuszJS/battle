@@ -57,7 +57,7 @@ impl SquadsGridManager {
     let max_x = ((x + radius) as usize).max(0).min(GRID_MAP_WIDTH - 1);
     let min_y = ((y - radius) as usize).max(0).min(GRID_MAP_HEIGHT - 1);
     let max_y = ((y + radius) as usize).max(0).min(GRID_MAP_HEIGHT - 1);
-    log!("{} {} {} {}", min_x, max_x, min_y, max_y);
+
     let mut result = vec![];
 
     for x in min_x..=max_x {
@@ -66,7 +66,6 @@ impl SquadsGridManager {
         // result.push(y as f32 / GRID_MAP_SCALE);
         let index = y * GRID_MAP_WIDTH + x;
         match grid.get(&index) {
-          Some(squads_list) => result = [&result[..], &squads_list[..]].concat(),
           Some(squads_list) => result = [&result[..], &squads_list[..]].concat(),
           None => {}
         };
