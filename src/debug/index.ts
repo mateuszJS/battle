@@ -19,14 +19,6 @@ const debugController = {
   obstaclesMapDebug,
   update: (universe: Universe) => {
     Object.keys(debugController).forEach(key => {
-      // debugger
-      if (key === 'obstaclesMap') {
-        console.log(
-          typeof debugController[key] === 'boolean',
-          debugController[key],
-          debugController[`${key}Debug`],
-        )
-      }
       if (
         typeof debugController[key] === 'boolean' &&
         debugController[key] &&
@@ -47,7 +39,6 @@ const createCheckbox = (name: string) => {
   checkboxNode.type = 'checkbox'
   checkboxNode.name = name
   checkboxNode.addEventListener('change', event => {
-    console.log((event.target as HTMLInputElement).checked)
     debugController[name] = (event.target as HTMLInputElement).checked
   })
 
