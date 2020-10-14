@@ -51,6 +51,7 @@ use constants::{
 };
 use faction::Faction;
 use factory::Factory;
+use position_utils::calc_positions::CalcPositions;
 use position_utils::obstacles_lazy_statics::ObstaclesLazyStatics;
 use representations_ids::BULLETS_REPRESENTATION_ID;
 use squad::Squad;
@@ -93,6 +94,7 @@ impl Universe {
     }
 
     ObstaclesLazyStatics::init_and_get_obstacles_handler(Some(obstacles_data));
+    CalcPositions::get_is_point_inside_any_obstacle((0, 0), false);
 
     Universe {
       factions,
@@ -313,6 +315,37 @@ impl Universe {
     selected_enemy_squad
   }
 
+  pub fn debug_obstacles(&self) -> js_sys::Float32Array {
+    let result = ObstaclesLazyStatics::get_obstacles()
+      .iter()
+      .flat_map(|obstacle_points_list| {
+        let mut result = obstacle_points_list
+          .iter()
+          .flat_map(|point| vec![point.x, point.y])
+          .collect::<Vec<f32>>();
+        result.push(-1.0);
+        result
+      })
+      .collect::<Vec<f32>>();
+    js_sys::Float32Array::from(&result[..])
+  }
+
+  pub fn debug_track(&self) -> js_sys::Float32Array {
+    let user_faction = &self.factions[INDEX_OF_USER_FACTION];
+    let mut result = vec![];
+    user_faction.squads.iter().for_each(|squad| {
+      let track = squad
+        .borrow()
+        .shared
+        .track
+        .iter()
+        .flat_map(|(a, b)| vec![*a, *b])
+        .collect::<Vec<f32>>();
+      result = [&result[..], &track[..], &[-1.0][..]].concat();
+    });
+    js_sys::Float32Array::from(&result[..])
+  }
+
   pub fn move_units(
     &mut self,
     squads_ids: Vec<u32>,
@@ -347,6 +380,7 @@ impl Universe {
           vec![]
         }
       };
+
     js_sys::Float32Array::from(&selected_enemy_units[..])
   }
 
@@ -401,5 +435,9 @@ impl Universe {
       .collect::<Vec<f32>>();
 
     js_sys::Float32Array::from(&result[..])
+  }
+
+  pub fn is_point_inside_obstacle(&self, x: i16, y: i16) -> u8 {
+    CalcPositions::test((x, y))
   }
 }

@@ -13,7 +13,7 @@ import { createFactoryButtons } from './buttons/factory'
 import REPRESENTATION_IDS from '~/render/representationsIds'
 import { updateAbilitiesButtons, clearAbilitiesIcons } from '~/buttons/abilities'
 import { updateInfluenceMap } from '~/inclufenceMapping'
-import { gridDebug } from '~/debug'
+import debugController from '~/debug'
 
 export type UniverseRepresentation = {
   [id: number]: Factory | Unit
@@ -61,8 +61,11 @@ const initGame = () => {
 
   window.visibleInfluenceMap = false
 
+  debugController.init()
+
   window.app.ticker.add((delta: number) => {
-    gridDebug(universe)
+    // gridDebug(universe)
+    debugController.update(universe)
     mouseController.updateScenePosition()
 
     universe.update()

@@ -1,19 +1,25 @@
 use super::basic_utils::{BasicUtils, Line, Point};
 use super::obstacles_lazy_statics::ObstaclesLazyStatics;
-use crate::constants::{ATTACKERS_DISTANCE, MATH_PI, NORMAL_SQUAD_RADIUS};
+use crate::constants::{
+  ATTACKERS_DISTANCE, MATH_PI, NORMAL_SQUAD_RADIUS, OBSTACLES_CELL_SIZE, OBSTACLES_MAP_HEIGHT,
+  OBSTACLES_MAP_SCALE, OBSTACLES_MAP_WIDTH,
+};
 
 const NUMBER_OF_PRECALCULATED_OFFSETS: usize = 4;
 const TRIANGLE_BASE_WIDTH: i16 = 140;
 const TRIANGLE_HEIGHT: i16 = 113;
 const UNIT_COHERENCY: f32 = 50.0;
 const DISTANCE_BETWEEN_ATTACKERS: f32 = 2.0 * NORMAL_SQUAD_RADIUS;
+const UNIT_INSIDE_OBSTACLE: u8 = 0;
+const SQUAD_INSIDE_OBSTACLE: u8 = 1;
+const IS_NOT_IN_OBSTACLE: u8 = 2;
 
 type PositionPoint = (i16, i16);
 
 pub struct CalcPositions {}
 
 impl CalcPositions {
-  pub fn get_is_point_inside_any_obstacle((x, y): (i16, i16)) -> bool {
+  fn collision_checking(x: i16, y: i16) -> bool {
     let p1 = Point {
       id: 0,
       x: -1.0,
@@ -35,6 +41,92 @@ impl CalcPositions {
     });
 
     number_of_intersections % 2 == 1
+  }
+
+  pub fn test((x, y): (i16, i16)) -> u8 {
+    let precalculdated_obstacles_map = CalcPositions::get_precalculated_obstacles_map();
+    let index = (y as f32 * OBSTACLES_MAP_SCALE) as usize * OBSTACLES_MAP_WIDTH
+      + (x as f32 * OBSTACLES_MAP_SCALE as f32) as usize;
+    let precalculated_value = precalculdated_obstacles_map[index];
+
+    precalculated_value
+  }
+
+  fn get_precalculated_obstacles_map() -> &'static Vec<u8> {
+    lazy_static! {
+      static ref PRECALCULATED_OBSTACLES_MAP: Vec<u8> = {
+        let check_cell_corners = [
+          (0, 0),
+          (0, OBSTACLES_CELL_SIZE as i16),
+          (OBSTACLES_CELL_SIZE as i16, OBSTACLES_CELL_SIZE as i16),
+          (OBSTACLES_CELL_SIZE as i16, 0),
+          (
+            OBSTACLES_CELL_SIZE as i16 / 2,
+            OBSTACLES_CELL_SIZE as i16 / 2,
+          ),
+        ];
+
+        let check_squad_distance_from_obstacles = (0..16)
+          .collect::<Vec<u8>>()
+          .into_iter()
+          .map(|i| {
+            let angle = (i as f32 / 16.0) * (2.0 * MATH_PI);
+            (
+              (angle.sin() * NORMAL_SQUAD_RADIUS) as i16,
+              (-angle.cos() * NORMAL_SQUAD_RADIUS) as i16,
+            )
+          })
+          .collect::<Vec<(i16, i16)>>();
+
+        (0..OBSTACLES_MAP_WIDTH * OBSTACLES_MAP_HEIGHT)
+          .collect::<Vec<usize>>()
+          .iter()
+          .map(|index| {
+            let y = ((index / OBSTACLES_MAP_WIDTH) as f32 / OBSTACLES_MAP_SCALE) as i16;
+            let x = ((index % OBSTACLES_MAP_WIDTH) as f32 / OBSTACLES_MAP_SCALE) as i16;
+
+            let unit_will_collide_with_any_obstacle = check_cell_corners
+              .iter()
+              .any(|(mod_x, mod_y)| CalcPositions::collision_checking(x + mod_x, y + mod_y));
+
+            if unit_will_collide_with_any_obstacle {
+              return UNIT_INSIDE_OBSTACLE;
+            }
+
+            let squad_will_collide_with_any_obstacle = check_squad_distance_from_obstacles
+              .iter()
+              .any(|(mod_x, mod_y)| CalcPositions::collision_checking(x + mod_x, y + mod_y));
+
+            if squad_will_collide_with_any_obstacle {
+              return SQUAD_INSIDE_OBSTACLE;
+            }
+
+            return IS_NOT_IN_OBSTACLE;
+          })
+          .collect::<Vec<u8>>()
+      };
+    };
+    &PRECALCULATED_OBSTACLES_MAP
+  }
+
+  pub fn get_is_point_inside_any_obstacle((x, y): (i16, i16), is_squad: bool) -> bool {
+    let precalculdated_obstacles_map = CalcPositions::get_precalculated_obstacles_map();
+    let index = (y as f32 * OBSTACLES_MAP_SCALE) as usize * OBSTACLES_MAP_WIDTH
+      + (x as f32 * OBSTACLES_MAP_SCALE as f32) as usize;
+    let precalculated_value = precalculdated_obstacles_map[index];
+
+    if precalculated_value == IS_NOT_IN_OBSTACLE {
+      false
+    } else if is_squad {
+      // precalculated_value it's not free
+      true
+    } else if precalculated_value == UNIT_INSIDE_OBSTACLE {
+      // it's unit, and precalculated_value not available for unit
+      true
+    } else {
+      // place is not available for squad, but we are checking unit
+      false
+    }
   }
 
   // // https://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
@@ -101,21 +193,21 @@ impl CalcPositions {
 
   initial_x is toggling, once it's 0, next time B/2, and again 0, and so on and on
 
-                                            B              B/2
-                                    ┌───────┴─────────┬─────┴─────┐
-                                    │                 │           │
-                                    ╳_________________╳           │ ─────┐
-                                                       \¸         │      │
-                                   x:0                   \¸       │      │
-                                    ┊                      \¸     │      ├─ H
-                                    ┊                        \¸   │      │
-                                    ┊                          \¸ │      │
-      prev_y_top ───────── ╳________┊________╳                   ╳ ──────┘
+                                           B              B/2
+                                   ┌───────┴─────────┬─────┴─────┐
+                                   │                 │           │
+                                   ╳_________________╳           │ ─────┐
+                                                      \¸         │      │
+                                  x:0                   \¸       │      │
+                                   ┊                      \¸     │      ├─ H
+                                   ┊                        \¸   │      │
+                                   ┊                          \¸ │      │
+      prev_y_top ──────── ╳________┊________╳                   ╳ ──────┘
                         ¸/░\¸      ┊       ¸\¸                   \¸
                       ¸/░░░░░\     ┊     ¸/   \¸                   \¸
                     ¸/░░░░░░░░\¸   ┊   ¸/       \¸                   \¸
                   ¸/░░░░░░░░░░░░\¸ ┊ ¸/           \¸                   \¸
-                  /░░░░░░░░░░░░░░░░\┊/               \¸                   \¸
+                ¸/░░░░░░░░░░░░░░░░\┊/               \¸                   \¸
       y:0 ───── ╳┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈ ╳ ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈╳ ───────── y:0      ╳
                 │¯\¸             ¸/┊\¸             ¸/¯│                 ¸/│
                 │   \¸         ¸/  ┊  \¸         ¸/   │               ¸/  │
@@ -159,7 +251,7 @@ impl CalcPositions {
       let point: PositionPoint = (center_x + offset_x, center_y + offset_y);
       if !all_results.contains(&point) {
         if check_with_terrain {
-          if !CalcPositions::get_is_point_inside_any_obstacle(point) {
+          if !CalcPositions::get_is_point_inside_any_obstacle(point, true) {
             points.push(point);
           }
         } else {
@@ -256,7 +348,8 @@ impl CalcPositions {
           center_y + calculated_offsets[index].1,
         );
 
-        if !CalcPositions::get_is_point_inside_any_obstacle(point) && !all_results.contains(&point)
+        if !CalcPositions::get_is_point_inside_any_obstacle(point, true)
+          && !all_results.contains(&point)
         {
           points.push(point);
         }
@@ -286,7 +379,7 @@ impl CalcPositions {
     let mut results: Vec<PositionPoint> = vec![];
 
     let initial_point = (x as i16, y as i16);
-    if !CalcPositions::get_is_point_inside_any_obstacle(initial_point) {
+    if !CalcPositions::get_is_point_inside_any_obstacle(initial_point, true) {
       results.push(initial_point);
       last_visited_result_point_index += 1;
     }
@@ -401,10 +494,10 @@ impl CalcPositions {
         (angle_from_target + precalc_pos_info.0).sin() * precalc_pos_info.1 + target.0,
         -(angle_from_target + precalc_pos_info.0).cos() * precalc_pos_info.1 + target.1,
       );
-      if !CalcPositions::get_is_point_inside_any_obstacle((
-        real_position.0 as i16,
-        real_position.1 as i16,
-      )) {
+      if !CalcPositions::get_is_point_inside_any_obstacle(
+        (real_position.0 as i16, real_position.1 as i16),
+        true,
+      ) {
         result.push(real_position);
       }
       position_index = (position_index + 1) % precalc_positions_number;

@@ -5,7 +5,6 @@ import { Universe } from '../../crate/pkg/index'
 import { UniverseRepresentation } from '~/initGame'
 import SelectionController from './SelectionController'
 import getCameraPositionModificators from './getCameraPositionModificators'
-import { anglesDebug } from '~/debug'
 
 const MOUSE_LEFT_BUTTON = 0
 const MOUSE_RIGHT_BUTTON = 2
@@ -33,8 +32,6 @@ class MouseController {
     window.app.stage.on('mouseup', this.onMouseUp)
     window.app.view.addEventListener('mousemove', this.onMouseMove)
     window.app.view.addEventListener('mouseleave', this.onMouseLeave)
-
-    anglesDebug()
   }
 
   private onMouseDown = () => {

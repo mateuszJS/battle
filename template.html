@@ -27,10 +27,25 @@
     svg {
       width: 20vw;
     }
+
+    #debug-panel {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      padding: 10px;
+      background-color: white;
+      border-radius: 4px;
+      z-index: 1;
+    }
+
+    #debug-panel label {
+      display: block;
+    }
   </style>
 </head>
 
 <body>
+  <div id="debug-panel"></div>
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 796 260">
     <style>
       .st0 {

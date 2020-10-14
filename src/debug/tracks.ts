@@ -1,3 +1,5 @@
+import { Universe } from '../../crate/pkg/index'
+
 let graph = null
 
 const drawCircle = (x, y) => {
@@ -7,11 +9,13 @@ const drawCircle = (x, y) => {
   graph.endFill()
 }
 
-const debug = (result: Float32Array) => {
+const debug = (universe: Universe) => {
   if (!graph) {
     graph = new PIXI.Graphics()
     window.world.addChild(graph)
   }
+
+  const result = universe.debug_track()
 
   let i = 2
 

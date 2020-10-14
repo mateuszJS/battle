@@ -105,7 +105,15 @@ impl Unit {
   fn update_getup(&mut self, squad_shared_info: &mut SquadUnitSharedDataSet) {
     self.get_upping_progress += 0.01;
     if self.get_upping_progress >= 1.0 {
-      self.change_state_to_idle(squad_shared_info);
+      self.change_state_to_idle();
+      if self.track_index != -1 {
+        self.track_index = Utils::get_initial_track_index(
+          0.max(self.track_index - 1),
+          self.x,
+          self.y,
+          squad_shared_info,
+        );
+      }
     }
   }
 
@@ -117,8 +125,7 @@ impl Unit {
   }
 
   pub fn change_state_to_run(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
-    self.track_index =
-      Utils::get_initial_track_index(self.track_index, self.x, self.y, squad_shared_info);
+    self.track_index = Utils::get_initial_track_index(0, self.x, self.y, squad_shared_info);
   }
 
   fn set_target(&mut self, x: f32, y: f32) {
@@ -143,6 +150,8 @@ impl Unit {
       (self.x - self.target_x).hypot(self.y - self.target_y) < self.squad_details.movement_speed;
 
     if is_target_achieved {
+      // TODO: what in case if unit wants just come closer to the aim?!
+      // then wont have track, by actually then we could just set self.track_index = squad_shared_info.track.len() as i8 - 1
       if squad_shared_info.track.len() as i8 - 1 == self.track_index {
         self.reset_state();
       } else {
@@ -383,10 +392,15 @@ impl Unit {
     }
   }
 
-  fn change_state_to_idle(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
+  fn change_state_to_idle(&mut self) {
     self.state = STATE_IDLE;
-    self.set_correct_state(squad_shared_info);
+    self.reset_state();
   }
+
+  // fn change_state_to_idle(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
+  //   self.state = STATE_IDLE;
+  //   // self.set_correct_state(squad_shared_info);
+  // }
 
   fn throw_grenade(
     &mut self,
@@ -407,7 +421,7 @@ impl Unit {
       // We can do it at the same time as add explosion but then get_representation
       // will never returns self.state = ABILITY_STATE
       // so ability icon will never be disabled
-      self.change_state_to_idle(squad_shared_info);
+      self.change_state_to_idle();
     }
   }
 

@@ -1,4 +1,5 @@
 mod ai;
+mod squad_manager;
 use crate::constants::{
   ATTACKERS_DISTANCE, FACTORY_INFLUENCE_RANGE, FACTORY_INFLUENCE_VALUE,
   MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE, MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS, WEAPON_RANGE,
@@ -13,6 +14,7 @@ use crate::unit::STATE_IDLE;
 use crate::Factory;
 use crate::World;
 use ai::ArtificialIntelligence;
+use squad_manager::SquadsManager;
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 
@@ -169,7 +171,7 @@ impl Faction {
     let mut index = 0;
     self.squads.iter_mut().for_each(|squad| {
       if squads_ids.contains(&squad.borrow().id) {
-        squad.borrow_mut().task_add_target(position[index]);
+        squad.borrow_mut().task_add_target(position[index], false);
         index += 1;
       }
     });
@@ -186,7 +188,7 @@ impl Faction {
       .iter()
       .for_each(|squad| squad.borrow_mut().task_attack_enemy(enemy));
 
-    // let aim_position = enemy.upgrade().unwrap().borrow().shared.center_point;
+    let aim_position = enemy.upgrade().unwrap().borrow().shared.center_point;
 
     // let mut attackers_out_of_range: Vec<&Rc<RefCell<Squad>>> = attackers
     //   .into_iter()
@@ -196,8 +198,7 @@ impl Faction {
     //       > ATTACKERS_DISTANCE
     //   })
     //   .collect();
-
-    // SquadsManager::set_positions_in_range(&mut attackers_out_of_range, aim_position, false);
+    // SquadsManager::set_positions_in_range(&mut attackers, aim_position);
   }
 
   pub fn search_for_enemies(

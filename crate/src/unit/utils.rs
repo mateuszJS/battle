@@ -32,7 +32,7 @@ impl Utils {
     while distance > 0.0 {
       let x = (angle.sin() * distance + x) as i16;
       let y = (-angle.cos() * distance + y) as i16;
-      if CalcPositions::get_is_point_inside_any_obstacle((x, y)) {
+      if CalcPositions::get_is_point_inside_any_obstacle((x, y), false) {
         distance -= distance_portion;
       } else {
         break;

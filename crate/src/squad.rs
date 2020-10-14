@@ -118,11 +118,13 @@ impl Squad {
       })
   }
 
-  fn reset_state(&mut self) {
+  fn reset_state(&mut self, keep_aims_and_targets: bool) {
     // never call when is during using ability/keeping coherency
-    self.shared.ability_target = None;
-    self.shared.aim = Weak::new();
-    self.shared.secondary_aim = Weak::new();
+    if !keep_aims_and_targets {
+      self.shared.ability_target = None;
+      self.shared.aim = Weak::new();
+      self.shared.secondary_aim = Weak::new();
+    }
     self.shared.track = vec![];
 
     self.members.iter().for_each(|member| {
@@ -130,8 +132,8 @@ impl Squad {
     });
   }
 
-  fn add_target(&mut self, destination: (f32, f32)) {
-    self.reset_state();
+  fn add_target(&mut self, destination: (f32, f32), keep_aims_and_targets: bool) {
+    self.reset_state(keep_aims_and_targets);
 
     self.shared.track = PositionUtils::get_track(
       self.shared.center_point.0,
@@ -151,16 +153,24 @@ impl Squad {
     // });
   }
 
-  pub fn task_add_target(&mut self, destination: (f32, f32)) {
+  pub fn task_add_target(&mut self, destination: (f32, f32), keep_aims_and_targets: bool) {
     if self.is_taking_new_task_disabled() {
-      self.task_todo = TaskTodo {
-        aim: Weak::new(),
-        ability_target: None,
-        track_destination: Some(destination),
+      self.task_todo = if keep_aims_and_targets {
+        TaskTodo {
+          aim: self.task_todo.aim.clone(),
+          ability_target: self.task_todo.ability_target,
+          track_destination: Some(destination),
+        }
+      } else {
+        TaskTodo {
+          aim: Weak::new(),
+          ability_target: None,
+          track_destination: Some(destination),
+        }
       };
       return;
     }
-    self.add_target(destination);
+    self.add_target(destination, keep_aims_and_targets);
   }
 
   // pub fn stop_running(&mut self) {
@@ -192,7 +202,7 @@ impl Squad {
       return;
     }
     // TODO: handle attack & move, and use ability & move
-    self.reset_state();
+    self.reset_state(false);
     self.shared.aim = Weak::clone(enemy);
   }
 
@@ -205,7 +215,7 @@ impl Squad {
       };
       return;
     }
-    self.reset_state();
+    self.reset_state(false);
     self.shared.ability_target = Some(target);
     // call to add actions immediately, but can also be called with next checking correctness call
     // self.members.iter().for_each(|member| {
@@ -247,7 +257,7 @@ impl Squad {
     self.shared.ability_target = self.task_todo.ability_target;
 
     if let Some(new_target) = self.task_todo.track_destination {
-      self.add_target(new_target);
+      self.add_target(new_target, false);
     }
 
     self.task_todo = TaskTodo {
@@ -282,9 +292,9 @@ impl Squad {
     if coherency_not_kept {
       if !self.is_during_keeping_coherency {
         self.store_current_task_as_todo_task();
+        self.is_during_keeping_coherency = true;
       }
-      self.add_target(self.shared.center_point);
-      self.is_during_keeping_coherency = true;
+      self.add_target(self.shared.center_point, false);
     // call to add actions immediately, but can also be called with next checking correctness call
     // self.members.iter().for_each(|member| {
     //   member.borrow_mut().set_correct_state(shared);
@@ -298,7 +308,7 @@ impl Squad {
     });
   }
 
-  pub fn remove_died_members(&mut self) {
+  fn remove_died_members(&mut self) {
     // let number_of_members = self.members.len();
     self
       .members

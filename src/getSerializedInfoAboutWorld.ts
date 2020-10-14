@@ -1,5 +1,4 @@
 import { USER_FACTION_ID } from 'Consts'
-import { obstaclesDebug } from '~/debug'
 
 const OBSTACLES_DIVIDER = -1
 
@@ -42,7 +41,6 @@ const getSerializedInfoAboutWorld = (): {
   factions: Float32Array
   obstacles: Float32Array
 } => {
-  obstaclesDebug(obstacles)
   const serializedPlayers = players.map(({ id, base }) => [id, base.x, base.y, base.angle]).flat()
   const serializedObstacles = obstacles
     .map(obstaclePoints => [...obstaclePoints.flat(), OBSTACLES_DIVIDER])

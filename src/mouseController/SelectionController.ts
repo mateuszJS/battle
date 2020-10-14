@@ -1,7 +1,6 @@
 import { HALF_UNIT_HEIGHT } from 'Consts'
 import { Universe } from '../../crate/pkg/index'
 import { UniverseRepresentation } from '~/initGame'
-import { tracksDebug } from '~/debug'
 import Unit from '~/representation/Unit'
 import Factory from '~/representation/Factory'
 import {

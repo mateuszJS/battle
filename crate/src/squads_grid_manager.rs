@@ -2,7 +2,6 @@ use super::{Faction, Squad};
 use crate::constants::{
   GRID_MAP_HEIGHT, GRID_MAP_SCALE, GRID_MAP_WIDTH, THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER,
 };
-use crate::weapon_types::{get_weapon_details, WeaponType};
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::{Rc, Weak};
