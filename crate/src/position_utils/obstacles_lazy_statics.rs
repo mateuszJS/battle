@@ -27,6 +27,7 @@ impl ObstaclesLazyStatics {
   pub fn init_and_get_obstacles_handler(option: Option<Vec<f32>>) -> &'static Mutex<ObstaclesList> {
     lazy_static! {
       static ref ALL_OBSTACLES_POINTS: Mutex<ObstaclesList> = { Mutex::new(vec![]) };
+      // have to use Mutex, cannot capture dynamic environment (option) in static block
     };
 
     match option {
