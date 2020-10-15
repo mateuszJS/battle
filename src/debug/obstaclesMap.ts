@@ -5,7 +5,7 @@ const rectSize = 10
 const OBSTACLES_MAP_WIDTH = 2700 / rectSize
 const OBSTACLES_MAP_HEIGHT = 2100 / rectSize
 
-const debug = (universe: Universe) => {
+export const startDebug = (universe: Universe) => {
   if (!graph) {
     graph = new PIXI.Graphics()
     window.world.addChild(graph)
@@ -29,4 +29,7 @@ const debug = (universe: Universe) => {
   }
 }
 
-export default debug
+export const stopDebug = () => {
+  window.world.removeChild(graph)
+  graph = null
+}

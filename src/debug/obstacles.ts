@@ -2,7 +2,7 @@ import { Universe } from '../../crate/pkg/index'
 
 let graph = null
 
-const debug = (universe: Universe) => {
+export const startDebug = (universe: Universe) => {
   if (graph) return
 
   const result = universe.debug_obstacles()
@@ -18,7 +18,7 @@ const debug = (universe: Universe) => {
 
   while (i < result.length) {
     if (result[i] === -1) {
-      graph.endFill()
+      graph.closePath()
 
       graph.beginFill(0x000000, 0)
       graph.lineStyle(3, 0xffffff, 0.3)
@@ -31,4 +31,7 @@ const debug = (universe: Universe) => {
   }
 }
 
-export default debug
+export const stopDebug = () => {
+  window.world.removeChild(graph)
+  graph = null
+}

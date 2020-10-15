@@ -1,7 +1,7 @@
 import { Universe } from '../../crate/pkg/index'
 
 let graph = null
-
+let timer = 0
 const drawCircle = (x, y) => {
   graph.beginFill(0xff0000, 1)
   graph.lineStyle(0)
@@ -9,7 +9,13 @@ const drawCircle = (x, y) => {
   graph.endFill()
 }
 
-const debug = (universe: Universe) => {
+export const startDebug = (universe: Universe) => {
+  if (++timer > 30) {
+    timer = 0
+  } else {
+    return
+  }
+
   if (!graph) {
     graph = new PIXI.Graphics()
     window.world.addChild(graph)
@@ -41,4 +47,8 @@ const debug = (universe: Universe) => {
   }
 }
 
-export default debug
+export const stopDebug = () => {
+  window.world.removeChild(graph)
+  timer = 0
+  graph = null
+}

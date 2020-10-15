@@ -1,6 +1,7 @@
 import { Universe } from '../../crate/pkg/index'
 
 let graph = null
+let timer = 0
 const rectSize = 1 / 0.0025
 
 const drawRect = (x: number, y: number) => {
@@ -10,35 +11,25 @@ const drawRect = (x: number, y: number) => {
   graph.endFill()
 }
 
-const drawCircle = (x: number, y: number) => {
-  graph.beginFill(0xff0000, 0.1)
-  graph.lineStyle(2, 0xffffff, 1)
-  graph.drawCircle(x - 5, y - 5, 10)
-  graph.endFill()
-}
-
-// const debug = (universe: Universe) => {
-//   if (!graph) {
-//     graph = new PIXI.Graphics()
-//     window.world.addChild(graph)
-//   }
-//   graph.clear()
-//   const gridData = universe.get_grid()
-//   for (let i = 0; i < gridData.length; i += 2) {
-//     drawRect(gridData[i], gridData[i + 1])
-//   }
-// }
-
-const debug = (universe: Universe) => {
+export const startDebug = (universe: Universe) => {
+  if (++timer > 30) {
+    timer = 0
+  } else {
+    return
+  }
   if (!graph) {
     graph = new PIXI.Graphics()
     window.world.addChild(graph)
   }
   graph.clear()
-  const gridData = universe.get_grid_area()
+  const gridData = universe.get_grid()
   for (let i = 0; i < gridData.length; i += 2) {
     drawRect(gridData[i], gridData[i + 1])
   }
 }
 
-export default debug
+export const stopDebug = () => {
+  window.world.removeChild(graph)
+  timer = 0
+  graph = null
+}

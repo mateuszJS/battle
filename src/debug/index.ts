@@ -1,8 +1,8 @@
-import anglesDebug from './angles'
-import tracksDebug from './tracks'
-import obstaclesDebug from './obstacles'
-import gridDebug from './grid'
-import obstaclesMapDebug from './obstaclesMap'
+import * as anglesDebug from './angles'
+import * as tracksDebug from './tracks'
+import * as obstaclesDebug from './obstacles'
+import * as gridDebug from './grid'
+import * as obstaclesMapDebug from './obstaclesMap'
 import { Universe } from '../../crate/pkg/index'
 
 const debugController = {
@@ -24,7 +24,7 @@ const debugController = {
         debugController[key] &&
         debugController[`${key}Debug`]
       ) {
-        debugController[`${key}Debug`](universe)
+        debugController[`${key}Debug`].startDebug(universe)
       }
     })
   },
@@ -40,6 +40,7 @@ const createCheckbox = (name: string) => {
   checkboxNode.name = name
   checkboxNode.addEventListener('change', event => {
     debugController[name] = (event.target as HTMLInputElement).checked
+    debugController[`${name}Debug`].stopDebug()
   })
 
   labelNode.appendChild(checkboxNode)
