@@ -1,7 +1,7 @@
 import { Universe } from '../../crate/pkg/index'
 
 let graph = null
-const rectSize = 10
+const rectSize = 20 // remember to change also in constants.rs
 const OBSTACLES_MAP_WIDTH = 2700 / rectSize
 const OBSTACLES_MAP_HEIGHT = 2100 / rectSize
 
@@ -11,8 +11,8 @@ export const startDebug = (universe: Universe) => {
     window.world.addChild(graph)
     for (let i = 0; i < OBSTACLES_MAP_WIDTH; i++) {
       for (let j = 0; j < OBSTACLES_MAP_HEIGHT; j++) {
-        const x = i * 10
-        const y = j * 10
+        const x = i * rectSize
+        const y = j * rectSize
         const value = universe.is_point_inside_obstacle(x, y)
 
         if (value === 0) {
@@ -22,7 +22,7 @@ export const startDebug = (universe: Universe) => {
         } else {
           graph.beginFill(0x0000ff, 0.5)
         }
-        graph.drawRect(x, y, 10, 10)
+        graph.drawRect(x, y, rectSize, rectSize)
         graph.endFill()
       }
     }

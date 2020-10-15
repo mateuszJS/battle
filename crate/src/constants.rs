@@ -32,7 +32,7 @@ pub const GRID_MAP_SCALE: f32 = 1.0 / GRID_CELL_SIZE;
 pub const GRID_MAP_WIDTH: usize = (MAP_WIDTH * GRID_MAP_SCALE + 1.0) as usize;
 pub const GRID_MAP_HEIGHT: usize = (MAP_HEIGHT * GRID_MAP_SCALE + 1.0) as usize;
 
-pub const OBSTACLES_CELL_SIZE: f32 = 10.0;
+pub const OBSTACLES_CELL_SIZE: f32 = 20.0; // remember to change also in debug/obstaclesMap.ts
 pub const OBSTACLES_MAP_SCALE: f32 = 1.0 / OBSTACLES_CELL_SIZE;
 pub const OBSTACLES_MAP_WIDTH: usize = (MAP_WIDTH * OBSTACLES_MAP_SCALE + 1.0) as usize;
 pub const OBSTACLES_MAP_HEIGHT: usize = (MAP_HEIGHT * OBSTACLES_MAP_SCALE + 1.0) as usize;

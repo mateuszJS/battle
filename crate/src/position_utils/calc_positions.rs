@@ -22,7 +22,7 @@ impl CalcPositions {
   fn collision_checking(x: i16, y: i16) -> bool {
     let p1 = Point {
       id: 0,
-      x: -1.0,
+      x: x as f32, // previously was -1.0, but gives random number when lines go though points
       y: -1.0,
     };
     let p2 = Point {
@@ -56,14 +56,11 @@ impl CalcPositions {
     lazy_static! {
       static ref PRECALCULATED_OBSTACLES_MAP: Vec<u8> = {
         let check_cell_corners = [
-          (0, 0),
-          (0, OBSTACLES_CELL_SIZE as i16),
-          (OBSTACLES_CELL_SIZE as i16, OBSTACLES_CELL_SIZE as i16),
-          (OBSTACLES_CELL_SIZE as i16, 0),
-          (
-            OBSTACLES_CELL_SIZE as i16 / 2,
-            OBSTACLES_CELL_SIZE as i16 / 2,
-          ),
+          (0.0, 0.0),
+          (0.0, OBSTACLES_CELL_SIZE),
+          (OBSTACLES_CELL_SIZE, OBSTACLES_CELL_SIZE),
+          (OBSTACLES_CELL_SIZE, 0.0),
+          (OBSTACLES_CELL_SIZE / 2.0, OBSTACLES_CELL_SIZE / 2.0),
         ];
 
         let check_squad_distance_from_obstacles = (0..16)
@@ -72,22 +69,26 @@ impl CalcPositions {
           .map(|i| {
             let angle = (i as f32 / 16.0) * (2.0 * MATH_PI);
             (
-              (angle.sin() * NORMAL_SQUAD_RADIUS) as i16,
-              (-angle.cos() * NORMAL_SQUAD_RADIUS) as i16,
+              (angle.sin() * NORMAL_SQUAD_RADIUS),
+              (-angle.cos() * NORMAL_SQUAD_RADIUS),
             )
           })
-          .collect::<Vec<(i16, i16)>>();
+          .collect::<Vec<(f32, f32)>>();
 
         (0..OBSTACLES_MAP_WIDTH * OBSTACLES_MAP_HEIGHT)
           .collect::<Vec<usize>>()
           .iter()
           .map(|index| {
-            let y = ((index / OBSTACLES_MAP_WIDTH) as f32 / OBSTACLES_MAP_SCALE) as i16;
-            let x = ((index % OBSTACLES_MAP_WIDTH) as f32 / OBSTACLES_MAP_SCALE) as i16;
+            let y = (index / OBSTACLES_MAP_WIDTH) as f32 / OBSTACLES_MAP_SCALE;
+            let x = (index % OBSTACLES_MAP_WIDTH) as f32 / OBSTACLES_MAP_SCALE;
 
-            let unit_will_collide_with_any_obstacle = check_cell_corners
-              .iter()
-              .any(|(mod_x, mod_y)| CalcPositions::collision_checking(x + mod_x, y + mod_y));
+            let unit_will_collide_with_any_obstacle =
+              check_cell_corners.iter().any(|(mod_x, mod_y)| {
+                CalcPositions::collision_checking(
+                  (x + mod_x).round() as i16,
+                  (y + mod_y).round() as i16,
+                )
+              });
 
             if unit_will_collide_with_any_obstacle {
               return UNIT_INSIDE_OBSTACLE;
@@ -95,7 +96,12 @@ impl CalcPositions {
 
             let squad_will_collide_with_any_obstacle = check_squad_distance_from_obstacles
               .iter()
-              .any(|(mod_x, mod_y)| CalcPositions::collision_checking(x + mod_x, y + mod_y));
+              .any(|(mod_x, mod_y)| {
+                CalcPositions::collision_checking(
+                  (x + mod_x).round() as i16,
+                  (y + mod_y).round() as i16,
+                )
+              });
 
             if squad_will_collide_with_any_obstacle {
               return SQUAD_INSIDE_OBSTACLE;
