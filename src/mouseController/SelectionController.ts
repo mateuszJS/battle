@@ -39,6 +39,8 @@ class SelectionController {
 
     // const tracks = this.universe.move_units(this.selectedSquads, x, y)
     // tracksDebug(tracks)
+    if (this.selectedSquads.length === 0) return
+
     const selectedEnemyUnitsIds = this.universe.move_units(this.selectedSquads, x, y)
 
     if (selectedEnemyUnitsIds.length === 0) return

@@ -1,8 +1,8 @@
 mod ai;
 mod squad_manager;
 use crate::constants::{
-  ATTACKERS_DISTANCE, FACTORY_INFLUENCE_RANGE, FACTORY_INFLUENCE_VALUE,
-  MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE, MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS, WEAPON_RANGE,
+  FACTORY_INFLUENCE_RANGE, FACTORY_INFLUENCE_VALUE, MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE,
+  MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS,
 };
 
 use crate::look_up_table::LookUpTable;
@@ -178,11 +178,15 @@ impl Faction {
   }
 
   pub fn attack_enemy(&mut self, squads_ids: Vec<u32>, enemy: &Weak<RefCell<Squad>>) {
-    let attackers: Vec<&Rc<RefCell<Squad>>> = self
+    let mut attackers: Vec<&Rc<RefCell<Squad>>> = self
       .squads
       .iter()
       .filter(|squad| squads_ids.contains(&squad.borrow().id))
       .collect();
+
+    if attackers.len() == 0 {
+      return;
+    }
 
     attackers
       .iter()
@@ -198,7 +202,9 @@ impl Faction {
     //       > ATTACKERS_DISTANCE
     //   })
     //   .collect();
-    // SquadsManager::set_positions_in_range(&mut attackers, aim_position);
+    let range = attackers[0].borrow().squad_details.weapon.range;
+    // TODO: divide them by range, then divide if are not in the same group maybe?? let range = squads.
+    SquadsManager::set_positions_in_range(&mut attackers, aim_position, range);
   }
 
   pub fn search_for_enemies(
@@ -262,41 +268,45 @@ impl Faction {
   pub fn use_ability(&mut self, squads_ids: Vec<u32>, target_x: f32, target_y: f32) {
     let squads = self.get_squads_from_ids(squads_ids);
 
-    let positions = PositionUtils::get_squads_positions(squads.len(), target_x, target_y);
+    if squads.len() == 0 {
+      return;
+    }
 
+    let ability_range = squads[0].borrow().squad_details.ability_range;
+    // TODO: divide them by range, then divide if are not in the same group maybe?? let range = squads.
+    // SquadsManager::set_positions_in_range(&mut squads, (target_x, target_y), ability_range);
+
+    let ability_targets = PositionUtils::get_squads_positions(squads.len(), target_x, target_y);
     // TODO: maybe it should be done along the attacks/hunters
-    let squads_out_of_range: Vec<Option<&Rc<RefCell<Squad>>>> = squads
-      .clone()
-      .into_iter()
-      .enumerate()
-      .map(|(index, ref_cell_squad)| {
-        let mut squad = ref_cell_squad.borrow_mut();
-        let squad_position = squad.shared.center_point;
-        let target = positions[index];
-        let out_of_range = (squad_position.0 - target.0).hypot(squad_position.1 - target.1)
-          > WEAPON_RANGE - MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS;
-        if !out_of_range {
-          // squad.stop_running();
-          None
-        } else {
-          Some(ref_cell_squad)
-        }
-      })
-      .collect();
-
-    // squads_out_of_range
-    //   .iter()
+    // let squads_out_of_range: Vec<Option<&Rc<RefCell<Squad>>>> = squads
+    //   .clone()
+    //   .into_iter()
     //   .enumerate()
-    //   .for_each(|(index, option_squad)| {
-    //     if let Some(squad) = option_squad {
-    //       let target = positions[index];
-    //       SquadsManager::set_positions_in_range(&mut vec![squad], target, true);
-    //     }
-    //   });
+    //   .map(|(index, ref_cell_squad)| {
+    //     let mut squad = ref_cell_squad.borrow_mut();
+    //     let squad_position = squad.shared.center_point;
+    //     let target = positions[index];
+    //     let out_of_range = (squad_position.0 - target.0).hypot(squad_position.1 - target.1)
+    //       > ability_range - MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS;
+    //     // if !out_of_range {
+    //     //   // squad.stop_running();
+    //     //   None
+    //     // } else {
+    //       Some(ref_cell_squad)
+    //     // }
+    //   })
+    //   .collect();
 
     squads.iter().enumerate().for_each(|(index, rc_hunter)| {
-      let target = positions[index];
-      rc_hunter.borrow_mut().task_use_ability(target)
+      rc_hunter
+        .borrow_mut()
+        .task_use_ability(ability_targets[index])
+    });
+
+    squads.iter().enumerate().for_each(|(index, squad)| {
+      let target = ability_targets[index];
+      SquadsManager::set_positions_in_range(&mut vec![squad], target, ability_range);
+      // TODO: does nto work, if first unit is closer to make a jump, then will make and rest will stay
     });
   }
 
@@ -321,7 +331,7 @@ impl Faction {
           squad.shared.center_point.0,
           squad.shared.center_point.1,
           (squad.members.len() as f32) * squad.squad_details.influence_value,
-          WEAPON_RANGE * 1.2,
+          squad.squad_details.weapon.range * 1.2,
         ]
       })
       .collect::<Vec<f32>>();

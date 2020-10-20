@@ -47,7 +47,7 @@ use wasm_bindgen::prelude::*;
 use bullets_manager::BulletsManager;
 use constants::{
   CHECK_SQUADS_CORRECTNESS_PERIOD, MANAGE_HUNTERS_PERIOD, SEARCH_FOR_ENEMIES_PERIOD,
-  UPDATE_SQUAD_CENTER_PERIOD, WEAPON_RANGE,
+  UPDATE_SQUAD_CENTER_PERIOD,
 };
 use faction::Faction;
 use factory::Factory;
@@ -287,32 +287,26 @@ impl Universe {
     target_x: f32,
     target_y: f32,
     user_faction_id: u32,
-  ) -> Option<&Weak<RefCell<Squad>>> {
-    let mut selected_enemy_squad = None;
-    // for weak_squad in world.all_squads.iter() {
-    //   if let Some(unwrapper_squad) = weak_squad.upgrade() {
-    //     let squad = unwrapper_squad.borrow();
-    //     if squad.faction_id == user_faction_id {
-    //       continue;
-    //     }
-    //     if squad.faction_id != INDEX_OF_USER_FACTION as u32
-    //       && (squad.shared.center_point.0 - target_x).hypot(squad.shared.center_point.1 - target_y)
-    //         < THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER
-    //     {
-    //       let corrected_target_y = target_y + squad.squad_details.unit_model_offset_y;
-    //       for ref_cell_unit in squad.members.iter() {
-    //         let unit = ref_cell_unit.borrow();
-    //         if (unit.x - target_x).hypot(unit.y - corrected_target_y)
-    //           < squad.squad_details.selection_threshold
-    //         {
-    //           selected_enemy_squad = Some(weak_squad);
-    //           break;
-    //         };
-    //       }
-    //     };
-    //   };
-    // }
-    selected_enemy_squad
+  ) -> Option<Weak<RefCell<Squad>>> {
+    let squads_in_area =
+      SquadsGridManager::get_squads_in_area(&world.squads_on_grid, target_x, target_y, 0.0);
+    squads_in_area.into_iter().find(|weak_squad| {
+      if let Some(unwrapper_squad) = weak_squad.upgrade() {
+        let squad = unwrapper_squad.borrow();
+        if squad.faction_id == user_faction_id {
+          return false;
+        }
+
+        let corrected_target_y = target_y + squad.squad_details.unit_model_offset_y;
+        squad.members.iter().any(|ref_cell_unit| {
+          let unit = ref_cell_unit.borrow();
+          (unit.x - target_x).hypot(unit.y - corrected_target_y)
+            < squad.squad_details.selection_threshold
+        })
+      } else {
+        false
+      }
+    })
   }
 
   pub fn debug_obstacles(&self) -> js_sys::Float32Array {
@@ -361,7 +355,7 @@ impl Universe {
     let selected_enemy_units =
       match Universe::is_it_attack(world, target_x, target_y, user_faction.id) {
         Some(squad) => {
-          user_faction.attack_enemy(squads_ids, squad);
+          user_faction.attack_enemy(squads_ids, &squad);
           let upgraded_squad = squad.upgrade();
           if upgraded_squad.is_some() {
             upgraded_squad
@@ -417,25 +411,25 @@ impl Universe {
     }
     js_sys::Float32Array::from(&result[..])
   }
-  pub fn get_grid_area(&self) -> js_sys::Float32Array {
-    if self.factions[0].squads.len() == 0 {
-      return js_sys::Float32Array::from(&vec![][..]);
-    }
+  // pub fn get_grid_area(&self) -> js_sys::Float32Array {
+  //   if self.factions[0].squads.len() == 0 {
+  //     return js_sys::Float32Array::from(&vec![][..]);
+  //   }
 
-    let (x, y) = self.factions[0].squads[0].borrow().shared.center_point;
-    let squads =
-      SquadsGridManager::get_squads_in_area(&self.world.squads_on_grid, x, y, WEAPON_RANGE);
-    // log!("{}", squads.len());
-    let result = squads
-      .iter()
-      .flat_map(|squad| {
-        let (x, y) = squad.upgrade().unwrap().borrow().shared.center_point;
-        vec![x, y]
-      })
-      .collect::<Vec<f32>>();
+  //   let (x, y) = self.factions[0].squads[0].borrow().shared.center_point;
+  //   let squads =
+  //     SquadsGridManager::get_squads_in_area(&self.world.squads_on_grid, x, y, WEAPON_RANGE);
+  //   // log!("{}", squads.len());
+  //   let result = squads
+  //     .iter()
+  //     .flat_map(|squad| {
+  //       let (x, y) = squad.upgrade().unwrap().borrow().shared.center_point;
+  //       vec![x, y]
+  //     })
+  //     .collect::<Vec<f32>>();
 
-    js_sys::Float32Array::from(&result[..])
-  }
+  //   js_sys::Float32Array::from(&result[..])
+  // }
 
   pub fn is_point_inside_obstacle(&self, x: i16, y: i16) -> u8 {
     CalcPositions::test((x, y))

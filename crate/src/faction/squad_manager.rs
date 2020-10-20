@@ -6,12 +6,16 @@ use std::rc::{Rc, Weak};
 pub struct SquadsManager {}
 
 impl SquadsManager {
-  pub fn set_positions_in_range(squads: &mut Vec<&Rc<RefCell<Squad>>>, target: (f32, f32)) {
-    // TODO: get range of the squads, divide them by range, then divide if are not in the same group maybe?? let range = squads.
+  pub fn set_positions_in_range(
+    squads: &mut Vec<&Rc<RefCell<Squad>>>,
+    target: (f32, f32),
+    range: f32,
+  ) {
     let mut positions = PositionUtils::get_attackers_position(
       squads.len(),
       SquadsManager::calc_army_center(squads),
       target,
+      range,
     );
 
     positions.sort_by(|a, b| (a.1).partial_cmp(&b.1).unwrap());

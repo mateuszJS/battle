@@ -1,8 +1,8 @@
 use super::basic_utils::{BasicUtils, Line, Point};
 use super::obstacles_lazy_statics::ObstaclesLazyStatics;
 use crate::constants::{
-  ATTACKERS_DISTANCE, MATH_PI, NORMAL_SQUAD_RADIUS, OBSTACLES_CELL_SIZE, OBSTACLES_MAP_HEIGHT,
-  OBSTACLES_MAP_SCALE, OBSTACLES_MAP_WIDTH,
+  MATH_PI, NORMAL_SQUAD_RADIUS, OBSTACLES_CELL_SIZE, OBSTACLES_MAP_HEIGHT, OBSTACLES_MAP_SCALE,
+  OBSTACLES_MAP_WIDTH,
 };
 
 const NUMBER_OF_PRECALCULATED_OFFSETS: usize = 4;
@@ -13,6 +13,8 @@ const DISTANCE_BETWEEN_ATTACKERS: f32 = 2.0 * NORMAL_SQUAD_RADIUS;
 const UNIT_INSIDE_OBSTACLE: u8 = 0;
 const SQUAD_INSIDE_OBSTACLE: u8 = 1;
 const IS_NOT_IN_OBSTACLE: u8 = 2;
+const MAX_WEAPON_RANGE: f32 = 1000.0;
+const NUMBER_OF_RANGE_BREAKPOINTS: usize = (MAX_WEAPON_RANGE / DISTANCE_BETWEEN_ATTACKERS) as usize;
 
 type PositionPoint = (i16, i16);
 
@@ -451,54 +453,59 @@ impl CalcPositions {
     target: (f32, f32),
     source: (f32, f32),
     needed_positions: usize,
+    range: f32,
   ) -> Vec<(f32, f32)> {
     lazy_static! {
-      static ref PRECALCULATED_ATTACKERS_POSITIONS: Vec<(f32, f32)> = {
-        let mut range: f32 = ATTACKERS_DISTANCE; // should be replaces with weapon range?
-        let mut positions = vec![];
+      static ref PRECALCULATED_ATTACKERS_POSITIONS: Vec<Vec<(f32, f32)>> = {
+        (1..=NUMBER_OF_RANGE_BREAKPOINTS).collect::<Vec<usize>>().into_iter().map(|distance_factor| {
+          let max_distance = distance_factor as f32 * DISTANCE_BETWEEN_ATTACKERS;
+          let mut distance = max_distance;
+          let mut positions = vec![];
 
-        while range > DISTANCE_BETWEEN_ATTACKERS {
-          let diff_angle =
-            (1.0 - (DISTANCE_BETWEEN_ATTACKERS.powi(2) / (2.0 * range.powi(2)))).acos();
-          let mut multiple_by = 0.0;
+          while distance > DISTANCE_BETWEEN_ATTACKERS {
+            let diff_angle =
+              (1.0 - (DISTANCE_BETWEEN_ATTACKERS.powi(2) / (2.0 * distance.powi(2)))).acos();
+            let mut multiple_by = 0.0;
 
-          while (multiple_by * diff_angle).abs() < MATH_PI - diff_angle / 2.0 {
-            let angle = multiple_by * diff_angle;
-            positions.push((angle, range));
+            while (multiple_by * diff_angle).abs() < MATH_PI - diff_angle / 2.0 {
+              let angle = multiple_by * diff_angle;
+              positions.push((angle, distance));
 
-            if multiple_by > 0.0 {
-              multiple_by = -multiple_by;
-            } else {
-              multiple_by = 1.0 - multiple_by;
+              if multiple_by > 0.0 {
+                multiple_by = -multiple_by;
+              } else {
+                multiple_by = 1.0 - multiple_by;
+              }
             }
+            distance -= DISTANCE_BETWEEN_ATTACKERS;
           }
-          range -= DISTANCE_BETWEEN_ATTACKERS;
-        }
 
-        positions.sort_by(|a, b| {
-          let a_x = a.0.sin() * a.1;
-          let a_y = -a.0.cos() * a.1;
-          let b_x = b.0.sin() * b.1;
-          let b_y = -b.0.cos() * b.1;
-          let a_dis = (a_x).hypot(a_y + ATTACKERS_DISTANCE); // a_y - (-ATTACKERS_DISTANCE)
-          let b_dis = (b_x).hypot(b_y + ATTACKERS_DISTANCE);
-          (a_dis).partial_cmp(&b_dis).unwrap()
-        });
+          positions.sort_by(|a, b| {
+            let a_x = a.0.sin() * a.1;
+            let a_y = -a.0.cos() * a.1;
+            let b_x = b.0.sin() * b.1;
+            let b_y = -b.0.cos() * b.1;
+            let a_dis = (a_x).hypot(a_y + max_distance); // a_y - (-ATTACKERS_DISTANCE)
+            let b_dis = (b_x).hypot(b_y + max_distance);
+            (a_dis).partial_cmp(&b_dis).unwrap()
+          });
 
-        positions
+          positions
+        }).collect()
       };
     };
-
+    let breakpoint = (range / DISTANCE_BETWEEN_ATTACKERS) as usize - 1;
+    let precalculated_positions = &PRECALCULATED_ATTACKERS_POSITIONS[breakpoint];
+    let precalculated_positions_number = precalculated_positions.len();
     let mut result = vec![];
     let mut position_index = 0;
     let angle_from_target = (source.0 - target.0).atan2(target.1 - source.1);
-    let precalc_positions_number = PRECALCULATED_ATTACKERS_POSITIONS.len();
 
     while result.len() < needed_positions {
-      let precalc_pos_info = PRECALCULATED_ATTACKERS_POSITIONS[position_index];
+      let (angle, distance) = precalculated_positions[position_index];
       let real_position = (
-        (angle_from_target + precalc_pos_info.0).sin() * precalc_pos_info.1 + target.0,
-        -(angle_from_target + precalc_pos_info.0).cos() * precalc_pos_info.1 + target.1,
+        (angle_from_target + angle).sin() * distance + target.0,
+        -(angle_from_target + angle).cos() * distance + target.1,
       );
       if !CalcPositions::get_is_point_inside_any_obstacle(
         (real_position.0 as i16, real_position.1 as i16),
@@ -506,7 +513,7 @@ impl CalcPositions {
       ) {
         result.push(real_position);
       }
-      position_index = (position_index + 1) % precalc_positions_number;
+      position_index = (position_index + 1) % precalculated_positions_number;
     }
     result
   }

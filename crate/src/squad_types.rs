@@ -1,7 +1,9 @@
 use crate::representations_ids::{
   NON_REPRESENTATION_ID, RAPTOR_REPRESENTATION_ID, SOLIDER_REPRESENTATION_ID,
 };
-use crate::weapon_types::{Weapon, NON_WEAPON, STANDARD_RIFLE_DETAILS};
+use crate::weapon_types::{
+  Weapon, GRENADE_DETAILS, HIT_THE_GROUND, NON_WEAPON, STANDARD_RIFLE_DETAILS,
+};
 
 pub enum SquadType {
   Solider,
@@ -19,6 +21,7 @@ pub struct SquadDetails {
   pub selection_threshold: f32, // for selection
   pub weapon: &'static Weapon,
   pub influence_value: f32,
+  pub ability_range: f32,
 }
 
 static SOLIDER_DETAILS: SquadDetails = SquadDetails {
@@ -33,6 +36,7 @@ static SOLIDER_DETAILS: SquadDetails = SquadDetails {
   unit_model_offset_y: 20.0,
   weapon: &STANDARD_RIFLE_DETAILS,
   influence_value: 0.01,
+  ability_range: GRENADE_DETAILS.range,
 };
 
 static RAPTOR_DETAILS: SquadDetails = SquadDetails {
@@ -47,6 +51,7 @@ static RAPTOR_DETAILS: SquadDetails = SquadDetails {
   unit_model_offset_y: 20.0,
   weapon: &STANDARD_RIFLE_DETAILS,
   influence_value: 0.013,
+  ability_range: HIT_THE_GROUND.range,
 };
 
 static PORTAL_DETAILS: SquadDetails = SquadDetails {
@@ -59,6 +64,7 @@ static PORTAL_DETAILS: SquadDetails = SquadDetails {
   unit_model_offset_y: 40.0,
   weapon: &NON_WEAPON,
   influence_value: 0.1,
+  ability_range: NON_WEAPON.range,
 };
 
 pub fn get_squad_details(squad_type: &SquadType) -> &'static SquadDetails {

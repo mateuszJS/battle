@@ -60,12 +60,13 @@ impl PositionUtils {
     number_of_needed_positions: usize,
     squads_average_position: (f32, f32),
     aim: (f32, f32),
+    range: f32,
   ) -> Vec<(f32, f32)> {
-    // TODO: handle different ranges
     CalcPositions::calc_attackers_positions(
       aim,
       squads_average_position,
       number_of_needed_positions,
+      range,
     )
   }
 }

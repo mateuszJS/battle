@@ -1,7 +1,7 @@
 mod utils;
 
 use crate::bullets_manager::BulletsManager;
-use crate::constants::{MATH_PI, NORMAL_SQUAD_RADIUS, WEAPON_RANGE};
+use crate::constants::{MATH_PI, NORMAL_SQUAD_RADIUS};
 use crate::id_generator::IdGenerator;
 use crate::look_up_table::LookUpTable;
 use crate::representations_ids::{RAPTOR_REPRESENTATION_ID, SOLIDER_REPRESENTATION_ID};
@@ -105,7 +105,7 @@ impl Unit {
   fn update_getup(&mut self, squad_shared_info: &mut SquadUnitSharedDataSet) {
     self.get_upping_progress += 0.01;
     if self.get_upping_progress >= 1.0 {
-      self.change_state_to_idle();
+      self.state = STATE_IDLE;
       if self.track_index != -1 {
         self.track_index = Utils::get_initial_track_index(
           0.max(self.track_index - 1),
@@ -183,10 +183,9 @@ impl Unit {
 
     // it's check_correctness_state method, always should be called after check correctness for squad (bc if enemy can be out of whole squad range in shooting)
     if self.track_index != -1 {
-      // maybe just check if track_index === track.len() - 1
-      // and clear track in squad unit should stop
-      // and always when set new track also clear index
-      self.go_to_current_point_on_track(squad_shared_info);
+      if self.state != STATE_RUN {
+        self.go_to_current_point_on_track(squad_shared_info);
+      }
     } else if squad_shared_info.ability_target.is_some() {
       // assuming that unit cannot be disrupted during using ability,
       // unit is always able to use ability, then squad has ability_target and self.track_index == -1
@@ -248,16 +247,22 @@ impl Unit {
         });
     if let Some(ref_cell_unit_aim) = nearest_weak_unit_aim.upgrade() {
       let unit_aim = ref_cell_unit_aim.borrow();
-      let angle = (self.x - unit_aim.x).atan2(unit_aim.y - self.y);
+      let angle = (unit_aim.x - self.x).atan2(self.y - unit_aim.y);
 
-      if distance_to_nearest_unit_aim <= WEAPON_RANGE {
+      if distance_to_nearest_unit_aim <= squad_shared_info.weapon.range {
         self.state = STATE_SHOOT;
         self.angle = angle;
         self.aim = nearest_weak_unit_aim;
       } else if is_important_aim {
+        self.track_index = squad_shared_info.track.len() as i8 - 1;
+        let angle_from_aim_to_unit = angle + MATH_PI;
+        let distance_to_enemy = squad_shared_info.weapon.range - self.squad_details.movement_speed;
+        // 10.0 -> to be little bit closer
+        // if there is no enough distance to new position,
+        // then it will be in threshold of "target_achieved"
         self.set_target(
-          angle.sin() * WEAPON_RANGE + unit_aim.x,
-          -angle.cos() * WEAPON_RANGE + unit_aim.y,
+          angle_from_aim_to_unit.sin() * distance_to_enemy + unit_aim.x,
+          -angle_from_aim_to_unit.cos() * distance_to_enemy + unit_aim.y,
         );
       }
     }
@@ -359,7 +364,8 @@ impl Unit {
         self.y,
         (self.x, self.y),
         &WeaponType::HitTheGround,
-      )
+      );
+      self.state = STATE_IDLE;
     } else {
       let acceleration = if self.get_upping_progress < 0.7 {
         1.3 - self.get_upping_progress
@@ -421,7 +427,8 @@ impl Unit {
       // We can do it at the same time as add explosion but then get_representation
       // will never returns self.state = ABILITY_STATE
       // so ability icon will never be disabled
-      self.change_state_to_idle();
+      // self.change_state_to_idle();
+      self.state = STATE_IDLE;
     }
   }
 

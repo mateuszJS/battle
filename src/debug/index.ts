@@ -8,7 +8,7 @@ import { Universe } from '../../crate/pkg/index'
 const debugController = {
   tracks: false,
   angles: false,
-  obstacles: false,
+  obstacles: true,
   grid: false,
   obstaclesMap: false,
   init: () => null,
@@ -38,6 +38,7 @@ const createCheckbox = (name: string) => {
   spanNode.innerText = name
   checkboxNode.type = 'checkbox'
   checkboxNode.name = name
+  checkboxNode.checked = debugController[name]
   checkboxNode.addEventListener('change', event => {
     debugController[name] = (event.target as HTMLInputElement).checked
     debugController[`${name}Debug`].stopDebug()

@@ -118,9 +118,9 @@ impl Squad {
       })
   }
 
-  fn reset_state(&mut self, keep_aims_and_targets: bool) {
+  fn reset_state(&mut self, keep_aim_and_ability_target: bool) {
     // never call when is during using ability/keeping coherency
-    if !keep_aims_and_targets {
+    if !keep_aim_and_ability_target {
       self.shared.ability_target = None;
       self.shared.aim = Weak::new();
       self.shared.secondary_aim = Weak::new();
@@ -132,8 +132,8 @@ impl Squad {
     });
   }
 
-  fn add_target(&mut self, destination: (f32, f32), keep_aims_and_targets: bool) {
-    self.reset_state(keep_aims_and_targets);
+  fn add_target(&mut self, destination: (f32, f32), keep_aim_and_ability_target: bool) {
+    self.reset_state(keep_aim_and_ability_target);
 
     self.shared.track = PositionUtils::get_track(
       self.shared.center_point.0,
@@ -146,16 +146,15 @@ impl Squad {
     self.members.iter_mut().for_each(|unit| {
       unit.borrow_mut().change_state_to_run(shared);
     });
-
     // call to add actions immediately, but can also be called with next checking correctness call
     // self.members.iter().for_each(|member| {
     //   member.borrow_mut().set_correct_state(shared);
     // });
   }
 
-  pub fn task_add_target(&mut self, destination: (f32, f32), keep_aims_and_targets: bool) {
+  pub fn task_add_target(&mut self, destination: (f32, f32), keep_aim_and_ability_target: bool) {
     if self.is_taking_new_task_disabled() {
-      self.task_todo = if keep_aims_and_targets {
+      self.task_todo = if keep_aim_and_ability_target {
         TaskTodo {
           aim: self.task_todo.aim.clone(),
           ability_target: self.task_todo.ability_target,
@@ -170,7 +169,8 @@ impl Squad {
       };
       return;
     }
-    self.add_target(destination, keep_aims_and_targets);
+
+    self.add_target(destination, keep_aim_and_ability_target);
   }
 
   // pub fn stop_running(&mut self) {
@@ -253,11 +253,13 @@ impl Squad {
   }
 
   fn restore_todo_task(&mut self) {
+    self.reset_state(false);
+
     self.shared.aim = self.task_todo.aim.clone();
     self.shared.ability_target = self.task_todo.ability_target;
 
     if let Some(new_target) = self.task_todo.track_destination {
-      self.add_target(new_target, false);
+      self.add_target(new_target, true);
     }
 
     self.task_todo = TaskTodo {
@@ -269,7 +271,7 @@ impl Squad {
 
   pub fn check_units_correctness(&mut self) {
     self.remove_died_members();
-
+    /*=================USING ABILITY START===================*/
     if self.shared.any_unit_started_using_ability {
       if self.has_all_members_finish_using_ability() {
         self.shared.ability_target = None;
@@ -278,30 +280,34 @@ impl Squad {
           member.borrow_mut().has_finished_using_ability = false;
         });
         self.restore_todo_task();
-      } else {
-        return; // if is during ability, don't care about coherency or state correctness
       }
     }
+    /*=================USING ABILITY END===================*/
 
-    let (x, y) = self.shared.center_point;
-    let coherency_not_kept = self.members.iter().any(|ref_cell_unit| {
-      let unit = ref_cell_unit.borrow();
-      (x - unit.x).hypot(y - unit.y) > MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS
-    });
+    /*=================KEEPING COHERENCY START===================*/
+    if !self.shared.any_unit_started_using_ability {
+      let (x, y) = self.shared.center_point;
+      let coherency_not_kept = self.members.iter().any(|ref_cell_unit| {
+        let unit = ref_cell_unit.borrow();
+        (x - unit.x).hypot(y - unit.y) > MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS
+      });
 
-    if coherency_not_kept {
-      if !self.is_during_keeping_coherency {
-        self.store_current_task_as_todo_task();
-        self.is_during_keeping_coherency = true;
+      if coherency_not_kept {
+        if !self.is_during_keeping_coherency {
+          self.store_current_task_as_todo_task();
+          self.is_during_keeping_coherency = true;
+        }
+        self.add_target(self.shared.center_point, false);
+      // call to add actions immediately, but can also be called with next checking correctness call
+      // self.members.iter().for_each(|member| {
+      //   member.borrow_mut().set_correct_state(shared);
+      // });
+      } else if self.is_during_keeping_coherency {
+        self.is_during_keeping_coherency = false;
+        self.restore_todo_task();
       }
-      self.add_target(self.shared.center_point, false);
-    // call to add actions immediately, but can also be called with next checking correctness call
-    // self.members.iter().for_each(|member| {
-    //   member.borrow_mut().set_correct_state(shared);
-    // });
-    } else if self.is_during_keeping_coherency {
-      self.restore_todo_task();
     }
+    /*=================KEEPING COHERENCY END===================*/
 
     self.members.iter().for_each(|ref_cell_unit| {
       ref_cell_unit.borrow_mut().set_correct_state(&self.shared);
