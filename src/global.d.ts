@@ -17,4 +17,8 @@ declare global {
   }
 
   type ValueOf<T> = T[keyof T]
+
+  interface Math {
+    clamp: (value: number, min: number, max: number) => number
+  }
 }

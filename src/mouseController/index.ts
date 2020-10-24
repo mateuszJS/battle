@@ -1,4 +1,3 @@
-import Utils from 'Utils'
 import { MIN_CAMERA_X, MAX_CAMERA_X, MIN_CAMERA_Y, MAX_CAMERA_Y } from 'Consts'
 
 import { Universe } from '../../crate/pkg/index'
@@ -69,8 +68,8 @@ class MouseController {
   }
 
   public updateScenePosition() {
-    this.sceneX = Utils.clamp(MIN_CAMERA_X, this.sceneX + this.modX, MAX_CAMERA_X)
-    this.sceneY = Utils.clamp(MIN_CAMERA_Y, this.sceneY + this.modY, MAX_CAMERA_Y)
+    this.sceneX = Math.clamp(this.sceneX + this.modX, MIN_CAMERA_X, MAX_CAMERA_X)
+    this.sceneY = Math.clamp(this.sceneY + this.modY, MIN_CAMERA_Y, MAX_CAMERA_Y)
 
     window.app.stage.x = this.sceneX
     window.app.stage.y = this.sceneY

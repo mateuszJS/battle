@@ -10,6 +10,10 @@ const startGame = () => {
     return false
   }
 
+  if (!Math.clamp) {
+    Math.clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max)
+  }
+
   const app = new PIXI.Application({
     width: window.innerWidth,
     height: window.innerHeight,

@@ -1,5 +1,4 @@
 import debounce from 'debounce'
-import Utils from 'Utils'
 import initGame from '~/initGame'
 import createItem from './createItem'
 import blendColorBurn from './blendColorBurn'
@@ -122,9 +121,9 @@ const setup = () => {
     let isStartBtnHover = false
 
     window.app.ticker.add((delta: number) => {
-      startBtnHoverFactor = Utils.clamp(
-        0,
+      startBtnHoverFactor = Math.clamp(
         startBtnHoverFactor + (isStartBtnHover ? 0.007 : -0.012),
+        0,
         1,
       )
       // if (startBtnHoverFactor !== shader.uniforms.factor) {
