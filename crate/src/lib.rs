@@ -24,7 +24,7 @@ macro_rules! log {
 // https://rustwasm.github.io/book/game-of-life/debugging.html fix debugging
 
 use std::cell::RefCell;
-use std::rc::{Rc, Weak};
+use std::rc::Weak;
 
 mod constants;
 mod faction;
@@ -46,8 +46,7 @@ use wasm_bindgen::prelude::*;
 
 use bullets_manager::BulletsManager;
 use constants::{
-  CHECK_SQUADS_CORRECTNESS_PERIOD, MANAGE_HUNTERS_PERIOD, SEARCH_FOR_ENEMIES_PERIOD,
-  UPDATE_SQUAD_CENTER_PERIOD,
+  CHECK_SQUADS_CORRECTNESS_PERIOD, MANAGE_HUNTERS_PERIOD, UPDATE_SQUAD_CENTER_PERIOD,
 };
 use faction::Faction;
 use factory::Factory;
@@ -188,28 +187,28 @@ impl Universe {
 
     factions.iter_mut().for_each(|faction: &mut Faction| {
       if *time % MANAGE_HUNTERS_PERIOD == 0 {
-        // TODO: faction.manage_hunters();
+        faction.manage_hunters(&world.squads_on_grid);
       }
 
-      // if *time % 1000 == 0 && faction.id == 2 && faction.squads.len() > 0 {
-      //   let squad_id = faction.squads[0].borrow().id;
-      //   faction.move_squads(
-      //     vec![squad_id],
-      //     if faction.squads[0].borrow().shared.center_point.0 > 2000.0 {
-      //       200.0
-      //     } else {
-      //       2200.0
-      //     },
-      //     1300.0,
-      //   );
-      // }
+      if *time % 1000 == 0 && faction.id == 2 && faction.squads.len() > 0 {
+        let squad_id = faction.squads[0].borrow().id;
+        faction.task_add_target(
+          vec![squad_id],
+          if faction.squads[0].borrow().shared.center_point.0 > 2000.0 {
+            200.0
+          } else {
+            2200.0
+          },
+          1300.0,
+        );
+      }
       faction.resources += 1;
       faction.update(world);
     });
 
-    if *time % SEARCH_FOR_ENEMIES_PERIOD == 0 {
-      Universe::run_squad_manager(factions, world);
-    }
+    // if *time % SEARCH_FOR_ENEMIES_PERIOD == 0 {
+    //   Universe::run_squad_manager(factions, world);
+    // }
 
     // world.bullets_manager.update(&world.all_squads);
   }
@@ -355,7 +354,7 @@ impl Universe {
     let selected_enemy_units =
       match Universe::is_it_attack(world, target_x, target_y, user_faction.id) {
         Some(squad) => {
-          user_faction.attack_enemy(squads_ids, &squad);
+          user_faction.task_attack_enemy(squads_ids, &squad);
           let upgraded_squad = squad.upgrade();
           if upgraded_squad.is_some() {
             upgraded_squad
@@ -370,7 +369,7 @@ impl Universe {
           }
         }
         None => {
-          user_faction.move_squads(squads_ids, target_x, target_y);
+          user_faction.task_add_target(squads_ids, target_x, target_y);
           vec![]
         }
       };
@@ -380,7 +379,7 @@ impl Universe {
 
   pub fn use_ability(&mut self, squads_ids: Vec<u32>, target_x: f32, target_y: f32) {
     let user_faction = &mut self.factions[INDEX_OF_USER_FACTION];
-    user_faction.use_ability(squads_ids, target_x, target_y);
+    user_faction.task_use_ability(squads_ids, target_x, target_y);
   }
 
   pub fn get_influence(&self) -> js_sys::Float32Array {
@@ -411,25 +410,42 @@ impl Universe {
     }
     js_sys::Float32Array::from(&result[..])
   }
-  // pub fn get_grid_area(&self) -> js_sys::Float32Array {
-  //   if self.factions[0].squads.len() == 0 {
-  //     return js_sys::Float32Array::from(&vec![][..]);
-  //   }
+  pub fn get_grid_area(&self) -> js_sys::Float32Array {
+    if self.factions[0].squads.len() == 0 {
+      return js_sys::Float32Array::from(&vec![][..]);
+    }
 
-  //   let (x, y) = self.factions[0].squads[0].borrow().shared.center_point;
-  //   let squads =
-  //     SquadsGridManager::get_squads_in_area(&self.world.squads_on_grid, x, y, WEAPON_RANGE);
-  //   // log!("{}", squads.len());
-  //   let result = squads
-  //     .iter()
-  //     .flat_map(|squad| {
-  //       let (x, y) = squad.upgrade().unwrap().borrow().shared.center_point;
-  //       vec![x, y]
-  //     })
-  //     .collect::<Vec<f32>>();
+    let (x, y) = self.factions[0].squads[0].borrow().shared.center_point;
+    let all_squares = SquadsGridManager::get_squads_in_area_debug(
+      &self.world.squads_on_grid,
+      x,
+      y,
+      self.factions[0].squads[0].borrow().shared.weapon.range,
+    );
 
-  //   js_sys::Float32Array::from(&result[..])
-  // }
+    let squads = SquadsGridManager::get_squads_in_area(
+      &self.world.squads_on_grid,
+      x,
+      y,
+      self.factions[0].squads[0].borrow().shared.weapon.range,
+    );
+
+    let serialized_squads_data = squads
+      .iter()
+      .flat_map(|squad| {
+        let (squad_x, squad_y) = squad.upgrade().unwrap().borrow().shared.center_point;
+        vec![squad_x, squad_y]
+      })
+      .collect::<Vec<f32>>();
+    let result = [
+      &all_squares[..],
+      &vec![-1.0][..],
+      &serialized_squads_data[..],
+    ]
+    .concat();
+
+    js_sys::Float32Array::from(&result[..])
+  }
 
   pub fn is_point_inside_obstacle(&self, x: i16, y: i16) -> u8 {
     CalcPositions::test((x, y))

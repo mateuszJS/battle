@@ -32,6 +32,7 @@ pub struct Squad {
   pub shared: SquadUnitSharedDataSet,
   pub squad_details: &'static SquadDetails,
   task_todo: TaskTodo,
+  require_check_correctness: bool,
 }
 
 impl Squad {
@@ -43,6 +44,7 @@ impl Squad {
       members: vec![],
       squad_details: details,
       is_during_keeping_coherency: false,
+      require_check_correctness: false,
       task_todo: TaskTodo {
         ability_target: None,
         track_destination: None,
@@ -78,6 +80,15 @@ impl Squad {
 
   pub fn update(&mut self, world: &mut World) {
     let shared = &mut self.shared;
+
+    if self.require_check_correctness {
+      self
+        .members
+        .iter_mut()
+        .for_each(|unit| unit.borrow_mut().set_correct_state(shared));
+      self.require_check_correctness = false;
+    }
+
     self
       .members
       .iter_mut()
@@ -146,10 +157,6 @@ impl Squad {
     self.members.iter_mut().for_each(|unit| {
       unit.borrow_mut().change_state_to_run(shared);
     });
-    // call to add actions immediately, but can also be called with next checking correctness call
-    // self.members.iter().for_each(|member| {
-    //   member.borrow_mut().set_correct_state(shared);
-    // });
   }
 
   pub fn task_add_target(&mut self, destination: (f32, f32), keep_aim_and_ability_target: bool) {
@@ -171,6 +178,7 @@ impl Squad {
     }
 
     self.add_target(destination, keep_aim_and_ability_target);
+    self.require_check_correctness = true;
   }
 
   // pub fn stop_running(&mut self) {
@@ -201,9 +209,10 @@ impl Squad {
       };
       return;
     }
-    // TODO: handle attack & move, and use ability & move
+
     self.reset_state(false);
     self.shared.aim = Weak::clone(enemy);
+    self.require_check_correctness = true;
   }
 
   pub fn task_use_ability(&mut self, target: (f32, f32)) {
@@ -217,10 +226,7 @@ impl Squad {
     }
     self.reset_state(false);
     self.shared.ability_target = Some(target);
-    // call to add actions immediately, but can also be called with next checking correctness call
-    // self.members.iter().for_each(|member| {
-    //   member.borrow_mut().set_correct_state(shared);
-    // });
+    self.require_check_correctness = true;
   }
 
   fn is_taking_new_task_disabled(&self) -> bool {
@@ -267,6 +273,7 @@ impl Squad {
       ability_target: None,
       track_destination: None,
     };
+    self.require_check_correctness = true;
   }
 
   pub fn check_units_correctness(&mut self) {
@@ -298,10 +305,6 @@ impl Squad {
           self.is_during_keeping_coherency = true;
         }
         self.add_target(self.shared.center_point, false);
-      // call to add actions immediately, but can also be called with next checking correctness call
-      // self.members.iter().for_each(|member| {
-      //   member.borrow_mut().set_correct_state(shared);
-      // });
       } else if self.is_during_keeping_coherency {
         self.is_during_keeping_coherency = false;
         self.restore_todo_task();

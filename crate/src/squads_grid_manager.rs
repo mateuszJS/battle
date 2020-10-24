@@ -73,4 +73,31 @@ impl SquadsGridManager {
 
     result
   }
+
+  pub fn get_squads_in_area_debug(
+    grid: &HashMap<usize, Vec<Weak<RefCell<Squad>>>>,
+    raw_x: f32,
+    raw_y: f32,
+    raw_radius: f32,
+  ) -> Vec<f32> {
+    let radius = (raw_radius + THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER) * GRID_MAP_SCALE;
+    let x = raw_x * GRID_MAP_SCALE;
+    let y = raw_y * GRID_MAP_SCALE;
+    let min_x = ((x - radius) as usize).max(0).min(GRID_MAP_WIDTH - 1);
+    let max_x = ((x + radius) as usize).max(0).min(GRID_MAP_WIDTH - 1);
+    let min_y = ((y - radius) as usize).max(0).min(GRID_MAP_HEIGHT - 1);
+    let max_y = ((y + radius) as usize).max(0).min(GRID_MAP_HEIGHT - 1);
+
+    let mut result = vec![];
+
+    for x in min_x..=max_x {
+      for y in min_y..=max_y {
+        result.push(x as f32 / GRID_MAP_SCALE);
+        result.push(y as f32 / GRID_MAP_SCALE);
+        let index = y * GRID_MAP_WIDTH + x;
+      }
+    }
+
+    result
+  }
 }

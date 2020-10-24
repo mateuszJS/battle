@@ -4,7 +4,6 @@ use crate::constants::{
   FACTORY_INFLUENCE_RANGE, FACTORY_INFLUENCE_VALUE, MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE,
   MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS,
 };
-
 use crate::look_up_table::LookUpTable;
 use crate::position_utils::PositionUtils;
 use crate::representations_ids::FACTION_REPRESENTATION_ID;
@@ -12,10 +11,12 @@ use crate::squad::Squad;
 use crate::squad_types::SquadType;
 use crate::unit::STATE_IDLE;
 use crate::Factory;
+use crate::SquadsGridManager;
 use crate::World;
 use ai::ArtificialIntelligence;
 use squad_manager::SquadsManager;
 use std::cell::RefCell;
+use std::collections::HashMap;
 use std::rc::{Rc, Weak};
 
 const TIME_BETWEEN_CREATION: u8 = 10;
@@ -33,6 +34,8 @@ pub struct Faction {
   pub squads_during_creation: Vec<SquadDuringCreation>,
   pub portal: Rc<RefCell<Squad>>,
   ai: ArtificialIntelligence,
+  hunters_aims: HashMap<u32, (Weak<RefCell<Squad>>, (f32, f32))>,
+  // hunters: HashMap<enemy_squad_id, (refenrece_to_enemy_squad, old_position)>
 }
 
 impl Faction {
@@ -62,6 +65,7 @@ impl Faction {
       portal: portal_squad,
       squads_during_creation: vec![],
       ai,
+      hunters_aims: HashMap::new(),
     }
   }
 
@@ -166,18 +170,19 @@ impl Faction {
     .concat()
   }
 
-  pub fn move_squads(&mut self, squads_ids: Vec<u32>, target_x: f32, target_y: f32) {
+  pub fn task_add_target(&mut self, squads_ids: Vec<u32>, target_x: f32, target_y: f32) {
     let position = PositionUtils::get_squads_positions(squads_ids.len(), target_x, target_y);
     let mut index = 0;
-    self.squads.iter_mut().for_each(|squad| {
-      if squads_ids.contains(&squad.borrow().id) {
-        squad.borrow_mut().task_add_target(position[index], false);
+    self.squads.iter_mut().for_each(|ref_cell_squad| {
+      let mut squad = ref_cell_squad.borrow_mut();
+      if squads_ids.contains(&squad.id) {
+        squad.task_add_target(position[index], false);
         index += 1;
       }
     });
   }
 
-  pub fn attack_enemy(&mut self, squads_ids: Vec<u32>, enemy: &Weak<RefCell<Squad>>) {
+  pub fn task_attack_enemy(&mut self, squads_ids: Vec<u32>, weak_enemy: &Weak<RefCell<Squad>>) {
     let mut attackers: Vec<&Rc<RefCell<Squad>>> = self
       .squads
       .iter()
@@ -187,12 +192,20 @@ impl Faction {
     if attackers.len() == 0 {
       return;
     }
-
+    /*==========ADD ENEMY TO HUNTERS HashMap===========*/
+    let enemy_ref_cell = weak_enemy.upgrade().unwrap();
+    let enemy_squad = enemy_ref_cell.borrow();
+    if !self.hunters_aims.contains_key(&enemy_squad.id) {
+      self.hunters_aims.insert(
+        enemy_squad.id,
+        (weak_enemy.clone(), enemy_squad.shared.center_point),
+      );
+    }
     attackers
       .iter()
-      .for_each(|squad| squad.borrow_mut().task_attack_enemy(enemy));
+      .for_each(|squad| squad.borrow_mut().task_attack_enemy(weak_enemy));
 
-    let aim_position = enemy.upgrade().unwrap().borrow().shared.center_point;
+    let aim_position = weak_enemy.upgrade().unwrap().borrow().shared.center_point;
 
     // let mut attackers_out_of_range: Vec<&Rc<RefCell<Squad>>> = attackers
     //   .into_iter()
@@ -204,7 +217,8 @@ impl Faction {
     //   .collect();
     let range = attackers[0].borrow().squad_details.weapon.range;
     // TODO: divide them by range, then divide if are not in the same group maybe?? let range = squads.
-    SquadsManager::set_positions_in_range(&mut attackers, aim_position, range);
+    // or maybe do it inside set_positions_in_range, hen hunters will got it also
+    SquadsManager::set_positions_in_range(&attackers, aim_position, range);
   }
 
   pub fn search_for_enemies(
@@ -250,8 +264,7 @@ impl Faction {
 
   pub fn check_squads_correctness(&mut self) {
     self.squads.iter_mut().for_each(|ref_cell_squad| {
-      let mut squad = ref_cell_squad.borrow_mut();
-      squad.check_units_correctness();
+      ref_cell_squad.borrow_mut().check_units_correctness();
     });
 
     self.squads.retain(|squad| squad.borrow().members.len() > 0);
@@ -265,7 +278,7 @@ impl Faction {
       .collect()
   }
 
-  pub fn use_ability(&mut self, squads_ids: Vec<u32>, target_x: f32, target_y: f32) {
+  pub fn task_use_ability(&mut self, squads_ids: Vec<u32>, target_x: f32, target_y: f32) {
     let squads = self.get_squads_from_ids(squads_ids);
 
     if squads.len() == 0 {
@@ -305,8 +318,7 @@ impl Faction {
 
     squads.iter().enumerate().for_each(|(index, squad)| {
       let target = ability_targets[index];
-      SquadsManager::set_positions_in_range(&mut vec![squad], target, ability_range);
-      // TODO: does nto work, if first unit is closer to make a jump, then will make and rest will stay
+      SquadsManager::set_positions_in_range(&vec![squad], target, ability_range);
     });
   }
 
@@ -363,5 +375,59 @@ impl Faction {
     let squads_plans = self
       .ai
       .work(&self.factory, squads, texture, enemy_factories);
+  }
+
+  pub fn manage_hunters(&mut self, squads_grid: &HashMap<usize, Vec<Weak<RefCell<Squad>>>>) {
+    let mut enemies_that_moved: Vec<(u32, (f32, f32))> = vec![]; // value is to check, if we are using still this enemy
+    for (key, (weak_enemy, old_position)) in &self.hunters_aims {
+      if let Some(ref_cell_enemy) = weak_enemy.upgrade() {
+        let enemy = ref_cell_enemy.borrow();
+        let new_position = enemy.shared.center_point;
+        let distance = (old_position.0 - new_position.0).hypot(old_position.1 - new_position.1);
+        if distance > 10.0 {
+          enemies_that_moved.push((enemy.id, new_position));
+        }
+      }
+    }
+
+    let mut used_enemies: HashMap<u32, (bool, Vec<&Rc<RefCell<Squad>>>)> = HashMap::new();
+    // was enemy moved, list of out squads which have that aim
+    self.squads.iter().for_each(|ref_cell_squad| {
+      if let Some(ref_cell_aim) = ref_cell_squad.borrow().shared.aim.upgrade() {
+        let aim = ref_cell_aim.borrow();
+        if used_enemies.contains_key(&aim.id) {
+          let squads_list = &mut used_enemies.get_mut(&aim.id).unwrap().1;
+          squads_list.push(ref_cell_squad);
+        } else {
+          let was_enemy_moved = enemies_that_moved
+            .iter()
+            .find(|(id, ..)| *id == aim.id)
+            .is_some();
+          used_enemies.insert(aim.id, (was_enemy_moved, vec![ref_cell_squad]));
+        }
+      } else {
+        // TODO: squad should stop running, enemy does not exists
+      }
+    });
+
+    let mut new_hunters_aims: HashMap<u32, (Weak<RefCell<Squad>>, (f32, f32))> = HashMap::new();
+
+    for (enemy_id, (was_moved, squads_list)) in used_enemies {
+      if squads_list.len() > 1 {
+        let (range, enemy_position) = {
+          let first_squad = squads_list[0].borrow();
+          let weak_aim = &first_squad.shared.aim;
+          let curr_enemy_position = weak_aim.upgrade().unwrap().borrow().shared.center_point;
+          new_hunters_aims.insert(enemy_id, (weak_aim.clone(), curr_enemy_position));
+          let range = first_squad.squad_details.weapon.range;
+          (range, curr_enemy_position)
+        };
+        if was_moved {
+          SquadsManager::set_positions_in_range(&squads_list, enemy_position, range);
+        }
+      }
+    }
+
+    self.hunters_aims = new_hunters_aims;
   }
 }

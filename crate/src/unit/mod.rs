@@ -260,10 +260,13 @@ impl Unit {
         // 10.0 -> to be little bit closer
         // if there is no enough distance to new position,
         // then it will be in threshold of "target_achieved"
-        self.set_target(
-          angle_from_aim_to_unit.sin() * distance_to_enemy + unit_aim.x,
-          -angle_from_aim_to_unit.cos() * distance_to_enemy + unit_aim.y,
-        );
+        if unit_aim.state != STATE_RUN {
+          // if the enemy is running, then the faction's hunters should handle it
+          self.set_target(
+            angle_from_aim_to_unit.sin() * distance_to_enemy + unit_aim.x,
+            -angle_from_aim_to_unit.cos() * distance_to_enemy + unit_aim.y,
+          );
+        }
       }
     }
   }
