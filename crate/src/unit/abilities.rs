@@ -121,7 +121,6 @@ impl Abilities {
     squad_shared_info: &mut SquadUnitSharedDataSet,
     bullet_manager: &mut BulletsManager,
   ) {
-    // TODO: should be done in other place, related only with certain type of unit
     if let Some(ability_target) = squad_shared_info.ability_target {
       bullet_manager.add_explosion(
         unit.id as f32,

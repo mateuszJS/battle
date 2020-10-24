@@ -181,25 +181,6 @@ impl Squad {
     self.require_check_correctness = true;
   }
 
-  // pub fn stop_running(&mut self) {
-  //   // TODO: replace with method to clear all current things, target, ability, aim, stored_track_destination
-  //   // and call reset also in members, but remember that coherency is most important, then no reset in members
-  //   // but actually it's not used rn, will be in hunting prob used
-  //   // so maybe wait until we will rethink hunting
-  //   if self.is_taking_new_task_disabled() {
-  //     return;
-  //   }
-
-  //   // TODO: rename stored_track_destination to indicate desire of keeping coherency
-  //   if self.stored_track_destination.is_none() {
-  //     self.members.iter().for_each(|unit| {
-  //       unit.borrow_mut().stop_running(&self.shared);
-  //     });
-  //   } else {
-  //     self.stored_track_destination = None;
-  //   }
-  // }
-
   pub fn task_attack_enemy(&mut self, enemy: &Weak<RefCell<Squad>>) {
     if self.is_taking_new_task_disabled() {
       self.task_todo = TaskTodo {

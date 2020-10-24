@@ -87,7 +87,7 @@ impl Faction {
 
           creating_squad.squad.add_member(position_x, position_y);
 
-          let seed_throwing_strength = LookUpTable::get_random(); // TODO: move it to factory code, or faction
+          let seed_throwing_strength = LookUpTable::get_random();
           let throwing_strength = 8.0 + seed_throwing_strength * 15.0;
           creating_squad
             .squad
@@ -406,7 +406,7 @@ impl Faction {
           used_enemies.insert(aim.id, (was_enemy_moved, vec![ref_cell_squad]));
         }
       } else {
-        // TODO: squad should stop running, enemy does not exists
+        // enemy does not exist
       }
     });
 
