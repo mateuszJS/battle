@@ -35,7 +35,7 @@ const setup = () => {
     background.height = window.innerHeight
     const windowSize = Math.min(window.innerHeight * 1.75, window.innerWidth)
 
-    /* ====== CREATING GEMOTERY AND TEXTURES NEEDED FOR COLOR BURN SHADER ======= */
+    /* ====== CREATING GEOMETRY AND TEXTURES NEEDED FOR COLOR BURN SHADER ======= */
     const { geometry: startBtnGeometry, texture: startBtnTexture } = createItem(
       startBtnPrimaryTexture,
       backgroundTexture,
