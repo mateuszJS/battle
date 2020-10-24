@@ -103,16 +103,6 @@ impl Abilities {
       unit.y += unit.mod_y * acceleration;
       unit.get_upping_progress =
         (unit.x - unit.ability_start_point) / (target_x - unit.ability_start_point);
-      // (1460.3317 - 1454.0729) / (1455.5663 - 1454.0729)
-      if unit.get_upping_progress > 1.0 {
-        log!(
-          "{} - {} - {} - {}",
-          unit.get_upping_progress,
-          unit.x,
-          unit.ability_start_point,
-          target_x
-        );
-      }
     }
   }
 
