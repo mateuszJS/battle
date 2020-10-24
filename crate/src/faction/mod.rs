@@ -221,40 +221,6 @@ impl Faction {
     SquadsManager::set_positions_in_range(&attackers, aim_position, range);
   }
 
-  pub fn search_for_enemies(
-    &mut self,
-    squads_which_moved: &Vec<Rc<RefCell<Squad>>>,
-    all_squads: &Vec<Rc<RefCell<Squad>>>,
-  ) {
-    self.squads.iter().for_each(|squad| {
-      squad.borrow_mut().shared.secondary_aim = Weak::new();
-    });
-
-    let idle_squads: Vec<&Rc<RefCell<Squad>>> = self
-      .squads
-      .iter()
-      .filter(|ref_cell_squad| {
-        ref_cell_squad
-          .borrow()
-          .members
-          .iter()
-          .any(|unit| unit.borrow().state == STATE_IDLE)
-      })
-      .collect();
-
-    // let moved_enemies_squads: Vec<&Rc<RefCell<Squad>>> = squads_which_moved
-    //   .iter()
-    //   .filter(|squad| squad.borrow().faction_id != self.id)
-    //   .collect();
-
-    // let all_enemies_squads: Vec<&Rc<RefCell<Squad>>> = all_squads
-    //   .iter()
-    //   .filter(|squad| squad.borrow().faction_id != self.id)
-    //   .collect();
-
-    // SquadsManager::search_for_enemies(idle_squads, moved_enemies_squads, all_enemies_squads);
-  }
-
   pub fn update_squads_centers(&mut self) {
     self.squads.iter_mut().for_each(|ref_cell_squad| {
       let mut squad = ref_cell_squad.borrow_mut();
@@ -377,57 +343,43 @@ impl Faction {
       .work(&self.factory, squads, texture, enemy_factories);
   }
 
-  pub fn manage_hunters(&mut self, squads_grid: &HashMap<usize, Vec<Weak<RefCell<Squad>>>>) {
-    let mut enemies_that_moved: Vec<(u32, (f32, f32))> = vec![]; // value is to check, if we are using still this enemy
-    for (key, (weak_enemy, old_position)) in &self.hunters_aims {
-      if let Some(ref_cell_enemy) = weak_enemy.upgrade() {
-        let enemy = ref_cell_enemy.borrow();
-        let new_position = enemy.shared.center_point;
-        let distance = (old_position.0 - new_position.0).hypot(old_position.1 - new_position.1);
-        if distance > 10.0 {
-          enemies_that_moved.push((enemy.id, new_position));
-        }
-      }
-    }
+  fn search_for_enemy(
+    &mut self,
+    ref_cell_squad: &Rc<RefCell<Squad>>,
+    squads_grid: &HashMap<usize, Vec<Weak<RefCell<Squad>>>>,
+  ) {
+    let mut squad = ref_cell_squad.borrow_mut();
+    let squad_position = squad.shared.center_point;
+    let squad_range = squad.squad_details.weapon.range;
+    let enemy_nearby = SquadsGridManager::get_squads_in_area(
+      squads_grid,
+      squad_position.0,
+      squad_position.1,
+      squad_range,
+    );
 
-    let mut used_enemies: HashMap<u32, (bool, Vec<&Rc<RefCell<Squad>>>)> = HashMap::new();
-    // was enemy moved, list of out squads which have that aim
-    self.squads.iter().for_each(|ref_cell_squad| {
-      if let Some(ref_cell_aim) = ref_cell_squad.borrow().shared.aim.upgrade() {
-        let aim = ref_cell_aim.borrow();
-        if used_enemies.contains_key(&aim.id) {
-          let squads_list = &mut used_enemies.get_mut(&aim.id).unwrap().1;
-          squads_list.push(ref_cell_squad);
-        } else {
-          let was_enemy_moved = enemies_that_moved
-            .iter()
-            .find(|(id, ..)| *id == aim.id)
-            .is_some();
-          used_enemies.insert(aim.id, (was_enemy_moved, vec![ref_cell_squad]));
+    let mut min_distance = std::f32::MAX;
+    let mut weak_nearest_enemy = Weak::new();
+
+    enemy_nearby.iter().for_each(|weak_enemy| {
+      if let Some(ref_cell_enemy) = weak_enemy.upgrade() {
+        let enemy_position = ref_cell_enemy.borrow().shared.center_point;
+        let distance = (enemy_position.0 - squad_position.0).hypot(enemy_position.1 - squad_position.1);
+        if distance < min_distance {
+          weak_nearest_enemy = weak_enemy.clone();
+          min_distance = distance;
         }
-      } else {
-        // enemy does not exist
       }
     });
 
-    let mut new_hunters_aims: HashMap<u32, (Weak<RefCell<Squad>>, (f32, f32))> = HashMap::new();
+    squad.shared.secondary_aim = weak_nearest_enemy;
+  }
 
-    for (enemy_id, (was_moved, squads_list)) in used_enemies {
-      if squads_list.len() > 1 {
-        let (range, enemy_position) = {
-          let first_squad = squads_list[0].borrow();
-          let weak_aim = &first_squad.shared.aim;
-          let curr_enemy_position = weak_aim.upgrade().unwrap().borrow().shared.center_point;
-          new_hunters_aims.insert(enemy_id, (weak_aim.clone(), curr_enemy_position));
-          let range = first_squad.squad_details.weapon.range;
-          (range, curr_enemy_position)
-        };
-        if was_moved {
-          SquadsManager::set_positions_in_range(&squads_list, enemy_position, range);
-        }
-      }
-    }
-
-    self.hunters_aims = new_hunters_aims;
+  pub fn manage_hunters(&mut self, squads_grid: &HashMap<usize, Vec<Weak<RefCell<Squad>>>>) {
+    self.hunters_aims = SquadsManager::manage_hunters(
+      &mut self.squads,
+      &self.hunters_aims,
+      squads_grid,
+    );
   }
 }

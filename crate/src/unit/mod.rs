@@ -234,6 +234,8 @@ impl Unit {
             -angle_from_aim_to_unit.cos() * distance_to_enemy + unit_aim.y,
           );
         }
+      } else {
+        self.state = STATE_IDLE;
       }
     }
   }
