@@ -143,7 +143,11 @@ impl Unit {
     );
   }
 
-  fn update_run(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
+  fn update_run(
+    &mut self,
+    squad_shared_info: &SquadUnitSharedDataSet,
+    bullet_manager: &mut BulletsManager,
+  ) {
     let is_target_achieved =
       (self.x - self.target_x).hypot(self.y - self.target_y) < self.squad_details.movement_speed;
 
@@ -157,6 +161,10 @@ impl Unit {
     } else {
       self.x += self.mod_x;
       self.y += self.mod_y;
+
+      if self.squad_details.weapon.can_shoot_during_running && squad_shared_info.secondary_aim.upgrade().is_some() && self.aim.upgrade().is_some() {
+        self.update_shoot(squad_shared_info, bullet_manager);
+      }
     }
   }
 
@@ -182,6 +190,7 @@ impl Unit {
       if self.state != STATE_RUN {
         self.go_to_current_point_on_track(squad_shared_info);
       }
+      self.change_state_to_shoot_during_running(squad_shared_info);
     } else if squad_shared_info.ability_target.is_some() {
       // assuming that unit cannot be disrupted during using ability,
       // unit is always able to use ability, then squad has ability_target and self.track_index == -1
@@ -193,12 +202,55 @@ impl Unit {
     }
   }
 
+  fn change_state_to_shoot_during_running(
+    &mut self,
+    squad_shared_info: &SquadUnitSharedDataSet,
+  ) {
+    // TODO: check if aim is in front of the unit
+    if let Some(ref_cell_unit_aim) = self.aim.upgrade() {
+      let unit_aim = ref_cell_unit_aim.borrow();
+      let distance = (unit_aim.x - self.x).hypot(unit_aim.y - self.y);
+      if distance <= squad_shared_info.weapon.range {
+        return; // it's okay, don't have to find an aim
+      }
+    }
+
+    if squad_shared_info.secondary_aim.upgrade().is_none() {
+      return; // it's okay, unit won't have aim when squad does not have
+    }
+
+    let ref_cell_aim = squad_shared_info.secondary_aim.upgrade().unwrap();
+    let borrowed_members = &ref_cell_aim.borrow().members;
+
+    let (nearest_weak_unit_aim, distance_to_nearest_unit_aim) =
+    borrowed_members
+      .iter()
+      .fold((Weak::new(), std::f32::MAX), |acc, ref_cell_unit| {
+        let unit = ref_cell_unit.borrow();
+        let dis = (self.x - unit.x).hypot(self.y - unit.y);
+        if dis < acc.1 {
+          (Rc::downgrade(ref_cell_unit), dis)
+        } else {
+          acc
+        }
+      });
+
+    if let Some(ref_cell_unit_aim) = nearest_weak_unit_aim.upgrade() {
+      let unit_aim = ref_cell_unit_aim.borrow();
+      if distance_to_nearest_unit_aim <= squad_shared_info.weapon.range {
+        self.aim = nearest_weak_unit_aim;
+      }
+    }
+  }
+  
+
   fn change_state_to_shoot(
     &mut self,
     aim: Rc<RefCell<Squad>>,
     is_important_aim: bool,
     squad_shared_info: &SquadUnitSharedDataSet,
   ) {
+    // TODO: if we have already aim, and is in range, then don't search
     let borrowed_members = &aim.borrow().members;
     let (nearest_weak_unit_aim, distance_to_nearest_unit_aim) =
       borrowed_members
@@ -288,7 +340,7 @@ impl Unit {
     match self.state {
       STATE_FLY => self.update_fly(),
       STATE_GETUP => self.update_getup(squad_shared_info),
-      STATE_RUN => self.update_run(squad_shared_info),
+      STATE_RUN => self.update_run(squad_shared_info, bullet_manager),
       STATE_SHOOT => self.update_shoot(squad_shared_info, bullet_manager),
       STATE_ABILITY => Abilities::update_ability(self, squad_shared_info, bullet_manager),
       _ => {}
@@ -309,9 +361,20 @@ impl Unit {
         STATE_GETUP => self.get_upping_progress,
         STATE_SHOOT => self.time_to_next_shoot as f32,
         STATE_ABILITY => Abilities::get_representation_state(self),
+        STATE_RUN => self.get_run_representation_param(),
         _ => 0.0,
       },
     ]
+  }
+
+  fn get_run_representation_param(&self) -> f32 {
+    // TODO: we have to check if unit is shooting, because self.time_to_next_shoot
+    // can be 0 all the time, if is running and the aim is behind 
+    if self.state == STATE_RUN {
+      self.time_to_next_shoot as f32
+    } else {
+      0.0
+    }
   }
 
   pub fn set_position_offset(&mut self, offset_x: f32, offset_y: f32) {

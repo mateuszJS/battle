@@ -134,7 +134,7 @@ impl Squad {
     if !keep_aim_and_ability_target {
       self.shared.ability_target = None;
       self.shared.aim = Weak::new();
-      self.shared.secondary_aim = Weak::new();
+      self.shared.secondary_aim = Weak::new(); // TODO: don't have to do it
     }
     self.shared.track = vec![];
 

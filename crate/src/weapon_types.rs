@@ -15,6 +15,7 @@ pub struct Weapon {
   pub representation_id: f32,
   pub explosion_range: f32,
   pub range: f32, // between <DISTANCE_BETWEEN_ATTACKERS, MAX_WEAPON_RANGE>  from calc_positions
+  pub can_shoot_during_running: bool,
 }
 
 pub static STANDARD_RIFLE_DETAILS: Weapon = Weapon {
@@ -28,6 +29,7 @@ pub static STANDARD_RIFLE_DETAILS: Weapon = Weapon {
   representation_id: 1.0,
   explosion_range: 0.0,
   range: 600.0,
+  can_shoot_during_running: true,
 };
 
 pub static GRENADE_DETAILS: Weapon = Weapon {
@@ -41,6 +43,7 @@ pub static GRENADE_DETAILS: Weapon = Weapon {
   representation_id: 2.0,
   explosion_range: 200.0,
   range: 300.0,
+  can_shoot_during_running: false,
 };
 
 pub static HIT_THE_GROUND: Weapon = Weapon {
@@ -54,6 +57,7 @@ pub static HIT_THE_GROUND: Weapon = Weapon {
   representation_id: 3.0,
   explosion_range: 80.0,
   range: 900.0,
+  can_shoot_during_running: false,
 };
 
 pub static NON_WEAPON: Weapon = Weapon {
@@ -67,6 +71,7 @@ pub static NON_WEAPON: Weapon = Weapon {
   representation_id: 0.0,
   explosion_range: 0.0,
   range: 0.0,
+  can_shoot_during_running: false,
 };
 
 pub fn get_weapon_details(weapon_type: &WeaponType) -> &'static Weapon {

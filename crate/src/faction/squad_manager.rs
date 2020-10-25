@@ -67,6 +67,7 @@ impl SquadsManager {
     ref_cell_squad: &mut Rc<RefCell<Squad>>,
     squads_grid: &HashMap<usize, Vec<Weak<RefCell<Squad>>>>,
   ) {
+    // TODO: when is running, then it won't work, because nearest enemy can be behind!
     let (faction_id, squad_position, squad_range) = {
       let squad = ref_cell_squad.borrow();
       (squad.faction_id, squad.shared.center_point, squad.squad_details.weapon.range)
