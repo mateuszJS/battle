@@ -92,7 +92,7 @@ impl Abilities {
             unit.id as f32,
             (unit.x - aim_x).hypot(unit_y - aim_y) + random * 0.1,
             (aim_x - unit.x).atan2(unit_y - aim_y),
-            &WeaponType::StandardRifle,
+            &unit.squad_details.weapon.name,
           );
           unit.time_to_next_shoot = 10
         } else {

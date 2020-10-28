@@ -11,41 +11,67 @@ use std::rc::{Rc, Weak};
 pub struct SquadsManager {}
 
 impl SquadsManager {
-  pub fn set_positions_in_range(squads: &Vec<&Rc<RefCell<Squad>>>, target: (f32, f32), range: f32) {
-    let mut squads_out_of_range = squads
+  pub fn set_positions(squads: &Vec<&Rc<RefCell<Squad>>>, target: (f32, f32)) {
+    let squads_out_of_range = squads
       .into_iter()
       .filter_map(|ref_cell_squad| {
         let squad = ref_cell_squad.borrow_mut();
         let (x, y) = squad.shared.center_point;
-        if (x - target.0).hypot(y - target.1) + NORMAL_SQUAD_RADIUS < range {
+        if (x - target.0).hypot(y - target.1) + NORMAL_SQUAD_RADIUS
+          < squad.squad_details.weapon.range
+        {
           None
         } else {
           Some(*ref_cell_squad)
         }
       })
       .collect::<Vec<&Rc<RefCell<Squad>>>>();
+
+    let mut squads_divided_by_range: Vec<(u16, Vec<&Rc<RefCell<Squad>>>)> = vec![];
+    squads_out_of_range.into_iter().for_each(|ref_cell_squad| {
+      let squad = ref_cell_squad.borrow();
+      let weapon_range = squad.squad_details.weapon.range as u16;
+      let option_collected_squads = squads_divided_by_range
+        .iter_mut()
+        .find(|(range, ..)| weapon_range == *range as u16);
+      if let Some(collected_squads) = option_collected_squads {
+        collected_squads.1.push(ref_cell_squad);
+      } else {
+        squads_divided_by_range.push((weapon_range, vec![ref_cell_squad]));
+      }
+    });
+
+    squads_divided_by_range
+      .iter_mut()
+      .for_each(|(range, squads)| {
+        SquadsManager::set_positions_by_range(squads, target, *range as f32)
+      });
+  }
+
+  pub fn set_positions_by_range(
+    squads: &mut Vec<&Rc<RefCell<Squad>>>,
+    target: (f32, f32),
+    range: f32,
+  ) {
     // TODO: divide squads_out_of_range into smaller groups by weapon and range (range should be included in squads_out_of_range closure)
     let mut positions = PositionUtils::get_attackers_position(
-      squads_out_of_range.len(),
-      SquadsManager::calc_army_center(&squads_out_of_range),
+      squads.len(),
+      SquadsManager::calc_army_center(&squads),
       target,
       range,
     );
 
     positions.sort_by(|a, b| (a.1).partial_cmp(&b.1).unwrap());
 
-    squads_out_of_range.sort_by(|a, b| {
+    squads.sort_by(|a, b| {
       (a.borrow().shared.center_point.1)
         .partial_cmp(&b.borrow().shared.center_point.1)
         .unwrap()
     });
 
-    squads_out_of_range
-      .iter()
-      .enumerate()
-      .for_each(|(index, squad)| {
-        squad.borrow_mut().task_add_target(positions[index], true);
-      });
+    squads.iter().enumerate().for_each(|(index, squad)| {
+      squad.borrow_mut().task_add_target(positions[index], true);
+    });
   }
 
   fn calc_army_center(hunters: &Vec<&Rc<RefCell<Squad>>>) -> (f32, f32) {
@@ -206,16 +232,15 @@ impl SquadsManager {
     let mut new_hunters_aims: HashMap<u32, (Weak<RefCell<Squad>>, (f32, f32))> = HashMap::new();
     for (enemy_id, (was_moved, squads_list)) in used_enemies {
       if squads_list.len() > 1 {
-        let (range, enemy_position) = {
+        let enemy_position = {
           let first_squad = squads_list[0].borrow();
           let weak_aim = &first_squad.shared.aim;
           let curr_enemy_position = weak_aim.upgrade().unwrap().borrow().shared.center_point;
           new_hunters_aims.insert(enemy_id, (weak_aim.clone(), curr_enemy_position));
-          let range = first_squad.squad_details.weapon.range;
-          (range, curr_enemy_position)
+          curr_enemy_position
         };
         if was_moved {
-          SquadsManager::set_positions_in_range(&squads_list, enemy_position, range);
+          SquadsManager::set_positions(&squads_list, enemy_position);
         }
       }
     }

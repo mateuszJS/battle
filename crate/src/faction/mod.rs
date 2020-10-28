@@ -206,19 +206,7 @@ impl Faction {
       .for_each(|squad| squad.borrow_mut().task_attack_enemy(weak_enemy));
 
     let aim_position = weak_enemy.upgrade().unwrap().borrow().shared.center_point;
-
-    // let mut attackers_out_of_range: Vec<&Rc<RefCell<Squad>>> = attackers
-    //   .into_iter()
-    //   .filter(|squad| {
-    //     let squad_position = squad.borrow().shared.center_point;
-    //     (squad_position.0 - aim_position.0).hypot(squad_position.1 - aim_position.1)
-    //       > ATTACKERS_DISTANCE
-    //   })
-    //   .collect();
-    let range = attackers[0].borrow().squad_details.weapon.range;
-    // TODO: divide them by range, then divide if are not in the same group maybe?? let range = squads.
-    // or maybe do it inside set_positions_in_range, hen hunters will got it also
-    SquadsManager::set_positions_in_range(&attackers, aim_position, range);
+    SquadsManager::set_positions(&attackers, aim_position);
   }
 
   pub fn update_squads_centers(&mut self) {
@@ -252,29 +240,8 @@ impl Faction {
     }
 
     let ability_range = squads[0].borrow().squad_details.ability_range;
-    // TODO: divide them by range, then divide if are not in the same group maybe?? let range = squads.
-    // SquadsManager::set_positions_in_range(&mut squads, (target_x, target_y), ability_range);
 
     let ability_targets = PositionUtils::get_squads_positions(squads.len(), target_x, target_y);
-    // TODO: maybe it should be done along the attacks/hunters
-    // let squads_out_of_range: Vec<Option<&Rc<RefCell<Squad>>>> = squads
-    //   .clone()
-    //   .into_iter()
-    //   .enumerate()
-    //   .map(|(index, ref_cell_squad)| {
-    //     let mut squad = ref_cell_squad.borrow_mut();
-    //     let squad_position = squad.shared.center_point;
-    //     let target = positions[index];
-    //     let out_of_range = (squad_position.0 - target.0).hypot(squad_position.1 - target.1)
-    //       > ability_range - MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS;
-    //     // if !out_of_range {
-    //     //   // squad.stop_running();
-    //     //   None
-    //     // } else {
-    //       Some(ref_cell_squad)
-    //     // }
-    //   })
-    //   .collect();
 
     squads.iter().enumerate().for_each(|(index, rc_hunter)| {
       rc_hunter
@@ -284,7 +251,7 @@ impl Faction {
 
     squads.iter().enumerate().for_each(|(index, squad)| {
       let target = ability_targets[index];
-      SquadsManager::set_positions_in_range(&vec![squad], target, ability_range);
+      SquadsManager::set_positions_by_range(&mut vec![squad], target, ability_range);
     });
   }
 

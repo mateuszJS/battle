@@ -2,7 +2,7 @@ use crate::representations_ids::{
   NON_REPRESENTATION_ID, RAPTOR_REPRESENTATION_ID, SOLIDER_REPRESENTATION_ID,
 };
 use crate::weapon_types::{
-  Weapon, GRENADE_DETAILS, HIT_THE_GROUND, NON_WEAPON, STANDARD_RIFLE_DETAILS,
+  Weapon, GRENADE_DETAILS, HIT_THE_GROUND, LASER_RIFLE_DETAILS, NON_WEAPON, STANDARD_RIFLE_DETAILS,
 };
 
 pub enum SquadType {
@@ -49,7 +49,7 @@ static RAPTOR_DETAILS: SquadDetails = SquadDetails {
   representation_type: RAPTOR_REPRESENTATION_ID,
   selection_threshold: 40.0,
   unit_model_offset_y: 20.0,
-  weapon: &STANDARD_RIFLE_DETAILS,
+  weapon: &LASER_RIFLE_DETAILS,
   influence_value: 0.013,
   ability_range: HIT_THE_GROUND.range,
 };

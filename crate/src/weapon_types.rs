@@ -1,5 +1,6 @@
 pub enum WeaponType {
   StandardRifle,
+  LaserRifle,
   Grenade,
   HitTheGround,
 }
@@ -30,6 +31,21 @@ pub static STANDARD_RIFLE_DETAILS: Weapon = Weapon {
   representation_id: 1.0,
   explosion_range: 0.0,
   range: 600.0,
+  can_shoot_during_running: true,
+  max_angle_during_run: 0.7,
+};
+
+pub static LASER_RIFLE_DETAILS: Weapon = Weapon {
+  name: WeaponType::LaserRifle,
+  chances_to_reload: 0.4,
+  reload_time: 200,
+  shoot_time: 40,
+  scatter: 0.3, // (smaller -> more precise)
+  bullets_speed: 10.0,
+  damage: 10,
+  representation_id: 1.0,
+  explosion_range: 0.0,
+  range: 400.0,
   can_shoot_during_running: true,
   max_angle_during_run: 0.7,
 };
@@ -82,6 +98,7 @@ pub static NON_WEAPON: Weapon = Weapon {
 pub fn get_weapon_details(weapon_type: &WeaponType) -> &'static Weapon {
   match *weapon_type {
     WeaponType::StandardRifle => &STANDARD_RIFLE_DETAILS,
+    WeaponType::LaserRifle => &LASER_RIFLE_DETAILS,
     WeaponType::Grenade => &GRENADE_DETAILS,
     WeaponType::HitTheGround => &HIT_THE_GROUND,
   }
