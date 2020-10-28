@@ -68,22 +68,18 @@ impl SquadsManager {
     ref_cell_squad: &mut Rc<RefCell<Squad>>,
     squads_grid: &HashMap<usize, Vec<Weak<RefCell<Squad>>>>,
   ) {
-    let (faction_id, squad_position, squad_weapon, is_squad_running) = {
+    // Current secondary aim can be totally okay
+    let (faction_id, squad_position, squad_weapon, is_squad_running, weak_secondary_aim) = {
       let squad = ref_cell_squad.borrow();
       (
         squad.faction_id,
         squad.shared.center_point,
         &squad.squad_details.weapon,
         squad.is_squad_running(),
+        squad.shared.secondary_aim.clone(),
       )
     };
 
-    let squads_nearby = SquadsGridManager::get_squads_in_area(
-      squads_grid,
-      squad_position.0,
-      squad_position.1,
-      squad_weapon.range,
-    );
     let max_distance =
       squad_weapon.range + NORMAL_SQUAD_RADIUS + THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER;
 
@@ -123,6 +119,13 @@ impl SquadsManager {
     let mut min_value = std::f32::MAX;
     let mut weak_enemy = Weak::new();
 
+    let squads_nearby = SquadsGridManager::get_squads_in_area(
+      squads_grid,
+      squad_position.0,
+      squad_position.1,
+      squad_weapon.range,
+    );
+
     squads_nearby.iter().for_each(|some_weak_squad| {
       if let Some(some_ref_cell_squad) = some_weak_squad.upgrade() {
         let some_squad = some_ref_cell_squad.borrow();
@@ -141,6 +144,13 @@ impl SquadsManager {
     let new_secondary_aim = if weak_enemy.upgrade().is_some()
       && (is_squad_running.is_some() || min_value < max_distance)
     {
+      if weak_secondary_aim.upgrade().is_some()
+        && weak_enemy.upgrade().unwrap().borrow().id
+          == weak_secondary_aim.upgrade().unwrap().borrow().id
+      {
+        return; // this is the same aim as current one
+                // to avoid calling squad.set_secondary_aim because it will erase the unit.aim
+      }
       weak_enemy
     } else {
       Weak::new()

@@ -269,6 +269,7 @@ impl Unit {
       let unit_aim = ref_cell_unit_aim.borrow();
       let distance = (unit_aim.x - self.x).hypot(unit_aim.y - self.y);
       if distance <= squad_shared_info.weapon.range {
+        self.state = STATE_SHOOT; // if changed from RUN -> IDLE and still has secondary aim from run
         self.angle = (unit_aim.x - self.x).atan2(self.y - unit_aim.y);
         return; // it's okay, don't have to find an aim
       }
