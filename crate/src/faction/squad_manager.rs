@@ -69,14 +69,18 @@ impl SquadsManager {
     squads_grid: &HashMap<usize, Vec<Weak<RefCell<Squad>>>>,
   ) {
     // Current secondary aim can be totally okay
-    let (faction_id, squad_position, squad_weapon, is_squad_running, weak_secondary_aim) = {
+    let (faction_id, squad_position, squad_weapon, is_squad_running, option_secondary_aim_id) = {
       let squad = ref_cell_squad.borrow();
       (
         squad.faction_id,
         squad.shared.center_point,
         &squad.squad_details.weapon,
         squad.is_squad_running(),
-        squad.shared.secondary_aim.clone(),
+        if let Some(secondary_aim) = squad.shared.secondary_aim.upgrade() {
+          Some(secondary_aim.borrow().id)
+        } else {
+          None
+        },
       )
     };
 
@@ -144,9 +148,8 @@ impl SquadsManager {
     let new_secondary_aim = if weak_enemy.upgrade().is_some()
       && (is_squad_running.is_some() || min_value < max_distance)
     {
-      if weak_secondary_aim.upgrade().is_some()
-        && weak_enemy.upgrade().unwrap().borrow().id
-          == weak_secondary_aim.upgrade().unwrap().borrow().id
+      if option_secondary_aim_id.is_some()
+        && weak_enemy.upgrade().unwrap().borrow().id == option_secondary_aim_id.unwrap()
       {
         return; // this is the same aim as current one
                 // to avoid calling squad.set_secondary_aim because it will erase the unit.aim
