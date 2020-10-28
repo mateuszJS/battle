@@ -27,8 +27,24 @@ impl SquadsManager {
       })
       .collect::<Vec<&Rc<RefCell<Squad>>>>();
 
+    let mut squads_divided_by_range = SquadsManager::divide_squads_by_range(squads_out_of_range);
+
+    squads_divided_by_range
+      .iter_mut()
+      .for_each(|(range, squads)| {
+        SquadsManager::set_positions_by_range(squads, target, *range as f32)
+      });
+  }
+
+  // fn divide_squads_by_position(squads: Vec<&Rc<RefCell<Squad>>>) -> Vec<(u16, Vec<&Rc<RefCell<Squad>>>)> {
+  // TODO: if will be necessary we can implement it, but don't have to slow down whole app for just this effect
+  // }
+
+  fn divide_squads_by_range(
+    squads: Vec<&Rc<RefCell<Squad>>>,
+  ) -> Vec<(u16, Vec<&Rc<RefCell<Squad>>>)> {
     let mut squads_divided_by_range: Vec<(u16, Vec<&Rc<RefCell<Squad>>>)> = vec![];
-    squads_out_of_range.into_iter().for_each(|ref_cell_squad| {
+    squads.into_iter().for_each(|ref_cell_squad| {
       let squad = ref_cell_squad.borrow();
       let weapon_range = squad.squad_details.weapon.range as u16;
       let option_collected_squads = squads_divided_by_range
@@ -40,12 +56,7 @@ impl SquadsManager {
         squads_divided_by_range.push((weapon_range, vec![ref_cell_squad]));
       }
     });
-
     squads_divided_by_range
-      .iter_mut()
-      .for_each(|(range, squads)| {
-        SquadsManager::set_positions_by_range(squads, target, *range as f32)
-      });
   }
 
   pub fn set_positions_by_range(
@@ -53,7 +64,6 @@ impl SquadsManager {
     target: (f32, f32),
     range: f32,
   ) {
-    // TODO: divide squads_out_of_range into smaller groups by weapon and range (range should be included in squads_out_of_range closure)
     let mut positions = PositionUtils::get_attackers_position(
       squads.len(),
       SquadsManager::calc_army_center(&squads),
@@ -210,6 +220,8 @@ impl SquadsManager {
     let mut used_enemies: HashMap<u32, (bool, Vec<&Rc<RefCell<Squad>>>)> = HashMap::new();
     // was enemy moved, list of out squads which have that aim
     all_squads.iter_mut().for_each(|mut ref_cell_squad| {
+      // TODO: don't have to do search_for_enemy ALWAYS!
+      SquadsManager::search_for_enemy(&mut ref_cell_squad, squads_grid);
       if let Some(ref_cell_aim) = ref_cell_squad.borrow().shared.aim.upgrade() {
         let aim = ref_cell_aim.borrow();
         if used_enemies.contains_key(&aim.id) {
@@ -222,10 +234,7 @@ impl SquadsManager {
             .is_some();
           used_enemies.insert(aim.id, (was_enemy_moved, vec![ref_cell_squad]));
         }
-        // TODO: unit which has aim out of the range, also should get the secondary_aim
-        return;
       }
-      SquadsManager::search_for_enemy(&mut ref_cell_squad, squads_grid);
     });
 
     /*=====CONSUME GROUPED OUR SQUADS AND CREATE NEW HUNTERS HASH MAP======*/

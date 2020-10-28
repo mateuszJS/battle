@@ -411,7 +411,6 @@ impl Unit {
   }
 
   fn change_state_to_die(&mut self) {
-    // TODO: not sure but maybe also should be done in function which checking correctness, base on input: target, aim ,ability, hp, own_aim, is_aim_important
     self.state = STATE_DIE;
     self.mod_x = 0.0;
     self.mod_y = 0.0;

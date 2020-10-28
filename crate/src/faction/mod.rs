@@ -32,7 +32,7 @@ pub struct Faction {
   pub squads: Vec<Rc<RefCell<Squad>>>, // call borrow() and share that Ref<Squad>, if it's not possible then wrap in Rc like Vec<Rc<RefCell<Squad>>>
   pub factory: Factory,
   pub squads_during_creation: Vec<SquadDuringCreation>,
-  pub portal: Rc<RefCell<Squad>>,
+  pub portal_squad: Rc<RefCell<Squad>>,
   ai: ArtificialIntelligence,
   hunters_aims: HashMap<u32, (Weak<RefCell<Squad>>, (f32, f32))>,
   // hunters: HashMap<enemy_squad_id, (refenrece_to_enemy_squad, old_position)>
@@ -45,7 +45,6 @@ impl Faction {
     factory_y: f32,
     factory_angle: f32,
     is_user: bool,
-    world: &mut World,
   ) -> Faction {
     let mut portal = Squad::new(id, SquadType::Portal);
     portal.add_member(factory_x, factory_y);
@@ -53,8 +52,6 @@ impl Faction {
     let portal_id = portal.members[0].borrow().id;
     let factory = Factory::new(portal_id, factory_x, factory_y, factory_angle, is_user);
     let portal_squad = Rc::new(RefCell::new(portal));
-    // TODO: add portal to grid!!!
-    // world.all_squads.push(Rc::downgrade(&portal_squad));
     let ai = ArtificialIntelligence::new();
 
     Faction {
@@ -62,7 +59,7 @@ impl Faction {
       factory,
       resources: 0,
       squads: vec![],
-      portal: portal_squad,
+      portal_squad,
       squads_during_creation: vec![],
       ai,
       hunters_aims: HashMap::new(),

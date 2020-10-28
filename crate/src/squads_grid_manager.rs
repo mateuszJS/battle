@@ -12,24 +12,34 @@ pub struct SquadsGridManager {}
 impl SquadsGridManager {
   pub fn create(factions: &Vec<Faction>) -> HashMap<usize, Vec<Weak<RefCell<Squad>>>> {
     let mut grid: HashMap<usize, Vec<Weak<RefCell<Squad>>>> = HashMap::new();
-    factions.iter().for_each(|faction| {
-      faction.squads.iter().for_each(|ref_cell_squad| {
-        let (x, y) = ref_cell_squad.borrow().shared.center_point;
-        let index = SquadsGridManager::get_index_from_real_position(x, y);
-        let weak_ref = Rc::downgrade(&ref_cell_squad);
 
-        match grid.get_mut(&index) {
-          Some(squads_list) => {
-            squads_list.push(weak_ref);
-          }
-          None => {
-            grid.insert(index, vec![weak_ref]);
-          }
-        };
-      });
+    factions.iter().for_each(|faction| {
+      SquadsGridManager::grid_add_entry(&faction.portal_squad, &mut grid);
+      faction
+        .squads
+        .iter()
+        .for_each(|squad| SquadsGridManager::grid_add_entry(squad, &mut grid));
     });
 
     grid
+  }
+
+  fn grid_add_entry(
+    ref_cell_squad: &Rc<RefCell<Squad>>,
+    grid: &mut HashMap<usize, Vec<Weak<RefCell<Squad>>>>,
+  ) {
+    let (x, y) = ref_cell_squad.borrow().shared.center_point;
+    let index = SquadsGridManager::get_index_from_real_position(x, y);
+    let weak_ref = Rc::downgrade(&ref_cell_squad);
+
+    match grid.get_mut(&index) {
+      Some(squads_list) => {
+        squads_list.push(weak_ref);
+      }
+      None => {
+        grid.insert(index, vec![weak_ref]);
+      }
+    };
   }
 
   pub fn get_real_position_from_index(index: usize) -> (f32, f32) {

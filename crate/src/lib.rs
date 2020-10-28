@@ -73,7 +73,7 @@ pub struct Universe {
 impl Universe {
   pub fn new(factions_data: Vec<f32>, obstacles_data: Vec<f32>) -> Universe {
     let mut factions: Vec<Faction> = vec![];
-    let mut world = World {
+    let world = World {
       squads_on_grid: HashMap::new(),
       bullets_manager: BulletsManager::new(),
     };
@@ -86,7 +86,6 @@ impl Universe {
         factions_data[i + 2],
         factions_data[i + 3],
         i == 0,
-        &mut world,
       ));
       i += 4;
     }
