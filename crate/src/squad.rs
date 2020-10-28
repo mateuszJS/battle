@@ -134,7 +134,6 @@ impl Squad {
     if !keep_aim_and_ability_target {
       self.shared.ability_target = None;
       self.shared.aim = Weak::new();
-      self.shared.secondary_aim = Weak::new(); // TODO: don't have to do it
     }
     self.shared.track = vec![];
 
@@ -306,5 +305,39 @@ impl Squad {
     // if number_of_members != self.members.len() {
     //   self.recalculate_members_positions();
     // }
+  }
+
+  pub fn is_squad_running(&self) -> Option<f32> {
+    // returns [-pi/2, pi/2]
+    // it's the angle where squad is directed
+    let is_running = self
+      .members
+      .iter()
+      .any(|member| member.borrow().track_index != -1);
+
+    if is_running {
+      let (sin_sum, cos_sum) =
+        self
+          .members
+          .iter()
+          .fold((0.0, 0.0), |(sin_sum, cos_sum), ref_cell_unit| {
+            let angle = ref_cell_unit.borrow().angle;
+            (sin_sum + angle.sin(), cos_sum + angle.cos())
+          });
+      // calc angels mean
+      let sin_mean = sin_sum / self.members.len() as f32;
+      let cos_mean = cos_sum / self.members.len() as f32;
+      Some(sin_mean.atan2(cos_mean))
+    } else {
+      None
+    }
+  }
+
+  pub fn set_secondary_aim(&mut self, enemy: Weak<RefCell<Squad>>) {
+    self.shared.secondary_aim = enemy;
+    self
+      .members
+      .iter_mut()
+      .for_each(|member| member.borrow_mut().aim = Weak::new());
   }
 }

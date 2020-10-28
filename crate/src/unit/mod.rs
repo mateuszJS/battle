@@ -33,6 +33,7 @@ pub struct Unit {
   pub angle: f32,
   pub state: u8,
   pub get_upping_progress: f32, // <0, 1>, 0 -> start get up, 1 -> change state to IDLE
+  // used also in running and shooting, to keep correct angle
   pub has_finished_using_ability: bool,
   mod_x: f32,
   mod_y: f32,
@@ -40,10 +41,10 @@ pub struct Unit {
   target_y: f32,
   position_offset_x: f32,
   position_offset_y: f32,
-  track_index: i8,
+  pub track_index: i8, // used in squad to check if members are running
   squad_details: &'static SquadDetails,
   time_to_next_shoot: u16,
-  aim: Weak<RefCell<Unit>>,
+  pub aim: Weak<RefCell<Unit>>, // used in squad, to clear out after set secondary aim
   hp: i16,
   ability_start_point: f32,
 }
@@ -162,7 +163,7 @@ impl Unit {
       self.x += self.mod_x;
       self.y += self.mod_y;
 
-      if self.squad_details.weapon.can_shoot_during_running && squad_shared_info.secondary_aim.upgrade().is_some() && self.aim.upgrade().is_some() {
+      if self.squad_details.weapon.can_shoot_during_running && self.aim.upgrade().is_some() {
         self.update_shoot(squad_shared_info, bullet_manager);
       }
     }
@@ -190,7 +191,9 @@ impl Unit {
       if self.state != STATE_RUN {
         self.go_to_current_point_on_track(squad_shared_info);
       }
-      self.change_state_to_shoot_during_running(squad_shared_info);
+      if let Some(secondary_aim) = squad_shared_info.secondary_aim.upgrade() {
+        self.change_state_to_shoot_during_running(secondary_aim);
+      }
     } else if squad_shared_info.ability_target.is_some() {
       // assuming that unit cannot be disrupted during using ability,
       // unit is always able to use ability, then squad has ability_target and self.track_index == -1
@@ -202,47 +205,58 @@ impl Unit {
     }
   }
 
-  fn change_state_to_shoot_during_running(
-    &mut self,
-    squad_shared_info: &SquadUnitSharedDataSet,
-  ) {
-    // TODO: check if aim is in front of the unit
+  fn set_new_aim_during_running(&mut self, secondary_aim: Rc<RefCell<Squad>>) {
+    let enemy_members = &secondary_aim.borrow().members;
+
+    let (nearest_weak_unit_aim, min_angle_diff) =
+      enemy_members
+        .iter()
+        .fold((Weak::new(), std::f32::MAX), |acc, ref_cell_enemy| {
+          let enemy = ref_cell_enemy.borrow();
+          let dis = (self.x - enemy.x).hypot(self.y - enemy.y);
+          if dis < self.squad_details.weapon.range {
+            let angle_from_unit_to_enemy = (enemy.x - self.x).atan2(self.y - enemy.y);
+            let angle_diff = angle_diff!(self.angle, angle_from_unit_to_enemy);
+            if angle_diff < acc.1 {
+              (Rc::downgrade(ref_cell_enemy), angle_diff)
+            } else {
+              acc
+            }
+          } else {
+            acc
+          }
+        });
+
+    if let Some(unit_aim_ref_cell) = nearest_weak_unit_aim.upgrade() {
+      if min_angle_diff < self.squad_details.weapon.max_angle_during_run {
+        self.aim = nearest_weak_unit_aim;
+        let unit_aim = unit_aim_ref_cell.borrow();
+        self.get_upping_progress = (unit_aim.x - self.x).atan2(self.y - unit_aim.y);
+        return;
+      }
+    }
+
+    self.aim = Weak::new();
+  }
+
+  fn change_state_to_shoot_during_running(&mut self, secondary_aim: Rc<RefCell<Squad>>) {
+    // check if unit can keep current aim
     if let Some(ref_cell_unit_aim) = self.aim.upgrade() {
       let unit_aim = ref_cell_unit_aim.borrow();
       let distance = (unit_aim.x - self.x).hypot(unit_aim.y - self.y);
-      if distance <= squad_shared_info.weapon.range {
-        return; // it's okay, don't have to find an aim
-      }
-    }
-
-    if squad_shared_info.secondary_aim.upgrade().is_none() {
-      return; // it's okay, unit won't have aim when squad does not have
-    }
-
-    let ref_cell_aim = squad_shared_info.secondary_aim.upgrade().unwrap();
-    let borrowed_members = &ref_cell_aim.borrow().members;
-
-    let (nearest_weak_unit_aim, distance_to_nearest_unit_aim) =
-    borrowed_members
-      .iter()
-      .fold((Weak::new(), std::f32::MAX), |acc, ref_cell_unit| {
-        let unit = ref_cell_unit.borrow();
-        let dis = (self.x - unit.x).hypot(self.y - unit.y);
-        if dis < acc.1 {
-          (Rc::downgrade(ref_cell_unit), dis)
-        } else {
-          acc
+      if distance <= self.squad_details.weapon.range {
+        let angle_from_unit_to_aim = (unit_aim.x - self.x).atan2(self.y - unit_aim.y);
+        if angle_diff!(self.angle, angle_from_unit_to_aim)
+          < self.squad_details.weapon.max_angle_during_run
+        {
+          self.get_upping_progress = angle_from_unit_to_aim;
+          return; // it's okay, don't have to find an aim
         }
-      });
-
-    if let Some(ref_cell_unit_aim) = nearest_weak_unit_aim.upgrade() {
-      let unit_aim = ref_cell_unit_aim.borrow();
-      if distance_to_nearest_unit_aim <= squad_shared_info.weapon.range {
-        self.aim = nearest_weak_unit_aim;
       }
     }
+
+    self.set_new_aim_during_running(secondary_aim);
   }
-  
 
   fn change_state_to_shoot(
     &mut self,
@@ -250,7 +264,16 @@ impl Unit {
     is_important_aim: bool,
     squad_shared_info: &SquadUnitSharedDataSet,
   ) {
-    // TODO: if we have already aim, and is in range, then don't search
+    // check if unit can keep current aim
+    if let Some(ref_cell_unit_aim) = self.aim.upgrade() {
+      let unit_aim = ref_cell_unit_aim.borrow();
+      let distance = (unit_aim.x - self.x).hypot(unit_aim.y - self.y);
+      if distance <= squad_shared_info.weapon.range {
+        self.angle = (unit_aim.x - self.x).atan2(self.y - unit_aim.y);
+        return; // it's okay, don't have to find an aim
+      }
+    }
+
     let borrowed_members = &aim.borrow().members;
     let (nearest_weak_unit_aim, distance_to_nearest_unit_aim) =
       borrowed_members
@@ -310,11 +333,17 @@ impl Unit {
             1.0
           };
 
+      let angle = if self.state == STATE_SHOOT {
+        self.angle
+      } else {
+        self.get_upping_progress
+      };
+
       bullet_manager.add_bullet(
         self.id as f32,
         self.x,
         self.y,
-        self.angle + weapon_deviation,
+        angle + weapon_deviation,
         &squad_shared_info.weapon.name,
         self.aim.clone(),
         distance_mod,
@@ -368,9 +397,7 @@ impl Unit {
   }
 
   fn get_run_representation_param(&self) -> f32 {
-    // TODO: we have to check if unit is shooting, because self.time_to_next_shoot
-    // can be 0 all the time, if is running and the aim is behind 
-    if self.state == STATE_RUN {
+    if self.aim.upgrade().is_some() {
       self.time_to_next_shoot as f32
     } else {
       0.0

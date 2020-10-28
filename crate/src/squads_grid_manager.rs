@@ -1,6 +1,7 @@
 use super::{Faction, Squad};
 use crate::constants::{
-  GRID_MAP_HEIGHT, GRID_MAP_SCALE, GRID_MAP_WIDTH, THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER,
+  GRID_MAP_HEIGHT, GRID_MAP_SCALE, GRID_MAP_WIDTH, NORMAL_SQUAD_RADIUS,
+  THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER,
 };
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -49,7 +50,8 @@ impl SquadsGridManager {
     raw_y: f32,
     raw_radius: f32,
   ) -> Vec<Weak<RefCell<Squad>>> {
-    let radius = (raw_radius + THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER) * GRID_MAP_SCALE;
+    let radius = (NORMAL_SQUAD_RADIUS + raw_radius + THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER)
+      * GRID_MAP_SCALE;
     let x = raw_x * GRID_MAP_SCALE;
     let y = raw_y * GRID_MAP_SCALE;
     let min_x = ((x - radius) as usize).max(0).min(GRID_MAP_WIDTH - 1);

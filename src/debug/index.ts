@@ -3,6 +3,7 @@ import * as tracksDebug from './tracks'
 import * as obstaclesDebug from './obstacles'
 import * as gridDebug from './grid'
 import * as obstaclesMapDebug from './obstaclesMap'
+import * as enemySecondaryAimDebug from './enemySecondaryAim'
 import { Universe } from '../../crate/pkg/index'
 
 const debugController = {
@@ -11,12 +12,14 @@ const debugController = {
   obstacles: true,
   grid: false,
   obstaclesMap: false,
+  enemySecondaryAim: false,
   init: () => null,
   anglesDebug,
   tracksDebug,
   obstaclesDebug,
   gridDebug,
   obstaclesMapDebug,
+  enemySecondaryAimDebug,
   update: (universe: Universe) => {
     Object.keys(debugController).forEach(key => {
       if (

@@ -343,43 +343,8 @@ impl Faction {
       .work(&self.factory, squads, texture, enemy_factories);
   }
 
-  fn search_for_enemy(
-    &mut self,
-    ref_cell_squad: &Rc<RefCell<Squad>>,
-    squads_grid: &HashMap<usize, Vec<Weak<RefCell<Squad>>>>,
-  ) {
-    let mut squad = ref_cell_squad.borrow_mut();
-    let squad_position = squad.shared.center_point;
-    let squad_range = squad.squad_details.weapon.range;
-    let enemy_nearby = SquadsGridManager::get_squads_in_area(
-      squads_grid,
-      squad_position.0,
-      squad_position.1,
-      squad_range,
-    );
-
-    let mut min_distance = std::f32::MAX;
-    let mut weak_nearest_enemy = Weak::new();
-
-    enemy_nearby.iter().for_each(|weak_enemy| {
-      if let Some(ref_cell_enemy) = weak_enemy.upgrade() {
-        let enemy_position = ref_cell_enemy.borrow().shared.center_point;
-        let distance = (enemy_position.0 - squad_position.0).hypot(enemy_position.1 - squad_position.1);
-        if distance < min_distance {
-          weak_nearest_enemy = weak_enemy.clone();
-          min_distance = distance;
-        }
-      }
-    });
-
-    squad.shared.secondary_aim = weak_nearest_enemy;
-  }
-
   pub fn manage_hunters(&mut self, squads_grid: &HashMap<usize, Vec<Weak<RefCell<Squad>>>>) {
-    self.hunters_aims = SquadsManager::manage_hunters(
-      &mut self.squads,
-      &self.hunters_aims,
-      squads_grid,
-    );
+    self.hunters_aims =
+      SquadsManager::manage_hunters(&mut self.squads, &self.hunters_aims, squads_grid);
   }
 }

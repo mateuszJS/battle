@@ -9,17 +9,16 @@ macro_rules! log {
   ($( $t:tt )*) => (web_sys::console::log_1(&format!($($t)*).into()));
 }
 
-// macro_rules! read_squad {
-//   ( $( $x:expr ),* ) => {
-//       {
-//           let mut temp_vec = Vec::new();
-//           $(
-//               temp_vec.push($x);
-//           )*
-//           temp_vec
-//       }
-//   };
-// }
+macro_rules! angle_diff {
+  ($beta:expr, $alpha:expr) => {{
+    let phi = ($beta - $alpha).abs() % (2.0 * MATH_PI); // This is either the distance or 360 - distance
+    if phi > MATH_PI {
+      (2.0 * MATH_PI) - phi
+    } else {
+      phi
+    }
+  }}
+}
 
 // https://rustwasm.github.io/book/game-of-life/debugging.html fix debugging
 
@@ -449,5 +448,29 @@ impl Universe {
 
   pub fn is_point_inside_obstacle(&self, x: i16, y: i16) -> u8 {
     CalcPositions::test((x, y))
+  }
+
+  pub fn debug_enemy_secondary_aim(&self) -> js_sys::Float32Array {
+    let result = if self.factions[1].squads.len() > 0
+      && self.factions[1].squads[0]
+        .borrow()
+        .shared
+        .secondary_aim
+        .upgrade()
+        .is_some()
+    {
+      self.factions[1].squads[0]
+        .borrow()
+        .shared
+        .secondary_aim
+        .upgrade()
+        .unwrap()
+        .borrow()
+        .shared
+        .center_point
+    } else {
+      (-1.0, -1.0)
+    };
+    js_sys::Float32Array::from(&vec![result.0, result.1][..])
   }
 }

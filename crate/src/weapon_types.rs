@@ -16,6 +16,7 @@ pub struct Weapon {
   pub explosion_range: f32,
   pub range: f32, // between <DISTANCE_BETWEEN_ATTACKERS, MAX_WEAPON_RANGE>  from calc_positions
   pub can_shoot_during_running: bool,
+  pub max_angle_during_run: f32,
 }
 
 pub static STANDARD_RIFLE_DETAILS: Weapon = Weapon {
@@ -30,6 +31,7 @@ pub static STANDARD_RIFLE_DETAILS: Weapon = Weapon {
   explosion_range: 0.0,
   range: 600.0,
   can_shoot_during_running: true,
+  max_angle_during_run: 0.7,
 };
 
 pub static GRENADE_DETAILS: Weapon = Weapon {
@@ -44,6 +46,7 @@ pub static GRENADE_DETAILS: Weapon = Weapon {
   explosion_range: 200.0,
   range: 300.0,
   can_shoot_during_running: false,
+  max_angle_during_run: 0.0,
 };
 
 pub static HIT_THE_GROUND: Weapon = Weapon {
@@ -58,6 +61,7 @@ pub static HIT_THE_GROUND: Weapon = Weapon {
   explosion_range: 80.0,
   range: 900.0,
   can_shoot_during_running: false,
+  max_angle_during_run: 0.0,
 };
 
 pub static NON_WEAPON: Weapon = Weapon {
@@ -72,6 +76,7 @@ pub static NON_WEAPON: Weapon = Weapon {
   explosion_range: 0.0,
   range: 0.0,
   can_shoot_during_running: false,
+  max_angle_during_run: 0.0,
 };
 
 pub fn get_weapon_details(weapon_type: &WeaponType) -> &'static Weapon {

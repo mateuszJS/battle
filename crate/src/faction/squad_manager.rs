@@ -1,10 +1,12 @@
-use crate::constants::NORMAL_SQUAD_RADIUS;
+use crate::constants::{
+  MATH_PI, NORMAL_SQUAD_RADIUS, THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER,
+};
 use crate::position_utils::PositionUtils;
 use crate::squad::Squad;
 use crate::SquadsGridManager;
-use std::cell::RefCell;
-use std::rc::{Rc, Weak};
+use std::cell::{Ref, RefCell};
 use std::collections::HashMap;
+use std::rc::{Rc, Weak};
 
 pub struct SquadsManager {}
 
@@ -62,26 +64,64 @@ impl SquadsManager {
     (sum_x / len, sum_y / len)
   }
 
-
   fn search_for_enemy(
     ref_cell_squad: &mut Rc<RefCell<Squad>>,
     squads_grid: &HashMap<usize, Vec<Weak<RefCell<Squad>>>>,
   ) {
-    // TODO: when is running, then it won't work, because nearest enemy can be behind!
-    let (faction_id, squad_position, squad_range) = {
+    let (faction_id, squad_position, squad_weapon, is_squad_running) = {
       let squad = ref_cell_squad.borrow();
-      (squad.faction_id, squad.shared.center_point, squad.squad_details.weapon.range)
+      (
+        squad.faction_id,
+        squad.shared.center_point,
+        &squad.squad_details.weapon,
+        squad.is_squad_running(),
+      )
     };
 
     let squads_nearby = SquadsGridManager::get_squads_in_area(
       squads_grid,
       squad_position.0,
       squad_position.1,
-      squad_range,
+      squad_weapon.range,
     );
+    let max_distance =
+      squad_weapon.range + NORMAL_SQUAD_RADIUS + THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER;
 
-    let mut min_distance = std::f32::MAX;
-    let mut weak_nearest_enemy = Weak::new();
+    let squad_angle = if let Some(angle) = is_squad_running {
+      angle
+    } else {
+      0.0
+    };
+
+    let get_value: Box<dyn Fn(Ref<Squad>) -> f32> = if is_squad_running.is_some() {
+      Box::new(|enemy_squad: Ref<Squad>| {
+        let enemy_position = enemy_squad.shared.center_point;
+        let distance =
+          (enemy_position.0 - squad_position.0).hypot(enemy_position.1 - squad_position.1);
+        if distance > max_distance {
+          std::f32::MAX
+        } else {
+          let angle_from_squad_to_enemy =
+            (enemy_position.0 - squad_position.0).atan2(squad_position.1 - enemy_position.1);
+          let angle_diff = angle_diff!(squad_angle, angle_from_squad_to_enemy);
+
+          if angle_diff > squad_weapon.max_angle_during_run {
+            std::f32::MAX
+          } else {
+            // get min value by angle diff and distance
+            distance / max_distance + angle_diff / squad_weapon.max_angle_during_run
+          }
+        }
+      })
+    } else {
+      Box::new(|enemy_squad: Ref<Squad>| {
+        let enemy_position = enemy_squad.shared.center_point;
+        (enemy_position.0 - squad_position.0).hypot(enemy_position.1 - squad_position.1)
+      })
+    };
+
+    let mut min_value = std::f32::MAX;
+    let mut weak_enemy = Weak::new();
 
     squads_nearby.iter().for_each(|some_weak_squad| {
       if let Some(some_ref_cell_squad) = some_weak_squad.upgrade() {
@@ -89,34 +129,40 @@ impl SquadsManager {
         if some_squad.faction_id == faction_id {
           return;
         }
-        let enemy_position = some_squad.shared.center_point;
-        let distance = (enemy_position.0 - squad_position.0).hypot(enemy_position.1 - squad_position.1);
-        if distance < min_distance {
-          weak_nearest_enemy = some_weak_squad.clone();
-          min_distance = distance;
+        let new_value = get_value(some_squad);
+        if new_value < min_value {
+          min_value = new_value;
+          weak_enemy = some_weak_squad.clone();
         }
       }
     });
 
-    if min_distance < squad_range {
-      ref_cell_squad.borrow_mut().shared.secondary_aim = weak_nearest_enemy;
-    }
+    // when it's find by smallest angle, then okay, if by distance, then check if we are close enough
+    let new_secondary_aim = if weak_enemy.upgrade().is_some()
+      && (is_squad_running.is_some() || min_value < max_distance)
+    {
+      weak_enemy
+    } else {
+      Weak::new()
+    };
+    ref_cell_squad
+      .borrow_mut()
+      .set_secondary_aim(new_secondary_aim);
   }
 
   pub fn manage_hunters(
     all_squads: &mut Vec<Rc<RefCell<Squad>>>,
     hunters_aims: &HashMap<u32, (Weak<RefCell<Squad>>, (f32, f32))>,
-    squads_grid: &HashMap<usize, Vec<Weak<RefCell<Squad>>>>
+    squads_grid: &HashMap<usize, Vec<Weak<RefCell<Squad>>>>,
   ) -> HashMap<u32, (Weak<RefCell<Squad>>, (f32, f32))> {
     /*=======COLLECT_ENEMIES_THAT_MOVED_AND_THEIR_NEW_POSITION=====*/
     let mut enemies_that_moved: Vec<(u32, (f32, f32))> = vec![]; // value is to check, if we are using still this enemy
     for (key, (weak_enemy, old_position)) in hunters_aims {
       if let Some(ref_cell_enemy) = weak_enemy.upgrade() {
-        let enemy = ref_cell_enemy.borrow();
-        let new_position = enemy.shared.center_point;
+        let new_position = ref_cell_enemy.borrow().shared.center_point;
         let distance = (old_position.0 - new_position.0).hypot(old_position.1 - new_position.1);
         if distance > 10.0 {
-          enemies_that_moved.push((enemy.id, new_position));
+          enemies_that_moved.push((*key, new_position));
         }
       }
     }
@@ -137,6 +183,7 @@ impl SquadsManager {
             .is_some();
           used_enemies.insert(aim.id, (was_enemy_moved, vec![ref_cell_squad]));
         }
+        // TODO: unit which has aim out of the range, also should get the secondary_aim
         return;
       }
       SquadsManager::search_for_enemy(&mut ref_cell_squad, squads_grid);
