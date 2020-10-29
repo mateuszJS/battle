@@ -11,7 +11,7 @@ macro_rules! log {
 
 macro_rules! angle_diff {
   ($beta:expr, $alpha:expr) => {{
-    let phi = ($beta - $alpha).abs() % (2.0 * MATH_PI); // This is either the distance or 360 - distance
+    let phi = ($beta - $alpha).abs() % (2.0 * MATH_PI); // This is either the distance or 2*Math.PI - distance
     if phi > MATH_PI {
       (2.0 * MATH_PI) - phi
     } else {

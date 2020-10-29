@@ -31,8 +31,12 @@ impl SquadsManager {
 
     squads_divided_by_range
       .iter_mut()
-      .for_each(|(range, squads)| {
-        SquadsManager::set_positions_by_range(squads, target, *range as f32)
+      .for_each(|(weapon_range, squads)| {
+        SquadsManager::set_positions_by_range(
+          squads,
+          target,
+          *weapon_range as f32 - NORMAL_SQUAD_RADIUS,
+        )
       });
   }
 
@@ -220,10 +224,27 @@ impl SquadsManager {
     let mut used_enemies: HashMap<u32, (bool, Vec<&Rc<RefCell<Squad>>>)> = HashMap::new();
     // was enemy moved, list of out squads which have that aim
     all_squads.iter_mut().for_each(|mut ref_cell_squad| {
-      // TODO: don't have to do search_for_enemy ALWAYS!
-      SquadsManager::search_for_enemy(&mut ref_cell_squad, squads_grid);
-      if let Some(ref_cell_aim) = ref_cell_squad.borrow().shared.aim.upgrade() {
+      let (squad_position, weapon_range, aim_option) = {
+        let squad = ref_cell_squad.borrow();
+        (
+          squad.shared.center_point,
+          squad.squad_details.weapon.range,
+          &squad.shared.aim.upgrade(),
+        )
+      };
+
+      if let Some(ref_cell_aim) = aim_option {
         let aim = ref_cell_aim.borrow();
+
+        /*========CHECK IF SECONDARY AIM IS NEEDED===============*/
+        if (squad_position.0 - aim.shared.center_point.0)
+          .hypot(squad_position.1 - aim.shared.center_point.1)
+          > weapon_range
+        {
+          SquadsManager::search_for_enemy(&mut ref_cell_squad, squads_grid);
+        }
+
+        /*========ADD SQUADS TO HUNTERS===============*/
         if used_enemies.contains_key(&aim.id) {
           let squads_list = &mut used_enemies.get_mut(&aim.id).unwrap().1;
           squads_list.push(ref_cell_squad);
@@ -234,6 +255,9 @@ impl SquadsManager {
             .is_some();
           used_enemies.insert(aim.id, (was_enemy_moved, vec![ref_cell_squad]));
         }
+      } else {
+        // if there is no aim, then search for secondary_aim
+        SquadsManager::search_for_enemy(&mut ref_cell_squad, squads_grid);
       }
     });
 

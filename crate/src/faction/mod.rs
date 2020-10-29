@@ -202,8 +202,7 @@ impl Faction {
       .iter()
       .for_each(|squad| squad.borrow_mut().task_attack_enemy(weak_enemy));
 
-    let aim_position = weak_enemy.upgrade().unwrap().borrow().shared.center_point;
-    SquadsManager::set_positions(&attackers, aim_position);
+    SquadsManager::set_positions(&attackers, enemy_squad.shared.center_point);
   }
 
   pub fn update_squads_centers(&mut self) {
@@ -273,7 +272,7 @@ impl Faction {
           squad.shared.center_point.0,
           squad.shared.center_point.1,
           (squad.members.len() as f32) * squad.squad_details.influence_value,
-          squad.squad_details.weapon.range * 1.2,
+          squad.squad_details.weapon.range + squad.squad_details.movement_speed * 100.0,
         ]
       })
       .collect::<Vec<f32>>();
