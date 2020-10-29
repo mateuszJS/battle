@@ -1,10 +1,9 @@
 let testElbows = null
 
-const debug = () => {
-  if (!testElbows) {
-    testElbows = new PIXI.Graphics()
-    window.world.addChild(testElbows)
-  }
+export const startDebug = () => {
+  if (testElbows) return
+  testElbows = new PIXI.Graphics()
+  window.world.addChild(testElbows)
 
   const correct = []
   const incorrect = []
@@ -204,4 +203,7 @@ const debug = () => {
   }
 }
 
-export default debug
+export const stopDebug = () => {
+  window.world.removeChild(testElbows)
+  testElbows = null
+}

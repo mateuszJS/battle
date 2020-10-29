@@ -1,11 +1,9 @@
-import Utils from 'Utils'
 import { MIN_CAMERA_X, MAX_CAMERA_X, MIN_CAMERA_Y, MAX_CAMERA_Y } from 'Consts'
 
 import { Universe } from '../../crate/pkg/index'
 import { UniverseRepresentation } from '~/initGame'
 import SelectionController from './SelectionController'
 import getCameraPositionModificators from './getCameraPositionModificators'
-import { anglesDebug } from '~/debug'
 
 const MOUSE_LEFT_BUTTON = 0
 const MOUSE_RIGHT_BUTTON = 2
@@ -33,8 +31,6 @@ class MouseController {
     window.app.stage.on('mouseup', this.onMouseUp)
     window.app.view.addEventListener('mousemove', this.onMouseMove)
     window.app.view.addEventListener('mouseleave', this.onMouseLeave)
-
-    anglesDebug()
   }
 
   private onMouseDown = () => {
@@ -72,8 +68,8 @@ class MouseController {
   }
 
   public updateScenePosition() {
-    this.sceneX = Utils.clamp(MIN_CAMERA_X, this.sceneX + this.modX, MAX_CAMERA_X)
-    this.sceneY = Utils.clamp(MIN_CAMERA_Y, this.sceneY + this.modY, MAX_CAMERA_Y)
+    this.sceneX = Math.clamp(this.sceneX + this.modX, MIN_CAMERA_X, MAX_CAMERA_X)
+    this.sceneY = Math.clamp(this.sceneY + this.modY, MIN_CAMERA_Y, MAX_CAMERA_Y)
 
     window.app.stage.x = this.sceneX
     window.app.stage.y = this.sceneY

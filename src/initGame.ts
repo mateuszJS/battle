@@ -13,6 +13,7 @@ import { createFactoryButtons } from './buttons/factory'
 import REPRESENTATION_IDS from '~/render/representationsIds'
 import { updateAbilitiesButtons, clearAbilitiesIcons } from '~/buttons/abilities'
 import { updateInfluenceMap } from '~/inclufenceMapping'
+import debugController from '~/debug'
 
 export type UniverseRepresentation = {
   [id: number]: Factory | Unit
@@ -58,9 +59,13 @@ const initGame = () => {
 
   let timeToClearAbilitiesIcons = 1000
 
-  window.toggleBackground()
+  window.visibleInfluenceMap = false
+
+  debugController.init()
 
   window.app.ticker.add((delta: number) => {
+    // gridDebug(universe)
+    debugController.update(universe)
     mouseController.updateScenePosition()
 
     universe.update()

@@ -145,7 +145,7 @@ const getAbilityIconPosition = (
 export const addAbilitiesButton = (
   universeRepresentation: UniverseRepresentation,
   units: number[][],
-  squadsIds: Float32Array,
+  squadsIds: Uint32Array,
   selectAbility: (abilityId: number) => void,
 ) => {
   let squadsIdsIndex = 0
@@ -271,10 +271,10 @@ export const disableAbility = (squadId: number) => {
   ability.container.interactive = false
 }
 
-export const getAllSimilarAvailableAbilitiesIds = (): Float32Array => {
+export const getAllSimilarAvailableAbilitiesIds = (): Uint32Array => {
   const squadsIdsToCastAbility = Object.values(abilities)
     .filter(ability => ability.selected)
     .map(ability => ability.squadId)
 
-  return new Float32Array(squadsIdsToCastAbility)
+  return new Uint32Array(squadsIdsToCastAbility)
 }

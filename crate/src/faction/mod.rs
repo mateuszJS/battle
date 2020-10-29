@@ -1,10 +1,9 @@
 mod ai;
-mod squads_manager;
+mod squad_manager;
 use crate::constants::{
-  ATTACKERS_DISTANCE, FACTORY_INFLUENCE_RANGE, FACTORY_INFLUENCE_VALUE,
-  MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE, MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS, WEAPON_RANGE,
+  FACTORY_INFLUENCE_RANGE, FACTORY_INFLUENCE_VALUE, MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE,
+  MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS,
 };
-
 use crate::look_up_table::LookUpTable;
 use crate::position_utils::PositionUtils;
 use crate::representations_ids::FACTION_REPRESENTATION_ID;
@@ -12,10 +11,12 @@ use crate::squad::Squad;
 use crate::squad_types::SquadType;
 use crate::unit::STATE_IDLE;
 use crate::Factory;
+use crate::SquadsGridManager;
 use crate::World;
 use ai::ArtificialIntelligence;
-use squads_manager::SquadsManager;
+use squad_manager::SquadsManager;
 use std::cell::RefCell;
+use std::collections::HashMap;
 use std::rc::{Rc, Weak};
 
 const TIME_BETWEEN_CREATION: u8 = 10;
@@ -31,8 +32,10 @@ pub struct Faction {
   pub squads: Vec<Rc<RefCell<Squad>>>, // call borrow() and share that Ref<Squad>, if it's not possible then wrap in Rc like Vec<Rc<RefCell<Squad>>>
   pub factory: Factory,
   pub squads_during_creation: Vec<SquadDuringCreation>,
-  pub portal: Rc<RefCell<Squad>>,
+  pub portal_squad: Rc<RefCell<Squad>>,
   ai: ArtificialIntelligence,
+  hunters_aims: HashMap<u32, (Weak<RefCell<Squad>>, (f32, f32))>,
+  // hunters: HashMap<enemy_squad_id, (refenrece_to_enemy_squad, old_position)>
 }
 
 impl Faction {
@@ -42,7 +45,6 @@ impl Faction {
     factory_y: f32,
     factory_angle: f32,
     is_user: bool,
-    world: &mut World,
   ) -> Faction {
     let mut portal = Squad::new(id, SquadType::Portal);
     portal.add_member(factory_x, factory_y);
@@ -50,7 +52,6 @@ impl Faction {
     let portal_id = portal.members[0].borrow().id;
     let factory = Factory::new(portal_id, factory_x, factory_y, factory_angle, is_user);
     let portal_squad = Rc::new(RefCell::new(portal));
-    world.all_squads.push(Rc::downgrade(&portal_squad));
     let ai = ArtificialIntelligence::new();
 
     Faction {
@@ -58,9 +59,10 @@ impl Faction {
       factory,
       resources: 0,
       squads: vec![],
-      portal: portal_squad,
+      portal_squad,
       squads_during_creation: vec![],
       ai,
+      hunters_aims: HashMap::new(),
     }
   }
 
@@ -82,7 +84,7 @@ impl Faction {
 
           creating_squad.squad.add_member(position_x, position_y);
 
-          let seed_throwing_strength = LookUpTable::get_random(); // TODO: move it to factory code, or faction
+          let seed_throwing_strength = LookUpTable::get_random();
           let throwing_strength = 8.0 + seed_throwing_strength * 15.0;
           creating_squad
             .squad
@@ -106,7 +108,7 @@ impl Faction {
         self.squads_during_creation.remove(squad_index).squad,
       ));
       squad.borrow_mut().update_center();
-      world.all_squads.push(Rc::downgrade(&squad));
+      // world.all_squads.push(Rc::downgrade(&squad));
       self.squads.push(squad);
     }
   }
@@ -165,140 +167,87 @@ impl Faction {
     .concat()
   }
 
-  pub fn move_squads(&mut self, squads_ids: Vec<u32>, target_x: f32, target_y: f32) {
+  pub fn task_add_target(&mut self, squads_ids: Vec<u32>, target_x: f32, target_y: f32) {
     let position = PositionUtils::get_squads_positions(squads_ids.len(), target_x, target_y);
     let mut index = 0;
-    self.squads.iter_mut().for_each(|squad| {
-      if squads_ids.contains(&squad.borrow().id) {
-        let squad_target = position[index];
-        squad
-          .borrow_mut()
-          .add_target(squad_target.0, squad_target.1, true);
+    self.squads.iter_mut().for_each(|ref_cell_squad| {
+      let mut squad = ref_cell_squad.borrow_mut();
+      if squads_ids.contains(&squad.id) {
+        squad.task_add_target(position[index], false);
         index += 1;
       }
     });
   }
 
-  pub fn attack_enemy(&mut self, squads_ids: Vec<u32>, enemy: &Weak<RefCell<Squad>>) {
-    let attackers: Vec<&Rc<RefCell<Squad>>> = self
+  pub fn task_attack_enemy(&mut self, squads_ids: Vec<u32>, weak_enemy: &Weak<RefCell<Squad>>) {
+    let mut attackers: Vec<&Rc<RefCell<Squad>>> = self
       .squads
       .iter()
       .filter(|squad| squads_ids.contains(&squad.borrow().id))
       .collect();
 
+    if attackers.len() == 0 {
+      return;
+    }
+    /*==========ADD ENEMY TO HUNTERS HashMap===========*/
+    let enemy_ref_cell = weak_enemy.upgrade().unwrap();
+    let enemy_squad = enemy_ref_cell.borrow();
+    if !self.hunters_aims.contains_key(&enemy_squad.id) {
+      self.hunters_aims.insert(
+        enemy_squad.id,
+        (weak_enemy.clone(), enemy_squad.shared.center_point),
+      );
+    }
     attackers
       .iter()
-      .for_each(|squad| squad.borrow_mut().attack_enemy(enemy));
+      .for_each(|squad| squad.borrow_mut().task_attack_enemy(weak_enemy));
 
-    let aim_position = enemy.upgrade().unwrap().borrow().shared.center_point;
-
-    let mut attackers_out_of_range: Vec<&Rc<RefCell<Squad>>> = attackers
-      .into_iter()
-      .filter(|squad| {
-        let squad_position = squad.borrow().shared.center_point;
-        (squad_position.0 - aim_position.0).hypot(squad_position.1 - aim_position.1)
-          > ATTACKERS_DISTANCE
-      })
-      .collect();
-
-    SquadsManager::set_positions_in_range(&mut attackers_out_of_range, aim_position, false);
-  }
-
-  pub fn search_for_enemies(
-    &mut self,
-    squads_which_moved: &Vec<Rc<RefCell<Squad>>>,
-    all_squads: &Vec<Rc<RefCell<Squad>>>,
-  ) {
-    self.squads.iter().for_each(|squad| {
-      squad.borrow_mut().shared.secondary_aim = Weak::new();
-    });
-
-    let idle_squads: Vec<&Rc<RefCell<Squad>>> = self
-      .squads
-      .iter()
-      .filter(|ref_cell_squad| {
-        ref_cell_squad
-          .borrow()
-          .members
-          .iter()
-          .any(|unit| unit.borrow().state == STATE_IDLE)
-      })
-      .collect();
-
-    let moved_enemies_squads: Vec<&Rc<RefCell<Squad>>> = squads_which_moved
-      .iter()
-      .filter(|squad| squad.borrow().faction_id != self.id)
-      .collect();
-
-    let all_enemies_squads: Vec<&Rc<RefCell<Squad>>> = all_squads
-      .iter()
-      .filter(|squad| squad.borrow().faction_id != self.id)
-      .collect();
-
-    SquadsManager::search_for_enemies(idle_squads, moved_enemies_squads, all_enemies_squads);
+    SquadsManager::set_positions(&attackers, enemy_squad.shared.center_point);
   }
 
   pub fn update_squads_centers(&mut self) {
     self.squads.iter_mut().for_each(|ref_cell_squad| {
       let mut squad = ref_cell_squad.borrow_mut();
       squad.update_center();
-      squad.check_units_correctness();
+    });
+  }
+
+  pub fn check_squads_correctness(&mut self) {
+    self.squads.iter_mut().for_each(|ref_cell_squad| {
+      ref_cell_squad.borrow_mut().check_units_correctness();
     });
 
     self.squads.retain(|squad| squad.borrow().members.len() > 0);
   }
 
-  pub fn manage_hunters(&mut self) {
-    SquadsManager::manage_hunters(self);
-  }
-
-  pub fn use_ability(
-    &mut self,
-    squads_ids: Vec<u32>,
-    ability_id: u8,
-    target_x: f32,
-    target_y: f32,
-  ) {
-    let squads: Vec<&Rc<RefCell<Squad>>> = self
+  fn get_squads_from_ids(&self, squads_ids: Vec<u32>) -> Vec<&Rc<RefCell<Squad>>> {
+    self
       .squads
       .iter()
       .filter(|ref_cell_squad| squads_ids.contains(&ref_cell_squad.borrow().id))
-      .collect();
+      .collect()
+  }
 
-    let positions = PositionUtils::get_squads_positions(squads.len(), target_x, target_y);
+  pub fn task_use_ability(&mut self, squads_ids: Vec<u32>, target_x: f32, target_y: f32) {
+    let squads = self.get_squads_from_ids(squads_ids);
 
-    let squads_out_of_range: Vec<Option<&Rc<RefCell<Squad>>>> = squads
-      .clone()
-      .into_iter()
-      .enumerate()
-      .map(|(index, ref_cell_squad)| {
-        let mut squad = ref_cell_squad.borrow_mut();
-        let squad_position = squad.shared.center_point;
-        let target = positions[index];
-        let out_of_range = (squad_position.0 - target.0).hypot(squad_position.1 - target.1)
-          > WEAPON_RANGE - MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS;
-        if !out_of_range {
-          squad.stop_running();
-          None
-        } else {
-          Some(ref_cell_squad)
-        }
-      })
-      .collect();
+    if squads.len() == 0 {
+      return;
+    }
 
-    squads_out_of_range
-      .iter()
-      .enumerate()
-      .for_each(|(index, option_squad)| {
-        if let Some(squad) = option_squad {
-          let target = positions[index];
-          SquadsManager::set_positions_in_range(&mut vec![squad], target, true);
-        }
-      });
+    let ability_range = squads[0].borrow().squad_details.ability_range;
+
+    let ability_targets = PositionUtils::get_squads_positions(squads.len(), target_x, target_y);
 
     squads.iter().enumerate().for_each(|(index, rc_hunter)| {
-      let target = positions[index];
-      rc_hunter.borrow_mut().start_using_ability(target)
+      rc_hunter
+        .borrow_mut()
+        .task_use_ability(ability_targets[index])
+    });
+
+    squads.iter().enumerate().for_each(|(index, squad)| {
+      let target = ability_targets[index];
+      SquadsManager::set_positions_by_range(&mut vec![squad], target, ability_range);
     });
   }
 
@@ -323,7 +272,7 @@ impl Faction {
           squad.shared.center_point.0,
           squad.shared.center_point.1,
           (squad.members.len() as f32) * squad.squad_details.influence_value,
-          WEAPON_RANGE * 1.2,
+          squad.squad_details.weapon.range + squad.squad_details.movement_speed * 100.0,
         ]
       })
       .collect::<Vec<f32>>();
@@ -355,5 +304,10 @@ impl Faction {
     let squads_plans = self
       .ai
       .work(&self.factory, squads, texture, enemy_factories);
+  }
+
+  pub fn manage_hunters(&mut self, squads_grid: &HashMap<usize, Vec<Weak<RefCell<Squad>>>>) {
+    self.hunters_aims =
+      SquadsManager::manage_hunters(&mut self.squads, &self.hunters_aims, squads_grid);
   }
 }

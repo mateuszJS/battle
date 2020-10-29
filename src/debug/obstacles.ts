@@ -1,23 +1,37 @@
+import { Universe } from '../../crate/pkg/index'
+
 let graph = null
 
-const debug = (result: number[][][]) => {
-  if (!graph) {
-    graph = new PIXI.Graphics()
-    window.world.addChild(graph)
-  }
+export const startDebug = (universe: Universe) => {
+  if (graph) return
+
+  const result = universe.debug_obstacles()
+  graph = new PIXI.Graphics()
+  window.world.addChild(graph)
+
+  let i = 2
 
   graph.clear()
   graph.beginFill(0x000000, 0)
   graph.lineStyle(3, 0xffffff, 0.3)
+  graph.moveTo(result[0], result[1])
 
-  result.forEach(pointsList => {
-    const [firstPoint, ...restPoint] = pointsList
-    graph.moveTo(firstPoint[0], firstPoint[1])
-    restPoint.forEach(point => {
-      graph.lineTo(point[0], point[1])
-    })
-    graph.closePath()
-  })
+  while (i < result.length) {
+    if (result[i] === -1) {
+      graph.closePath()
+
+      graph.beginFill(0x000000, 0)
+      graph.lineStyle(3, 0xffffff, 0.3)
+      graph.moveTo(result[i + 1], result[i + 2])
+      i += 3
+    } else {
+      graph.lineTo(result[i], result[i + 1])
+      i += 2
+    }
+  }
 }
 
-export default debug
+export const stopDebug = () => {
+  window.world.removeChild(graph)
+  graph = null
+}

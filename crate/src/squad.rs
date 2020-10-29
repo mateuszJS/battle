@@ -1,34 +1,38 @@
+use crate::constants::MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS;
 use crate::id_generator::IdGenerator;
 use crate::position_utils::PositionUtils;
 use crate::squad_types::{get_squad_details, SquadDetails, SquadType};
 use crate::unit::{Unit, STATE_DIE};
 use crate::weapon_types::Weapon;
-
 use crate::World;
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 
 pub struct SquadUnitSharedDataSet {
-  pub units_started_using_ability: bool,
-  pub units_which_finished_using_ability: u8,
-  pub ability_target: Option<(f32, f32)>,
+  pub any_unit_started_using_ability: bool, // used in unit, only for jump
+  pub ability_target: Option<(f32, f32)>,   // grenade ability will remove it inside the unit
   pub center_point: (f32, f32),
   pub track: Vec<(f32, f32)>,
   pub aim: Weak<RefCell<Squad>>,
   pub secondary_aim: Weak<RefCell<Squad>>,
   pub weapon: &'static Weapon,
-  pub stored_track_destination: Option<(f32, f32)>, // to store destination, bc units are regrouping rn
+}
+
+struct TaskTodo {
+  ability_target: Option<(f32, f32)>,
+  track_destination: Option<(f32, f32)>,
+  aim: Weak<RefCell<Squad>>,
 }
 
 pub struct Squad {
   pub id: u32,
   pub faction_id: u32,
+  is_during_keeping_coherency: bool,
   pub members: Vec<Rc<RefCell<Unit>>>,
   pub shared: SquadUnitSharedDataSet,
   pub squad_details: &'static SquadDetails,
-  pub was_moved_in_previous_loop: bool,
-  pub last_center_point: (f32, f32), // it's pub only bc
-                                     // in squads_manager we are calc distance, to detect if aim is coming closer or farther
+  task_todo: TaskTodo,
+  require_check_correctness: bool,
 }
 
 impl Squad {
@@ -39,14 +43,17 @@ impl Squad {
       faction_id,
       members: vec![],
       squad_details: details,
-      last_center_point: (0.0, 0.0),
-      was_moved_in_previous_loop: true,
+      is_during_keeping_coherency: false,
+      require_check_correctness: false,
+      task_todo: TaskTodo {
+        ability_target: None,
+        track_destination: None,
+        aim: Weak::new(),
+      },
       shared: SquadUnitSharedDataSet {
-        units_started_using_ability: false,
-        units_which_finished_using_ability: 0,
+        any_unit_started_using_ability: false,
         ability_target: None,
         center_point: (0.0, 0.0),
-        stored_track_destination: None,
         track: vec![],
         aim: Weak::new(),
         secondary_aim: Weak::new(),
@@ -67,11 +74,21 @@ impl Squad {
         let unit = ref_cell_unit.borrow();
         (sum_x + unit.x, sum_y + unit.y)
       });
-    shared.center_point = (sum_x / members.len() as f32, sum_y / members.len() as f32);
+    let members_len = members.len() as f32;
+    shared.center_point = (sum_x / members_len, sum_y / members_len);
   }
 
   pub fn update(&mut self, world: &mut World) {
     let shared = &mut self.shared;
+
+    if self.require_check_correctness {
+      self
+        .members
+        .iter_mut()
+        .for_each(|unit| unit.borrow_mut().set_correct_state(shared));
+      self.require_check_correctness = false;
+    }
+
     self
       .members
       .iter_mut()
@@ -112,156 +129,175 @@ impl Squad {
       })
   }
 
-  pub fn add_target(&mut self, destination_x: f32, destination_y: f32, clear_aim: bool) {
-    if self.is_during_using_ability() {
-      return;
-    }
-    // let is_center_inside_obstacle =
-    //   CalcPositions::get_is_point_inside_any_obstacle((destination_x as i16, destination_y as i16));
-    // if is_center_inside_obstacle {
-    //   // have to avoid squad center in a obstacle or in the boundaries of obstacle
-    //   let (distance, closest_point) =
-    //     CalcPositions::get_nearest_line((destination_x, destination_y));
-    //   // TODO: calc segment, from squad_center thought closest_point to outsite (like plus 5?)
-    //   // also handle case when distance is 0, then add 5, check if it's okay, if not, minsu 5, and this is have to be okay
-    // }
-    if clear_aim {
-      // if clear_aim || self.shared.ability_target.is_some() {
+  fn reset_state(&mut self, keep_aim_and_ability_target: bool) {
+    // never call when is during using ability/keeping coherency
+    if !keep_aim_and_ability_target {
       self.shared.ability_target = None;
       self.shared.aim = Weak::new();
-      self.shared.secondary_aim = Weak::new();
     }
+    self.shared.track = vec![];
 
-    if self.shared.stored_track_destination.is_some() {
-      self.shared.stored_track_destination = Some((destination_x, destination_y));
-      return;
-    }
+    self.members.iter().for_each(|member| {
+      member.borrow_mut().reset_state();
+    });
+  }
+
+  fn add_target(&mut self, destination: (f32, f32), keep_aim_and_ability_target: bool) {
+    self.reset_state(keep_aim_and_ability_target);
 
     self.shared.track = PositionUtils::get_track(
       self.shared.center_point.0,
       self.shared.center_point.1,
-      destination_x,
-      destination_y,
+      destination.0,
+      destination.1,
     );
+
     let shared = &self.shared;
     self.members.iter_mut().for_each(|unit| {
-      unit
-        .borrow_mut()
-        .change_state_to_run_though_track(shared, true);
+      unit.borrow_mut().change_state_to_run(shared);
     });
   }
 
-  pub fn stop_running(&mut self) {
-    if self.is_during_using_ability() {
+  pub fn task_add_target(&mut self, destination: (f32, f32), keep_aim_and_ability_target: bool) {
+    if self.is_taking_new_task_disabled() {
+      self.task_todo = if keep_aim_and_ability_target {
+        TaskTodo {
+          aim: self.task_todo.aim.clone(),
+          ability_target: self.task_todo.ability_target,
+          track_destination: Some(destination),
+        }
+      } else {
+        TaskTodo {
+          aim: Weak::new(),
+          ability_target: None,
+          track_destination: Some(destination),
+        }
+      };
       return;
     }
 
-    if self.shared.stored_track_destination.is_none() {
-      self.members.iter().for_each(|unit| {
-        unit.borrow_mut().stop_running(&self.shared);
-      });
-    } else {
-      self.shared.stored_track_destination = None;
-    }
+    self.add_target(destination, keep_aim_and_ability_target);
+    self.require_check_correctness = true;
   }
 
-  pub fn attack_enemy(&mut self, enemy: &Weak<RefCell<Squad>>) {
-    if self.is_during_using_ability() {
+  pub fn task_attack_enemy(&mut self, enemy: &Weak<RefCell<Squad>>) {
+    if self.is_taking_new_task_disabled() {
+      self.task_todo = TaskTodo {
+        aim: Weak::clone(enemy),
+        ability_target: None,
+        track_destination: None,
+      };
       return;
     }
+
+    self.reset_state(false);
     self.shared.aim = Weak::clone(enemy);
-    self.shared.secondary_aim = Weak::new();
-    self.shared.ability_target = None;
-    // self.shared.track = vec![];
-    // if, stop running only if the squad is running
-    self.stop_running();
+    self.require_check_correctness = true;
   }
 
-  pub fn was_center_point_changed(&self) -> bool {
-    (self.shared.center_point.0 - self.last_center_point.0)
-      .hypot(self.shared.center_point.1 - self.last_center_point.1)
-      >= 30.0 // std::f32::EPSILON
-              // TODO: find a better solution
-  }
-
-  pub fn update_moved_status(&mut self) {
-    self.was_moved_in_previous_loop = if self.was_center_point_changed() {
-      self.last_center_point = self.shared.center_point;
-      true
-    } else {
-      false
+  pub fn task_use_ability(&mut self, target: (f32, f32)) {
+    if self.is_taking_new_task_disabled() {
+      self.task_todo = TaskTodo {
+        aim: Weak::new(),
+        ability_target: Some(target),
+        track_destination: None,
+      };
+      return;
     }
+    self.reset_state(false);
+    self.shared.ability_target = Some(target);
+    self.require_check_correctness = true;
   }
 
-  fn is_during_using_ability(&self) -> bool {
-    self.shared.units_started_using_ability
-      && self.shared.units_which_finished_using_ability < self.members.len() as u8
+  fn is_taking_new_task_disabled(&self) -> bool {
+    self.is_during_keeping_coherency
+      || (self.shared.any_unit_started_using_ability
+        && !self.has_all_members_finish_using_ability())
+  }
+
+  fn has_all_members_finish_using_ability(&self) -> bool {
+    // some abilities don't have to be used by all members!
+    !self
+      .members
+      .iter()
+      .any(|member| !member.borrow().has_finished_using_ability)
+  }
+
+  fn store_current_task_as_todo_task(&mut self) {
+    let shared = &self.shared;
+    let point_to_store = if shared.track.len() > 0 {
+      Some(shared.track[shared.track.len() - 1])
+    } else {
+      None
+    };
+
+    self.task_todo = TaskTodo {
+      aim: shared.aim.clone(),
+      ability_target: shared.ability_target,
+      track_destination: point_to_store,
+    };
+  }
+
+  fn restore_todo_task(&mut self) {
+    self.reset_state(false);
+
+    self.shared.aim = self.task_todo.aim.clone();
+    self.shared.ability_target = self.task_todo.ability_target;
+
+    if let Some(new_target) = self.task_todo.track_destination {
+      self.add_target(new_target, true);
+    }
+
+    self.task_todo = TaskTodo {
+      aim: Weak::new(),
+      ability_target: None,
+      track_destination: None,
+    };
+    self.require_check_correctness = true;
   }
 
   pub fn check_units_correctness(&mut self) {
     self.remove_died_members();
-
-    if self.is_during_using_ability() {
-      return;
-    }
-    if self.shared.ability_target.is_some()
-      && self.shared.units_which_finished_using_ability == self.members.len() as u8
-    {
-      self.shared.ability_target = None;
-      self.shared.units_which_finished_using_ability = 0;
-      self.shared.units_started_using_ability = false;
-      self.members.iter().for_each(|ref_cell_unit| {
-        ref_cell_unit
-          .borrow_mut()
-          .change_state_to_idle(&self.shared)
-      })
-    }
-
-    let coherency_not_kept = self.members.iter().any(|ref_cell_unit| {
-      ref_cell_unit
-        .borrow()
-        .check_if_too_far_from_squad_center(&self.shared)
-    });
-
-    if coherency_not_kept {
-      if self.shared.stored_track_destination.is_none() {
-        let track_len = self.shared.track.len();
-        // store point, instead of saving to "self" because self.add_target is checking self
-        let point_to_store = if track_len > 0 {
-          self.shared.track[track_len - 1]
-        } else {
-          (-1.0, -1.0)
-        };
-        self.add_target(
-          self.shared.center_point.0,
-          self.shared.center_point.1,
-          false,
-        );
-        self.shared.stored_track_destination = Some(point_to_store);
+    /*=================USING ABILITY START===================*/
+    if self.shared.any_unit_started_using_ability {
+      if self.has_all_members_finish_using_ability() {
+        self.shared.ability_target = None;
+        self.shared.any_unit_started_using_ability = false;
+        self.members.iter().for_each(|member| {
+          member.borrow_mut().has_finished_using_ability = false;
+        });
+        self.restore_todo_task();
       }
-    } else if let Some(stored_track_destination) = self.shared.stored_track_destination {
-      // it's the next step of previous if, if coherency is kept and some track was stored
-      // (bc keeping coherency is more important) then restore old track
-      self.shared.stored_track_destination = None;
-      if stored_track_destination.0 >= 0.0 {
-        // if smaller, then
-        self.add_target(
-          stored_track_destination.0,
-          stored_track_destination.1,
-          false,
-        );
-      }
-    } else {
-      // if coherency is kept,
-      self.members.iter().for_each(|ref_cell_unit| {
-        ref_cell_unit
-          .borrow_mut()
-          .check_state_correctness(&self.shared);
+    }
+    /*=================USING ABILITY END===================*/
+
+    /*=================KEEPING COHERENCY START===================*/
+    if !self.shared.any_unit_started_using_ability {
+      let (x, y) = self.shared.center_point;
+      let coherency_not_kept = self.members.iter().any(|ref_cell_unit| {
+        let unit = ref_cell_unit.borrow();
+        (x - unit.x).hypot(y - unit.y) > MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS
       });
+
+      if coherency_not_kept {
+        if !self.is_during_keeping_coherency {
+          self.store_current_task_as_todo_task();
+          self.is_during_keeping_coherency = true;
+        }
+        self.add_target(self.shared.center_point, false);
+      } else if self.is_during_keeping_coherency {
+        self.is_during_keeping_coherency = false;
+        self.restore_todo_task();
+      }
     }
+    /*=================KEEPING COHERENCY END===================*/
+
+    self.members.iter().for_each(|ref_cell_unit| {
+      ref_cell_unit.borrow_mut().set_correct_state(&self.shared);
+    });
   }
 
-  pub fn remove_died_members(&mut self) {
+  fn remove_died_members(&mut self) {
     // let number_of_members = self.members.len();
     self
       .members
@@ -271,13 +307,37 @@ impl Squad {
     // }
   }
 
-  pub fn start_using_ability(&mut self, target: (f32, f32)) {
-    if self.is_during_using_ability() {
-      return;
+  pub fn is_squad_running(&self) -> Option<f32> {
+    // returns [-pi/2, pi/2]
+    // it's the angle where squad is directed
+    let is_running = self
+      .members
+      .iter()
+      .any(|member| member.borrow().track_index != -1);
+
+    if is_running {
+      let (sin_sum, cos_sum) =
+        self
+          .members
+          .iter()
+          .fold((0.0, 0.0), |(sin_sum, cos_sum), ref_cell_unit| {
+            let angle = ref_cell_unit.borrow().angle;
+            (sin_sum + angle.sin(), cos_sum + angle.cos())
+          });
+      // calc angels mean
+      let sin_mean = sin_sum / self.members.len() as f32;
+      let cos_mean = cos_sum / self.members.len() as f32;
+      Some(sin_mean.atan2(cos_mean))
+    } else {
+      None
     }
-    self.shared.ability_target = Some(target);
-    self.members.iter().for_each(|unit| {
-      unit.borrow_mut().change_state_to_idle(&self.shared);
-    });
+  }
+
+  pub fn set_secondary_aim(&mut self, enemy: Weak<RefCell<Squad>>) {
+    self.shared.secondary_aim = enemy;
+    self
+      .members
+      .iter_mut()
+      .for_each(|member| member.borrow_mut().aim = Weak::new());
   }
 }

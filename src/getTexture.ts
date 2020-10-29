@@ -16,8 +16,6 @@ const getTexture = (
   display.y -= y
   const renderTexture = new PIXI.RenderTexture(baseRenderTexture)
   window.app.renderer.render(display, renderTexture)
-  // window.app.renderer.generateTexture
-  // TODO: this should work in v4, maybe v5 also
 
   display.destroy({
     children: true,
