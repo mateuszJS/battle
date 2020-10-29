@@ -264,7 +264,7 @@ impl SquadsManager {
     /*=====CONSUME GROUPED OUR SQUADS AND CREATE NEW HUNTERS HASH MAP======*/
     let mut new_hunters_aims: HashMap<u32, (Weak<RefCell<Squad>>, (f32, f32))> = HashMap::new();
     for (enemy_id, (was_moved, squads_list)) in used_enemies {
-      if squads_list.len() > 1 {
+      if squads_list.len() > 0 {
         let enemy_position = {
           let first_squad = squads_list[0].borrow();
           let weak_aim = &first_squad.shared.aim;
