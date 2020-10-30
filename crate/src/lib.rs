@@ -390,13 +390,13 @@ impl Universe {
   }
 
   pub fn do_ai(&mut self, faction_id: u32, texture: Vec<u8>) {
-    // let faction_option = self
-    //   .factions
-    //   .iter_mut()
-    //   .find(|faction| faction.id == faction_id);
-    // if let Some(faction) = faction_option {
-    //   faction.do_ai(&texture, &self.factions);
-    // }
+    let faction_option = self
+      .factions
+      .iter_mut()
+      .find(|faction| faction.id == faction_id);
+    if let Some(faction) = faction_option {
+      faction.do_ai(&texture, &self.world.squads_on_grid);
+    }
   }
 
   pub fn get_grid(&self) -> js_sys::Float32Array {

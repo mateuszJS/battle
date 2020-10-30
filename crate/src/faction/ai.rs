@@ -1,12 +1,14 @@
 use super::{Factory, Squad};
 use crate::constants::{INFLUENCE_MAP_SCALE, INFLUENCE_MAP_WIDTH};
-use std::cell::RefMut;
+use std::cell::{RefCell, RefMut};
+use std::collections::HashMap;
+use std::rc::Weak;
 
 enum Plan {
   RunAway, // running away, don't care about enemies nearby until reach the safe place
   Stay, // stay and just wait, to make a bigger group (if you are in range of enemy influence, then go to attack)
   Attack, //
-  GoTo, // just go to place, it can be strategic point, it can be attack on portal, attack on enemies, attack to support alliances
+  GoTo, // just go to place, it can be strategic point, it can be attack on portal, attack on enemies, attack to support alliancese
         // (if you are in range of enemy influence, then go to attack)
 }
 
@@ -33,8 +35,20 @@ impl ArtificialIntelligence {
     factory: &Factory,
     squads: Vec<RefMut<Squad>>,
     texture: &Vec<u8>,
-    enemy_factories: Vec<(f32, f32)>,
+    squads_on_grid: &HashMap<usize, Vec<Weak<RefCell<Squad>>>>,
   ) {
+    if squads.len() == 0 {
+      return;
+    }
+    let squad_position = squads[0].shared.center_point;
+    let influence =
+      ArtificialIntelligence::get_influence_values(squad_position.0, squad_position.1, texture);
+    log!("{:?}", influence);
+    return;
+    // influence[0] < influence[2]
+
+    // 1. group squads into armies
+
     // ) -> [Vec<((f32, f32), Vec<u32>)>; 2] {
     // let armies = vec![
     // ((Plan, f32, f32, u32), (f32, f32) Vec<Squad>)

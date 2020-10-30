@@ -59,8 +59,6 @@ const initGame = () => {
 
   let timeToClearAbilitiesIcons = 1000
 
-  window.visibleInfluenceMap = false
-
   debugController.init()
 
   window.app.ticker.add((delta: number) => {

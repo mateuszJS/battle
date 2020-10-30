@@ -2,16 +2,13 @@ mod ai;
 mod squad_manager;
 use crate::constants::{
   FACTORY_INFLUENCE_RANGE, FACTORY_INFLUENCE_VALUE, MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE,
-  MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS,
 };
 use crate::look_up_table::LookUpTable;
 use crate::position_utils::PositionUtils;
 use crate::representations_ids::FACTION_REPRESENTATION_ID;
 use crate::squad::Squad;
 use crate::squad_types::SquadType;
-use crate::unit::STATE_IDLE;
 use crate::Factory;
-use crate::SquadsGridManager;
 use crate::World;
 use ai::ArtificialIntelligence;
 use squad_manager::SquadsManager;
@@ -255,7 +252,6 @@ impl Faction {
     let faction_info_and_portal_influence = [
       -1.0,
       self.id as f32,
-      0.0,
       self.factory.x,
       self.factory.y,
       FACTORY_INFLUENCE_VALUE,
@@ -268,7 +264,6 @@ impl Faction {
       .flat_map(|ref_cell_squad: &Rc<RefCell<Squad>>| {
         let squad = ref_cell_squad.borrow();
         vec![
-          squad.id as f32,
           squad.shared.center_point.0,
           squad.shared.center_point.1,
           (squad.members.len() as f32) * squad.squad_details.influence_value,
@@ -283,27 +278,18 @@ impl Faction {
     .concat()
   }
 
-  pub fn do_ai(&mut self, texture: &Vec<u8>, factions: &Vec<Faction>) {
+  pub fn do_ai(
+    &mut self,
+    texture: &Vec<u8>,
+    squads_on_grid: &HashMap<usize, Vec<Weak<RefCell<Squad>>>>,
+  ) {
     let squads = self
       .squads
       .iter()
       .map(|ref_cell_squad| ref_cell_squad.borrow_mut())
       .collect();
 
-    let enemy_factories = factions
-      .iter()
-      .filter_map(|faction: &Faction| {
-        if faction.id != self.id {
-          Some((faction.factory.x, faction.factory.y))
-        } else {
-          None
-        }
-      })
-      .collect();
-
-    let squads_plans = self
-      .ai
-      .work(&self.factory, squads, texture, enemy_factories);
+    let squads_plans = self.ai.work(&self.factory, squads, texture, squads_on_grid);
   }
 
   pub fn manage_hunters(&mut self, squads_grid: &HashMap<usize, Vec<Weak<RefCell<Squad>>>>) {
