@@ -6,6 +6,8 @@ import {
   MAP_HEIGHT,
   INFLUENCE_MAP_WIDTH,
   INFLUENCE_MAP_HEIGHT,
+  INFLUENCE_MAP_SCALE_X,
+  INFLUENCE_MAP_SCALE_Y,
 } from 'Consts'
 import { Universe } from '../../crate/pkg/index'
 
@@ -37,6 +39,13 @@ const createVulnerabilityGeom = () => {
   vulnerabilityGeometry = getGeom().addAttribute('aUvs', [0, 0, 1, 0, 1, 1, 0, 1], 2)
 }
 
+const scale: [number, number] = [
+  /* eslint-disable prettier/prettier */
+  INFLUENCE_MAP_SCALE_X,
+  INFLUENCE_MAP_SCALE_Y,
+  /* eslint-enable prettier/prettier */
+]
+
 export const updateInfluenceMap = (influence: Float32Array, universe: Universe) => {
   if (!influence.length) return
 
@@ -52,7 +61,7 @@ export const updateInfluenceMap = (influence: Float32Array, universe: Universe) 
     influenceGeometry,
     INFLUENCE_MAP_WIDTH,
     INFLUENCE_MAP_HEIGHT,
-    INFLUENCE_MAP_WIDTH / MAP_WIDTH,
+    scale,
   )
   const tensionMap = myInfluencesList[myInfluencesList.length - 1].texture
 
@@ -72,7 +81,7 @@ export const updateInfluenceMap = (influence: Float32Array, universe: Universe) 
       firstFactionInflueneceAndVulnerabilityMap.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST
 
       const sprite = new PIXI.Sprite(firstFactionInflueneceAndVulnerabilityMap)
-      sprite.filters = [new PIXI.filters.AlphaFilter(10.0)]
+      // sprite.filters = [new PIXI.filters.AlphaFilter(10.0)]
       sprite.width = MAP_WIDTH
       sprite.height = MAP_HEIGHT
 

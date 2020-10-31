@@ -1,8 +1,8 @@
 use super::basic_utils::{BasicUtils, Line, Point};
 use super::obstacles_lazy_statics::ObstaclesLazyStatics;
 use crate::constants::{
-  MATH_PI, NORMAL_SQUAD_RADIUS, OBSTACLES_CELL_SIZE, OBSTACLES_MAP_HEIGHT, OBSTACLES_MAP_SCALE,
-  OBSTACLES_MAP_WIDTH,
+  MATH_PI, NORMAL_SQUAD_RADIUS, OBSTACLES_CELL_SIZE, OBSTACLES_MAP_HEIGHT, OBSTACLES_MAP_SCALE_X,
+  OBSTACLES_MAP_SCALE_Y, OBSTACLES_MAP_WIDTH,
 };
 
 const NUMBER_OF_PRECALCULATED_OFFSETS: usize = 4;
@@ -47,8 +47,8 @@ impl CalcPositions {
 
   pub fn test((x, y): (i16, i16)) -> u8 {
     let precalculdated_obstacles_map = CalcPositions::get_precalculated_obstacles_map();
-    let index = (y as f32 * OBSTACLES_MAP_SCALE) as usize * OBSTACLES_MAP_WIDTH
-      + (x as f32 * OBSTACLES_MAP_SCALE as f32) as usize;
+    let index = (y as f32 * OBSTACLES_MAP_SCALE_Y) as usize * OBSTACLES_MAP_WIDTH
+      + (x as f32 * OBSTACLES_MAP_SCALE_X as f32) as usize;
     let precalculated_value = precalculdated_obstacles_map[index];
 
     precalculated_value
@@ -81,8 +81,8 @@ impl CalcPositions {
           .collect::<Vec<usize>>()
           .iter()
           .map(|index| {
-            let y = (index / OBSTACLES_MAP_WIDTH) as f32 / OBSTACLES_MAP_SCALE;
-            let x = (index % OBSTACLES_MAP_WIDTH) as f32 / OBSTACLES_MAP_SCALE;
+            let y = (index / OBSTACLES_MAP_WIDTH) as f32 / OBSTACLES_MAP_SCALE_Y;
+            let x = (index % OBSTACLES_MAP_WIDTH) as f32 / OBSTACLES_MAP_SCALE_X;
 
             let unit_will_collide_with_any_obstacle =
               check_cell_corners.iter().any(|(mod_x, mod_y)| {
@@ -119,8 +119,8 @@ impl CalcPositions {
 
   pub fn get_is_point_inside_any_obstacle((x, y): (i16, i16), is_squad: bool) -> bool {
     let precalculdated_obstacles_map = CalcPositions::get_precalculated_obstacles_map();
-    let index = (y as f32 * OBSTACLES_MAP_SCALE) as usize * OBSTACLES_MAP_WIDTH
-      + (x as f32 * OBSTACLES_MAP_SCALE as f32) as usize;
+    let index = (y as f32 * OBSTACLES_MAP_SCALE_Y) as usize * OBSTACLES_MAP_WIDTH
+      + (x as f32 * OBSTACLES_MAP_SCALE_X as f32) as usize;
     let precalculated_value = precalculdated_obstacles_map[index];
 
     if precalculated_value == IS_NOT_IN_OBSTACLE {

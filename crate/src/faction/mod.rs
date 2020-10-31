@@ -49,7 +49,7 @@ impl Faction {
     let portal_id = portal.members[0].borrow().id;
     let factory = Factory::new(portal_id, factory_x, factory_y, factory_angle, is_user);
     let portal_squad = Rc::new(RefCell::new(portal));
-    let ai = ArtificialIntelligence::new();
+    let ai = ArtificialIntelligence::new(id);
 
     Faction {
       id,

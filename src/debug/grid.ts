@@ -1,13 +1,20 @@
 import { Universe } from '../../crate/pkg/index'
+import { MAP_WIDTH, MAP_HEIGHT } from 'Consts'
 
 let graph = null
 let timer = 0
-const rectSize = 1 / 0.0025
+
+const GRID_CELL_SIZE = 400.0
+const GRID_MAP_SCALE = 1.0 / GRID_CELL_SIZE
+const GRID_MAP_WIDTH = Math.floor(MAP_WIDTH * GRID_MAP_SCALE + 1.0)
+const GRID_MAP_HEIGHT = Math.floor(MAP_HEIGHT * GRID_MAP_SCALE + 1.0)
+const GRID_MAP_SCALE_X = GRID_MAP_WIDTH / MAP_WIDTH
+const GRID_MAP_SCALE_Y = GRID_MAP_HEIGHT / MAP_HEIGHT
 
 const drawRect = (x: number, y: number) => {
   graph.beginFill(0x000000, 0)
   graph.lineStyle(2, 0xffffff, 1)
-  graph.drawRect(x, y, rectSize, rectSize)
+  graph.drawRect(x, y, 1 / GRID_MAP_SCALE_X, 1 / GRID_MAP_SCALE_Y)
   graph.endFill()
 }
 const drawCircle = (x: number, y: number) => {
