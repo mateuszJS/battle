@@ -340,4 +340,8 @@ impl Squad {
       .iter_mut()
       .for_each(|member| member.borrow_mut().aim = Weak::new());
   }
+
+  pub fn get_influence(&self) -> f32 {
+    self.members.len() as f32 * self.squad_details.influence_value
+  }
 }

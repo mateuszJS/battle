@@ -266,7 +266,7 @@ impl Faction {
         vec![
           squad.shared.center_point.0,
           squad.shared.center_point.1,
-          (squad.members.len() as f32) * squad.squad_details.influence_value,
+          squad.get_influence(),
           squad.squad_details.weapon.range + squad.squad_details.movement_speed * 100.0,
         ]
       })

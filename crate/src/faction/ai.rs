@@ -1,14 +1,16 @@
 use super::{Factory, Squad};
 use crate::constants::{
-  GRID_CELL_SIZE, GRID_MAP_HEIGHT, GRID_MAP_WIDTH, INFLUENCE_MAP_SCALE_X, INFLUENCE_MAP_SCALE_Y,
-  INFLUENCE_MAP_WIDTH,
+  GRID_CELL_SIZE, GRID_MAP_HEIGHT, GRID_MAP_WIDTH, INFLUENCE_MAP_HEIGHT, INFLUENCE_MAP_SCALE_X,
+  INFLUENCE_MAP_SCALE_Y, INFLUENCE_MAP_WIDTH,
 };
-use crate::SquadsGridManager;
+
 use std::cell::{RefCell, RefMut};
 use std::collections::HashMap;
 use std::rc::Weak;
 
+// #[derive(PartialEq)]
 enum PurposeType {
+  Nothing,
   RunAway, // running away, don't care about enemies nearby until reach the safe place
   Stay, // stay and just wait, to make a bigger group (if you are in range of enemy influence, then go to attack)
   Attack, //
@@ -17,82 +19,114 @@ enum PurposeType {
 }
 
 struct Purpose {
-  kind: PurposeType,
-  enemy_faction_id: u32,
-  enemy_squads_ids: Vec<u32>,
-  enemy_squads: Vec<Weak<RefCell<Squad>>>,
+  purpose_type: PurposeType,
+  x: i16,
+  y: i16,
+  squads_ids: Vec<u32>,
+}
+
+struct EnhancedPurpose<'a> {
+  purpose_type: PurposeType,
+  value_of_purpose: f32,
+  enemy_force: f32,
+  our_power: f32,
+  squads: Vec<RefMut<'a, Squad>>,
+  x: f32,
+  y: f32,
 }
 
 pub struct ArtificialIntelligence {
   faction_id: u32,
-  squads_plans: [Vec<((f32, f32), Vec<u32>)>; 2],
+  purposes: Vec<Purpose>,
 }
+
+type TexCellInfo = (usize, usize, usize, u8);
 
 impl ArtificialIntelligence {
   pub fn new(faction_id: u32) -> ArtificialIntelligence {
     ArtificialIntelligence {
       faction_id,
-      squads_plans: [
-        vec![], // RUN_AWAY
-        vec![], // STAY
-      ],
+      purposes: vec![],
     }
   }
 
-  fn is_same_targets(p1: (f32, f32), p2: (f32, f32)) -> bool {
-    (p1.0 - p2.0).hypot(p1.1 - p2.1) < 10.0
+  fn get_all_neightbours(
+    item: TexCellInfo,
+    not_checked_yet: &mut Vec<TexCellInfo>,
+  ) -> Vec<TexCellInfo> {
+    // item shouldn't be in not_checked_yet vector
+    let mut neighbors = vec![];
+    not_checked_yet.retain(|position_data| {
+      if (item.1 as i16 - position_data.1 as i16).abs() < 3
+        && (item.2 as i16 - position_data.2 as i16).abs() < 3
+      {
+        neighbors.push(position_data.clone());
+        false
+      } else {
+        true
+      }
+    });
+
+    let mut neighbors_of_neighbors = neighbors
+      .iter()
+      .flat_map(|neoighbour| {
+        ArtificialIntelligence::get_all_neightbours(*neoighbour, not_checked_yet)
+      })
+      .collect::<Vec<TexCellInfo>>();
+
+    neighbors.append(&mut neighbors_of_neighbors);
+
+    neighbors
   }
 
-  fn get_list_of_indexes_around(center_x: i16, center_y: i16, range: i16) -> Vec<usize> {
-    let min_y = (center_y - range).max(0) as usize;
-    let max_y = (center_y + range).min(GRID_MAP_HEIGHT as i16 - 1) as usize;
-    let min_x = (center_x - range).max(0) as usize;
-    let max_x = (center_x - range).min(GRID_MAP_WIDTH as i16 - 1) as usize;
-    let mut result = vec![];
+  fn collect_new_purposes(texture: &Vec<u8>) -> Vec<(f32, f32, f32)> {
+    /*=========GET GROUPED IMPORTANT PLACES==============*/
+    let texture_len = texture.len() / 4;
+    let mut interesting_positions = vec![];
 
-    (min_y..=max_y)
-      .collect::<Vec<usize>>()
+    for i in 0..texture_len {
+      let tex_value = texture[i * 4 + 1];
+      if tex_value > 0 {
+        // 1 or 0, depends if there is enemy
+        let y = i / INFLUENCE_MAP_WIDTH;
+        let x = i % INFLUENCE_MAP_WIDTH;
+        interesting_positions.push((i * 4, x, y, tex_value));
+      }
+    }
+
+    let mut grouped_interesting_positions = vec![];
+    let mut points_to_check = vec![];
+
+    while interesting_positions.len() > 0 {
+      if points_to_check.len() == 0 {
+        points_to_check.push(interesting_positions.pop().unwrap());
+      }
+
+      let new_item = points_to_check.pop().unwrap();
+
+      let mut neighbours =
+        ArtificialIntelligence::get_all_neightbours(new_item, &mut interesting_positions);
+      neighbours.push(new_item);
+      grouped_interesting_positions.push(neighbours);
+    }
+
+    grouped_interesting_positions
       .into_iter()
-      .for_each(|y| {
-        let mod_x: usize = if y == min_y || y == max_y {
-          1
-        } else {
-          range as usize * 2
-        };
-
-        let mut x = min_x;
-        while x <= max_x {
-          result.push(y * GRID_MAP_WIDTH + x);
-          x += mod_x;
-        }
-      });
-    result
+      .flat_map(|list_of_close_places| {
+        let sum_influence = list_of_close_places
+          .iter()
+          .fold(0.0, |acc, (_index, _x, _y, influence)| {
+            acc + *influence as f32
+          });
+        list_of_close_places
+          .into_iter()
+          .map(|(_index, x, y, ..)| (x as f32, y as f32, sum_influence))
+          .collect::<Vec<(f32, f32, f32)>>()
+      })
+      .collect::<Vec<(f32, f32, f32)>>()
   }
 
-  // fn get_army(
-  //   weak_squad: Weak<RefCell<Squad>>,
-  //   squads_on_grid: &HashMap<usize, Vec<Weak<RefCell<Squad>>>>,
-  // ) -> (
-  // ) {
-  //   let position = weak_squad.upgrade().unwrap().borrow().shared.center_point;
-  //   let x = (position.0 / GRID_CELL_SIZE) as i16;
-  //   let y = (position.1 / GRID_CELL_SIZE) as i16;
 
-  //   let mut power: f32 = 0.0;
-  //   let mut squads_ids = vec![];
-  //   let mut squads = vec![];
-  //   let current_cell_squads = ArtificialIntelligence::get_list_of_indexes_around(x, y, range);
-
-  //   current_cell_squads.iter().for_each(|some_weak_squad| {
-  //     let Some(some_ref_cell_squad) = some_weak_squad.upgrade() {
-  //       let some_squad = some_ref_cell_squad.borrow();
-  //       power +=
-  //     }
-  //   })
-
-  //   (squads_ids, squads, power)
-  //   current_cell_squads
-  // }
 
   pub fn work(
     &mut self,
@@ -101,9 +135,115 @@ impl ArtificialIntelligence {
     texture: &Vec<u8>,
     squads_on_grid: &HashMap<usize, Vec<Weak<RefCell<Squad>>>>,
   ) {
-    // to collect purposes go over texture green channel, collect all,
-    // - if green channel is 1, then collect also red channel, it's value of the enemies there
-    //
+    let mut new_purposes = ArtificialIntelligence::collect_new_purposes(texture);
+    let factory_x = factory.x * INFLUENCE_MAP_SCALE_X;
+    let factory_y = factory.y * INFLUENCE_MAP_SCALE_Y;
+    // RN we are calculating strength of the enemy forces, we should handle also how is it important for us,
+    // e.g. how important is destroy enemy portal, and how to capture enemy strategic point
+    new_purposes.sort_by(|(a_x, a_y, a_influence), (b_x, b_y, b_influence)| {
+      let distance_a = (factory_x - a_x).hypot(factory_y - a_y);
+      let distance_b = (factory_x - b_x).hypot(factory_y - b_y);
+      let a_value = a_influence - distance_a / 15.0; // 15.0 almost form the sky, 15.43 is width of the influence map
+      let b_value = b_influence - distance_b / 15.0;
+      (a_value).partial_cmp(&b_value).unwrap()
+    });
+
+    let mut all_squads_ids = squads.iter().map(|squad| squad.id).collect::<Vec<u32>>();
+    /*====update the current state fo the purpose, if point is captured, is enemy was defeated====*/
+    let mut curr_state_of_our_army = self
+      .purposes
+      .iter()
+      .map(|purpose| {
+        // We assume that rn everything is attack only!
+        all_squads_ids.retain(|id| !purpose.squads_ids.contains(id));
+
+        let mut our_power = 0.0;
+        let mut sum_x = 0.0;
+        let mut sum_y = 0.0;
+        let squads = purpose
+          .squads_ids
+          .iter()
+          .filter_map(|squad_id| {
+            if let Some(squad) = squads.iter().find(|squad| squad.id == *squad_id) {
+              our_power += squad.get_influence();
+              sum_x += squad.shared.center_point.0;
+              sum_y += squad.shared.center_point.1;
+              Some(*squad)
+            } else {
+              None
+            }
+          })
+          .collect::<Vec<RefMut<Squad>>>();
+
+        let avg_x = sum_x * INFLUENCE_MAP_SCALE_X / squads.len() as f32;
+        let avg_y = sum_y * INFLUENCE_MAP_SCALE_Y / squads.len() as f32;
+
+        let (curr_purpose_type, value_of_purpose, enemy_force) = match purpose.purpose_type {
+          PurposeType::Attack => {
+            let is_still_there_any_enemy = new_purposes
+              .iter()
+              .find(|(x, y, ..)| (purpose.x as f32 - x).hypot(purpose.y as f32 - y) < 2.0);
+
+            if let Some(enemy_influence) = is_still_there_any_enemy {
+              (PurposeType::Attack, 1.0, is_still_there_any_enemy.unwrap().2)
+            } else {
+              (PurposeType::Nothing, 0.0, 0.0)
+            }
+          }
+          _ => (PurposeType::Nothing, 0.0, 0.0),
+        };
+        EnhancedPurpose {
+          purpose_type: curr_purpose_type,
+          value_of_purpose,
+          enemy_force,
+          our_power,
+          squads,
+          x: avg_x,
+          y: avg_y,
+        }
+        // (value, enemy_force, power, squads, avg_x, avg_y)
+      })
+      .collect::<Vec<EnhancedPurpose>>();
+
+    all_squads_ids.into_iter().for_each(|squad_id| {
+      let squad = squads.iter().find(|squad| squad.id == squad_id).unwrap();
+      let squad_x = (squad.shared.center_point.0 * INFLUENCE_MAP_SCALE_X).floor();
+      let squad_y = (squad.shared.center_point.1 * INFLUENCE_MAP_SCALE_Y).floor();
+      curr_state_of_our_army.push(EnhancedPurpose {
+        purpose_type: PurposeType::Nothing,
+        value_of_purpose: 0.0,
+        enemy_force: 0.0,
+        our_power: squad.get_influence(),
+        squads: vec![*squad],
+        x: squad_x,
+        y: squad_y,
+      });
+    });
+
+    curr_state_of_our_army
+    new_purposes(x, y, influence) sorted by the nearest one to the portal
+
+    // we don't have to match the current state with new purposes, there is no real reason
+
+    new_purposes.iter().for_each(|(x, y, influence)| {
+      let distance = (x - ).hypot(y - );
+      // we have to think how to calculate situation, when sqyad can stay in current position, but also can go to the morei mprotant purpose, but alone is not enough power, but comebined with other squads got enough power
+      // prob we should just go over all squads then, and calculate minimum required fire power
+      // let required_purpose = purpose.value - current_purpose.value;
+      // go over all the squads, and check if some of the squad has curr_purpose.value < required_purpose AND distance and power is okay also!
+      // we don't know even if it's strategic point, attack or something
+    });
+
+    // 1. update power of your all armies, and check if they didn't complete the purpose! Maybe add new squads/squads which finished purpose here!
+    // 2. to collect purposes go over texture green channel, collect all,
+    //  - if green channel is 1, then collect also red channel, it's value of the enemies there
+    // 3. Check if all current armies are able to achieve the purpose, if not:
+    //  - you can send some support (support power - distance - not doing current purpose, if there is any)
+    //  - run away to safe place (or if you crazy, to less "powered" purpose)
+    //  - get some vector of results from this point
+    // 4. Compare vector from point 3, and all purposes (or result from point 3 should edit all purposes)
+    // and select new purposes!!!!
+
     return;
     if squads.len() == 0 {
       return;
@@ -284,4 +424,79 @@ impl ArtificialIntelligence {
 
     // all points which hare not controlled by us, all enemies portals
   }
+
+  fn is_any_enemy_in_area(texture: &Vec<u8>, x: i16, y: i16, radius: i16) -> bool {
+    let min_y = (y - radius).max(0) as usize;
+    let max_y = (y + radius).min(INFLUENCE_MAP_HEIGHT as i16 - 1) as usize;
+    let min_x = (x - radius).max(0) as usize;
+    let max_x = (x - radius).min(INFLUENCE_MAP_WIDTH as i16 - 1) as usize;
+    let mut result = vec![];
+
+    for y in min_y..=max_y {
+      for x in min_x..=max_x {
+        // When we will introduce strategic point, then we have to distingisch, enemy squads from enemy strategic point
+        if texture[(INFLUENCE_MAP_WIDTH * GRID_MAP_WIDTH + x) * 4 + 1] > 0 {
+          return true;
+        }
+      }
+    }
+
+    false
+  }
+
+  fn is_same_targets(p1: (f32, f32), p2: (f32, f32)) -> bool {
+    (p1.0 - p2.0).hypot(p1.1 - p2.1) < 10.0
+  }
+
+  fn get_list_of_indexes_around(center_x: i16, center_y: i16, range: i16) -> Vec<usize> {
+    let min_y = (center_y - range).max(0) as usize;
+    let max_y = (center_y + range).min(GRID_MAP_HEIGHT as i16 - 1) as usize;
+    let min_x = (center_x - range).max(0) as usize;
+    let max_x = (center_x - range).min(GRID_MAP_WIDTH as i16 - 1) as usize;
+    let mut result = vec![];
+
+    (min_y..=max_y)
+      .collect::<Vec<usize>>()
+      .into_iter()
+      .for_each(|y| {
+        let mod_x: usize = if y == min_y || y == max_y {
+          1
+        } else {
+          range as usize * 2
+        };
+
+        let mut x = min_x;
+        while x <= max_x {
+          result.push(y * GRID_MAP_WIDTH + x);
+          x += mod_x;
+        }
+      });
+    result
+  }
+
+  // fn get_army(
+  //   weak_squad: Weak<RefCell<Squad>>,
+  //   squads_on_grid: &HashMap<usize, Vec<Weak<RefCell<Squad>>>>,
+  // ) -> (
+  // ) {
+  //   let position = weak_squad.upgrade().unwrap().borrow().shared.center_point;
+  //   let x = (position.0 / GRID_CELL_SIZE) as i16;
+  //   let y = (position.1 / GRID_CELL_SIZE) as i16;
+
+  //   let mut power: f32 = 0.0;
+  //   let mut squads_ids = vec![];
+  //   let mut squads = vec![];
+  //   let current_cell_squads = ArtificialIntelligence::get_list_of_indexes_around(x, y, range);
+
+  //   current_cell_squads.iter().for_each(|some_weak_squad| {
+  //     let Some(some_ref_cell_squad) = some_weak_squad.upgrade() {
+  //       let some_squad = some_ref_cell_squad.borrow();
+  //       power +=
+  //     }
+  //   })
+
+  //   (squads_ids, squads, power)
+  //   current_cell_squads
+  // }
+
 }
