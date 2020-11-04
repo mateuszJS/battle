@@ -188,18 +188,6 @@ impl Universe {
         faction.manage_hunters(&world.squads_on_grid);
       }
 
-      if *time % 1000 == 0 && faction.id == 2 && faction.squads.len() > 0 {
-        let squad_id = faction.squads[0].borrow().id;
-        faction.task_add_target(
-          vec![squad_id],
-          if faction.squads[0].borrow().shared.center_point.0 > 2000.0 {
-            200.0
-          } else {
-            2200.0
-          },
-          1300.0,
-        );
-      }
       faction.resources += 1;
       faction.update(world);
     });
@@ -352,7 +340,7 @@ impl Universe {
     let selected_enemy_units =
       match Universe::is_it_attack(world, target_x, target_y, user_faction.id) {
         Some(squad) => {
-          user_faction.task_attack_enemy(squads_ids, &squad);
+          user_faction.task_attack_enemy(&squads_ids, &squad);
           let upgraded_squad = squad.upgrade();
           if upgraded_squad.is_some() {
             upgraded_squad
@@ -367,7 +355,7 @@ impl Universe {
           }
         }
         None => {
-          user_faction.task_add_target(squads_ids, target_x, target_y);
+          user_faction.task_add_target(&squads_ids, target_x, target_y);
           vec![]
         }
       };
@@ -377,7 +365,7 @@ impl Universe {
 
   pub fn use_ability(&mut self, squads_ids: Vec<u32>, target_x: f32, target_y: f32) {
     let user_faction = &mut self.factions[INDEX_OF_USER_FACTION];
-    user_faction.task_use_ability(squads_ids, target_x, target_y);
+    user_faction.task_use_ability(&squads_ids, target_x, target_y);
   }
 
   pub fn get_influence(&self) -> js_sys::Float32Array {

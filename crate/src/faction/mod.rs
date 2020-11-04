@@ -1,7 +1,8 @@
 mod ai;
 mod squad_manager;
 use crate::constants::{
-  FACTORY_INFLUENCE_RANGE, FACTORY_INFLUENCE_VALUE, MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE,
+  FACTORY_INFLUENCE_RANGE, FACTORY_INFLUENCE_VALUE, INFLUENCE_CELL_SIZE, INFLUENCE_MAP_SCALE_X,
+  INFLUENCE_MAP_SCALE_Y, MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE,
 };
 use crate::look_up_table::LookUpTable;
 use crate::position_utils::PositionUtils;
@@ -9,8 +10,9 @@ use crate::representations_ids::FACTION_REPRESENTATION_ID;
 use crate::squad::Squad;
 use crate::squad_types::SquadType;
 use crate::Factory;
+use crate::SquadsGridManager;
 use crate::World;
-use ai::ArtificialIntelligence;
+use ai::{ArtificialIntelligence, PurposeType, SquadBasicInfo};
 use squad_manager::SquadsManager;
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -49,7 +51,7 @@ impl Faction {
     let portal_id = portal.members[0].borrow().id;
     let factory = Factory::new(portal_id, factory_x, factory_y, factory_angle, is_user);
     let portal_squad = Rc::new(RefCell::new(portal));
-    let ai = ArtificialIntelligence::new(id);
+    let ai = ArtificialIntelligence::new();
 
     Faction {
       id,
@@ -164,7 +166,7 @@ impl Faction {
     .concat()
   }
 
-  pub fn task_add_target(&mut self, squads_ids: Vec<u32>, target_x: f32, target_y: f32) {
+  pub fn task_add_target(&mut self, squads_ids: &Vec<u32>, target_x: f32, target_y: f32) {
     let position = PositionUtils::get_squads_positions(squads_ids.len(), target_x, target_y);
     let mut index = 0;
     self.squads.iter_mut().for_each(|ref_cell_squad| {
@@ -176,7 +178,7 @@ impl Faction {
     });
   }
 
-  pub fn task_attack_enemy(&mut self, squads_ids: Vec<u32>, weak_enemy: &Weak<RefCell<Squad>>) {
+  pub fn task_attack_enemy(&mut self, squads_ids: &Vec<u32>, weak_enemy: &Weak<RefCell<Squad>>) {
     let mut attackers: Vec<&Rc<RefCell<Squad>>> = self
       .squads
       .iter()
@@ -217,7 +219,7 @@ impl Faction {
     self.squads.retain(|squad| squad.borrow().members.len() > 0);
   }
 
-  fn get_squads_from_ids(&self, squads_ids: Vec<u32>) -> Vec<&Rc<RefCell<Squad>>> {
+  fn get_squads_from_ids(&self, squads_ids: &Vec<u32>) -> Vec<&Rc<RefCell<Squad>>> {
     self
       .squads
       .iter()
@@ -225,7 +227,7 @@ impl Faction {
       .collect()
   }
 
-  pub fn task_use_ability(&mut self, squads_ids: Vec<u32>, target_x: f32, target_y: f32) {
+  pub fn task_use_ability(&mut self, squads_ids: &Vec<u32>, target_x: f32, target_y: f32) {
     let squads = self.get_squads_from_ids(squads_ids);
 
     if squads.len() == 0 {
@@ -283,13 +285,61 @@ impl Faction {
     texture: &Vec<u8>,
     squads_on_grid: &HashMap<usize, Vec<Weak<RefCell<Squad>>>>,
   ) {
-    let squads = self
+    let squads_basic_info = self
       .squads
       .iter()
-      .map(|ref_cell_squad| ref_cell_squad.borrow_mut())
-      .collect();
+      .map(|ref_cell_squad| {
+        let squad = ref_cell_squad.borrow();
+        SquadBasicInfo {
+          id: squad.id,
+          x: (squad.shared.center_point.0 * INFLUENCE_MAP_SCALE_X).floor(),
+          y: (squad.shared.center_point.1 * INFLUENCE_MAP_SCALE_Y).floor(),
+          movement_speed: squad.squad_details.movement_speed,
+        }
+      })
+      .collect::<Vec<SquadBasicInfo>>();
 
-    let squads_plans = self.ai.work(&self.factory, squads, texture, squads_on_grid);
+    let squads_plans = self.ai.work(&self.factory, &squads_basic_info, texture);
+    squads_plans.iter().for_each(|plan| {
+      let plan_x = plan.x / INFLUENCE_MAP_SCALE_X + INFLUENCE_CELL_SIZE / 2.0;
+      let plan_y = plan.y / INFLUENCE_MAP_SCALE_Y + INFLUENCE_CELL_SIZE / 2.0;
+
+      match plan.purpose_type {
+        PurposeType::Nothing => {
+          self.task_add_target(&plan.squads_ids, plan_x, plan_y);
+        }
+        PurposeType::Attack => {
+          let squads_in_area = SquadsGridManager::get_squads_in_area(
+            squads_on_grid,
+            plan_x,
+            plan_y,
+            INFLUENCE_CELL_SIZE,
+          );
+
+          squads_in_area.into_iter().find(|weak_squad| {
+            if let Some(unwrapper_squad) = weak_squad.upgrade() {
+              let squad = unwrapper_squad.borrow();
+              if squad.faction_id == self.id {
+                return false;
+              }
+
+              let enemy_position = squad.shared.center_point;
+              if (enemy_position.0 - plan_x).hypot(enemy_position.1 - plan_y)
+                < 2.0 * INFLUENCE_CELL_SIZE
+              {
+                self.task_attack_enemy(&plan.squads_ids, weak_squad);
+                true
+              } else {
+                false
+              }
+            } else {
+              false
+            }
+          });
+        }
+        _ => log!("not handled case"),
+      }
+    })
   }
 
   pub fn manage_hunters(&mut self, squads_grid: &HashMap<usize, Vec<Weak<RefCell<Squad>>>>) {

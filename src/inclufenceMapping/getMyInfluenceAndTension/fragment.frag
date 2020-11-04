@@ -11,7 +11,13 @@ varying vec2 vUvs;
 void main() {
   float value = 0.0;
   vec4 acc = texture2D(uAccTexture, vUvs);
-  float isSquadHere = acc.b;
+  float isSquadHere = 0.0;
+  // 0.33 is our
+  // 0.66 is enemy
+  // 0.99 is our and enemy
+  if (acc.b > 0.0) {
+    isSquadHere = 0.66;
+  }
   for (int i=0; i<XX; i+=4) {
     vec2 position = vec2(uInfluence[i] * uScale.x, uInfluence[i + 1] * uScale.y);
     float dis = distance(vCoord, position);
@@ -23,7 +29,7 @@ void main() {
       value += ((max_range - dis) / max_range) * uInfluence[i + 2];
       vec2 posDiff = abs(vCoord - position);
       if (posDiff.x < 0.5 && posDiff.y < 0.5) {
-        isSquadHere = 1.0;
+        isSquadHere += 0.33;
       }
     }
   }

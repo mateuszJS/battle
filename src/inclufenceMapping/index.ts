@@ -70,7 +70,7 @@ export const updateInfluenceMap = (influence: Float32Array, universe: Universe) 
   }
 
   myInfluencesList.forEach(faction => {
-    if (faction.id === USER_FACTION_ID) {
+    if (faction.id !== USER_FACTION_ID) {
       const firstFactionInflueneceAndVulnerabilityMap = getInfluenceAndVulnerabilityMap(
         faction.texture,
         tensionMap,
@@ -78,14 +78,15 @@ export const updateInfluenceMap = (influence: Float32Array, universe: Universe) 
         INFLUENCE_MAP_WIDTH,
         INFLUENCE_MAP_HEIGHT,
       )
-      firstFactionInflueneceAndVulnerabilityMap.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST
-
-      const sprite = new PIXI.Sprite(firstFactionInflueneceAndVulnerabilityMap)
-      // sprite.filters = [new PIXI.filters.AlphaFilter(10.0)]
-      sprite.width = MAP_WIDTH
-      sprite.height = MAP_HEIGHT
-
-      container.addChild(sprite)
+      if (window.visibleInfluenceMap) {
+        const texture = firstFactionInflueneceAndVulnerabilityMap
+        texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST
+        const sprite = new PIXI.Sprite(texture)
+        sprite.filters = [new PIXI.filters.AlphaFilter(10.0)]
+        sprite.width = MAP_WIDTH
+        sprite.height = MAP_HEIGHT
+        container.addChild(sprite)
+      }
 
       const influenceAndVulnerabilityMapPixels = window.app.renderer.extract.pixels(
         firstFactionInflueneceAndVulnerabilityMap,
