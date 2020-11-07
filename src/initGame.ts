@@ -55,13 +55,17 @@ const initGame = () => {
 
   const mouseController = new initializeMouseController(universe, universeRepresentation)
 
-  universe.create_enemy_squad(REPRESENTATION_IDS.SOLIDER)
-
   let timeToClearAbilitiesIcons = 1000
 
   debugController.init()
-
+  let timeToCreateEnemy = 0
   window.app.ticker.add((delta: number) => {
+    if (timeToCreateEnemy == 0) {
+      universe.create_enemy_squad(REPRESENTATION_IDS.SOLIDER)
+      timeToCreateEnemy = 1000
+    } else {
+      timeToCreateEnemy--
+    }
     // gridDebug(universe)
     debugController.update(universe)
     mouseController.updateScenePosition()

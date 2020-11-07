@@ -1,8 +1,8 @@
 mod ai;
 mod squad_manager;
 use crate::constants::{
-  FACTORY_INFLUENCE_RANGE, FACTORY_INFLUENCE_VALUE, INFLUENCE_CELL_SIZE, INFLUENCE_MAP_SCALE_X,
-  INFLUENCE_MAP_SCALE_Y, MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE,
+  AI_CALCULATION_PERIOD, FACTORY_INFLUENCE_RANGE, FACTORY_INFLUENCE_VALUE, INFLUENCE_CELL_SIZE,
+  INFLUENCE_MAP_SCALE_X, INFLUENCE_MAP_SCALE_Y, MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE,
 };
 use crate::look_up_table::LookUpTable;
 use crate::position_utils::PositionUtils;
@@ -269,7 +269,8 @@ impl Faction {
           squad.shared.center_point.0,
           squad.shared.center_point.1,
           squad.get_influence(),
-          squad.squad_details.weapon.range + squad.squad_details.movement_speed * 100.0,
+          squad.squad_details.weapon.range
+            + squad.squad_details.movement_speed * AI_CALCULATION_PERIOD as f32,
         ]
       })
       .collect::<Vec<f32>>();
@@ -295,6 +296,7 @@ impl Faction {
           x: (squad.shared.center_point.0 * INFLUENCE_MAP_SCALE_X).floor(),
           y: (squad.shared.center_point.1 * INFLUENCE_MAP_SCALE_Y).floor(),
           movement_speed: squad.squad_details.movement_speed,
+          influence: squad.get_influence() * 255.0, // because squad.get_influence() fro webGL <0, 1>
         }
       })
       .collect::<Vec<SquadBasicInfo>>();
@@ -306,7 +308,7 @@ impl Faction {
 
       match plan.purpose_type {
         PurposeType::Nothing => {
-          self.task_add_target(&plan.squads_ids, plan_x, plan_y);
+          self.task_add_target(&plan.squads_ids, self.factory.x, self.factory.y);
         }
         PurposeType::Attack => {
           let squads_in_area = SquadsGridManager::get_squads_in_area(

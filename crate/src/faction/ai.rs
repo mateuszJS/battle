@@ -4,7 +4,7 @@ use crate::constants::{
   INFLUENCE_MAP_SCALE_Y, INFLUENCE_MAP_WIDTH,
 };
 
-#[derive(Clone)]
+#[derive(PartialEq, Clone)]
 pub enum PurposeType {
   Nothing,
   RunAway, // running away, don't care about enemies nearby until reach the safe place
@@ -19,6 +19,7 @@ pub struct SquadBasicInfo {
   pub x: f32,
   pub y: f32,
   pub movement_speed: f32,
+  pub influence: f32,
 }
 
 #[derive(Clone)]
@@ -76,9 +77,7 @@ impl ArtificialIntelligence {
 
     let mut neighbors_of_neighbors = neighbors
       .iter()
-      .flat_map(|neoighbour| {
-        ArtificialIntelligence::get_all_neightbours(*neoighbour, not_checked_yet)
-      })
+      .flat_map(|neighbor| ArtificialIntelligence::get_all_neightbours(*neighbor, not_checked_yet))
       .collect::<Vec<TexCellInfo>>();
 
     neighbors.append(&mut neighbors_of_neighbors);
@@ -100,10 +99,17 @@ impl ArtificialIntelligence {
       }
     }
 
+    // interesting_places_list
+    //   .iter()
+    //   .for_each(|(index, x, y, value)| {
+    //     log!("place {} {} {}", x, y, value);
+    //   });
+
     let mut grouped_interesting_positions = vec![];
     let mut points_to_check = vec![];
 
     while interesting_places_list.len() > 0 {
+      // TODO: points_to_check can be removed probably
       if points_to_check.len() == 0 {
         points_to_check.push(interesting_places_list.pop().unwrap());
       }
@@ -114,6 +120,13 @@ impl ArtificialIntelligence {
       neighbours.push(new_item);
       grouped_interesting_positions.push(neighbours);
     }
+
+    // grouped_interesting_positions.iter().for_each(|vector| {
+    //   log!("++++++++++++++++++++++");
+    //   vector.iter().for_each(|(index, x, y, value)| {
+    //     log!("place {} {} {}", x, y, value);
+    //   });
+    // });
 
     let mut new_purposes = grouped_interesting_positions
       .into_iter()
@@ -142,12 +155,11 @@ impl ArtificialIntelligence {
     new_purposes.sort_by(|a_purpose, b_purpose| {
       let distance_a = (factory_x - a_purpose.x).hypot(factory_y - a_purpose.y);
       let distance_b = (factory_x - b_purpose.x).hypot(factory_y - b_purpose.y);
-      let a_how_much_is_it_worth = a_purpose.value * 2.0
-        - a_purpose.enemy_influence * 0.1
-        - distance_a / INFLUENCE_MAP_WIDTH as f32;
-      let b_how_much_is_it_worth = b_purpose.value * 2.0
-        - b_purpose.enemy_influence * 0.1
-        - distance_b / INFLUENCE_MAP_WIDTH as f32;
+      let max_distance = distance_a.max(distance_b).max(1.0); // to avoid dividing by zero
+      let a_how_much_is_it_worth =
+        a_purpose.value * 2.0 - a_purpose.enemy_influence * 0.1 - distance_a / max_distance;
+      let b_how_much_is_it_worth =
+        b_purpose.value * 2.0 - b_purpose.enemy_influence * 0.1 - distance_b / max_distance;
       (b_how_much_is_it_worth)
         .partial_cmp(&a_how_much_is_it_worth)
         .unwrap()
@@ -165,22 +177,34 @@ impl ArtificialIntelligence {
   }
 
   fn get_how_much_is_it_worth(new_purpose: &NewPurpose, army: &EnhancedPurpose) -> f32 {
-    let value_diff = new_purpose.value - army.value_of_purpose;
-    let purposes_enemies_forces_diff = army.enemy_force - new_purpose.enemy_influence;
+    /*========CALC VALUE========*/
+    let max_value = new_purpose.value.max(army.value_of_purpose).max(1.0);
+    let value_diff = (new_purpose.value - army.value_of_purpose) / max_value;
+
+    /*======CALC ENEMIES FORCES========*/
+    let max_force = army.enemy_force.max(new_purpose.enemy_influence).max(1.0);
+    let purposes_enemies_forces_diff = (army.enemy_force - new_purpose.enemy_influence) / max_force;
+
+    /*========CALC DISTANCE========*/
     let distance_to_new_purpose =
       (new_purpose.x - army.squad.x).hypot(new_purpose.y - army.squad.y);
     let distance_to_curr_purpose =
       (army.old_purpose_x - army.squad.x).hypot(army.old_purpose_y - army.squad.y);
-    let distance_diff =
-      (distance_to_curr_purpose - distance_to_new_purpose) / army.squad.movement_speed;
+    let max_distance = distance_to_new_purpose
+      .max(distance_to_curr_purpose)
+      .max(1.0); // to avoid dividing by zero
+    let distance_diff = (distance_to_curr_purpose - distance_to_new_purpose) / max_distance; // * (army.squad.movement_speed / 2.0));
 
-    value_diff + purposes_enemies_forces_diff + distance_diff
+    /*========FINAL RESULT========*/
+    100.0 - distance_to_new_purpose
+    // distance_to_curr_purpose - distance_to_new_purpose
+    // value_diff + purposes_enemies_forces_diff + distance_diff
   }
 
-  pub fn get_our_influence_from_coords(texture: &Vec<u8>, x: f32, y: f32) -> f32 {
-    let index = (y as usize * INFLUENCE_MAP_WIDTH + x as usize) * 4;
-    texture[index] as f32
-  }
+  // pub fn get_our_influence_from_coords(texture: &Vec<u8>, x: f32, y: f32) -> f32 {
+  //   let index = (y as usize * INFLUENCE_MAP_WIDTH + x as usize) * 4;
+  //   texture[index] as f32
+  // }
 
   fn get_ids_from_squads(squads: Vec<&SquadBasicInfo>) -> Vec<u32> {
     squads
@@ -255,9 +279,7 @@ impl ArtificialIntelligence {
                 purpose_type: curr_purpose_type.clone(), // not sure if needed
                 value_of_purpose: ArtificialIntelligence::get_purpose_value(&curr_purpose_type),
                 enemy_force,
-                our_power: ArtificialIntelligence::get_our_influence_from_coords(
-                  texture, squad.x, squad.y,
-                ),
+                our_power: squad.influence,
                 squad,
                 old_purpose_x: curr_purpose.x,
                 old_purpose_y: curr_purpose.y,
@@ -276,13 +298,13 @@ impl ArtificialIntelligence {
         purpose_type: PurposeType::Nothing,
         value_of_purpose: ArtificialIntelligence::get_purpose_value(&PurposeType::Nothing),
         enemy_force: 0.0,
-        our_power: ArtificialIntelligence::get_our_influence_from_coords(texture, squad.x, squad.y),
+        our_power: squad.influence,
         squad,
         old_purpose_x: 0.0,
         old_purpose_y: 0.0,
       });
     });
-
+    log!("**********************************");
     let final_purposes = new_purposes
       .iter()
       .enumerate()
@@ -301,15 +323,47 @@ impl ArtificialIntelligence {
             .partial_cmp(&b_how_much_is_it_worth)
             .unwrap()
         });
+        log!("=============================");
+        log!(
+          "new_purpose x:{} y: {}, enemy_influence: {}, value: {}",
+          new_purpose.x,
+          new_purpose.y,
+          new_purpose.enemy_influence,
+          new_purpose.value
+        );
+        log!("-----------------------------");
+        curr_state_of_our_army.iter().for_each(|army| {
+          log!(
+            "army x:{} y: {}, value_of_purpose: {}, enemy_force: {}, old x: {}, old y: {}",
+            army.squad.x,
+            army.squad.y,
+            army.value_of_purpose,
+            army.enemy_force,
+            army.old_purpose_x,
+            army.old_purpose_y
+          );
+        });
 
         let mut collected_power = 0.0;
         let mut curr_state_of_our_army_last_index = curr_state_of_our_army.len() as isize - 1;
-
+        // at this moment two squads are created, third one is waiting and when forth appears, then attack! shouldn't!
         while curr_state_of_our_army_last_index >= 0
           && collected_power < new_purpose.enemy_influence
         {
-          collected_power += new_purpose.value
-            * curr_state_of_our_army[curr_state_of_our_army_last_index as usize].our_power;
+          let army = &curr_state_of_our_army[curr_state_of_our_army_last_index as usize];
+          let if_its_still_the_same_purpose = army.purpose_type != PurposeType::Nothing;
+          // with those, third squad will go to one enemy squad
+          // let keep_purpose_factor = if if_its_still_the_same_purpose {
+          //   1.0
+          // } else {
+          //   1.0
+          // };
+          let keep_purpose_factor = if if_its_still_the_same_purpose {
+            1.1
+          } else {
+            0.9
+          };
+          collected_power += new_purpose.value * keep_purpose_factor * army.our_power;
           curr_state_of_our_army_last_index -= 1
         }
 
