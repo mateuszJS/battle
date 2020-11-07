@@ -2,7 +2,8 @@ mod ai;
 mod squad_manager;
 use crate::constants::{
   AI_CALCULATION_PERIOD, FACTORY_INFLUENCE_RANGE, FACTORY_INFLUENCE_VALUE, INFLUENCE_CELL_SIZE,
-  INFLUENCE_MAP_SCALE_X, INFLUENCE_MAP_SCALE_Y, MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE,
+  INFLUENCE_MAP_SCALE_AVG, INFLUENCE_MAP_SCALE_X, INFLUENCE_MAP_SCALE_Y,
+  MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE,
 };
 use crate::look_up_table::LookUpTable;
 use crate::position_utils::PositionUtils;
@@ -297,6 +298,7 @@ impl Faction {
           y: (squad.shared.center_point.1 * INFLUENCE_MAP_SCALE_Y).floor(),
           movement_speed: squad.squad_details.movement_speed,
           influence: squad.get_influence() * 255.0, // because squad.get_influence() fro webGL <0, 1>
+          weapon_range: (squad.squad_details.weapon.range * INFLUENCE_MAP_SCALE_AVG).ceil(),
         }
       })
       .collect::<Vec<SquadBasicInfo>>();

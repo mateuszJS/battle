@@ -22,6 +22,7 @@ pub const INFLUENCE_MAP_WIDTH: usize = (MAP_WIDTH * INFLUENCE_MAP_SCALE + 1.0) a
 pub const INFLUENCE_MAP_HEIGHT: usize = (MAP_HEIGHT * INFLUENCE_MAP_SCALE + 1.0) as usize;
 pub const INFLUENCE_MAP_SCALE_X: f32 = INFLUENCE_MAP_WIDTH as f32 / MAP_WIDTH;
 pub const INFLUENCE_MAP_SCALE_Y: f32 = INFLUENCE_MAP_HEIGHT as f32 / MAP_HEIGHT;
+pub const INFLUENCE_MAP_SCALE_AVG: f32 = (INFLUENCE_MAP_SCALE_X + INFLUENCE_MAP_SCALE_Y) / 2.0; // to scale the radius stuff like weapon range
 
 pub const GRID_CELL_SIZE: f32 = 400.0;
 const GRID_MAP_SCALE: f32 = 1.0 / GRID_CELL_SIZE;
@@ -29,6 +30,7 @@ pub const GRID_MAP_WIDTH: usize = (MAP_WIDTH * GRID_MAP_SCALE + 1.0) as usize;
 pub const GRID_MAP_HEIGHT: usize = (MAP_HEIGHT * GRID_MAP_SCALE + 1.0) as usize;
 pub const GRID_MAP_SCALE_X: f32 = GRID_MAP_WIDTH as f32 / MAP_WIDTH;
 pub const GRID_MAP_SCALE_Y: f32 = GRID_MAP_HEIGHT as f32 / MAP_HEIGHT;
+pub const GRID_MAP_SCALE_AVG: f32 = (GRID_MAP_SCALE_X + GRID_MAP_SCALE_Y) / 2.0; // to scale the radius stuff like weapon range
 
 pub const OBSTACLES_CELL_SIZE: f32 = 20.0; // remember to change also in debug/obstaclesMap.ts
 const OBSTACLES_MAP_SCALE: f32 = 1.0 / OBSTACLES_CELL_SIZE;

@@ -20,6 +20,7 @@ pub struct SquadBasicInfo {
   pub y: f32,
   pub movement_speed: f32,
   pub influence: f32,
+  pub weapon_range: f32,
 }
 
 #[derive(Clone)]
@@ -31,6 +32,7 @@ pub struct Purpose {
 }
 
 struct NewPurpose {
+  id: isize,
   x: f32,
   y: f32,
   enemy_influence: f32,
@@ -41,10 +43,11 @@ struct EnhancedPurpose<'a> {
   purpose_type: PurposeType,
   value_of_purpose: f32,
   enemy_force: f32,
-  our_power: f32,
+  our_power: f32, // TODO: is this field still needed?
   squad: &'a SquadBasicInfo,
   old_purpose_x: f32,
   old_purpose_y: f32,
+  original_purpose_id: isize,
 }
 
 type TexCellInfo = (usize, usize, usize, u8);
@@ -86,6 +89,33 @@ impl ArtificialIntelligence {
   }
 
   fn collect_new_purposes(factory: &Factory, texture: &Vec<u8>) -> Vec<NewPurpose> {
+    // let x = ArtificialIntelligence::get_how_much_is_it_worth(
+    //   &NewPurpose {
+    //     id: 256,
+    //     x: 0.0,
+    //     y: 4.0,
+    //     enemy_influence: 18.0,
+    //     value: 1.0,
+    //   },
+    //   &EnhancedPurpose {
+    //     purpose_type: PurposeType::Attack,
+    //     our_power: 18.0,
+    //     value_of_purpose: 1.0,
+    //     original_purpose_id: 68,
+    //     old_purpose_x: 1.0,
+    //     old_purpose_y: 1.0,
+    //     enemy_force: 34.0,
+    //     squad: &SquadBasicInfo {
+    //       id: 68,
+    //       x: 5.0,
+    //       y: 5.0,
+    //       movement_speed: 2.5,
+    //       weapon_range: 4.0,
+    //       influence: 18.0,
+    //     },
+    //   },
+    // );
+    // log!("result: {}", x);
     /*=========GET GROUPED IMPORTANT PLACES==============*/
     let texture_len = texture.len() / 4;
     let mut interesting_places_list = vec![];
@@ -138,7 +168,8 @@ impl ArtificialIntelligence {
           });
         list_of_close_places
           .into_iter()
-          .map(|(_index, x, y, ..)| NewPurpose {
+          .map(|(index, x, y, ..)| NewPurpose {
+            id: index as isize,
             x: x as f32,
             y: y as f32,
             enemy_influence: sum_influence,
@@ -186,17 +217,31 @@ impl ArtificialIntelligence {
     let purposes_enemies_forces_diff = (army.enemy_force - new_purpose.enemy_influence) / max_force;
 
     /*========CALC DISTANCE========*/
-    let distance_to_new_purpose =
-      (new_purpose.x - army.squad.x).hypot(new_purpose.y - army.squad.y);
-    let distance_to_curr_purpose =
-      (army.old_purpose_x - army.squad.x).hypot(army.old_purpose_y - army.squad.y);
-    let max_distance = distance_to_new_purpose
-      .max(distance_to_curr_purpose)
-      .max(1.0); // to avoid dividing by zero
-    let distance_diff = (distance_to_curr_purpose - distance_to_new_purpose) / max_distance; // * (army.squad.movement_speed / 2.0));
+    let distance_factor = if army.purpose_type == PurposeType::Nothing {
+      -1.0 // the smallest value that distance_factor can have
+    } else {
+      let distance_to_new_purpose = ((new_purpose.x - army.squad.x)
+        .hypot(new_purpose.y - army.squad.y)
+        - army.squad.weapon_range)
+        .max(0.0);
+      // let distance_to_curr_purpose = ((army.old_purpose_x - army.squad.x)
+      //   .hypot(army.old_purpose_y - army.squad.y)
+      //   - army.squad.weapon_range) // to don't care if both squads are in distance of weapon range
+      //   .max(0.0);
+      let max_distance = (INFLUENCE_MAP_HEIGHT as f32).hypot(INFLUENCE_MAP_WIDTH as f32);
 
-    /*========FINAL RESULT========*/
-    100.0 - distance_to_new_purpose
+      // how ot handle PurposeType::Nothing1 / 2.5
+      // * (army.squad.movement_speed / 2.0));
+      1.0 - distance_to_new_purpose / max_distance
+    };
+
+    let change_purpose_factor = if new_purpose.id == army.original_purpose_id {
+      0.1
+    } else {
+      -0.1
+    }; // of coruse should be smaller!
+       /*========FINAL RESULT========*/
+    distance_factor * (1.0 / army.squad.movement_speed) + change_purpose_factor
     // distance_to_curr_purpose - distance_to_new_purpose
     // value_diff + purposes_enemies_forces_diff + distance_diff
   }
@@ -252,22 +297,26 @@ impl ArtificialIntelligence {
         // We assume that rn everything is attack only!
         all_squads_ids.retain(|id| !curr_purpose.squads_ids.contains(id));
 
-        let (curr_purpose_type, enemy_force) = match curr_purpose.purpose_type {
+        let (curr_purpose_type, enemy_force, original_purpose_id) = match curr_purpose.purpose_type
+        {
           PurposeType::Attack => {
+            // TODO: looks like it's tracted as different purposes, when is running, and isntead of one, there is two purposes
             let is_still_there_any_enemy = new_purposes.iter().find(|new_purpose| {
               (curr_purpose.x - new_purpose.x).hypot(curr_purpose.y - new_purpose.y) < 2.0
             });
 
-            if let Some(enemy_influence) = is_still_there_any_enemy {
+            if is_still_there_any_enemy.is_some() {
+              let old_purpose = is_still_there_any_enemy.unwrap();
               (
                 PurposeType::Attack,
-                is_still_there_any_enemy.unwrap().enemy_influence,
+                old_purpose.enemy_influence,
+                old_purpose.id,
               )
             } else {
-              (PurposeType::Nothing, 0.0)
+              (PurposeType::Nothing, 0.0, -1)
             }
           }
-          _ => (PurposeType::Nothing, 0.0),
+          _ => (PurposeType::Nothing, 0.0, -1),
         };
 
         curr_purpose
@@ -283,6 +332,7 @@ impl ArtificialIntelligence {
                 squad,
                 old_purpose_x: curr_purpose.x,
                 old_purpose_y: curr_purpose.y,
+                original_purpose_id,
               })
             } else {
               None
@@ -302,10 +352,11 @@ impl ArtificialIntelligence {
         squad,
         old_purpose_x: 0.0,
         old_purpose_y: 0.0,
+        original_purpose_id: -1,
       });
     });
     log!("**********************************");
-    let final_purposes = new_purposes
+    let mut final_purposes = new_purposes
       .iter()
       .enumerate()
       .filter_map(|(index, new_purpose)| {
@@ -325,7 +376,8 @@ impl ArtificialIntelligence {
         });
         log!("=============================");
         log!(
-          "new_purpose x:{} y: {}, enemy_influence: {}, value: {}",
+          "id: {},new_purpose x:{} y: {}, enemy_influence: {}, value: {}",
+          new_purpose.id,
           new_purpose.x,
           new_purpose.y,
           new_purpose.enemy_influence,
@@ -334,13 +386,15 @@ impl ArtificialIntelligence {
         log!("-----------------------------");
         curr_state_of_our_army.iter().for_each(|army| {
           log!(
-            "army x:{} y: {}, value_of_purpose: {}, enemy_force: {}, old x: {}, old y: {}",
+            "id: {}, army x:{} y: {}, value_of_purpose: {}, enemy_force: {}, old x: {}, old y: {}, range: {}",
+            army.original_purpose_id,
             army.squad.x,
             army.squad.y,
             army.value_of_purpose,
             army.enemy_force,
             army.old_purpose_x,
-            army.old_purpose_y
+            army.old_purpose_y,
+            army.squad.weapon_range,
           );
         });
 
@@ -379,34 +433,31 @@ impl ArtificialIntelligence {
             x: new_purpose.x,
             y: new_purpose.y,
           })
-        } else if index == new_purposes.len() - 1 {
-          // check if another one aim is easier, if not, then do nothing
-
-          // cannot fill that
-          // TODO: do nothing for now, later we will join those squads with aims OR do nothing when there is no other purposes
-          // calc best place to wait!
-          Some(ArtificialIntelligence::run_to_safe_place(
-            texture,
-            curr_state_of_our_army
-              .drain(..)
-              .collect::<Vec<EnhancedPurpose>>(),
-          ))
+        // } else if index != new_purposes.len() - 1 {
+        //   let next_purpose = &new_purposes[index + 1];
+        //   if next_purpose.value > new_purpose.value * 0.9 {
+        //     // let's make the loop for purpose
+        //     None
+        //   } else {
+        //     Some(ArtificialIntelligence::run_to_safe_place(
+        //       texture,
+        //       curr_state_of_our_army
+        //         .drain(..)
+        //         .collect::<Vec<EnhancedPurpose>>(),
+        //     ))
+        //   }
         } else {
-          let next_purpose = &new_purposes[index + 1];
-          if next_purpose.value > new_purpose.value * 0.9 {
-            // let's make the loop for purpose
-            None
-          } else {
-            Some(ArtificialIntelligence::run_to_safe_place(
-              texture,
-              curr_state_of_our_army
-                .drain(..)
-                .collect::<Vec<EnhancedPurpose>>(),
-            ))
-          }
+          None
         }
       })
       .collect::<Vec<Purpose>>();
+
+    final_purposes.push(ArtificialIntelligence::run_to_safe_place(
+      texture,
+      curr_state_of_our_army
+        .drain(..)
+        .collect::<Vec<EnhancedPurpose>>(),
+    ));
 
     self.purposes = final_purposes.clone();
 
