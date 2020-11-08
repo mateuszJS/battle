@@ -211,37 +211,38 @@ impl ArtificialIntelligence {
     /*========CALC VALUE========*/
     let max_value = new_purpose.value.max(army.value_of_purpose).max(1.0);
     let value_diff = (new_purpose.value - army.value_of_purpose) / max_value;
-
+    let max_distance = (INFLUENCE_MAP_HEIGHT as f32).hypot(INFLUENCE_MAP_WIDTH as f32);
     /*======CALC ENEMIES FORCES========*/
     let max_force = army.enemy_force.max(new_purpose.enemy_influence).max(1.0);
     let purposes_enemies_forces_diff = (army.enemy_force - new_purpose.enemy_influence) / max_force;
 
     /*========CALC DISTANCE========*/
-    let distance_factor = if army.purpose_type == PurposeType::Nothing {
-      -1.0 // the smallest value that distance_factor can have
-    } else {
-      let distance_to_new_purpose = ((new_purpose.x - army.squad.x)
-        .hypot(new_purpose.y - army.squad.y)
-        - army.squad.weapon_range)
-        .max(0.0);
-      // let distance_to_curr_purpose = ((army.old_purpose_x - army.squad.x)
-      //   .hypot(army.old_purpose_y - army.squad.y)
-      //   - army.squad.weapon_range) // to don't care if both squads are in distance of weapon range
-      //   .max(0.0);
-      let max_distance = (INFLUENCE_MAP_HEIGHT as f32).hypot(INFLUENCE_MAP_WIDTH as f32);
+    // let distance_factor = if army.purpose_type == PurposeType::Nothing {
+    // -1.0 // the smallest value that distance_factor can have
+    // it's VERY small distance!!!!!!!!!
+    // } else {
+    let distance_to_new_purpose = ((new_purpose.x - army.squad.x)
+      .hypot(new_purpose.y - army.squad.y)
+      - army.squad.weapon_range)
+      .max(0.0);
+    // let distance_to_curr_purpose = ((army.old_purpose_x - army.squad.x)
+    //   .hypot(army.old_purpose_y - army.squad.y)
+    //   - army.squad.weapon_range) // to don't care if both squads are in distance of weapon range
+    //   .max(0.0);
 
-      // how ot handle PurposeType::Nothing1 / 2.5
-      // * (army.squad.movement_speed / 2.0));
-      1.0 - distance_to_new_purpose / max_distance
-    };
+    // how ot handle PurposeType::Nothing1 / 2.5
+    // * (army.squad.movement_speed / 2.0));
+    let distance_factor = 1.0 - distance_to_new_purpose / max_distance;
+    // 1.0 - distance_to_new_purpose / max_distance
+    // };
 
     let change_purpose_factor = if new_purpose.id == army.original_purpose_id {
-      0.1
+      1.0 / max_distance // just very small number
     } else {
-      -0.1
+      -1.0 / max_distance
     }; // of coruse should be smaller!
        /*========FINAL RESULT========*/
-    distance_factor * (1.0 / army.squad.movement_speed) + change_purpose_factor
+    (distance_factor + change_purpose_factor) * (1.0 / army.squad.movement_speed)
     // distance_to_curr_purpose - distance_to_new_purpose
     // value_diff + purposes_enemies_forces_diff + distance_diff
   }
@@ -398,35 +399,39 @@ impl ArtificialIntelligence {
           );
         });
 
+        let mut curr_state_of_our_army_last_index = curr_state_of_our_army.len();
         let mut collected_power = 0.0;
-        let mut curr_state_of_our_army_last_index = curr_state_of_our_army.len() as isize - 1;
-        // at this moment two squads are created, third one is waiting and when forth appears, then attack! shouldn't!
-        while curr_state_of_our_army_last_index >= 0
-          && collected_power < new_purpose.enemy_influence
-        {
-          let army = &curr_state_of_our_army[curr_state_of_our_army_last_index as usize];
-          let if_its_still_the_same_purpose = army.purpose_type != PurposeType::Nothing;
-          // with those, third squad will go to one enemy squad
-          // let keep_purpose_factor = if if_its_still_the_same_purpose {
-          //   1.0
-          // } else {
-          //   1.0
-          // };
-          let keep_purpose_factor = if if_its_still_the_same_purpose {
-            1.1
-          } else {
-            0.9
-          };
-          collected_power += new_purpose.value * keep_purpose_factor * army.our_power;
-          curr_state_of_our_army_last_index -= 1
-        }
 
+        while collected_power < new_purpose.enemy_influence {
+          if curr_state_of_our_army_last_index > 0 {
+            curr_state_of_our_army_last_index -= 1;
+            let army = &curr_state_of_our_army[curr_state_of_our_army_last_index];
+            let is_it_attack = true; // new_purpose == PurposeType::Attack;
+            // let is_it_attack = army.purpose_type == PurposeType::Attack;
+            // with those, third squad will go to one enemy squad
+            // let keep_purpose_factor = if if_its_still_the_same_purpose {
+            //   1.0
+            // } else {
+            //   1.0
+            // };
+            let keep_purpose_factor = if is_it_attack {
+              0.8
+            } else {
+              1.2
+            };
+            collected_power += new_purpose.value * keep_purpose_factor * army.our_power;
+            log!("collected_power: {}", collected_power);
+          } else {
+            break;
+          }
+        }
+        log!("collected_power in while loop: {}, purpose enemy_influence: {}", collected_power, new_purpose.enemy_influence);
         if collected_power > new_purpose.enemy_influence {
           let collected_army = curr_state_of_our_army
             .drain(curr_state_of_our_army_last_index.max(0) as usize..)
             .map(|enhanced_purpose| enhanced_purpose.squad)
             .collect::<Vec<&SquadBasicInfo>>();
-
+          log!("collected_army.len: {}", collected_army.len());
           Some(Purpose {
             purpose_type: PurposeType::Attack,
             squads_ids: ArtificialIntelligence::get_ids_from_squads(collected_army),
@@ -451,13 +456,18 @@ impl ArtificialIntelligence {
         }
       })
       .collect::<Vec<Purpose>>();
-
-    final_purposes.push(ArtificialIntelligence::run_to_safe_place(
-      texture,
-      curr_state_of_our_army
-        .drain(..)
-        .collect::<Vec<EnhancedPurpose>>(),
-    ));
+    log!(
+      "rest squads without purpose: {}",
+      curr_state_of_our_army.len()
+    );
+    if curr_state_of_our_army.len() > 0 {
+      final_purposes.push(ArtificialIntelligence::run_to_safe_place(
+        texture,
+        curr_state_of_our_army
+          .drain(..)
+          .collect::<Vec<EnhancedPurpose>>(),
+      ));
+    }
 
     self.purposes = final_purposes.clone();
 
