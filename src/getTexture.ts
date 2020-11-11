@@ -15,7 +15,7 @@ const getTexture = (
   display.x -= x // we should do it in transform, it's parameter of the `render` function
   display.y -= y
   const renderTexture = new PIXI.RenderTexture(baseRenderTexture)
-  window.app.renderer.render(display, renderTexture)
+  window.app.renderer.render(display, renderTexture) // TODO: can be changed to this.renderer.generateTexture(target);
 
   display.destroy({
     children: true,

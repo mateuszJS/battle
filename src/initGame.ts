@@ -12,7 +12,6 @@ import getSerializedInfoAboutWorld from './getSerializedInfoAboutWorld'
 import { createFactoryButtons } from './buttons/factory'
 import REPRESENTATION_IDS from '~/render/representationsIds'
 import { updateAbilitiesButtons, clearAbilitiesIcons } from '~/buttons/abilities'
-import { updateInfluenceMap } from '~/inclufenceMapping'
 import debugController from '~/debug'
 
 export type UniverseRepresentation = {
@@ -80,12 +79,6 @@ const initGame = () => {
     )
 
     updateAbilitiesButtons(universeRepresentation)
-
-    if (timeToClearAbilitiesIcons % 200 === 0) {
-      const influence = universe.get_influence()
-      // updateInfluenceMap(new Float32Array([500.0, 500.0, 100, 200]))
-      updateInfluenceMap(influence, universe)
-    }
 
     if (timeToClearAbilitiesIcons === 0) {
       clearAbilitiesIcons(universeRepresentation)

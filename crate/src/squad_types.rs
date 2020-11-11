@@ -13,7 +13,7 @@ pub enum SquadType {
 
 pub struct SquadDetails {
   pub movement_speed: f32,
-  pub hp: i16,
+  pub hp: f32,
   pub production_time: u16,
   pub members_number: usize,
   pub representation_type: f32,
@@ -26,7 +26,7 @@ pub struct SquadDetails {
 
 static SOLIDER_DETAILS: SquadDetails = SquadDetails {
   movement_speed: 2.5,
-  hp: 100,
+  hp: 100.0,
   production_time: 200,
   members_number: 7,
   // predicted max number of units in squad in utils is 7 MAX_NUMBER_OF_UNITS_IN_SQUAD
@@ -35,13 +35,13 @@ static SOLIDER_DETAILS: SquadDetails = SquadDetails {
   selection_threshold: 40.0,
   unit_model_offset_y: 20.0,
   weapon: &STANDARD_RIFLE_DETAILS,
-  influence_value: 0.01,
+  influence_value: 1.0,
   ability_range: GRENADE_DETAILS.range,
 };
 
 static RAPTOR_DETAILS: SquadDetails = SquadDetails {
   movement_speed: 2.5,
-  hp: 120,
+  hp: 120.0,
   production_time: 100,
   members_number: 3,
   // predicted max number of units in squad in utils is 7 MAX_NUMBER_OF_UNITS_IN_SQUAD
@@ -50,20 +50,20 @@ static RAPTOR_DETAILS: SquadDetails = SquadDetails {
   selection_threshold: 40.0,
   unit_model_offset_y: 20.0,
   weapon: &LASER_RIFLE_DETAILS,
-  influence_value: 0.013,
+  influence_value: 1.3,
   ability_range: HIT_THE_GROUND.range,
 };
 
 static PORTAL_DETAILS: SquadDetails = SquadDetails {
   movement_speed: 0.0,
-  hp: 2000,
+  hp: 2000.0,
   production_time: 0,
   members_number: 1,
   representation_type: NON_REPRESENTATION_ID,
   selection_threshold: 100.0,
   unit_model_offset_y: 40.0,
   weapon: &NON_WEAPON,
-  influence_value: 0.1,
+  influence_value: 5.0,
   ability_range: NON_WEAPON.range,
 };
 

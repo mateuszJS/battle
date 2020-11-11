@@ -45,7 +45,7 @@ pub struct Unit {
   squad_details: &'static SquadDetails,
   time_to_next_shoot: u16,
   pub aim: Weak<RefCell<Unit>>, // used in squad, to clear out after set secondary aim
-  hp: i16,
+  pub hp: f32,                  // used in ai, to check portal health
   ability_start_point: f32,
 }
 
@@ -416,10 +416,10 @@ impl Unit {
     self.mod_y = 0.0;
   }
 
-  pub fn take_damage(&mut self, damage: u8) {
+  pub fn take_damage(&mut self, damage: f32) {
     if self.state != STATE_ABILITY && self.state != STATE_FLY {
-      self.hp -= damage as i16;
-      if self.hp <= 0 {
+      self.hp -= damage;
+      if self.hp <= 0.0 {
         self.change_state_to_die();
       }
     }

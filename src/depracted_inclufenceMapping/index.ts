@@ -1,5 +1,6 @@
 import getMyInfluenceAndTension from './getMyInfluenceAndTension'
 import getInfluenceAndVulnerabilityMap from './getInfluenceAndVulnerabilityMap'
+import testOnePixelShader from './testOnePixelShader'
 import {
   USER_FACTION_ID,
   MAP_WIDTH,
@@ -91,7 +92,15 @@ export const updateInfluenceMap = (influence: Float32Array, universe: Universe) 
       const influenceAndVulnerabilityMapPixels = window.app.renderer.extract.pixels(
         firstFactionInflueneceAndVulnerabilityMap,
       )
-      universe.do_ai(faction.id, influenceAndVulnerabilityMapPixels)
+      // universe.do_ai(faction.id, influenceAndVulnerabilityMapPixels)
+
+      // const circle = new PIXI.Graphics()
+
+      // circle.beginFill(0xaaaaaa)
+      // circle.drawRect(0, 0, 1, 1)
+      // circle.alpha = 0.5
+      // circle.endFill()
+      // console.log(window.app.renderer.extract.pixels(testOnePixelShader()).slice(0, 4))
     }
   })
 

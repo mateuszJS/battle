@@ -23,7 +23,7 @@ macro_rules! angle_diff {
 // https://rustwasm.github.io/book/game-of-life/debugging.html fix debugging
 
 use std::cell::RefCell;
-use std::rc::Weak;
+use std::rc::{Rc, Weak};
 
 mod constants;
 mod faction;
@@ -45,9 +45,10 @@ use wasm_bindgen::prelude::*;
 
 use bullets_manager::BulletsManager;
 use constants::{
-  CHECK_SQUADS_CORRECTNESS_PERIOD, MANAGE_HUNTERS_PERIOD, UPDATE_SQUAD_CENTER_PERIOD,
+  CHECK_SQUADS_CORRECTNESS_PERIOD, MANAGE_HUNTERS_PERIOD,
+  THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER, UPDATE_SQUAD_CENTER_PERIOD,
 };
-use faction::Faction;
+use faction::{Faction, FactionInfo, Place, PlaceType};
 use factory::Factory;
 use position_utils::calc_positions::CalcPositions;
 use position_utils::obstacles_lazy_statics::ObstaclesLazyStatics;
@@ -181,6 +182,13 @@ impl Universe {
       factions.iter_mut().for_each(|faction: &mut Faction| {
         faction.check_squads_correctness();
       });
+    }
+    if *time % MANAGE_HUNTERS_PERIOD == 0 {
+      let ai_input = Universe::calculate_ai_input(&factions);
+      factions.iter_mut().for_each(|faction: &mut Faction| {
+        faction.do_ai(&ai_input, &world.squads_on_grid);
+      });
+      // let all_squads = Universe::calculate_ai_input(&factions);
     }
 
     factions.iter_mut().for_each(|faction: &mut Faction| {
@@ -368,23 +376,92 @@ impl Universe {
     user_faction.task_use_ability(&squads_ids, target_x, target_y);
   }
 
-  pub fn get_influence(&self) -> js_sys::Float32Array {
-    let influence = self
-      .factions
+  fn get_all_neightbours(
+    source_position: (f32, f32),
+    not_checked_yet: &mut Vec<Rc<RefCell<Squad>>>,
+  ) -> Vec<Rc<RefCell<Squad>>> {
+    // item shouldn't be in not_checked_yet vector
+    let mut neighbors = vec![];
+    not_checked_yet.retain(|ref_cell_squad| {
+      let position = ref_cell_squad.borrow().shared.center_point;
+      if (source_position.0 - position.0).hypot(source_position.1 - position.1)
+        < THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER
+      {
+        neighbors.push(ref_cell_squad.clone());
+        false
+      } else {
+        true
+      }
+    });
+
+    let mut neighbors_of_neighbors = neighbors
       .iter()
-      .flat_map(|faction| faction.get_influence())
-      .collect::<Vec<f32>>();
-    js_sys::Float32Array::from(&influence[..])
+      .flat_map(|neighbor| {
+        Universe::get_all_neightbours(neighbor.borrow().shared.center_point, not_checked_yet)
+      })
+      .collect::<Vec<Rc<RefCell<Squad>>>>();
+
+    neighbors.append(&mut neighbors_of_neighbors);
+
+    neighbors
   }
 
-  pub fn do_ai(&mut self, faction_id: u32, texture: Vec<u8>) {
-    let faction_option = self
-      .factions
-      .iter_mut()
-      .find(|faction| faction.id == faction_id);
-    if let Some(faction) = faction_option {
-      faction.do_ai(&texture, &self.world.squads_on_grid);
-    }
+  fn calculate_ai_input(factions: &Vec<Faction>) -> Vec<FactionInfo> {
+    factions
+      .iter()
+      .map(|faction| {
+        let mut influence_total = 0.0;
+        let mut places = vec![]; // here we should push all strategic points owned by us
+        let mut squads_to_check = faction.squads.clone();
+
+        while let Some(new_item) = squads_to_check.pop() {
+          // let new_item = squads_to_check.pop().unwrap();
+          let mut neighbours = Universe::get_all_neightbours(
+            new_item.borrow().shared.center_point,
+            &mut squads_to_check,
+          );
+          neighbours.push(new_item);
+
+          let (sum_x, sum_y, sum_influence) =
+            neighbours
+              .iter()
+              .fold((0.0, 0.0, 0.0), |acc, ref_cell_squad| {
+                let squad = ref_cell_squad.borrow();
+                let position = squad.shared.center_point;
+                (
+                  acc.0 + position.0,
+                  acc.1 + position.1,
+                  acc.2 + squad.get_influence(),
+                )
+              });
+          let neighbours_len = neighbours.len() as f32;
+          influence_total += sum_influence;
+          places.push(Place {
+            place_type: PlaceType::Squads,
+            squads: neighbours,
+            influence: sum_influence,
+            x: sum_x / neighbours_len,
+            y: sum_y / neighbours_len,
+          });
+        }
+
+        let portal = faction.portal_squad.borrow();
+        let portal_influence = portal.get_influence();
+        influence_total += portal_influence;
+        places.push(Place {
+          place_type: PlaceType::Portal,
+          squads: vec![faction.portal_squad.clone()],
+          influence: portal_influence,
+          x: portal.shared.center_point.0,
+          y: portal.shared.center_point.1,
+        });
+        FactionInfo {
+          id: faction.id,
+          places,
+          influence_total,
+        }
+      })
+      .collect::<Vec<FactionInfo>>()
   }
 
   pub fn get_grid(&self) -> js_sys::Float32Array {

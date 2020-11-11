@@ -12,7 +12,7 @@ pub struct Weapon {
   pub shoot_time: u16,
   pub scatter: f32,
   pub bullets_speed: f32,
-  pub damage: u8,
+  pub damage: f32,
   pub representation_id: f32,
   pub explosion_range: f32,
   pub range: f32, // between <DISTANCE_BETWEEN_ATTACKERS, MAX_WEAPON_RANGE>  from calc_positions
@@ -27,7 +27,7 @@ pub static STANDARD_RIFLE_DETAILS: Weapon = Weapon {
   shoot_time: 40,
   scatter: 0.3, // (smaller -> more precise)
   bullets_speed: 10.0,
-  damage: 10,
+  damage: 10.0,
   representation_id: 1.0,
   explosion_range: 0.0,
   range: 600.0,
@@ -42,7 +42,7 @@ pub static LASER_RIFLE_DETAILS: Weapon = Weapon {
   shoot_time: 40,
   scatter: 0.3, // (smaller -> more precise)
   bullets_speed: 10.0,
-  damage: 10,
+  damage: 10.0,
   representation_id: 1.0,
   explosion_range: 0.0,
   range: 400.0,
@@ -57,7 +57,7 @@ pub static GRENADE_DETAILS: Weapon = Weapon {
   shoot_time: 0,
   scatter: 0.0, // (smaller -> more precise)
   bullets_speed: 5.0,
-  damage: 30,
+  damage: 30.0,
   representation_id: 2.0,
   explosion_range: 200.0,
   range: 300.0,
@@ -72,7 +72,7 @@ pub static HIT_THE_GROUND: Weapon = Weapon {
   shoot_time: 0,
   scatter: 0.0, // (smaller -> more precise)
   bullets_speed: 1.0,
-  damage: 15,
+  damage: 15.0,
   representation_id: 3.0,
   explosion_range: 80.0,
   range: 900.0,
@@ -87,7 +87,7 @@ pub static NON_WEAPON: Weapon = Weapon {
   shoot_time: 0,
   scatter: 0.0,
   bullets_speed: 0.0,
-  damage: 0,
+  damage: 0.0,
   representation_id: 0.0,
   explosion_range: 0.0,
   range: 0.0,
