@@ -45,7 +45,7 @@ use wasm_bindgen::prelude::*;
 
 use bullets_manager::BulletsManager;
 use constants::{
-  CHECK_SQUADS_CORRECTNESS_PERIOD, MANAGE_HUNTERS_PERIOD,
+  AI_CALCULATION_PERIOD, CHECK_SQUADS_CORRECTNESS_PERIOD, MANAGE_HUNTERS_PERIOD,
   THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER, UPDATE_SQUAD_CENTER_PERIOD,
 };
 use faction::{Faction, FactionInfo, Place, PlaceType};
@@ -183,11 +183,17 @@ impl Universe {
         faction.check_squads_correctness();
       });
     }
-    if *time % MANAGE_HUNTERS_PERIOD == 0 {
+
+    if *time % AI_CALCULATION_PERIOD == 0 {
       let ai_input = Universe::calculate_ai_input(&factions);
-      factions.iter_mut().for_each(|faction: &mut Faction| {
-        faction.do_ai(&ai_input, &world.squads_on_grid);
-      });
+      factions
+        .iter_mut()
+        .enumerate()
+        .for_each(|(index, faction)| {
+          if index != INDEX_OF_USER_FACTION {
+            faction.do_ai(&ai_input, &world.squads_on_grid);
+          }
+        });
       // let all_squads = Universe::calculate_ai_input(&factions);
     }
 

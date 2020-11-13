@@ -1,9 +1,6 @@
 mod ai;
 mod squad_manager;
-use crate::constants::{
-  AI_CALCULATION_PERIOD, INFLUENCE_CELL_SIZE, INFLUENCE_MAP_SCALE_AVG, INFLUENCE_MAP_SCALE_X,
-  INFLUENCE_MAP_SCALE_Y, MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE,
-};
+use crate::constants::MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE;
 
 use crate::look_up_table::LookUpTable;
 use crate::position_utils::PositionUtils;
@@ -11,7 +8,6 @@ use crate::representations_ids::FACTION_REPRESENTATION_ID;
 use crate::squad::Squad;
 use crate::squad_types::SquadType;
 use crate::Factory;
-use crate::SquadsGridManager;
 use crate::World;
 use ai::{ArtificialIntelligence, PurposeType};
 pub use ai::{FactionInfo, Place, PlaceType};
@@ -257,49 +253,31 @@ impl Faction {
     all_factions_info: &Vec<FactionInfo>,
     squads_on_grid: &HashMap<usize, Vec<Weak<RefCell<Squad>>>>,
   ) {
-    let squads_plans = self
-      .ai
-      .work(self.portal_squad.borrow(), &self.squads, all_factions_info);
-    // squads_plans.iter().for_each(|plan| {
-    //   let plan_x = plan.x / INFLUENCE_MAP_SCALE_X + INFLUENCE_CELL_SIZE / 2.0;
-    //   let plan_y = plan.y / INFLUENCE_MAP_SCALE_Y + INFLUENCE_CELL_SIZE / 2.0;
+    let Self { ref squads, .. } = self;
+    let our_factory_place = {
+      let factory = self.portal_squad.borrow();
+      let factory_hp = factory.members[0].borrow().hp;
+      Place {
+        place_type: PlaceType::Portal,
+        influence: factory_hp / factory.squad_details.hp,
+        squads: vec![],
+        x: factory.shared.center_point.0,
+        y: factory.shared.center_point.1,
+      }
+    };
 
-    //   match plan.purpose_type {
-    //     PurposeType::Nothing => {
-    //       self.task_add_target(&plan.squads_ids, self.factory.x, self.factory.y);
-    //     }
-    //     PurposeType::Attack => {
-    //       let squads_in_area = SquadsGridManager::get_squads_in_area(
-    //         squads_on_grid,
-    //         plan_x,
-    //         plan_y,
-    //         INFLUENCE_CELL_SIZE,
-    //       );
+    let squads_plans = self.ai.work(&our_factory_place, squads, all_factions_info);
 
-    //       squads_in_area.into_iter().find(|weak_squad| {
-    //         if let Some(unwrapper_squad) = weak_squad.upgrade() {
-    //           let squad = unwrapper_squad.borrow();
-    //           if squad.faction_id == self.id {
-    //             return false;
-    //           }
-
-    //           let enemy_position = squad.shared.center_point;
-    //           if (enemy_position.0 - plan_x).hypot(enemy_position.1 - plan_y)
-    //             < 2.0 * INFLUENCE_CELL_SIZE
-    //           {
-    //             self.task_attack_enemy(&plan.squads_ids, weak_squad);
-    //             true
-    //           } else {
-    //             false
-    //           }
-    //         } else {
-    //           false
-    //         }
-    //       });
-    //     }
-    //     _ => log!("not handled case"),
-    //   }
-    // })
+    squads_plans
+      .into_iter()
+      .for_each(|plan| match plan.purpose_type {
+        PurposeType::Attack => {
+          self.task_attack_enemy(&plan.squads_ids, &plan.enemy_squads[0]);
+        }
+        PurposeType::PrepareToDefend => {
+          self.task_add_target(&plan.squads_ids, plan.x, plan.y);
+        }
+      })
   }
 
   pub fn manage_hunters(&mut self, squads_grid: &HashMap<usize, Vec<Weak<RefCell<Squad>>>>) {
