@@ -61,7 +61,7 @@ const initGame = () => {
   window.app.ticker.add((delta: number) => {
     if (timeToCreateEnemy == 0) {
       universe.create_enemy_squad(REPRESENTATION_IDS.SOLIDER)
-      timeToCreateEnemy = 1000
+      timeToCreateEnemy = 2000
     } else {
       timeToCreateEnemy--
     }

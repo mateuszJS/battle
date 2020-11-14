@@ -10,6 +10,7 @@ pub enum PurposeType {
   Attack,
   // TakeStrategicPoint,
   PrepareToDefend,
+  // RunToSafePlace,
   // HelpInDanger,
 }
 
@@ -49,9 +50,14 @@ pub struct Plan {
   pub y: f32,
 }
 
-struct KeepPlanHelper<'a> {
+struct KeepPlanHelper {
   index_of_purpose: usize,
-  our_squads: Vec<&'a Ref<'a, Squad>>,
+  reserved_our_squads_ids: Vec<u32>,
+}
+
+struct ReservedSquad {
+  reserved_purpose_signification: f32,
+  squad_id: u32,
 }
 
 const RADIUS_OF_DANGER_ZONE_AROUND_THE_PORTAL: f32 = 1000.0; // best would be longest range of the weapon * 2.0
@@ -151,34 +157,11 @@ impl ArtificialIntelligence {
     purposes
   }
 
-  // fn is_it_current_aim(squad: &Ref<Squad>, purpose: &EnhancedPurpose) -> bool {
-  //   if purpose.purpose_type == PurposeType::Attack {
-  //     if let Some(current_enemy) = squad.shared.aim.upgrade() {
-  //       let current_enemy_position = current_enemy.borrow().shared.center_point;
-  //       purpose
-  //         .place
-  //         .squads
-  //         .iter()
-  //         .find(|ref_cell_squad| {
-  //           let new_enemy_position = ref_cell_squad.borrow().shared.center_point;
-  //           (new_enemy_position.0 - current_enemy_position.0)
-  //             .hypot(new_enemy_position.1 - current_enemy_position.1)
-  //             < THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER
-  //         })
-  //         .is_some()
-  //     } else {
-  //       false
-  //     }
-  //   } else {
-  //     false
-  //   }
-  // }
-
-  fn analyze_current_plans<'a>(
+  fn analyze_current_plans(
     &self,
-    new_purposes: &'a Vec<EnhancedPurpose>,
-    our_squads: &'a Vec<Ref<Squad>>,
-  ) -> (Vec<KeepPlanHelper<'a>>, Vec<(f32, u32)>) {
+    new_purposes: &Vec<EnhancedPurpose>,
+    our_squads: &Vec<Ref<Squad>>,
+  ) -> (Vec<KeepPlanHelper>, Vec<ReservedSquad>) {
     let mut transition_from_current_plan_to_new_plans = vec![];
     let mut reserved_squads_ids = vec![];
 
@@ -190,12 +173,21 @@ impl ArtificialIntelligence {
             < 2.0 * THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER;
 
           match current_plan.purpose_type {
-            PurposeType::Attack => new_purpose
-              .place
-              .squads
-              .iter()
-              .any(|squad| current_plan.squads_ids.contains(&squad.borrow().id)),
-            PurposeType::PrepareToDefend => is_same_position,
+            PurposeType::Attack => current_plan.enemy_squads.iter().any(|weak_enemy| {
+              if let Some(ref_cell_enemy) = weak_enemy.upgrade() {
+                let enemy = ref_cell_enemy.borrow();
+                new_purpose
+                  .place
+                  .squads
+                  .iter()
+                  .any(|squad| squad.borrow().id == enemy.id)
+              } else {
+                false
+              }
+            }),
+            // PurposeType::RunToSafePlace => is_same_position,
+            PurposeType::PrepareToDefend => false, // because rn we are not finishing this!!!
+                                                   // TODO: check if is the destination and also if there are any enemy squads still around!
           }
         } else {
           false
@@ -206,22 +198,24 @@ impl ArtificialIntelligence {
         let mut already_participating_our_squads_reservation = vec![];
         let already_participating_our_squads = our_squads
           .iter()
-          .filter(|squad| {
+          .filter_map(|squad| {
             if current_plan.squads_ids.contains(&squad.id) {
-              already_participating_our_squads_reservation
-                .push((new_purposes[new_purpose_index].place.influence, squad.id));
-              true
+              already_participating_our_squads_reservation.push(ReservedSquad {
+                reserved_purpose_signification: new_purposes[new_purpose_index].signification,
+                squad_id: squad.id,
+              });
+              Some(squad.id)
             } else {
-              false
+              None
             }
           })
-          .collect::<Vec<&Ref<Squad>>>();
+          .collect::<Vec<u32>>();
 
         reserved_squads_ids.append(&mut already_participating_our_squads_reservation);
 
         transition_from_current_plan_to_new_plans.push(KeepPlanHelper {
           index_of_purpose: new_purpose_index,
-          our_squads: already_participating_our_squads,
+          reserved_our_squads_ids: already_participating_our_squads,
         });
       }
     });
@@ -230,6 +224,121 @@ impl ArtificialIntelligence {
       transition_from_current_plan_to_new_plans,
       reserved_squads_ids,
     )
+  }
+
+  fn handle_already_involved_purposes(
+    our_squads: &mut Vec<Ref<Squad>>,
+    existing_plan: &KeepPlanHelper,
+    purpose: &EnhancedPurpose,
+    our_factory_place: &Place,
+  ) -> Plan {
+    let mut collected_our_influence = 0.0;
+
+    let reserved_not_stolen_squads_ids = existing_plan
+      .reserved_our_squads_ids
+      .iter()
+      .filter_map(|reserved_our_squad_id| {
+        // check if this squad is still free! not taken by more important purpose!
+        let option_squad = our_squads
+          .iter()
+          .find(|free_squads| free_squads.id == *reserved_our_squad_id);
+
+        if let Some(squad) = option_squad {
+          collected_our_influence += squad.get_influence();
+          Some(squad.id)
+        } else {
+          None
+        }
+      })
+      .collect::<Vec<u32>>();
+
+    our_squads.retain(|squad| !reserved_not_stolen_squads_ids.contains(&squad.id));
+
+    if collected_our_influence * 1.2 > purpose.place.influence {
+      let enemy_squads = purpose
+        .place
+        .squads
+        .iter()
+        .map(|ref_cell_squad| Rc::downgrade(ref_cell_squad))
+        .collect::<Vec<Weak<RefCell<Squad>>>>();
+
+      Plan {
+        purpose_type: purpose.purpose_type.clone(),
+        squads_ids: reserved_not_stolen_squads_ids,
+        enemy_squads,
+        x: purpose.place.x,
+        y: purpose.place.y,
+      }
+    } else {
+      // we can check, if enemy is not much bigger, then we can just send some support!
+      // TODO: run to safe place
+      // or check if some can support!
+
+      Plan {
+        purpose_type: PurposeType::PrepareToDefend,
+        squads_ids: reserved_not_stolen_squads_ids,
+        enemy_squads: vec![],
+        x: our_factory_place.x,
+        y: our_factory_place.y,
+      }
+    }
+  }
+
+  fn handle_new_purposes(
+    &self,
+    our_squads: &mut Vec<Ref<Squad>>,
+    purpose: &EnhancedPurpose,
+    reserved_squads_ids: &Vec<ReservedSquad>,
+  ) -> Option<Plan> {
+    our_squads.sort_by(|a_squad, b_squad| {
+      let a = ArtificialIntelligence::get_how_much_is_it_worth(&purpose, a_squad);
+      let b = ArtificialIntelligence::get_how_much_is_it_worth(&purpose, b_squad);
+      (a).partial_cmp(&b).unwrap()
+    });
+
+    let mut our_squads_last_index = our_squads.len();
+    let mut used_squads_ids = vec![];
+    let mut collected_our_influence = 0.0;
+
+    while collected_our_influence < purpose.place.influence && our_squads_last_index > 0 {
+      our_squads_last_index -= 1;
+      let our_squad = &our_squads[our_squads_last_index];
+      let cannot_be_stolen = reserved_squads_ids.iter().any(|reserved_squad| {
+        reserved_squad.squad_id == our_squad.id
+          && reserved_squad.reserved_purpose_signification * 1.15 > purpose.signification
+        // check if it's much less important or just little bit less important
+      });
+
+      if !cannot_be_stolen {
+        // TODO: each purposes should have their own moficiator/factor of our influence
+        // TODO: also influence should be multiplayed by distance, logner distance then smaller influence!
+        used_squads_ids.push(our_squad.id);
+        collected_our_influence += self.our_power_factor * our_squad.get_influence();
+      }
+      // TODO: IMPORTANT!!!! but at this moment drain from end to the our_squads_last_index won't work! because we have ommited squad, that is reserved and should stay reserved!!!
+      // we should create vector of ids of squads that should be drain/retain!
+    }
+
+    if collected_our_influence >= purpose.place.influence {
+      our_squads.retain(|squad| !used_squads_ids.contains(&squad.id));
+
+      let enemy_squads = purpose
+        .place
+        .squads
+        .iter()
+        .map(|ref_cell_squad| Rc::downgrade(ref_cell_squad))
+        .collect::<Vec<Weak<RefCell<Squad>>>>();
+
+      Some(Plan {
+        purpose_type: purpose.purpose_type.clone(),
+        squads_ids: used_squads_ids,
+        enemy_squads,
+        x: purpose.place.x,
+        y: purpose.place.y,
+      })
+    } else {
+      None
+    }
   }
 
   pub fn work(
@@ -249,127 +358,37 @@ impl ArtificialIntelligence {
     let (transition_from_current_plan_to_new_plans, reserved_squads_ids) =
       self.analyze_current_plans(&new_purposes, &our_squads);
 
-    /*=============CHECKING IF CURRENT PLAN EXISTS IN NEW PURPOSES==================*/
     for (index, purpose) in new_purposes.iter().enumerate() {
+      /*=============CHECKING IF CURRENT PLAN EXISTS IN NEW PURPOSES==================*/
       let option_existing_plan = transition_from_current_plan_to_new_plans
         .iter()
         .find(|transition_plan| transition_plan.index_of_purpose == index);
 
       if let Some(existing_plan) = option_existing_plan {
-        let mut our_influence = 0.0;
-        let our_squads_ids = existing_plan
-          .our_squads
-          .iter()
-          .map(|our_squad| {
-            our_influence += our_squad.get_influence();
-            our_squad.id
-          })
-          .collect::<Vec<u32>>();
-
-        if our_influence * 1.2 > purpose.place.influence {
-          our_squads.retain(|squad| our_squads_ids.contains(&squad.id));
-
-          // TODO: maybe reserved_squads_ids should look like (signification, squad_id),
-          // and the we won't need to find a purpose related with reserved squad
-
-          // TODO: calculate again the influence and needed influence, because some squads could be stolen!!!!!!
-          let enemy_squads = purpose
-            .place
-            .squads
-            .iter()
-            .map(|ref_cell_squad| Rc::downgrade(ref_cell_squad))
-            .collect::<Vec<Weak<RefCell<Squad>>>>();
-          final_purposes.push(Plan {
-            purpose_type: purpose.purpose_type.clone(),
-            squads_ids: our_squads_ids,
-            enemy_squads,
-            x: purpose.place.x,
-            y: purpose.place.y,
-          });
-        } else {
-          // TODO: run to safe place
-        }
+        // have to check influence one more, just in case if some squads were stolen
+        final_purposes.push(ArtificialIntelligence::handle_already_involved_purposes(
+          &mut our_squads,
+          &existing_plan,
+          purpose,
+          our_factory_place,
+        ));
         continue;
       }
 
-      if our_squads.len() == 0 {
-        break;
-      }
-      our_squads.sort_by(|a_squad, b_squad| {
-        let a = ArtificialIntelligence::get_how_much_is_it_worth(&purpose, a_squad);
-        let b = ArtificialIntelligence::get_how_much_is_it_worth(&purpose, b_squad);
-        (a).partial_cmp(&b).unwrap()
-      });
-
-      let mut our_squads_last_index = our_squads.len();
-      let mut used_squads_ids = vec![];
-      let mut collected_power = 0.0;
-
-      /*
-      Here if we will realize, that we need squad which is already taken by other purpose,
-      check how that purpose have smaller value than current one, and decide to take that squad or not.
-      After taken squad make sure that less important purpose can still be done or not.
-      If not (there is not enough our squads), then let's push squads into free squads vector
-      */
-      while collected_power < purpose.place.influence && our_squads_last_index > 0 {
-        // maybe we should do this in totally other way
-        // go over lest purposes, ale check if squads should run away, or should stay or need support
-        //
-        our_squads_last_index -= 1;
-        let our_squad = &our_squads[our_squads_last_index];
-        let cannot_be_stolen = reserved_squads_ids.iter().any(
-          |(reservation_purpose_signification, reservation_squad_id)| {
-            *reservation_squad_id == our_squad.id
-              && reservation_purpose_signification * 1.15 > purpose.signification
-          },
-        );
-
-        if !cannot_be_stolen {
-          // 1. find purpose where squad were used
-          // 2. check if signification of purposes is smaller then current_purpose.signification * 0.9, if yes, then you can steal squad
-          // 3. if you can steal squad, go and do it :)
-
-          // it's 1.2 but only when no squad (which previously attacked that purpose) will have different aim!
-          // let keep_purpose_factor = if ArtificialIntelligence::is_it_current_aim(our_squad, &purpose)
-          // {
-          //   1.2 // used only to don't run from enemies when is only little bit stronger
-          // } else {
-          //   0.8 // used to make sure we are stronger than enemy to attack
-          //       // prob decision if army should run or still fight should be different, and take care also that army is not fighting only with one enemy!
-          // };
-          // TODO: but at this moment when unit will lose some influence, then will run to other purpose :/
-          // TODO: each purposes should have their own moficiator/factor of our influence
-          // TODO: also influence should be multiplayed by distance, logner distance then smaller influence!
-          used_squads_ids.push(our_squad.id);
-          collected_power += self.our_power_factor * our_squad.get_influence();
+      if our_squads.len() > 0 {
+        let option_new_plan =
+          self.handle_new_purposes(&mut our_squads, purpose, &reserved_squads_ids);
+        if let Some(new_plan) = option_new_plan {
+          final_purposes.push(new_plan)
         }
-        // TODO: IMPORTANT!!!! but at this moment drain from end to the our_squads_last_index won't work! because we have ommited squad, that is reserved and should stay reserved!!!
-        // we should create vector of ids of squads that should be drain/retain!
-      }
-
-      if collected_power >= purpose.place.influence {
-        our_squads.retain(|squad| used_squads_ids.contains(&squad.id));
-
-        let enemy_squads = purpose
-          .place
-          .squads
-          .iter()
-          .map(|ref_cell_squad| Rc::downgrade(ref_cell_squad))
-          .collect::<Vec<Weak<RefCell<Squad>>>>();
-
-        final_purposes.push(Plan {
-          purpose_type: purpose.purpose_type,
-          squads_ids: used_squads_ids,
-          enemy_squads,
-          x: purpose.place.x,
-          y: purpose.place.y,
-        });
       }
     }
 
     if our_squads.len() > 0 {
+      // TODO: each squad should go to support, not run away!
+      // Can also support nearest strategic point or portal!
       let squads_ids = our_squads
-        .drain(..)
+        .iter()
         .map(|squad| squad.id)
         .collect::<Vec<u32>>();
 
