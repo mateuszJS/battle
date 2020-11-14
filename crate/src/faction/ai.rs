@@ -128,6 +128,7 @@ impl ArtificialIntelligence {
               (PurposeType::Attack, place.influence * 0.5 - distance * 0.01)
             }
           };
+
           purposes.push(EnhancedPurpose {
             purpose_type,
             signification,
@@ -300,6 +301,12 @@ impl ArtificialIntelligence {
     let mut used_squads_ids = vec![];
     let mut collected_our_influence = 0.0;
 
+    /*
+    HANDLE DETECTING IF OUR SQUADS ARE IN DANGER
+    1. Go over all enemy squads around our group of squads
+    2. Check if they are attacking us! Maybe there are 3 factions in the battle, if we are not attacking by any of rest 2, then why should we run
+    */
+
     while collected_our_influence < purpose.place.influence && our_squads_last_index > 0 {
       our_squads_last_index -= 1;
       let our_squad = &our_squads[our_squads_last_index];
@@ -310,13 +317,24 @@ impl ArtificialIntelligence {
       });
 
       if !cannot_be_stolen {
-        // TODO: each purposes should have their own moficiator/factor of our influence
-        // TODO: also influence should be multiplayed by distance, logner distance then smaller influence!
+        // TODO: each purposes should have their own modifier/factor of our influence
+        // TODO: also influence should be multiplied by distance, longer distance then smaller influence!
+
+        /*
+          HANDLE IF TRACK TO THE PURPOSE IS SAFE
+          1. divide all squads into groups
+            create vector of points, if any points in that vector is not close enough to squad center, then calculate track do squad center, and also add it to the array!
+            Maybe we should also add when we met enemy
+          2. For each group test if they will meet enemy on the way
+          3. If they will, then check if have enough power to handle it, if not, then squad is still free, to take other purpose,
+            and like it works rn, if there in way to do the purpose, then support other squad or run to safe place
+          4. If there is enemy, and we got enough power, then attack! as a new purpose! (so rn tester purpose need to find another squads)
+
+          but with those 4 points above, we will handle also cases like, when we want to capture strategic point/destroy enemy portal, and there are some enemy squads around
+        */
         used_squads_ids.push(our_squad.id);
         collected_our_influence += self.our_power_factor * our_squad.get_influence();
       }
-      // TODO: IMPORTANT!!!! but at this moment drain from end to the our_squads_last_index won't work! because we have ommited squad, that is reserved and should stay reserved!!!
-      // we should create vector of ids of squads that should be drain/retain!
     }
 
     if collected_our_influence >= purpose.place.influence {
