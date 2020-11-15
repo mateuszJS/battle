@@ -290,6 +290,7 @@ impl ArtificialIntelligence {
     our_squads: &mut Vec<Ref<Squad>>,
     purpose: &EnhancedPurpose,
     reserved_squads_ids: &Vec<ReservedSquad>,
+
   ) -> Option<Plan> {
     our_squads.sort_by(|a_squad, b_squad| {
       let a = ArtificialIntelligence::get_how_much_is_it_worth(&purpose, a_squad);
@@ -319,13 +320,39 @@ impl ArtificialIntelligence {
       if !cannot_be_stolen {
         // TODO: each purposes should have their own modifier/factor of our influence
         // TODO: also influence should be multiplied by distance, longer distance then smaller influence!
-
+        
         /*
           HANDLE IF TRACK TO THE PURPOSE IS SAFE
-          1. divide all squads into groups
+          1. divide all squads into groups (maybe we can use here somehow already calculated groups in all_factions_info?)
             create vector of points, if any points in that vector is not close enough to squad center, then calculate track do squad center, and also add it to the array!
             Maybe we should also add when we met enemy
+
+            // a) create track for each individual squad (best result!) track
+                  | COST: find track for each squad
+                  --- but it gives the most precise results!!!
+            // b) search neighbors in our_squads, for first selected group add it to vector of groups
+                  | COST: find track only one, then always search if squad is close to already figured out track source
+                  --- little bit less precise
+            // c) search squad in input from ai, with all info about factions
+                  | COST: find track once, assign it to the group from factions info, later just check if squad is already, if not, then add
+                  --- the lowest precision, but fast, but seems like this is the best option
+
+            // But how are we going to collect all squads in group and compare to enemies on the path???
+            // we could do it like, if there is any enemy between our squads group and purpose, then just don't care
+            // go ahead, and prob we will find better purpose OR purpose will be to fight with that enemy on that path
+
+            // BUT what in the case if our army is like 10 squads, and between us and purpose is one enemy squad
+            // but I think to fix it, we should just spread squads among rest purposes, if there are any squads that left,
+            // then add them to support of purpose! In thinking, where squad should support, we should mainly check distance
+
           2. For each group test if they will meet enemy on the way
+            // 2.1 Do it in for loop, take point on the track
+            // 2.2 check RADIUS around the point, if there is any enemy
+            // 2.3 if not, then check if there is any enemy squad in distance of RADIUS from line
+            // 2.4 if there was enemy on the line, then break the loop, return the value
+            // 2.5 if there is no enemy, then go to another point, and so on the
+            // 2.6 after make whole loop check last destination point in the same way as rest points
+
           3. If they will, then check if have enough power to handle it, if not, then squad is still free, to take other purpose,
             and like it works rn, if there in way to do the purpose, then support other squad or run to safe place
           4. If there is enemy, and we got enough power, then attack! as a new purpose! (so rn tester purpose need to find another squads)
