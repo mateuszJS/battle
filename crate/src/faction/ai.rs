@@ -1,7 +1,9 @@
 use crate::constants::{
   GRID_MAP_HEIGHT, GRID_MAP_WIDTH, THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER,
 };
+use crate::position_utils::PositionUtils;
 use crate::squad::Squad;
+use crate::squads_grid_manager::{SquadsGrid, SquadsGridManager};
 use std::cell::{Ref, RefCell};
 use std::rc::{Rc, Weak};
 
@@ -58,6 +60,13 @@ struct KeepPlanHelper {
 struct ReservedSquad {
   reserved_purpose_signification: f32,
   squad_id: u32,
+}
+
+struct MetEnemyOnTrack {
+  enemy_squads_ids: Vec<u32>,
+  enemy_influence: f32,
+  our_collected_squads_ids: Vec<u32>,
+  our_collected_influence: f32,
 }
 
 const RADIUS_OF_DANGER_ZONE_AROUND_THE_PORTAL: f32 = 1000.0; // best would be longest range of the weapon * 2.0
@@ -285,12 +294,61 @@ impl ArtificialIntelligence {
     }
   }
 
+  fn get_enemy_on_track(
+    &self,
+    purpose: &EnhancedPurpose,
+    our_squad: &Ref<Squad>,
+    squads_grid: &SquadsGrid,
+    our_aim_enemy_squads_ids: &Vec<u32>,
+  ) -> Option<(Vec<u32>, f32)> /* (our_influence, enemy_influence) */ {
+    let track = PositionUtils::get_track(
+      our_squad.shared.center_point.0,
+      our_squad.shared.center_point.1,
+      purpose.place.x,
+      purpose.place.y,
+    );
+
+    for (index, point) in track.iter().enumerate() {
+      if index == track.len() - 1 {
+        break;
+      }
+      let next_point = &track[index + 1];
+      let squads_nearby = SquadsGridManager::get_squads_in_line(
+        squads_grid,
+        point.0,
+        point.1,
+        next_point.0,
+        next_point.1,
+      );
+
+      /*==========CHECK IF THERE ARE ANY ENEMIES AROUND THE POINT============*/
+      let mut collected_enemy_influence = 0.0;
+      let mut collected_enemy_squads_ids = vec![];
+      for some_weak_squad in squads_nearby.iter() {
+        if let Some(some_ref_cell_squad) = some_weak_squad.upgrade() {
+          let some_squad = some_ref_cell_squad.borrow();
+          if some_squad.faction_id != self.faction_id
+            && !our_aim_enemy_squads_ids.contains(&some_squad.id)
+          {
+            collected_enemy_squads_ids.push(some_squad.id);
+            collected_enemy_influence += some_squad.get_influence();
+          }
+        }
+      }
+
+      if collected_enemy_squads_ids.len() > 0 {
+        return Some((collected_enemy_squads_ids, collected_enemy_influence));
+      }
+    }
+    return None;
+  }
+
   fn handle_new_purposes(
     &self,
     our_squads: &mut Vec<Ref<Squad>>,
     purpose: &EnhancedPurpose,
     reserved_squads_ids: &Vec<ReservedSquad>,
-
+    squads_grid: &SquadsGrid,
   ) -> Option<Plan> {
     our_squads.sort_by(|a_squad, b_squad| {
       let a = ArtificialIntelligence::get_how_much_is_it_worth(&purpose, a_squad);
@@ -308,6 +366,16 @@ impl ArtificialIntelligence {
     2. Check if they are attacking us! Maybe there are 3 factions in the battle, if we are not attacking by any of rest 2, then why should we run
     */
 
+    let enemy_squads_ids = purpose
+      .place
+      .squads
+      .iter()
+      .map(|ref_cell_squad| ref_cell_squad.borrow().id)
+      .collect::<Vec<u32>>();
+
+    let mut already_met_enemies: Vec<MetEnemyOnTrack> = vec![];
+    // (enemy_squads_ids, our_collected_squads_ids, our_collected_influence)
+
     while collected_our_influence < purpose.place.influence && our_squads_last_index > 0 {
       our_squads_last_index -= 1;
       let our_squad = &our_squads[our_squads_last_index];
@@ -320,45 +388,47 @@ impl ArtificialIntelligence {
       if !cannot_be_stolen {
         // TODO: each purposes should have their own modifier/factor of our influence
         // TODO: also influence should be multiplied by distance, longer distance then smaller influence!
-        
-        /*
-          HANDLE IF TRACK TO THE PURPOSE IS SAFE
-          1. divide all squads into groups (maybe we can use here somehow already calculated groups in all_factions_info?)
-            create vector of points, if any points in that vector is not close enough to squad center, then calculate track do squad center, and also add it to the array!
-            Maybe we should also add when we met enemy
 
-            // a) create track for each individual squad (best result!) track
-                  | COST: find track for each squad
-                  --- but it gives the most precise results!!!
-            // b) search neighbors in our_squads, for first selected group add it to vector of groups
-                  | COST: find track only one, then always search if squad is close to already figured out track source
-                  --- little bit less precise
-            // c) search squad in input from ai, with all info about factions
-                  | COST: find track once, assign it to the group from factions info, later just check if squad is already, if not, then add
-                  --- the lowest precision, but fast, but seems like this is the best option
+        let option_enemy_on_track =
+          self.get_enemy_on_track(purpose, our_squad, squads_grid, &enemy_squads_ids);
 
-            // But how are we going to collect all squads in group and compare to enemies on the path???
-            // we could do it like, if there is any enemy between our squads group and purpose, then just don't care
-            // go ahead, and prob we will find better purpose OR purpose will be to fight with that enemy on that path
+        if let Some((enemy_squads_ids, enemy_influence)) = option_enemy_on_track {
+          let option_met_enemy = already_met_enemies.iter_mut().find(|met_enemy| {
+            enemy_squads_ids
+              .iter()
+              .any(|enemy_squad_id| met_enemy.enemy_squads_ids.contains(&enemy_squad_id))
+          });
+          let our_squad_influence = self.our_power_factor * our_squad.get_influence();
+          let (mut our_blocked_squads_ids, our_blocked_influence, blocking_enemy_influence) =
+            if let Some(met_enemy) = option_met_enemy {
+              met_enemy.our_collected_squads_ids.push(our_squad.id);
+              met_enemy.our_collected_influence += our_squad_influence;
+              (
+                &mut met_enemy.our_collected_squads_ids,
+                met_enemy.our_collected_influence,
+                met_enemy.enemy_influence,
+              )
+            } else {
+              let new_entry = MetEnemyOnTrack {
+                enemy_squads_ids,
+                enemy_influence,
+                our_collected_squads_ids: vec![our_squad.id],
+                our_collected_influence: our_squad_influence,
+              };
+              already_met_enemies.push(new_entry);
+              (
+                &mut already_met_enemies[0].our_collected_squads_ids,
+                our_squad_influence,
+                enemy_influence,
+              )
+            };
+          if blocking_enemy_influence <= our_blocked_influence {
+            collected_our_influence += our_blocked_influence;
+            used_squads_ids.append(&mut our_blocked_squads_ids);
+          }
+          continue;
+        }
 
-            // BUT what in the case if our army is like 10 squads, and between us and purpose is one enemy squad
-            // but I think to fix it, we should just spread squads among rest purposes, if there are any squads that left,
-            // then add them to support of purpose! In thinking, where squad should support, we should mainly check distance
-
-          2. For each group test if they will meet enemy on the way
-            // 2.1 Do it in for loop, take point on the track
-            // 2.2 check RADIUS around the point, if there is any enemy
-            // 2.3 if not, then check if there is any enemy squad in distance of RADIUS from line
-            // 2.4 if there was enemy on the line, then break the loop, return the value
-            // 2.5 if there is no enemy, then go to another point, and so on the
-            // 2.6 after make whole loop check last destination point in the same way as rest points
-
-          3. If they will, then check if have enough power to handle it, if not, then squad is still free, to take other purpose,
-            and like it works rn, if there in way to do the purpose, then support other squad or run to safe place
-          4. If there is enemy, and we got enough power, then attack! as a new purpose! (so rn tester purpose need to find another squads)
-
-          but with those 4 points above, we will handle also cases like, when we want to capture strategic point/destroy enemy portal, and there are some enemy squads around
-        */
         used_squads_ids.push(our_squad.id);
         collected_our_influence += self.our_power_factor * our_squad.get_influence();
       }
@@ -391,6 +461,7 @@ impl ArtificialIntelligence {
     our_factory_place: &Place,
     our_squads_ref_cells: &Vec<Rc<RefCell<Squad>>>,
     all_factions_info: &Vec<FactionInfo>,
+    squads_grid: &SquadsGrid,
   ) -> Vec<Plan> {
     let mut final_purposes: Vec<Plan> = vec![];
     let mut our_squads = our_squads_ref_cells
@@ -422,7 +493,7 @@ impl ArtificialIntelligence {
 
       if our_squads.len() > 0 {
         let option_new_plan =
-          self.handle_new_purposes(&mut our_squads, purpose, &reserved_squads_ids);
+          self.handle_new_purposes(&mut our_squads, purpose, &reserved_squads_ids, squads_grid);
         if let Some(new_plan) = option_new_plan {
           final_purposes.push(new_plan)
         }

@@ -54,13 +54,13 @@ use position_utils::calc_positions::CalcPositions;
 use position_utils::obstacles_lazy_statics::ObstaclesLazyStatics;
 use representations_ids::BULLETS_REPRESENTATION_ID;
 use squad::Squad;
-use squads_grid_manager::SquadsGridManager;
+use squads_grid_manager::{SquadsGrid, SquadsGridManager};
 
 const INDEX_OF_USER_FACTION: usize = 0;
 
 pub struct World {
   bullets_manager: BulletsManager,
-  squads_on_grid: HashMap<usize, Vec<Weak<RefCell<Squad>>>>,
+  squads_on_grid: SquadsGrid,
 }
 
 #[wasm_bindgen]
@@ -479,6 +479,41 @@ impl Universe {
     }
     js_sys::Float32Array::from(&result[..])
   }
+
+  pub fn get_grid_line(&self) -> js_sys::Float32Array {
+    if self.factions[0].squads.len() == 0 {
+      return js_sys::Float32Array::from(&vec![][..]);
+    }
+
+    let (x, y) = self.factions[0].squads[0].borrow().shared.center_point;
+    let all_squares = SquadsGridManager::get_indexes_in_line_debug(x, y, 1000.0, 1000.0);
+
+    // let squads = SquadsGridManager::get_squads_in_line(
+    //   &self.world.squads_on_grid,
+    //   x,
+    //   y,
+    //   1000.0,
+    //   1000.0,
+    //   500.0,
+    // );
+
+    // let serialized_squads_data = squads
+    //   .iter()
+    //   .flat_map(|squad| {
+    //     let (squad_x, squad_y) = squad.upgrade().unwrap().borrow().shared.center_point;
+    //     vec![squad_x, squad_y]
+    //   })
+    //   .collect::<Vec<f32>>();
+    let result = [
+      //   &all_squares[..],
+      &vec![-1.0][..],
+      &all_squares[..],
+    ]
+    .concat();
+
+    js_sys::Float32Array::from(&result[..])
+  }
+
   pub fn get_grid_area(&self) -> js_sys::Float32Array {
     if self.factions[0].squads.len() == 0 {
       return js_sys::Float32Array::from(&vec![][..]);

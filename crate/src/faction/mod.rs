@@ -7,6 +7,7 @@ use crate::position_utils::PositionUtils;
 use crate::representations_ids::FACTION_REPRESENTATION_ID;
 use crate::squad::Squad;
 use crate::squad_types::SquadType;
+use crate::squads_grid_manager::SquadsGrid;
 use crate::Factory;
 use crate::World;
 use ai::{ArtificialIntelligence, PurposeType};
@@ -248,11 +249,7 @@ impl Faction {
     });
   }
 
-  pub fn do_ai(
-    &mut self,
-    all_factions_info: &Vec<FactionInfo>,
-    squads_on_grid: &HashMap<usize, Vec<Weak<RefCell<Squad>>>>,
-  ) {
+  pub fn do_ai(&mut self, all_factions_info: &Vec<FactionInfo>, squads_on_grid: &SquadsGrid) {
     let Self { ref squads, .. } = self;
     let our_factory_place = {
       let factory = self.portal_squad.borrow();
@@ -266,7 +263,12 @@ impl Faction {
       }
     };
 
-    let squads_plans = self.ai.work(&our_factory_place, squads, all_factions_info);
+    let squads_plans = self.ai.work(
+      &our_factory_place,
+      squads,
+      all_factions_info,
+      squads_on_grid,
+    );
 
     squads_plans
       .into_iter()
@@ -280,7 +282,7 @@ impl Faction {
       })
   }
 
-  pub fn manage_hunters(&mut self, squads_grid: &HashMap<usize, Vec<Weak<RefCell<Squad>>>>) {
+  pub fn manage_hunters(&mut self, squads_grid: &SquadsGrid) {
     self.hunters_aims =
       SquadsManager::manage_hunters(&mut self.squads, &self.hunters_aims, squads_grid);
   }

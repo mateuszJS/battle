@@ -4,6 +4,8 @@ import * as obstaclesDebug from './obstacles'
 import * as gridDebug from './grid'
 import * as obstaclesMapDebug from './obstaclesMap'
 import * as enemySecondaryAimDebug from './enemySecondaryAim'
+import * as getPointsInRectangleDebug from './getPointsInRectangle'
+import * as gridLineDebug from './gridLine'
 import { Universe } from '../../crate/pkg/index'
 
 const debugController = {
@@ -13,6 +15,8 @@ const debugController = {
   grid: false,
   obstaclesMap: false,
   enemySecondaryAim: false,
+  getPointsInRectangle: false,
+  gridLine: false,
   init: () => null,
   anglesDebug,
   tracksDebug,
@@ -20,6 +24,8 @@ const debugController = {
   gridDebug,
   obstaclesMapDebug,
   enemySecondaryAimDebug,
+  getPointsInRectangleDebug,
+  gridLineDebug,
   update: (universe: Universe) => {
     Object.keys(debugController).forEach(key => {
       if (

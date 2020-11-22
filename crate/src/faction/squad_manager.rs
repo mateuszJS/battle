@@ -3,6 +3,7 @@ use crate::constants::{
 };
 use crate::position_utils::PositionUtils;
 use crate::squad::Squad;
+use crate::squads_grid_manager::SquadsGrid;
 use crate::SquadsGridManager;
 use std::cell::{Ref, RefCell};
 use std::collections::HashMap;
@@ -104,10 +105,7 @@ impl SquadsManager {
     (sum_x / len, sum_y / len)
   }
 
-  fn search_for_enemy(
-    ref_cell_squad: &mut Rc<RefCell<Squad>>,
-    squads_grid: &HashMap<usize, Vec<Weak<RefCell<Squad>>>>,
-  ) {
+  fn search_for_enemy(ref_cell_squad: &mut Rc<RefCell<Squad>>, squads_grid: &SquadsGrid) {
     // Current secondary aim can be totally okay
     let (faction_id, squad_position, squad_weapon, is_squad_running, option_secondary_aim_id) = {
       let squad = ref_cell_squad.borrow();
@@ -206,7 +204,7 @@ impl SquadsManager {
   pub fn manage_hunters(
     all_squads: &mut Vec<Rc<RefCell<Squad>>>,
     hunters_aims: &HashMap<u32, (Weak<RefCell<Squad>>, (f32, f32))>,
-    squads_grid: &HashMap<usize, Vec<Weak<RefCell<Squad>>>>,
+    squads_grid: &SquadsGrid,
   ) -> HashMap<u32, (Weak<RefCell<Squad>>, (f32, f32))> {
     /*=======COLLECT_ENEMIES_THAT_MOVED_AND_THEIR_NEW_POSITION=====*/
     let mut enemies_that_moved: Vec<(u32, (f32, f32))> = vec![]; // value is to check, if we are using still this enemy
