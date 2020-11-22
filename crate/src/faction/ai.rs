@@ -456,6 +456,81 @@ impl ArtificialIntelligence {
     }
   }
 
+  fn keep_our_squads_safety(&self, all_factions_info: &Vec<FactionInfo>, squads_grid: &SquadsGrid) {
+    let our_faction_info = all_factions_info
+      .iter()
+      .find(|faction_info| faction_info.id == self.faction_id)
+      .unwrap();
+
+    let mut attacking_ours_squads_enemy_influence = 0.0;
+
+    our_faction_info.places.iter().for_each(|place| {
+      let squads_nearby = SquadsGridManager::get_squads_in_area(
+        squads_grid,
+        place.x,
+        place.y,
+        max_all_weapons_range, // maybe we should make a const or something with it
+      );
+      let our_squads_ids = place.squads.iter().map(|ref_cell_squad| ref_cell_squad.borrow().id).collect::<Vec<u32>>();
+      /*==========CHECK IF THERE ARE ANY ENEMIES AROUND THE POINT============*/
+      let mut collected_enemy_influence = 0.0;
+      let mut collected_enemy_squads_ids = vec![];
+      for some_weak_squad in squads_nearby.iter() {
+        if let Some(some_ref_cell_squad) = some_weak_squad.upgrade() {
+          let some_squad = some_ref_cell_squad.borrow();
+          if some_squad.faction_id != self.faction_id
+            && !our_aim_enemy_squads_ids.contains(&some_squad.id) // if squad is in our purpose
+            // need purpose here of the enemy
+          {
+            if let Some(enemy_aim) = some_squad.shared.aim.upgrade() {
+              if our_squads_ids.contains(&enemy_aim.borrow().id) {
+                attacking_ours_squads_enemy_influence += some_squad.get_influence();
+                // not sure if we should calculate it, or just when is it any attack, then make attack against the enemy or run away
+              }
+            }
+          }
+        }
+      }
+
+
+      let squads_around = faction_info.places.x
+    });
+
+
+    // pub struct FactionInfo {
+    //   pub id: u32,
+    //   pub places: Vec<Place>,
+    //   pub influence_total: f32,
+    // }
+    
+
+    // #[derive(Clone)]
+    // pub struct Plan {
+    //   pub purpose_type: PurposeType,
+    //   pub squads_ids: Vec<u32>,
+    //   pub enemy_squads: Vec<Weak<RefCell<Squad>>>,
+    //   pub x: f32,
+    //   pub y: f32,
+    // }
+
+    
+//   our_faction_info
+// let mut our_squads_groups = our_faction_info
+//   .places
+//   .iter()
+//   .map(|place| OurSquadsGroup {
+//     squads_ids: place
+//       .squads
+//       .iter()
+//       .map(|ref_cell_squad| ref_cell_squad.borrow().id)
+//       .collect::<Vec<u32>>(),
+//     x: place.x,
+//     y: place.y,
+//     destinations: vec![],
+//   })
+//   .collect::<Vec<OurSquadsGroup>>();
+  }
+
   pub fn work(
     &mut self,
     our_factory_place: &Place,
@@ -463,6 +538,9 @@ impl ArtificialIntelligence {
     all_factions_info: &Vec<FactionInfo>,
     squads_grid: &SquadsGrid,
   ) -> Vec<Plan> {
+    self.keep_our_squads_safety(all_factions_info, squads_grid);
+
+    
     let mut final_purposes: Vec<Plan> = vec![];
     let mut our_squads = our_squads_ref_cells
       .iter()
