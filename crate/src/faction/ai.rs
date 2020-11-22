@@ -183,18 +183,26 @@ impl ArtificialIntelligence {
             < 2.0 * THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER;
 
           match current_plan.purpose_type {
-            PurposeType::Attack => current_plan.enemy_squads.iter().any(|weak_enemy| {
-              if let Some(ref_cell_enemy) = weak_enemy.upgrade() {
-                let enemy = ref_cell_enemy.borrow();
-                new_purpose
-                  .place
-                  .squads
-                  .iter()
-                  .any(|squad| squad.borrow().id == enemy.id)
-              } else {
-                false
-              }
-            }),
+            PurposeType::Attack => {
+              let new_purpose_enemy_squads_ids = new_purpose
+                .place
+                .squads
+                .iter()
+                .map(|squad| squad.borrow().id).collect::<Vec<u32>>;
+
+                current_plan.enemy_squads.iter().any(|weak_enemy| {
+                // TODO: Let's collect data about enemies around that are attacking us
+                // And also enemies  around basically, even when are not attacking us, because it's also potential danger
+                // this is the place where we are determine the end of purpose or not, so here is also source of idle enemies!
+                // so the best place to collect those data!
+                if let Some(ref_cell_enemy) = weak_enemy.upgrade() {
+                  let enemy = ref_cell_enemy.borrow();
+                  new_purpose_enemy_squads_ids.contains(&enemy.id)
+                } else {
+                  false
+                }
+              })
+            },
             // PurposeType::RunToSafePlace => is_same_position,
             PurposeType::PrepareToDefend => false, // because rn we are not finishing this!!!
                                                    // TODO: check if is the destination and also if there are any enemy squads still around!
@@ -243,6 +251,11 @@ impl ArtificialIntelligence {
     our_factory_place: &Place,
   ) -> Plan {
     let mut collected_our_influence = 0.0;
+    /* in existing_plan we keep info about:
+      - number of enemies around
+      - number of enemies which are attacking us
+      And here we should decide, if should run, or maybe attack the enemy which are attacking us
+    */
 
     let reserved_not_stolen_squads_ids = existing_plan
       .reserved_our_squads_ids
@@ -456,7 +469,8 @@ impl ArtificialIntelligence {
     }
   }
 
-  fn keep_our_squads_safety(&self, all_factions_info: &Vec<FactionInfo>, squads_grid: &SquadsGrid) {
+  fn get_info_about_safety(&self, all_factions_info: &Vec<FactionInfo>, squads_grid: &SquadsGrid) -> (Vec<Rc<RefCell<Squad>>>, Vec<Rc<RefCell<Squad>>>) /* enemies that are attacking us, and enemies at all around */ {
+    // in params we should get our squads group
     let our_faction_info = all_factions_info
       .iter()
       .find(|faction_info| faction_info.id == self.faction_id)
@@ -547,7 +561,6 @@ impl ArtificialIntelligence {
       .map(|ref_cell_squad| ref_cell_squad.borrow())
       .collect::<Vec<Ref<Squad>>>();
     let new_purposes = self.get_sorted_purposes(&our_factory_place, all_factions_info);
-    // TODO: new_purposes we should handle case when there is to safe track from our purpose to our portal
 
     let (transition_from_current_plan_to_new_plans, reserved_squads_ids) =
       self.analyze_current_plans(&new_purposes, &our_squads);
