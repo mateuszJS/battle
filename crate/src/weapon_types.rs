@@ -95,6 +95,10 @@ pub static NON_WEAPON: Weapon = Weapon {
   max_angle_during_run: 0.0,
 };
 
+// TODO: always remember to update this const
+pub static MAX_POSSIBLE_WEAPON_RANGE: f32 =
+  LASER_RIFLE_DETAILS.range.max(STANDARD_RIFLE_DETAILS.range);
+
 pub fn get_weapon_details(weapon_type: &WeaponType) -> &'static Weapon {
   match *weapon_type {
     WeaponType::StandardRifle => &STANDARD_RIFLE_DETAILS,
