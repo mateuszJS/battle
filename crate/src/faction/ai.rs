@@ -242,9 +242,15 @@ impl ArtificialIntelligence {
       // if should be handler by group, and prob at the same time by purpose becuase in same gorup we can have 
       if let Some(new_purpose_index) = option_new_purpose_index {
         let new_purpose = &new_purposes[new_purpose_index];
+
+        // TODO: collect vector Vec<(our_squads: Vec<u32 | Rc<RefCell<Squad>>>, our_influence: f32)>
         let safety_info = our_squads_safety.iter().find(|safety_info| {
           current_plan.squads_ids.iter().any(|curr_plan_our_squad_id| safety_info.our_squads_ids.contains(curr_plan_our_squad_id))
         }).unwrap(); // unwrap because our squad has to be found in our faction vector
+
+        // for each item go over, compare influence with enemy, decide to attack or run away or go to the purpose
+        // TODO: but what is case if two our gorups got influence 1 and 1, and enemy got 1.5? Then both gorups will run away
+        // but together are stronger than the enemy
 
         let our_squads_influence = current_plan.squads_ids.iter().fold(0.0, |acc, squad_id| {
           if let Some(squad) = our_squads.iter().find(|our_squad| our_squad.id == *squad_id) {
@@ -634,6 +640,8 @@ impl ArtificialIntelligence {
     let (transition_from_current_plan_to_new_plans, reserved_squads_ids, sudden_plans) =
       self.analyze_current_plans(squads_grid, &new_purposes, &our_squads, &our_squads_safety);
 
+
+    // function which goes over all our squads groups, and check if they are 
     new_purposes.append(&mut sudden_plans);
 
     for (index, purpose) in new_purposes.iter().enumerate() {
