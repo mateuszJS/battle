@@ -170,11 +170,6 @@ impl ArtificialIntelligence {
       });
     }
 
-    // purposes go over all purposes, if value is less than <some very high value, prob will be used only when portal is almost destroyed>
-    // then check if there are any enemies on the path to the target, or if they are around the target!
-
-    // but then enemies which is included in purpose will overlap with enemies around the target...
-
     purposes
   }
 
@@ -227,30 +222,41 @@ impl ArtificialIntelligence {
       let option_new_purpose_index = ArtificialIntelligence::get_corresponding_new_purpose(current_plan, new_purposes);
       let mut already_participating_our_squads_reservation = vec![];
 
-      // TODO: totally wrong, we cannot do that in this way
-      // if squads from different positions are included in plan
-      // then one group can be in troubles, but another totally not!
-
-
-      /*
-      the final solution
-      1. Check if group of our squads is able to fight with that enemy, or run away, or run though those enemies, because purpose is so important
-      2. If has to change purpose, then add new purpose to vector and add squad to reserved squads vector
-      3. 
-      */
-
       // if should be handler by group, and prob at the same time by purpose becuase in same gorup we can have 
       if let Some(new_purpose_index) = option_new_purpose_index {
         let new_purpose = &new_purposes[new_purpose_index];
 
-        // TODO: collect vector Vec<(our_squads: Vec<u32 | Rc<RefCell<Squad>>>, our_influence: f32)>
-        let safety_info = our_squads_safety.iter().find(|safety_info| {
-          current_plan.squads_ids.iter().any(|curr_plan_our_squad_id| safety_info.our_squads_ids.contains(curr_plan_our_squad_id))
-        }).unwrap(); // unwrap because our squad has to be found in our faction vector
+        /*
+        What to do:
+        Divide squads into groups
+          - if purpose signification is more important than met enemy, then don't do anything
+          - if purpose is less important, add that squad influence
+          - at the end, compare collected influence with enemy influence, then decide if we should fight, or run
+          - if we should run, then prob whole this group will run to the same place, to it's good
 
-        // for each item go over, compare influence with enemy, decide to attack or run away or go to the purpose
-        // TODO: but what is case if two our gorups got influence 1 and 1, and enemy got 1.5? Then both gorups will run away
-        // but together are stronger than the enemy
+          - but what happen if we will make doubled purposes then, attack the same enemy squad when met, and attack in new_purposes
+          - then we could take purpose from new_purposes array! and then if didn't found there, add to new_purposes
+            - but then purpose won't cover all met enemies probably, but seems like it's not an issue
+            - like won't have negative impact
+            - bc in each loop we are checking if we are safe, so it's nto os important how big enemy is with we are fighting
+            - but important is all enemies around
+        */
+
+        // TODO: still we don't care about case when enemies are in the same place as our purpose
+        current_plan.squads_ids.iter().for_each(|curr_plan_our_squad_id| {
+          let safety_info = our_squads_safety.iter().find(|safety_info| safety_info.our_squads_ids.contains(curr_plan_our_squad_id)).unwrap();
+          // TODO: but there can be more enemies! so we will take care only to fight with one
+          // so we shouldn't do it in while
+          if new_purpose.signification < calc_signification(safety_info) {
+            // attack
+          } else {
+            // go to aim, don't care about the enemy
+          }
+        })
+        // TODO: maybe we can create just EnhancedPurpose but not with close enemies, but all enemies around our squad
+        // but then we should remove some purposes from new_purposes list probably
+        // like, if we are attacking by 3 enemies, and in new purposes we got two purposes, one group with one enemy squad,
+        // and second purpose with 2 enemy squads
 
         let our_squads_influence = current_plan.squads_ids.iter().fold(0.0, |acc, squad_id| {
           if let Some(squad) = our_squads.iter().find(|our_squad| our_squad.id == *squad_id) {
@@ -307,27 +313,6 @@ impl ArtificialIntelligence {
           });
           //Attack if are away from our purpose
         }
-
-        // collected_enemies_influence_around,
-        // collected_enemies_squads_who_attacks_us,
-        // collected_enemies_squads_around,
-        // our_squads_ids,
-
-
-        // don't care if enemy is our purpose or not, if is attacking us, it does not matter
-        // if too many enemies around then run away
-        // otherwise check if we are close to the purpose. If close, the attack purpose, yes far away then attack the enemy
-
-        // safety_info
-
-        /*
-          1. Check how away are we from purpose
-          2. Actually, when we are next to the purpose, then we should run away or attack purpose, doesn't matter 
-            - but in case if we are attacking enemy portal, then it would be better to kill the enemies squads first
-          3. When we are far away, se should decide if run or fight
-            - we should consider situation when we will run our whole army to chase one small enemy squad, but it should be done in comparing values
-            - so we should use small value of signification
-        */
 
 
       } else {
@@ -413,7 +398,7 @@ impl ArtificialIntelligence {
     }
   }
 
-  fn get_enemy_on_track(
+  fn get_first_enemy_groups_on_track(
     &self,
     purpose: &EnhancedPurpose,
     our_squad: &Ref<Squad>,
@@ -509,9 +494,11 @@ impl ArtificialIntelligence {
         // TODO: also influence should be multiplied by distance, longer distance then smaller influence!
 
         let option_enemy_on_track =
-          self.get_enemy_on_track(purpose, our_squad, squads_grid, &enemy_squads_ids);
-
+          self.get_first_enemy_groups_on_track(purpose, our_squad, squads_grid, &enemy_squads_ids);
+        // TODO: THOSE ARE ENEMIES ON THE TRACK, NOT MET ALREADY!!!
+        // SO RUNNING TO THE SAFE PLACE IS AT LEAST STUPID
         if let Some((enemy_squads_ids, enemy_influence)) = option_enemy_on_track {
+          // TODO: what the f*ck happened here!?
           let option_met_enemy = already_met_enemies.iter_mut().find(|met_enemy| {
             enemy_squads_ids
               .iter()
@@ -629,12 +616,15 @@ impl ArtificialIntelligence {
     all_factions_info: &Vec<FactionInfo>,
     squads_grid: &SquadsGrid,
   ) -> Vec<Plan> {
+    // TODO: if it's used only by one function, then shouldn't be there, but inside that function
     let our_squads_safety = self.get_info_about_safety(all_factions_info, squads_grid);
     let mut final_purposes: Vec<Plan> = vec![];
     let mut our_squads = our_squads_ref_cells
       .iter()
       .map(|ref_cell_squad| ref_cell_squad.borrow())
       .collect::<Vec<Ref<Squad>>>();
+
+    // Collect Vec<EnhancedPurpose> with enemy squads and optionally our portal defend purpose
     let mut new_purposes = self.get_sorted_purposes(&our_factory_place, all_factions_info);
 
     let (transition_from_current_plan_to_new_plans, reserved_squads_ids, sudden_plans) =
