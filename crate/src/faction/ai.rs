@@ -559,7 +559,7 @@ impl ArtificialIntelligence {
     our_squads_safety.into_iter().for_each(|safety_info| {
       let mut collected_our_influence = 0.0;
       let mut squads_ids_which_will_react = vec![];
-      let danger_signification = safety_info.collected_enemies_influence_who_attacks_us; // TODO: make calculation, rn it's very stupid
+      let danger_signification = safety_info.collected_enemies_influence_around; // TODO: make calculation, rn it's very stupid
 
       safety_info.our_squads_ids.iter().for_each(|squad_id| {
         let option_reserved_squad = reserved_squads_ids
@@ -580,9 +580,13 @@ impl ArtificialIntelligence {
 
       // TODO: loop over squads_ids_which_will_react and make reservation
       // prob we will have to update reserved_squads_ids also, update signification because purpose has changed
-
+      log!(
+        "{} {}",
+        collected_our_influence,
+        safety_info.collected_enemies_influence_around
+      );
       let purpose_index =
-        if collected_our_influence > safety_info.collected_enemies_influence_who_attacks_us {
+        if collected_our_influence > safety_info.collected_enemies_influence_around {
           // TODO: multiple by factor
           new_purposes
             .iter()
@@ -590,7 +594,7 @@ impl ArtificialIntelligence {
               new_purpose.purpose_type == PurposeType::Attack
                 && new_purpose.place.squads.iter().any(|ref_cell_squad| {
                   safety_info
-                    .collected_enemies_squads_ids_who_attacks_us
+                    .collected_enemies_squads_ids_around
                     .contains(&ref_cell_squad.borrow().id)
                 })
             })
