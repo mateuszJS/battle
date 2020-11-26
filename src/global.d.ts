@@ -8,6 +8,7 @@ declare global {
     app: PIXI.Application
     startGame: (playersList: string[]) => void
     visibleInfluenceMap: boolean
+    debugAiMode: boolean
   }
 
   interface Point {

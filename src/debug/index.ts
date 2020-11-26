@@ -6,6 +6,7 @@ import * as obstaclesMapDebug from './obstaclesMap'
 import * as enemySecondaryAimDebug from './enemySecondaryAim'
 import * as getPointsInRectangleDebug from './getPointsInRectangle'
 import * as gridLineDebug from './gridLine'
+import * as aiDebug from './ai'
 import { Universe } from '../../crate/pkg/index'
 
 const debugController = {
@@ -17,6 +18,7 @@ const debugController = {
   enemySecondaryAim: false,
   getPointsInRectangle: false,
   gridLine: false,
+  ai: false,
   init: () => null,
   anglesDebug,
   tracksDebug,
@@ -26,6 +28,7 @@ const debugController = {
   enemySecondaryAimDebug,
   getPointsInRectangleDebug,
   gridLineDebug,
+  aiDebug,
   update: (universe: Universe) => {
     Object.keys(debugController).forEach(key => {
       if (
@@ -50,7 +53,9 @@ const createCheckbox = (name: string) => {
   checkboxNode.checked = debugController[name]
   checkboxNode.addEventListener('change', event => {
     debugController[name] = (event.target as HTMLInputElement).checked
-    debugController[`${name}Debug`].stopDebug()
+    if (!debugController[name]) {
+      debugController[`${name}Debug`].stopDebug()
+    }
   })
 
   labelNode.appendChild(checkboxNode)

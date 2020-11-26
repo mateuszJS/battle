@@ -59,14 +59,18 @@ const initGame = () => {
   debugController.init()
   let timeToCreateEnemy = 0
   window.app.ticker.add((delta: number) => {
+    // gridDebug(universe)
+    debugController.update(universe)
+
+    if (window.debugAiMode) return
+
     if (timeToCreateEnemy == 0) {
       universe.create_enemy_squad(REPRESENTATION_IDS.SOLIDER)
       timeToCreateEnemy = 2000
     } else {
       timeToCreateEnemy--
     }
-    // gridDebug(universe)
-    debugController.update(universe)
+
     mouseController.updateScenePosition()
 
     universe.update()
