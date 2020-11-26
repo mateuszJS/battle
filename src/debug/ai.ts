@@ -34,7 +34,8 @@ const createNewFaction = () => {
     groundNode.appendChild(squadNode)
 
     let isDown = false
-    squadNode.addEventListener('mousedown', () => {
+    squadNode.addEventListener('mousedown', event => {
+      event.stopPropagation()
       isDown = true
     })
 
@@ -43,13 +44,11 @@ const createNewFaction = () => {
     })
 
     document.addEventListener('mousemove', event => {
-      event.preventDefault()
       if (isDown) {
-        const deltaX = event.movementX
-        const deltaY = event.movementY
-        const rect = squadNode.getBoundingClientRect()
-        squadNode.style.left = rect.x + deltaX + 'px'
-        squadNode.style.top = rect.y + deltaY + 'px'
+        newSquad.x += event.movementX
+        newSquad.y += event.movementY
+        squadNode.style.left = newSquad.x + 'px'
+        squadNode.style.top = newSquad.y + 'px'
       }
     })
   }
@@ -84,6 +83,23 @@ export const startDebug = (universe: Universe) => {
     groundNode.style.width = `${MAP_WIDTH}px`
     groundNode.style.height = `${MAP_HEIGHT}px`
     document.body.appendChild(groundNode)
+
+    let isDown = false
+    groundNode.addEventListener('mousedown', () => {
+      isDown = true
+    })
+
+    document.addEventListener('mouseup', event => {
+      isDown = false
+    })
+
+    document.addEventListener('mousemove', event => {
+      if (isDown) {
+        const rect = groundNode.getBoundingClientRect()
+        groundNode.style.left = rect.x + event.movementX + 'px'
+        groundNode.style.top = rect.y + event.movementY + 'px'
+      }
+    })
 
     const iterationBtnNode = document.createElement('button')
     iterationBtnNode.id = 'make-iteration'
