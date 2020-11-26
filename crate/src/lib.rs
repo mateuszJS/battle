@@ -39,7 +39,7 @@ mod squad_types;
 mod squads_grid_manager;
 mod unit;
 mod weapon_types;
-
+use id_generator::IdGenerator;
 use std::collections::HashMap;
 use wasm_bindgen::prelude::*;
 
@@ -48,12 +48,13 @@ use constants::{
   AI_CALCULATION_PERIOD, CHECK_SQUADS_CORRECTNESS_PERIOD, MANAGE_HUNTERS_PERIOD,
   THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER, UPDATE_SQUAD_CENTER_PERIOD,
 };
-use faction::{Faction, FactionInfo, Place, PlaceType};
+use faction::{ArtificialIntelligence, Faction, FactionInfo, Place, PlaceType, PurposeType};
 use factory::Factory;
 use position_utils::calc_positions::CalcPositions;
 use position_utils::obstacles_lazy_statics::ObstaclesLazyStatics;
 use representations_ids::BULLETS_REPRESENTATION_ID;
 use squad::Squad;
+use squad_types::SquadType;
 use squads_grid_manager::{SquadsGrid, SquadsGridManager};
 
 const INDEX_OF_USER_FACTION: usize = 0;
@@ -68,6 +69,7 @@ pub struct Universe {
   factions: Vec<Faction>,
   world: World,
   time: u32,
+  test_ai: ArtificialIntelligence,
 }
 
 #[wasm_bindgen]
@@ -83,6 +85,7 @@ impl Universe {
     while i < factions_data.len() {
       factions.push(Faction::new(
         factions_data[i] as u32,
+        IdGenerator::generate_id(),
         factions_data[i + 1],
         factions_data[i + 2],
         factions_data[i + 3],
@@ -98,6 +101,7 @@ impl Universe {
       factions,
       world,
       time: 0,
+      test_ai: ArtificialIntelligence::new(0),
     }
   }
 
@@ -167,6 +171,7 @@ impl Universe {
       ref mut factions,
       ref mut world,
       ref mut time,
+      ..
     } = self;
     *time = (*time + 1) % 1000;
 
@@ -577,5 +582,112 @@ impl Universe {
       (-1.0, -1.0)
     };
     js_sys::Float32Array::from(&vec![result.0, result.1][..])
+  }
+  /*
+    -1,
+    portal id, portal x, portal y,
+    squad id, squad x, squad y,
+    squad id, squad x, squad y,
+    squad id, squad x, squad y
+  */
+  pub fn test_ai(&mut self, input: Vec<f32>) -> js_sys::Float32Array {
+    let mut factions = vec![];
+    let mut index = 0;
+    let mut faction_id: i32 = -1;
+    log!("{:?}", input);
+    while index < input.len() {
+      let value = input[index];
+      log!("2");
+      if (value + 1.0).abs() < std::f32::EPSILON {
+        log!("3");
+        // if it's equal -1
+        faction_id += 1;
+        let faction = Faction::new(
+          faction_id as u32,
+          input[index + 1].round() as u32,
+          input[index + 2], // x
+          input[index + 3], // y
+          0.0,
+          false,
+        );
+        factions.push(faction);
+        index += 4;
+      } else {
+        log!("4");
+        let mut squad = Squad::new(faction_id as u32, value.round() as u32, SquadType::Solider);
+        squad.add_member(
+          input[index + 1], // x
+          input[index + 2], // y
+        );
+        factions[faction_id as usize]
+          .squads
+          .push(Rc::new(RefCell::new(squad)));
+        index += 3;
+      }
+    }
+    log!("1");
+    factions.iter_mut().for_each(|faction| {
+      faction.update_squads_centers();
+    });
+
+    let squads_on_grid = SquadsGridManager::create(&factions);
+
+    factions.iter_mut().for_each(|faction| {
+      faction.check_squads_correctness();
+    });
+
+    let all_factions_info = Universe::calculate_ai_input(&factions);
+
+    let squads = &factions[0].squads;
+    let our_factory_place = {
+      let factory = factions[0].portal_squad.borrow();
+      let factory_hp = factory.members[0].borrow().hp;
+      Place {
+        place_type: PlaceType::Portal,
+        influence: factory_hp / factory.squad_details.hp,
+        squads: vec![],
+        x: factory.shared.center_point.0,
+        y: factory.shared.center_point.1,
+      }
+    };
+
+    let plans = self.test_ai.work(
+      &our_factory_place,
+      squads,
+      &all_factions_info,
+      &squads_on_grid,
+    );
+
+    let serialized_output = plans
+      .iter()
+      .flat_map(|plan| {
+        [
+          &vec![
+            -2.0,
+            if plan.purpose_type == PurposeType::Attack {
+              1.0
+            } else {
+              -1.0
+            },
+            plan.x,
+            plan.y,
+          ][..],
+          &plan
+            .squads_ids
+            .iter()
+            .map(|value| *value as f32)
+            .collect::<Vec<f32>>()[..],
+          &vec![-3.0][..],
+          &plan
+            .enemy_squads
+            .iter()
+            .map(|enemy| enemy.upgrade().unwrap().borrow().id as f32)
+            .collect::<Vec<f32>>()[..],
+        ]
+        .concat()
+      })
+      .collect::<Vec<f32>>();
+
+    js_sys::Float32Array::from(&serialized_output[..])
   }
 }

@@ -1,7 +1,7 @@
 mod ai;
 mod squad_manager;
 use crate::constants::MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE;
-
+use crate::id_generator::IdGenerator;
 use crate::look_up_table::LookUpTable;
 use crate::position_utils::PositionUtils;
 use crate::representations_ids::FACTION_REPRESENTATION_ID;
@@ -10,8 +10,7 @@ use crate::squad_types::SquadType;
 use crate::squads_grid_manager::SquadsGrid;
 use crate::Factory;
 use crate::World;
-use ai::{ArtificialIntelligence, PurposeType};
-pub use ai::{FactionInfo, Place, PlaceType};
+pub use ai::{ArtificialIntelligence, FactionInfo, Place, PlaceType, PurposeType};
 use squad_manager::SquadsManager;
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -39,12 +38,13 @@ pub struct Faction {
 impl Faction {
   pub fn new(
     id: u32,
+    factory_id: u32,
     factory_x: f32,
     factory_y: f32,
     factory_angle: f32,
     is_user: bool,
   ) -> Faction {
-    let mut portal = Squad::new(id, SquadType::Portal);
+    let mut portal = Squad::new(id, factory_id, SquadType::Portal);
     portal.add_member(factory_x, factory_y);
     portal.update_center();
     let portal_id = portal.members[0].borrow().id;
@@ -117,7 +117,7 @@ impl Faction {
     match result {
       Some(squad_type) => {
         let new_squad = SquadDuringCreation {
-          squad: Squad::new(self.id, squad_type),
+          squad: Squad::new(self.id, IdGenerator::generate_id(), squad_type),
           time_to_create_another_unit: 0,
         };
         self.squads_during_creation.push(new_squad);

@@ -1,5 +1,4 @@
 use crate::constants::MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS;
-use crate::id_generator::IdGenerator;
 use crate::position_utils::PositionUtils;
 use crate::squad_types::{get_squad_details, SquadDetails, SquadType};
 use crate::unit::{Unit, STATE_DIE};
@@ -18,7 +17,7 @@ pub struct SquadUnitSharedDataSet {
   pub weapon: &'static Weapon,
 }
 
-struct TaskTodo {
+pub struct TaskTodo {
   ability_target: Option<(f32, f32)>,
   track_destination: Option<(f32, f32)>,
   aim: Weak<RefCell<Squad>>,
@@ -36,10 +35,10 @@ pub struct Squad {
 }
 
 impl Squad {
-  pub fn new(faction_id: u32, squad_type: SquadType) -> Squad {
+  pub fn new(faction_id: u32, id: u32, squad_type: SquadType) -> Squad {
     let details = get_squad_details(&squad_type);
     Squad {
-      id: IdGenerator::generate_id(),
+      id,
       faction_id,
       members: vec![],
       squad_details: details,
