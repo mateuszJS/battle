@@ -59,6 +59,8 @@ use squads_grid_manager::{SquadsGrid, SquadsGridManager};
 
 const INDEX_OF_USER_FACTION: usize = 0;
 
+const THRESHOLD_ARE_TWO_SQUADS_NEIGHBORS: f32 = 1.5 * THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER;
+
 pub struct World {
   bullets_manager: BulletsManager,
   squads_on_grid: SquadsGrid,
@@ -396,7 +398,7 @@ impl Universe {
     not_checked_yet.retain(|ref_cell_squad| {
       let position = ref_cell_squad.borrow().shared.center_point;
       if (source_position.0 - position.0).hypot(source_position.1 - position.1)
-        < THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER
+        < THRESHOLD_ARE_TWO_SQUADS_NEIGHBORS
       {
         neighbors.push(ref_cell_squad.clone());
         false
