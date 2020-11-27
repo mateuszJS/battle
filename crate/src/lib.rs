@@ -594,12 +594,11 @@ impl Universe {
     let mut factions = vec![];
     let mut index = 0;
     let mut faction_id: i32 = -1;
-    log!("{:?}", input);
+
     while index < input.len() {
       let value = input[index];
-      log!("2");
+
       if (value + 1.0).abs() < std::f32::EPSILON {
-        log!("3");
         // if it's equal -1
         faction_id += 1;
         let faction = Faction::new(
@@ -613,19 +612,22 @@ impl Universe {
         factions.push(faction);
         index += 4;
       } else {
-        log!("4");
         let mut squad = Squad::new(faction_id as u32, value.round() as u32, SquadType::Solider);
-        squad.add_member(
-          input[index + 1], // x
-          input[index + 2], // y
-        );
+
+        for i in 0..7 {
+          squad.add_member(
+            input[index + 1], // x
+            input[index + 2], // y
+          );
+        }
+
         factions[faction_id as usize]
           .squads
           .push(Rc::new(RefCell::new(squad)));
         index += 3;
       }
     }
-    log!("1");
+
     factions.iter_mut().for_each(|faction| {
       faction.update_squads_centers();
     });

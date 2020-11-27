@@ -145,6 +145,17 @@ impl ArtificialIntelligence {
               // if enemies are within RADIUS_OF_DANGER_ZONE_AROUND_THE_PORTAL then add it to "enemies_influence_around_our_portal"
 
               // if is attacking, then higher value and purpose is attack
+              log!(
+                "squads: {:?}, influence: {}, distance: {}, signification: {}",
+                place
+                  .squads
+                  .iter()
+                  .map(|ref_cell_squad| ref_cell_squad.borrow().id)
+                  .collect::<Vec<u32>>(),
+                place.influence,
+                distance,
+                place.influence * 0.5 - distance * 0.01
+              );
               (PurposeType::Attack, place.influence * 0.5 - distance * 0.01)
             }
           };
@@ -414,6 +425,7 @@ impl ArtificialIntelligence {
         let option_enemy_on_track =
           self.get_first_enemy_groups_on_track(purpose, our_squad, squads_grid, &enemy_squads_ids);
         if let Some((enemy_squads_ids, enemy_influence)) = option_enemy_on_track {
+          log!("enemy_squads_ids: {:?}", enemy_squads_ids);
           // here we are counting how many our sqyads will got enemy on the track
           // if this one particular group of enemy was met a couple of times, and we got
           // enough influence to bet them, then we can use our influence as there is no enemy of the track
@@ -421,7 +433,7 @@ impl ArtificialIntelligence {
           let option_met_enemy = already_met_enemies.iter_mut().find(|met_enemy| {
             enemy_squads_ids
               .iter()
-              .any(|enemy_squad_id| met_enemy.enemy_squads_ids.contains(&enemy_squad_id))
+              .all(|enemy_squad_id| met_enemy.enemy_squads_ids.contains(&enemy_squad_id))
           });
 
           let our_squad_influence = self.our_power_factor * our_squad.get_influence();
@@ -448,6 +460,9 @@ impl ArtificialIntelligence {
                 enemy_influence,
               )
             };
+          log!("our_blocked_squads_ids: {:?}", our_blocked_squads_ids);
+          log!("our_blocked_influence: {}", our_blocked_influence);
+          log!("blocking_enemy_influence: {}", blocking_enemy_influence);
           if blocking_enemy_influence <= our_blocked_influence {
             collected_our_influence += our_blocked_influence;
             used_squads_ids.append(&mut our_blocked_squads_ids);
@@ -496,12 +511,12 @@ impl ArtificialIntelligence {
     our_faction_info
       .places
       .iter()
-      .map(|place| {
+      .flat_map(|place| {
         let squads_nearby = SquadsGridManager::get_squads_in_area(
           squads_grid,
           place.x,
           place.y,
-          MAX_POSSIBLE_WEAPON_RANGE, // maybe we should make a const or something with it
+          0.0, // MAX_POSSIBLE_WEAPON_RANGE, // maybe we should make a const or something with it
         );
         let our_squads_ids = place
           .squads
@@ -518,7 +533,6 @@ impl ArtificialIntelligence {
           if let Some(some_ref_cell_squad) = some_weak_squad.upgrade() {
             let some_squad = some_ref_cell_squad.borrow();
             if some_squad.faction_id != self.faction_id {
-              // much better would be to push place or EnhancedPurpose, because we will need it in the future
               collected_enemies_squads_ids_around.push(some_squad.id);
               collected_enemies_influence_around += some_squad.get_influence();
               if let Some(enemy_aim) = some_squad.shared.aim.upgrade() {
@@ -530,13 +544,16 @@ impl ArtificialIntelligence {
             }
           }
         }
-
-        OurSquadsGroupSafetyInfo {
-          collected_enemies_influence_who_attacks_us,
-          collected_enemies_influence_around,
-          collected_enemies_squads_ids_who_attacks_us,
-          collected_enemies_squads_ids_around,
-          our_squads_ids,
+        if collected_enemies_squads_ids_around.len() > 0 {
+          Some(OurSquadsGroupSafetyInfo {
+            collected_enemies_influence_who_attacks_us,
+            collected_enemies_influence_around,
+            collected_enemies_squads_ids_who_attacks_us,
+            collected_enemies_squads_ids_around,
+            our_squads_ids,
+          })
+        } else {
+          None
         }
       })
       .collect::<Vec<OurSquadsGroupSafetyInfo>>()
@@ -566,7 +583,12 @@ impl ArtificialIntelligence {
           .iter()
           .find(|reserved_squad| reserved_squad.squad_id == *squad_id);
         if let Some(reserved_squad) = option_reserved_squad {
-          if reserved_squad.reserved_purpose_signification * 0.6 < danger_signification {
+          if reserved_squad.reserved_purpose_signification * 0.6 < danger_signification || true {
+            // TODO: rn we have signification od running away = 2
+            // we should do it in smarter way
+            // like if there is too many enemies, then don't run though them
+            // bc our units will be killed
+
             // do not care about enemy, if purpose is SO important
             squads_ids_which_will_react.push(*squad_id);
             collected_our_influence += our_squads
@@ -591,6 +613,7 @@ impl ArtificialIntelligence {
           new_purposes
             .iter()
             .position(|new_purpose| {
+              // TODO: eventually we can sort by distance, to take the closest one
               new_purpose.purpose_type == PurposeType::Attack
                 && new_purpose.place.squads.iter().any(|ref_cell_squad| {
                   safety_info
@@ -643,8 +666,8 @@ impl ArtificialIntelligence {
 
   fn sort_purposes(purposes: &mut Vec<EnhancedPurpose>) {
     purposes.sort_by(|a_purpose, b_purpose| {
-      (a_purpose.signification)
-        .partial_cmp(&b_purpose.signification)
+      (b_purpose.signification)
+        .partial_cmp(&a_purpose.signification)
         .unwrap()
     });
   }
@@ -686,6 +709,15 @@ impl ArtificialIntelligence {
 
     for (index, purpose) in new_purposes.iter().enumerate() {
       /*=============CHECKING IF CURRENT PLAN EXISTS IN NEW PURPOSES==================*/
+      log!(
+        "===========purpose.place.squads: {:?}",
+        purpose
+          .place
+          .squads
+          .iter()
+          .map(|ref_cell_squad| ref_cell_squad.borrow().id)
+          .collect::<Vec<u32>>()
+      );
       let option_existing_plan = transition_from_current_plan_to_new_plans
         .iter()
         .find(|transition_plan| transition_plan.index_of_purpose == index);
