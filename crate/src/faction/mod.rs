@@ -1,4 +1,5 @@
 mod ai;
+mod signification_calculator;
 mod squad_manager;
 use crate::constants::MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE;
 use crate::id_generator::IdGenerator;

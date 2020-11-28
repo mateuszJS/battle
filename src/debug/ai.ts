@@ -49,6 +49,11 @@ const createNewFaction = (id?: number, color?: string, complementaryColor?: stri
       isDown = false
     })
 
+    squadNode.addEventListener('dblclick', () => {
+      groundNode.removeChild(squadNode)
+      faction.squads = faction.squads.filter(({ id }) => newSquad.id !== id)
+    })
+
     document.addEventListener('mousemove', event => {
       if (isDown) {
         newSquad.x += event.movementX

@@ -96,7 +96,7 @@ pub static NON_WEAPON: Weapon = Weapon {
 };
 
 // TODO: always remember to update this const
-pub static MAX_POSSIBLE_WEAPON_RANGE: f32 = 600.0;
+pub const MAX_POSSIBLE_WEAPON_RANGE: f32 = 600.0;
 
 pub fn get_weapon_details(weapon_type: &WeaponType) -> &'static Weapon {
   match *weapon_type {
