@@ -247,6 +247,7 @@ impl ArtificialIntelligence {
         y: purpose.place.y,
       }
     } else {
+      log!("1");
       Plan {
         purpose_type: PurposeType::PrepareToDefend,
         squads_ids: reserved_not_stolen_squads_ids,
@@ -283,7 +284,7 @@ impl ArtificialIntelligence {
         next_point.0,
         next_point.1,
       );
-
+      log!("squads_nearby: {}", squads_nearby.len());
       /*==========CHECK IF THERE ARE ANY ENEMIES AROUND THE POINT============*/
       let mut collected_enemy_influence = 0.0;
       let mut collected_enemy_squads_ids = vec![];
@@ -329,12 +330,6 @@ impl ArtificialIntelligence {
     let mut used_squads_ids = vec![];
     let mut collected_our_influence = 0.0;
 
-    /*
-    HANDLE DETECTING IF OUR SQUADS ARE IN DANGER
-    1. Go over all enemy squads around our group of squads
-    2. Check if they are attacking us! Maybe there are 3 factions in the battle, if we are not attacking by any of rest 2, then why should we run
-    */
-
     let enemy_squads_ids = purpose
       .place
       .squads
@@ -343,11 +338,11 @@ impl ArtificialIntelligence {
       .collect::<Vec<u32>>();
 
     let mut already_met_enemies: Vec<MetEnemyOnTrack> = vec![];
-    // (enemy_squads_ids, our_collected_squads_ids, our_collected_influence)
 
     while collected_our_influence < purpose.place.influence && our_squads_last_index > 0 {
       our_squads_last_index -= 1;
       let our_squad = &our_squads[our_squads_last_index];
+      log!("our_squad: {}", our_squad.id);
       let option_reserved_squad = squads_reserved_for_this_purpose
         .iter()
         .find(|reserved_squad| reserved_squad.squad_id == our_squad.id);
@@ -359,7 +354,10 @@ impl ArtificialIntelligence {
       } else {
         true
       };
-
+      log!(
+        "squad_can_be_taken_by_purpose: {}",
+        squad_can_be_taken_by_purpose
+      );
       if squad_can_be_taken_by_purpose {
         // TODO: each purposes should have their own modifier/factor of our influence
         // TODO: also influence should be multiplied by distance, longer distance then smaller influence!
@@ -367,7 +365,9 @@ impl ArtificialIntelligence {
         //******************** EXTRACT TO ANOTHER FUNCTION
         let option_enemy_on_track =
           self.get_first_enemy_groups_on_track(purpose, our_squad, squads_grid, &enemy_squads_ids);
+        // defenietly we are tacking enemies much from too big range
         if let Some((enemy_squads_ids, enemy_influence)) = option_enemy_on_track {
+          log!("enemy_squads_ids: {:?}", enemy_squads_ids);
           // here we are counting how many our sqyads will got enemy on the track
           // if this one particular group of enemy was met a couple of times, and we got
           // enough influence to bet them, then we can use our influence as there is no enemy of the track
@@ -383,10 +383,14 @@ impl ArtificialIntelligence {
             if let Some(met_enemy) = option_met_enemy {
               met_enemy.our_collected_squads_ids.push(our_squad.id);
               met_enemy.our_collected_influence += our_squad_influence;
+              log!(
+                "already existing MetEnemyOnTrack influence: {}",
+                met_enemy.enemy_influence
+              );
               (
                 &mut met_enemy.our_collected_squads_ids,
                 met_enemy.our_collected_influence,
-                met_enemy.enemy_influence,
+                met_enemy.enemy_influence, // raised up, weirdo!
               )
             } else {
               let new_entry = MetEnemyOnTrack {
@@ -396,24 +400,35 @@ impl ArtificialIntelligence {
                 our_collected_influence: our_squad_influence,
               };
               already_met_enemies.push(new_entry);
+              log!("new created MetEnemyOnTrack influence: {}", enemy_influence);
               (
                 &mut already_met_enemies[0].our_collected_squads_ids,
                 our_squad_influence,
-                enemy_influence,
+                enemy_influence, // raised up, weirdo!
               )
             };
+          log!(
+            "blocking_enemy_influence: {}, our_blocked_influence: {}",
+            blocking_enemy_influence,
+            our_blocked_influence
+          );
           if blocking_enemy_influence <= our_blocked_influence {
             collected_our_influence += our_blocked_influence;
             used_squads_ids.append(&mut our_blocked_squads_ids);
           }
           continue;
         }
+        log!("DIDN'T met some enemy of the track");
         //********************
         used_squads_ids.push(our_squad.id);
         collected_our_influence += self.signi_calc.influence_our_squad_new_purpose(our_squad);
       }
     }
-
+    log!(
+      "new purpose influence comparison: {} >= {}",
+      collected_our_influence,
+      purpose.place.influence
+    );
     if collected_our_influence >= purpose.place.influence {
       our_squads.retain(|squad| !used_squads_ids.contains(&squad.id));
 
@@ -537,53 +552,51 @@ impl ArtificialIntelligence {
           .iter()
           .position(|reserved_squad| reserved_squad.squad_id == *squad_id);
 
-        if option_reserved_squad_index.is_none()
-          || self.signi_calc.is_purpose_less_important_than_danger(
-            &reserved_squads[option_reserved_squad_index.unwrap()],
+        if let Some(reserved_squad_index) = option_reserved_squad_index {
+          if self.signi_calc.is_purpose_less_important_than_danger(
+            &reserved_squads[reserved_squad_index],
             &safety_info,
-          )
-        // otherwise squads continue doing purposes, don't care about enemy nearby
-        {
-          let option_our_squad = our_squads.iter().find(|squad| squad.id == *squad_id);
-          // TODO: at this point we should remove that item from reservation!
-          // and also removed squad id from transition current plans ot new purposes array!
-          if let Some(our_squad) = option_our_squad {
-            reserved_squads.remove(option_reserved_squad_index.unwrap());
-            squads_ids_which_will_react.push(*squad_id);
-            collected_our_influence += self
-              .signi_calc
-              .influence_our_squads_in_danger_situation(our_squad);
-          } else {
-            // IT"S NOT A SQUAD, IT"S PORTAL, STRATEGIC POINT etc.
+          ) {
+            // otherwise squads continue doing purposes, don't care about enemy nearby
+            let option_our_squad = our_squads.iter().find(|squad| squad.id == *squad_id);
+            if let Some(our_squad) = option_our_squad {
+              reserved_squads.remove(reserved_squad_index);
+              squads_ids_which_will_react.push(*squad_id);
+              collected_our_influence += self
+                .signi_calc
+                .influence_our_squads_in_danger_situation(our_squad);
+            } else {
+              // IT"S NOT A SQUAD, IT"S PORTAL, STRATEGIC POINT etc.
 
-            new_purposes.iter_mut().for_each(|new_purpose| {
-              // because this is nto a squad, so cannot run away or attack
-              // so have to add new purpose to defend that object!
-              // this is the only one place when we are adding defend type of purpose
-              if new_purpose.purpose_type == PurposeType::Attack {
-                new_purpose.signification =
-                  new_purpose
-                    .place
-                    .squads
-                    .iter()
-                    .fold(0.0, |acc, ref_cell_enemy_squad| {
-                      let enemy_squad = ref_cell_enemy_squad.borrow();
-                      if safety_info
-                        .collected_enemies_squads_ids_who_attacks_us
-                        .contains(&enemy_squad.id)
-                      {
-                        acc + enemy_squad.get_influence() * 0.1
-                      } else if safety_info
-                        .collected_enemies_squads_ids_around
-                        .contains(&enemy_squad.id)
-                      {
-                        acc + enemy_squad.get_influence() * 0.05
-                      } else {
-                        acc
-                      }
-                    });
-              }
-            });
+              new_purposes.iter_mut().for_each(|new_purpose| {
+                // because this is nto a squad, so cannot run away or attack
+                // so have to add new purpose to defend that object!
+                // this is the only one place when we are adding defend type of purpose
+                if new_purpose.purpose_type == PurposeType::Attack {
+                  new_purpose.signification =
+                    new_purpose
+                      .place
+                      .squads
+                      .iter()
+                      .fold(0.0, |acc, ref_cell_enemy_squad| {
+                        let enemy_squad = ref_cell_enemy_squad.borrow();
+                        if safety_info
+                          .collected_enemies_squads_ids_who_attacks_us
+                          .contains(&enemy_squad.id)
+                        {
+                          acc + enemy_squad.get_influence() * 0.1
+                        } else if safety_info
+                          .collected_enemies_squads_ids_around
+                          .contains(&enemy_squad.id)
+                        {
+                          acc + enemy_squad.get_influence() * 0.05
+                        } else {
+                          acc
+                        }
+                      });
+                }
+              });
+            }
           }
         }
       });
@@ -607,10 +620,10 @@ impl ArtificialIntelligence {
               })
               .unwrap() // let's find first purpose which have even one enemy squad which attack us
                         // we are collecting ALL possible purposes, so ALL enemy squads are included in our purposes
-
-          // TODO: prob we should also increase signification of that enemy, not only reserved our squads!
+                        // TODO: prob we should also increase signification of that enemy, not only reserved our squads!
           } else {
             // TODO: RUN TO SAFE PLACE
+            log!("2");
             new_purposes.push(EnhancedPurpose {
               purpose_type: PurposeType::PrepareToDefend,
               signification: self.signi_calc.signification_running_to_safe_place(),
@@ -619,7 +632,6 @@ impl ArtificialIntelligence {
             new_purposes.len() - 1
           };
 
-        // TODO: add reservation also! It's always should be like when there is transition also there should be reservation!!!
         squads_ids_which_will_react
           .into_iter()
           .for_each(|squad_id| {
@@ -691,7 +703,7 @@ impl ArtificialIntelligence {
       if our_squads.len() > 0 {
         // TODO: do we still need this? It should be above? handle_already_involved_purposes
         // also shouldn't be handled if there is no our_squads
-        // becuase we are not doign any "hard reservation" like remove from our_squads before loop over all purposes
+        // because we are not doign any "hard reservation" like remove from our_squads before loop over all purposes
         let option_new_plan = self.handle_new_purposes(
           &mut our_squads,
           purpose,
@@ -699,6 +711,7 @@ impl ArtificialIntelligence {
           squads_grid,
         );
         if let Some(new_plan) = option_new_plan {
+          log!("final_purposes.push(new_plan)");
           final_purposes.push(new_plan)
         }
       }
@@ -711,7 +724,7 @@ impl ArtificialIntelligence {
         .iter()
         .map(|squad| squad.id)
         .collect::<Vec<u32>>();
-
+      log!("3");
       final_purposes.push(Plan {
         purpose_type: PurposeType::PrepareToDefend,
         squads_ids,
