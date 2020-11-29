@@ -21,9 +21,8 @@ impl SignificationCalculator {
     1.0
   }
 
-  pub fn signification_enemy_squads(&self, enemy_squads: &Place, our_portal: &Place) -> f32 {
-    let distance = (enemy_squads.x - our_portal.x).hypot(enemy_squads.y - our_portal.y);
-    enemy_squads.influence * 0.5 - distance * 0.01
+  pub fn signification_enemy_squads(&self, enemy_squads: &Place) -> f32 {
+    enemy_squads.influence
   }
 
   pub fn how_much_squad_fits_to_take_purpose(
