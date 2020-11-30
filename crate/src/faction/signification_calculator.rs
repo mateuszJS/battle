@@ -3,8 +3,6 @@ use super::Squad;
 use crate::weapon_types::MAX_POSSIBLE_WEAPON_RANGE;
 use std::cell::Ref;
 
-const RADIUS_OF_DANGER_ZONE_AROUND_THE_PORTAL: f32 = MAX_POSSIBLE_WEAPON_RANGE * 1.5;
-
 pub struct SignificationCalculator {
   our_power_factor: f32,
   influence_factor_already_engagement_squads: f32,
@@ -67,7 +65,7 @@ impl SignificationCalculator {
     reserved_squad: &ReservedSquad,
     purpose: &EnhancedPurpose,
   ) -> bool {
-    reserved_squad.reserved_purpose_signification * 0.85 < purpose.signification
+    reserved_squad.purpose_signification * 0.85 < purpose.signification
   }
 
   pub fn influence_enemy_squad_attacks_us(&self, enemy_squad: &Ref<Squad>) -> f32 {
@@ -78,7 +76,7 @@ impl SignificationCalculator {
     enemy_squad.get_influence()
   }
 
-  pub fn is_purpose_less_important_than_danger(
+  pub fn should_squad_react_on_met_danger(
     &self,
     reserved_squad: &ReservedSquad,
     safety_info: &OurSquadsGroupSafetyInfo,
@@ -87,8 +85,7 @@ impl SignificationCalculator {
     // we should do it in smarter way
     // like if there is too many enemies, then don't run though them
     // bc our units will be killed
-    reserved_squad.reserved_purpose_signification * 4.0
-      < safety_info.collected_enemies_influence_around
+    reserved_squad.purpose_signification * 4.0 < safety_info.collected_enemies_influence_around
     // also handle enemies which attacks us
   }
 
@@ -98,18 +95,5 @@ impl SignificationCalculator {
 
   pub fn signification_running_to_safe_place(&self) -> f32 {
     2.0
-  }
-
-  pub fn influence_enemy_squads_around_our_portal(
-    &self,
-    enemy_squads: &Place,
-    our_portal: &Place,
-  ) -> f32 {
-    let distance = (enemy_squads.x - our_portal.x).hypot(enemy_squads.y - our_portal.y);
-    if distance < RADIUS_OF_DANGER_ZONE_AROUND_THE_PORTAL {
-      enemy_squads.influence
-    } else {
-      0.0
-    }
   }
 }

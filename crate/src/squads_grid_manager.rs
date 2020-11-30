@@ -3,11 +3,13 @@ use crate::constants::{
   GRID_CELL_SIZE, GRID_MAP_HEIGHT, GRID_MAP_SCALE_AVG, GRID_MAP_SCALE_X, GRID_MAP_SCALE_Y,
   GRID_MAP_WIDTH, NORMAL_SQUAD_RADIUS, THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER,
 };
+use crate::weapon_types::MAX_POSSIBLE_WEAPON_RANGE;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::{Rc, Weak};
 
-const DISTANCE_THRESHOLD_THERE_IS_ENEMY_ON_PATH: f32 = 400.0;
+// TODO: if portals are too close to each other, then it should be smaller!
+const DISTANCE_THRESHOLD_THERE_IS_ENEMY_ON_PATH: f32 = 0.75 * MAX_POSSIBLE_WEAPON_RANGE;
 
 pub type SquadsGrid = HashMap<usize, Vec<Weak<RefCell<Squad>>>>;
 
@@ -63,8 +65,7 @@ impl SquadsGridManager {
     line_end_y: f32,
   ) -> Vec<Weak<RefCell<Squad>>> {
     let angle_from_start = (line_end_x - line_start_x).atan2(line_start_y - line_end_y);
-    let range = DISTANCE_THRESHOLD_THERE_IS_ENEMY_ON_PATH;
-    let step_distance = 2.0 * range;
+    let step_distance = 2.0 * DISTANCE_THRESHOLD_THERE_IS_ENEMY_ON_PATH;
     let mod_x = angle_from_start.sin() * step_distance;
     let mod_y = -angle_from_start.cos() * step_distance;
     let total_distance = (line_start_x - line_end_x).hypot(line_start_y - line_end_y);
@@ -76,7 +77,7 @@ impl SquadsGridManager {
         SquadsGridManager::get_indexes_in_area(
           line_start_x + index as f32 * mod_x,
           line_start_y + index as f32 * mod_y,
-          range,
+          DISTANCE_THRESHOLD_THERE_IS_ENEMY_ON_PATH,
         )
       })
       .collect::<Vec<usize>>();

@@ -13,7 +13,7 @@ pub const AI_CALCULATION_PERIOD: u32 = 2 * MANAGE_HUNTERS_PERIOD;
 pub const MAP_WIDTH: f32 = 2700.0;
 pub const MAP_HEIGHT: f32 = 2100.0;
 
-pub const GRID_CELL_SIZE: f32 = 400.0;
+pub const GRID_CELL_SIZE: f32 = 300.0;
 const GRID_MAP_SCALE: f32 = 1.0 / GRID_CELL_SIZE;
 pub const GRID_MAP_WIDTH: usize = (MAP_WIDTH * GRID_MAP_SCALE + 1.0) as usize;
 pub const GRID_MAP_HEIGHT: usize = (MAP_HEIGHT * GRID_MAP_SCALE + 1.0) as usize;
