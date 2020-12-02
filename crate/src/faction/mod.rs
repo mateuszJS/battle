@@ -277,7 +277,7 @@ impl Faction {
         PurposeType::Attack => {
           self.task_attack_enemy(&plan.squads_ids, &plan.enemy_squads[0]);
         }
-        PurposeType::PrepareToDefend => {
+        PurposeType::RunToSafePlace => {
           self.task_add_target(&plan.squads_ids, plan.x, plan.y);
         }
       })

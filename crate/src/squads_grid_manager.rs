@@ -57,7 +57,7 @@ impl SquadsGridManager {
     scaled_y * GRID_MAP_WIDTH + scaled_x
   }
 
-  pub fn get_squads_in_line(
+  pub fn get_first_met_squads(
     grid: &SquadsGrid,
     line_start_x: f32,
     line_start_y: f32,

@@ -1,0 +1,248 @@
+use super::SignificationCalculator;
+use super::{
+  EnhancedPurpose, FactionInfo, OurSquadsGroupSafetyInfo, Place, PlaceType, PurposeType,
+  ReservedSquad,
+};
+use crate::squads_grid_manager::{SquadsGrid, SquadsGridManager};
+use crate::Squad;
+use std::cell::Ref;
+
+use crate::weapon_types::MAX_POSSIBLE_WEAPON_RANGE;
+
+pub struct SafetyManager {}
+
+impl SafetyManager {
+  fn get_info_about_safety<'a>(
+    our_faction_id: u32,
+    signi_calc: &SignificationCalculator,
+    all_factions_info: &'a Vec<FactionInfo>,
+    squads_grid: &SquadsGrid,
+  ) -> Vec<OurSquadsGroupSafetyInfo<'a>> {
+    // in params we should get our squads group
+    let our_faction_info = all_factions_info
+      .iter()
+      .find(|faction_info| faction_info.id == our_faction_id)
+      .unwrap();
+
+    our_faction_info
+      .places
+      .iter()
+      .flat_map(|place| {
+        let threshold_enemies_around = match place.place_type {
+          PlaceType::Portal => MAX_POSSIBLE_WEAPON_RANGE * 1.5,
+          PlaceType::Squads => MAX_POSSIBLE_WEAPON_RANGE,
+        };
+        let squads_nearby = SquadsGridManager::get_squads_in_area(
+          squads_grid,
+          place.x,
+          place.y,
+          threshold_enemies_around,
+        );
+
+        let our_squads_ids = place
+          .squads
+          .iter()
+          .map(|ref_cell_squad| ref_cell_squad.borrow().id)
+          .collect::<Vec<u32>>();
+        let mut collected_enemies_squads_ids_who_attacks_us = vec![];
+        let mut collected_enemies_squads_ids_around = vec![];
+        let mut collected_enemies_influence_who_attacks_us = 0.0;
+        let mut collected_enemies_influence_around = 0.0;
+        /*==========CHECK IF THERE ARE ANY ENEMIES AROUND THE POINT============*/
+
+        for some_weak_squad in squads_nearby.iter() {
+          if let Some(some_ref_cell_squad) = some_weak_squad.upgrade() {
+            let some_squad = some_ref_cell_squad.borrow();
+            if some_squad.faction_id != our_faction_id {
+              collected_enemies_squads_ids_around.push(some_squad.id);
+              collected_enemies_influence_around +=
+                signi_calc.influence_enemy_squad_around_us(&some_squad);
+              if let Some(enemy_aim) = some_squad.shared.aim.upgrade() {
+                if our_squads_ids.contains(&enemy_aim.borrow().id) {
+                  collected_enemies_squads_ids_who_attacks_us.push(some_squad.id);
+                  collected_enemies_influence_who_attacks_us +=
+                    signi_calc.influence_enemy_squad_attacks_us(&some_squad);
+                }
+              }
+            }
+          }
+        }
+
+        if collected_enemies_squads_ids_around.len() > 0 {
+          Some(OurSquadsGroupSafetyInfo {
+            collected_enemies_influence_who_attacks_us,
+            collected_enemies_influence_around,
+            collected_enemies_squads_ids_who_attacks_us,
+            collected_enemies_squads_ids_around,
+            our_squads_ids,
+            place,
+          })
+        } else {
+          None
+        }
+      })
+      .collect::<Vec<OurSquadsGroupSafetyInfo>>()
+  }
+
+  pub fn handle_squads_safety<'a>(
+    our_faction_id: u32,
+    signi_calc: &SignificationCalculator,
+    our_squads: &Vec<Ref<Squad>>,
+    reserved_squads: &mut Vec<ReservedSquad>,
+    all_factions_info: &'a Vec<FactionInfo>,
+    squads_grid: &SquadsGrid,
+    new_purposes: &mut Vec<EnhancedPurpose<'a>>,
+  ) {
+    let our_squads_safety = SafetyManager::get_info_about_safety(
+      our_faction_id,
+      signi_calc,
+      all_factions_info,
+      squads_grid,
+    );
+
+    our_squads_safety.iter().for_each(|safety_info| {
+      let mut collected_our_influence = 0.0;
+      let mut squads_ids_which_will_react = vec![];
+
+      safety_info.our_squads_ids.iter().for_each(|squad_id| {
+        let option_reserved_squad_index = reserved_squads
+          .iter()
+          .position(|reserved_squad| reserved_squad.squad_id == *squad_id);
+
+        let squad_cares_about_danger = if let Some(reserved_squad_index) =
+          option_reserved_squad_index
+        {
+          if signi_calc
+            .should_squad_react_on_met_danger(&reserved_squads[reserved_squad_index], &safety_info)
+          {
+            reserved_squads.remove(reserved_squad_index);
+            true
+          } else {
+            false
+          }
+        } else {
+          true
+        };
+
+        if squad_cares_about_danger {
+          // otherwise squads continue doing purposes, don't care about enemy nearby
+          let option_our_squad = our_squads.iter().find(|squad| squad.id == *squad_id);
+          if let Some(our_squad) = option_our_squad {
+            squads_ids_which_will_react.push(*squad_id);
+            collected_our_influence +=
+              signi_calc.influence_our_squads_in_danger_situation(our_squad);
+          } else {
+            // IT"S NOT A SQUAD, IT"S PORTAL, STRATEGIC POINT etc.
+            let new_purpose = new_purposes.iter_mut().for_each(|new_purpose| {
+              // because this is not a squad, so cannot run away or attack
+              // so have to add new purpose to defend that object!
+              // this is the only one place when we are adding defend type of purpose
+              if new_purpose.purpose_type == PurposeType::Attack {
+                new_purpose.signification =
+                  new_purpose
+                    .place
+                    .squads
+                    .iter()
+                    .fold(0.0, |acc, ref_cell_enemy_squad| {
+                      let enemy_squad = ref_cell_enemy_squad.borrow();
+                      if safety_info
+                        .collected_enemies_squads_ids_who_attacks_us
+                        .contains(&enemy_squad.id)
+                      {
+                        acc + enemy_squad.get_influence() * 0.1
+                      } else if safety_info
+                        .collected_enemies_squads_ids_around
+                        .contains(&enemy_squad.id)
+                      {
+                        acc + enemy_squad.get_influence() * 0.05
+                      } else {
+                        acc
+                      }
+                    });
+              }
+            });
+          }
+        }
+      });
+
+      if squads_ids_which_will_react.len() > 0 {
+        // Portal and strategic point won't get here!
+
+        let (purpose_id, purpose_signification) =
+          if collected_our_influence >= safety_info.collected_enemies_influence_around {
+            let new_purpose = new_purposes
+              .iter()
+              .find(|new_purpose| {
+                // TODO: eventually we can sort by distance, to take the closest one
+                new_purpose.purpose_type == PurposeType::Attack
+                  && new_purpose.place.squads.iter().any(|ref_cell_squad| {
+                    safety_info
+                      .collected_enemies_squads_ids_around
+                      .contains(&ref_cell_squad.borrow().id)
+                    // TODO: we should also increase signification on that purpose!!!
+                  })
+              })
+              .unwrap();
+
+            (new_purpose.id, new_purpose.signification)
+          // let's find first purpose which have even one enemy squad which attack us
+          // we are collecting ALL possible purposes, so ALL enemy squads are included in our purposes
+          // TODO: prob we should also increase signification of that enemy, not only reserved our squads!
+          } else {
+            let new_id = new_purposes.len();
+            let signification = signi_calc.signification_running_to_safe_place();
+            let safe_destination_index =
+              SafetyManager::get_safe_destination_index(&safety_info, &our_squads_safety);
+
+            new_purposes.push(EnhancedPurpose {
+              id: new_id,
+              purpose_type: PurposeType::RunToSafePlace,
+              signification: signi_calc.signification_running_to_safe_place(),
+              place: our_squads_safety[safe_destination_index].place,
+            });
+
+            (new_id, signification)
+          };
+
+        squads_ids_which_will_react
+          .into_iter()
+          .for_each(|squad_id| {
+            reserved_squads.push(ReservedSquad {
+              purpose_id,
+              purpose_signification: purpose_signification,
+              squad_id,
+            });
+          });
+      }
+    });
+  }
+
+  fn get_safe_destination_index(
+    safety_info: &OurSquadsGroupSafetyInfo,
+    our_squads_safety: &Vec<OurSquadsGroupSafetyInfo>,
+  ) -> usize {
+    let place_x = safety_info.place.x;
+    let place_y = safety_info.place.y;
+
+    let mut min_index = 0;
+    let mut min_value = std::f32::MAX;
+    our_squads_safety
+      .iter()
+      .enumerate()
+      .for_each(|(index, safety_place)| {
+        let distance = (place_x - safety_place.place.x).hypot(place_y - safety_place.place.y);
+        let value = if distance < 1.0 {
+          std::f32::MAX // it's the same place
+        } else {
+          distance * 0.5 + safety_place.collected_enemies_influence_around
+        };
+
+        if min_value > value {
+          min_value = value;
+          min_index = index;
+        }
+      });
+
+    min_index
+  }
+}
