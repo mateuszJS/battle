@@ -1,5 +1,5 @@
 use super::SignificationCalculator;
-use super::{EnhancedPurpose, Place, Plan, PurposeType, ReservedSquad};
+use super::{EnhancedPurpose, Plan, PurposeType, ReservedSquad};
 use crate::Squad;
 use std::cell::{Ref, RefCell};
 use std::rc::{Rc, Weak};
@@ -34,7 +34,9 @@ impl AlreadyHandledPurposesManager {
 
     our_squads.retain(|squad| !reserved_not_stolen_squads_ids.contains(&squad.id));
 
-    if collected_our_influence >= purpose.place.influence {
+    if purpose.purpose_type == PurposeType::RunToSafePlace
+      || collected_our_influence >= purpose.place.influence
+    {
       let enemy_squads = purpose
         .place
         .squads

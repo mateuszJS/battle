@@ -163,9 +163,6 @@ impl NewPurposesManager {
       };
 
       if squad_can_be_taken_by_purpose {
-        // TODO: each purposes should have their own modifier/factor of our influence
-        // TODO: also influence should be multiplied by distance, longer distance then smaller influence!
-
         //******************** EXTRACT TO ANOTHER FUNCTION
         let option_enemy_on_track = NewPurposesManager::get_first_enemy_groups_on_track(
           our_faction_id,

@@ -1,6 +1,6 @@
-use super::ai::{EnhancedPurpose, OurSquadsGroupSafetyInfo, Place, ReservedSquad};
 use super::Squad;
-use crate::weapon_types::MAX_POSSIBLE_WEAPON_RANGE;
+use super::{EnhancedPurpose, OurSquadsGroupSafetyInfo, Place, ReservedSquad};
+
 use std::cell::Ref;
 
 pub struct SignificationCalculator {
@@ -37,14 +37,14 @@ impl SignificationCalculator {
     -distance_to_purpose / our_squad.squad_details.movement_speed
   }
 
-  pub fn signification_our_portal(
-    &self,
-    place: &Place,
-    enemies_influence_around_our_portal: f32,
-    enemies_influence_who_attacks_our_portal: f32,
-  ) -> f32 {
-    enemies_influence_around_our_portal * 0.5 + enemies_influence_who_attacks_our_portal
-  }
+  // pub fn signification_our_portal(
+  //   &self,
+  //   place: &Place,
+  //   enemies_influence_around_our_portal: f32,
+  //   enemies_influence_who_attacks_our_portal: f32,
+  // ) -> f32 {
+  //   enemies_influence_around_our_portal * 0.5 + enemies_influence_who_attacks_our_portal
+  // }
 
   pub fn influence_our_squad_new_purpose(&self, our_squad: &Ref<Squad>) -> f32 {
     self.our_power_factor * our_squad.get_influence()
@@ -95,5 +95,33 @@ impl SignificationCalculator {
 
   pub fn signification_running_to_safe_place(&self) -> f32 {
     2.0
+  }
+
+  pub fn signification_enemy_around_our_building(&self, enemy_squad: &Ref<Squad>) -> f32 {
+    enemy_squad.get_influence() * 0.05
+  }
+
+  pub fn signification_enemy_attacks_our_building(&self, enemy_squad: &Ref<Squad>) -> f32 {
+    enemy_squad.get_influence() * 0.1
+  }
+
+  pub fn should_we_do_anything_in_danger(
+    &self,
+    influence_enemies_who_attacks_us: f32,
+    influence_enemies_around_us: f32,
+    collected_our_influence: f32,
+  ) -> bool {
+    influence_enemies_who_attacks_us > collected_our_influence * 0.15
+      || influence_enemies_around_us > collected_our_influence * 0.5
+  }
+
+  pub fn should_our_squads_in_danger_attack_enemy(
+    &self,
+    our_influence: f32,
+    enemies_influence_who_attacks_us: f32,
+    enemies_influence_around: f32,
+  ) -> bool {
+    our_influence >= enemies_influence_who_attacks_us
+      && 2.0 * our_influence >= enemies_influence_around
   }
 }

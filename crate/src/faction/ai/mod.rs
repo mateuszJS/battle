@@ -1,14 +1,15 @@
 mod already_handled_purposes_manager;
 mod new_purposes_manager;
 mod safety_manager;
+mod signification_calculator;
 mod utils;
 
-use super::signification_calculator::SignificationCalculator;
 use crate::squad::Squad;
 use crate::squads_grid_manager::SquadsGrid;
 use already_handled_purposes_manager::AlreadyHandledPurposesManager;
 use new_purposes_manager::NewPurposesManager;
 use safety_manager::SafetyManager;
+use signification_calculator::SignificationCalculator;
 use std::cell::{Ref, RefCell};
 use std::rc::{Rc, Weak};
 use utils::AiUtils;
