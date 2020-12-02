@@ -97,7 +97,6 @@ impl ArtificialIntelligence {
 
   pub fn work(
     &mut self,
-    our_factory_place: &Place,
     our_squads_ref_cells: &Vec<Rc<RefCell<Squad>>>,
     all_factions_info: &Vec<FactionInfo>,
     squads_grid: &SquadsGrid,
@@ -166,19 +165,28 @@ impl ArtificialIntelligence {
     }
 
     if our_squads.len() > 0 {
-      // TODO: each squad should go to support, not run away!
-      // Can also support nearest strategic point or portal!
-      let squads_ids = our_squads
-        .iter()
-        .map(|squad| squad.id)
-        .collect::<Vec<u32>>();
+      our_squads.iter().for_each(|our_squad| {
+        let mut min_distance = std::f32::MAX;
+        let mut min_index = -1_isize;
 
-      final_purposes.push(Plan {
-        purpose_type: PurposeType::RunToSafePlace,
-        squads_ids,
-        enemy_squads: vec![],
-        x: our_factory_place.x,
-        y: our_factory_place.y,
+        final_purposes
+          .iter()
+          .enumerate()
+          .for_each(|(index, new_plan)| {
+            if new_plan.purpose_type == PurposeType::Attack {
+              let squad_position = our_squad.shared.center_point;
+              let distance = (squad_position.0 - new_plan.x).hypot(squad_position.1 - new_plan.y);
+              if min_distance > distance {
+                min_distance = distance;
+                min_index = index as isize;
+              }
+            }
+          });
+        if min_index >= 0 {
+          final_purposes[min_index as usize]
+            .squads_ids
+            .push(our_squad.id);
+        }
       });
     }
 

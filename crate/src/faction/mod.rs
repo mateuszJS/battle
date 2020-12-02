@@ -252,24 +252,8 @@ impl Faction {
 
   pub fn do_ai(&mut self, all_factions_info: &Vec<FactionInfo>, squads_on_grid: &SquadsGrid) {
     let Self { ref squads, .. } = self;
-    let our_factory_place = {
-      let factory = self.portal_squad.borrow();
-      let factory_hp = factory.members[0].borrow().hp;
-      Place {
-        place_type: PlaceType::Portal,
-        influence: factory_hp / factory.squad_details.hp,
-        squads: vec![],
-        x: factory.shared.center_point.0,
-        y: factory.shared.center_point.1,
-      }
-    };
 
-    let squads_plans = self.ai.work(
-      &our_factory_place,
-      squads,
-      all_factions_info,
-      squads_on_grid,
-    );
+    let squads_plans = self.ai.work(squads, all_factions_info, squads_on_grid);
 
     squads_plans
       .into_iter()

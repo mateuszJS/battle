@@ -211,8 +211,17 @@ impl NewPurposesManager {
                 enemy_influence, // raised up, weirdo!
               )
             };
+
           if blocking_enemy_influence <= our_blocked_influence {
-            collected_our_influence += our_blocked_influence;
+            if our_blocked_squads_ids.len() == 1 {
+              collected_our_influence += our_squad_influence;
+            // to avoid adding our_blocked_influence another time, when previously was added
+            // always will go into this case if enemy on the track is already weaker than our collected influence,
+            // and because we do not reset accumulated, it will add again already added influence
+            // when enemy on the track is weaker, but enemy from purpose still stronger!
+            } else {
+              collected_our_influence += our_blocked_influence;
+            }
             used_squads_ids.append(&mut our_blocked_squads_ids);
           }
           continue;
