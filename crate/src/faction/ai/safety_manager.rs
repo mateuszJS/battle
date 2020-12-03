@@ -111,10 +111,9 @@ impl SafetyManager {
 
           let squad_cares_about_danger =
             if let Some(reserved_squad_index) = option_reserved_squad_index {
-              if signi_calc.should_squad_react_on_met_danger(
-                &reserved_squads[reserved_squad_index],
-                &safety_info,
-              ) {
+              if signi_calc
+                .should_single_squad_react_on_met_danger(&reserved_squads[reserved_squad_index])
+              {
                 reserved_squads.remove(reserved_squad_index);
                 true
               } else {
@@ -165,16 +164,15 @@ impl SafetyManager {
         });
 
         if squads_ids_which_will_react.len() > 0
-          && signi_calc.should_we_do_anything_in_danger(
+          && signi_calc.should_our_squads_group_do_anything_in_danger(
             safety_info.collected_enemies_influence_who_attacks_us,
             safety_info.collected_enemies_influence_around,
             collected_our_influence,
           )
         {
           // Portal and strategic point won't get here!
-
           let (purpose_id, purpose_signification) = if signi_calc
-            .should_our_squads_in_danger_attack_enemy(
+            .should_our_group_squads_in_danger_attack_enemy(
               collected_our_influence,
               safety_info.collected_enemies_influence_who_attacks_us,
               safety_info.collected_enemies_influence_around,
@@ -214,7 +212,7 @@ impl SafetyManager {
             new_purposes.push(EnhancedPurpose {
               id: new_id,
               purpose_type: PurposeType::RunToSafePlace,
-              signification: signi_calc.signification_running_to_safe_place(),
+              signification,
               place: our_squads_safety[safe_destination_index].place,
             });
 

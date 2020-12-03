@@ -8,6 +8,8 @@ use crate::Squad;
 use std::cell::{Ref, RefCell};
 use std::rc::{Rc, Weak};
 
+const THRESHOLD_PLACE_WAS_ACHIEVED: f32 = 50.0;
+
 pub struct NewPurposesManager {}
 
 impl NewPurposesManager {
@@ -78,11 +80,16 @@ impl NewPurposesManager {
             .iter()
             .map(|place| {
               let (purpose_type, signification) = match place.place_type {
-                PlaceType::Portal => (PurposeType::Attack, signi_calc.signification_enemy_portal()),
-                PlaceType::Squads => (
+                PlaceType::Portal => (
                   PurposeType::Attack,
-                  signi_calc.signification_enemy_squads(place),
+                  signi_calc.signification_enemy_portal(&place.squads[0].borrow()),
                 ),
+                PlaceType::Squads => {
+                  let signification = place.squads.iter().fold(0.0, |acc, ref_cell_squad| {
+                    acc + signi_calc.signification_enemy_squads(&ref_cell_squad.borrow())
+                  });
+                  (PurposeType::Attack, signification)
+                }
               };
 
               new_id += 1;
@@ -101,7 +108,8 @@ impl NewPurposesManager {
             .iter()
             .filter_map(|place| {
               let exists_in_current_plans = current_plans.iter().any(|current_plan| {
-                (current_plan.x - place.x).hypot(current_plan.y - place.y) < 1.0
+                (current_plan.x - place.x).hypot(current_plan.y - place.y)
+                  < THRESHOLD_PLACE_WAS_ACHIEVED
               });
 
               if exists_in_current_plans {
