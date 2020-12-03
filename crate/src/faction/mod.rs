@@ -10,7 +10,7 @@ use crate::squad_types::SquadType;
 use crate::squads_grid_manager::SquadsGrid;
 use crate::Factory;
 use crate::World;
-pub use ai::{ArtificialIntelligence, FactionInfo, Place, PlaceType, PurposeType};
+pub use ai::{ArtificialIntelligence, FactionInfo, Place, PlaceType, Plan, PurposeType};
 use squad_manager::SquadsManager;
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -249,6 +249,50 @@ impl Faction {
     });
   }
 
+  fn attack_closest_enemies(&mut self, plan: Plan) {
+    let mut group_by_closest_enemies: HashMap<u32, (&Weak<RefCell<Squad>>, Vec<u32>)> =
+      HashMap::new();
+
+    plan.squads_ids.iter().for_each(|squad_id| {
+      let squad = self
+        .squads
+        .iter()
+        .find(|ref_cell_squad| ref_cell_squad.borrow().id == *squad_id)
+        .unwrap();
+      let squad_position = squad.borrow().shared.center_point;
+
+      let mut closest_weak_enemy = &plan.enemy_squads[0];
+      let mut closest_distance = std::f32::MAX;
+      let mut closest_enemy_id = 0;
+      plan.enemy_squads.iter().for_each(|weak_enemy_squad| {
+        let ref_cell_enemy_squad = weak_enemy_squad.upgrade().unwrap();
+        let enemy_squad = ref_cell_enemy_squad.borrow();
+        let enemy_squad_position = enemy_squad.shared.center_point;
+        let distance = (squad_position.0 - enemy_squad_position.0)
+          .hypot(squad_position.1 - enemy_squad_position.1);
+
+        if distance < closest_distance {
+          closest_weak_enemy = weak_enemy_squad;
+          closest_distance = distance;
+          closest_enemy_id = enemy_squad.id;
+        }
+      });
+
+      match group_by_closest_enemies.get_mut(&closest_enemy_id) {
+        Some(our_squads) => {
+          our_squads.1.push(*squad_id);
+        }
+        None => {
+          group_by_closest_enemies.insert(closest_enemy_id, (closest_weak_enemy, vec![*squad_id]));
+        }
+      };
+    });
+
+    for (_key, (weak_enemy, our_squads_ids)) in group_by_closest_enemies.iter() {
+      self.task_attack_enemy(our_squads_ids, weak_enemy);
+    }
+  }
+
   pub fn do_ai(&mut self, all_factions_info: &Vec<FactionInfo>, squads_on_grid: &SquadsGrid) {
     let Self { ref squads, .. } = self;
 
@@ -257,12 +301,8 @@ impl Faction {
     squads_plans
       .into_iter()
       .for_each(|plan| match plan.purpose_type {
-        PurposeType::Attack => {
-          self.task_attack_enemy(&plan.squads_ids, &plan.enemy_squads[0]);
-        }
-        PurposeType::RunToSafePlace => {
-          self.task_add_target(&plan.squads_ids, plan.x, plan.y);
-        }
+        PurposeType::Attack => self.attack_closest_enemies(plan),
+        PurposeType::RunToSafePlace => self.task_add_target(&plan.squads_ids, plan.x, plan.y),
       })
   }
 
