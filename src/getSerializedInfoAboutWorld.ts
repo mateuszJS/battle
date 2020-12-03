@@ -14,8 +14,8 @@ const players = [
   {
     id: 2,
     base: {
-      x: 1200,
-      y: 1200,
+      x: 2500,
+      y: 1900,
       angle: 5.39,
     },
   },
