@@ -102,7 +102,7 @@ impl ArtificialIntelligence {
     all_factions_info: &Vec<FactionInfo>,
     squads_grid: &SquadsGrid,
   ) -> Vec<Plan> {
-    let mut final_purposes: Vec<Plan> = vec![];
+    let mut final_plans: Vec<Plan> = vec![];
     let mut our_squads = our_squads_ref_cells
       .iter()
       .map(|ref_cell_squad| ref_cell_squad.borrow())
@@ -147,7 +147,7 @@ impl ArtificialIntelligence {
             purpose,
           );
           if let Some(new_plan) = option_new_plan {
-            final_purposes.push(new_plan)
+            final_plans.push(new_plan)
           }
         } else {
           let option_new_plan = NewPurposesManager::handle_new_purposes(
@@ -159,7 +159,7 @@ impl ArtificialIntelligence {
             squads_grid,
           );
           if let Some(new_plan) = option_new_plan {
-            final_purposes.push(new_plan)
+            final_plans.push(new_plan)
           }
         }
       }
@@ -170,7 +170,7 @@ impl ArtificialIntelligence {
         let mut min_distance = std::f32::MAX;
         let mut min_index = -1_isize;
 
-        final_purposes
+        final_plans
           .iter()
           .enumerate()
           .for_each(|(index, new_plan)| {
@@ -184,15 +184,33 @@ impl ArtificialIntelligence {
             }
           });
         if min_index >= 0 {
-          final_purposes[min_index as usize]
+          final_plans[min_index as usize]
             .squads_ids
             .push(our_squad.id);
         }
       });
     }
 
-    self.current_plans = final_purposes;
+    let plans_needed_to_update = final_plans
+      .clone()
+      .into_iter()
+      .filter(|final_plan| {
+        // remove all plans that didn't change
+        !self.current_plans.iter().any(|current_plan| {
+          current_plan.purpose_type == final_plan.purpose_type
+            && current_plan.squads_ids.len() == final_plan.squads_ids.len()
+            && current_plan
+              .squads_ids
+              .iter()
+              .all(|squad_id| final_plan.squads_ids.contains(&squad_id))
+            && (current_plan.x - final_plan.x).hypot(current_plan.y - final_plan.y) < 1.0
+            && current_plan.enemy_squads.len() == final_plan.enemy_squads.len() // do not check exactly each enemy
+        })
+      })
+      .collect::<Vec<Plan>>();
 
-    self.current_plans.clone()
+    self.current_plans = final_plans;
+
+    plans_needed_to_update
   }
 }
