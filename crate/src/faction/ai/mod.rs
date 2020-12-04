@@ -189,6 +189,7 @@ impl ArtificialIntelligence {
             .push(our_squad.id);
         }
       });
+      // TODO: if there is no final_plans, then go to the closest safe place
     }
 
     let plans_needed_to_update = final_plans
