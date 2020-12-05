@@ -45,7 +45,7 @@ impl SignificationCalculator {
   ) -> bool {
     // used to compare if purpose where squad is reserved got almost the same signification
     // or it's much less important, so can be taken by more important purpose
-    reserved_squad.purpose_signification * 0.85 < purpose.signification
+    reserved_squad.purpose_signification < purpose.signification * 0.85
   }
 
   pub fn influence_our_squad_new_purpose(&self, our_squad: &Ref<Squad>) -> f32 {
@@ -72,8 +72,11 @@ impl SignificationCalculator {
     our_squad.get_influence() * 0.7
   }
 
-  pub fn should_single_squad_react_on_met_danger(&self, reserved_squad: &ReservedSquad) -> bool {
-    reserved_squad.purpose_signification < 6.0
+  pub fn should_single_squad_react_on_met_danger(
+    &self,
+    reserved_squad_purpose_signification: f32,
+  ) -> bool {
+    reserved_squad_purpose_signification < 6.0
     // otherwise squad just do the purpose, don't care about danger around
 
     // TODO: rn we have signification od running away = 2

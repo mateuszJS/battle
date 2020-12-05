@@ -201,7 +201,7 @@ export const startDebug = (universe: Universe) => {
 
     const prevState = localStorage.getItem('ai_debug')
 
-    if (prevState) {
+    if (!factions.length && prevState) {
       JSON.parse(prevState).forEach(({ id, color, complementaryColor, squads }) => {
         const createSquad = createNewFaction(id, color, complementaryColor)
         squads.map(({ isPortal, x, y, id }) => {

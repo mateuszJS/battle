@@ -22,7 +22,7 @@ pub enum PurposeType {
   // RunToSafePlace,
   // HelpInDanger,
 }
-
+#[derive(PartialEq)]
 pub enum PlaceType {
   Squads,
   Portal,
@@ -118,7 +118,7 @@ impl ArtificialIntelligence {
     let mut reserved_squads =
       AiUtils::get_squads_reservations(&self.current_plans, &new_purposes, &our_squads);
 
-    SafetyManager::handle_squads_safety(
+    let our_squads_safety = SafetyManager::handle_squads_safety(
       self.faction_id,
       &self.signi_calc,
       &our_squads,
@@ -129,39 +129,44 @@ impl ArtificialIntelligence {
     );
 
     AiUtils::sort_purposes(&mut new_purposes);
-
+    log!("all reserved squads: {}", reserved_squads.len());
     for purpose in new_purposes.iter() {
-      if our_squads.len() > 0 {
-        /*=============CHECKING IF CURRENT PLAN EXISTS IN NEW PURPOSES==================*/
-        let squads_reserved_for_this_purpose = reserved_squads
-          .iter()
-          .filter(|reserved_squad| reserved_squad.purpose_id == purpose.id)
-          .collect::<Vec<&ReservedSquad>>();
-
-        if squads_reserved_for_this_purpose.len() > 0 {
-          // have to check influence one more, just in case if some squads were stolen
-          let option_new_plan = AlreadyHandledPurposesManager::handle_already_involved_purposes(
-            &self.signi_calc,
-            &mut our_squads,
-            &squads_reserved_for_this_purpose,
-            purpose,
-          );
-          if let Some(new_plan) = option_new_plan {
-            final_plans.push(new_plan)
-          }
-        } else {
-          let option_new_plan = NewPurposesManager::handle_new_purposes(
-            self.faction_id,
-            &self.signi_calc,
-            &mut our_squads,
-            purpose,
-            &squads_reserved_for_this_purpose,
-            squads_grid,
-          );
-          if let Some(new_plan) = option_new_plan {
-            final_plans.push(new_plan)
-          }
+      /*=============CHECKING IF CURRENT PLAN EXISTS IN NEW PURPOSES==================*/
+      let squads_reserved_for_this_purpose = reserved_squads
+        .iter()
+        .filter(|reserved_squad| reserved_squad.purpose_id == purpose.id)
+        .collect::<Vec<&ReservedSquad>>();
+      log!(
+        "squads_reserved_for_this_purpose: {}",
+        squads_reserved_for_this_purpose.len()
+      );
+      if squads_reserved_for_this_purpose.len() > 0 {
+        // have to check influence one more, just in case if some squads were stolen
+        let option_new_plan = AlreadyHandledPurposesManager::handle_already_involved_purposes(
+          &self.signi_calc,
+          &mut our_squads,
+          &squads_reserved_for_this_purpose,
+          purpose,
+        );
+        if let Some(new_plan) = option_new_plan {
+          final_plans.push(new_plan)
         }
+      } else {
+        let option_new_plan = NewPurposesManager::handle_new_purposes(
+          self.faction_id,
+          &self.signi_calc,
+          &mut our_squads,
+          purpose,
+          &reserved_squads,
+          squads_grid,
+        );
+        if let Some(new_plan) = option_new_plan {
+          final_plans.push(new_plan)
+        }
+      }
+
+      if our_squads.len() == 0 {
+        break;
       }
     }
 
@@ -173,10 +178,11 @@ impl ArtificialIntelligence {
         final_plans
           .iter()
           .enumerate()
-          .for_each(|(index, new_plan)| {
-            if new_plan.purpose_type == PurposeType::Attack {
+          .for_each(|(index, final_plan)| {
+            if final_plan.purpose_type == PurposeType::Attack {
               let squad_position = our_squad.shared.center_point;
-              let distance = (squad_position.0 - new_plan.x).hypot(squad_position.1 - new_plan.y);
+              let distance =
+                (squad_position.0 - final_plan.x).hypot(squad_position.1 - final_plan.y);
               if min_distance > distance {
                 min_distance = distance;
                 min_index = index as isize;
@@ -189,7 +195,6 @@ impl ArtificialIntelligence {
             .push(our_squad.id);
         }
       });
-      // TODO: if there is no final_plans, then go to the closest safe place
     }
 
     let plans_needed_to_update = final_plans

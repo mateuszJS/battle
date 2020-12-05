@@ -135,7 +135,7 @@ impl NewPurposesManager {
     signi_calc: &SignificationCalculator,
     our_squads: &mut Vec<Ref<Squad>>,
     purpose: &EnhancedPurpose,
-    squads_reserved_for_this_purpose: &Vec<&ReservedSquad>,
+    reserved_squads: &Vec<ReservedSquad>,
     squads_grid: &SquadsGrid,
   ) -> Option<Plan> {
     our_squads.sort_by(|a_squad, b_squad| {
@@ -160,16 +160,28 @@ impl NewPurposesManager {
     while collected_our_influence < purpose.place.influence && our_squads_last_index > 0 {
       our_squads_last_index -= 1;
       let our_squad = &our_squads[our_squads_last_index];
-      let option_reserved_squad = squads_reserved_for_this_purpose
+      let option_reserved_squad = reserved_squads
         .iter()
         .find(|reserved_squad| reserved_squad.squad_id == our_squad.id);
 
       let squad_can_be_taken_by_purpose = if let Some(reserved_squad) = option_reserved_squad {
+        log!(
+          "squad is reserved by other purpose, squad id: {}",
+          our_squad.id
+        );
+        log!(
+          "reserved_squad.purpose_signification: {}",
+          reserved_squad.purpose_signification
+        );
+        log!("purpose.signification: {}", purpose.signification);
         signi_calc.is_reserved_purpose_much_less_important(reserved_squad, purpose)
       } else {
         true
       };
-
+      log!(
+        "can squad be used by this purpose: {}",
+        squad_can_be_taken_by_purpose
+      );
       if squad_can_be_taken_by_purpose {
         //******************** EXTRACT TO ANOTHER FUNCTION
         let option_enemy_on_track = NewPurposesManager::get_first_enemy_groups_on_track(
@@ -200,7 +212,7 @@ impl NewPurposesManager {
               (
                 &mut met_enemy.our_collected_squads_ids,
                 met_enemy.our_collected_influence,
-                met_enemy.enemy_influence, // raised up, weirdo!
+                met_enemy.enemy_influence,
               )
             } else {
               let new_entry = MetEnemyOnTrack {
@@ -213,7 +225,7 @@ impl NewPurposesManager {
               (
                 &mut already_met_enemies[0].our_collected_squads_ids,
                 our_squad_influence,
-                enemy_influence, // raised up, weirdo!
+                enemy_influence,
               )
             };
 
@@ -247,7 +259,13 @@ impl NewPurposesManager {
         .iter()
         .map(|ref_cell_squad| Rc::downgrade(ref_cell_squad))
         .collect::<Vec<Weak<RefCell<Squad>>>>();
-
+      log!(
+        "already handled, create plan, our_squads: {:?}, x: {}, y: {}, enemies: {}",
+        used_squads_ids,
+        purpose.place.x,
+        purpose.place.y,
+        enemy_squads.len(),
+      );
       Some(Plan {
         purpose_type: purpose.purpose_type.clone(),
         squads_ids: used_squads_ids,
