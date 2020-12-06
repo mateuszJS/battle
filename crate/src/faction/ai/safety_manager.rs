@@ -221,6 +221,33 @@ impl SafetyManager {
                 }
               });
             let nearest_new_purpose = &mut new_purposes[nearest_index];
+
+            pub struct Place {
+              pub place_type: PlaceType,
+              pub squads: Vec<Rc<RefCell<Squad>>>,
+              pub influence: f32,
+              pub x: f32,
+              pub y: f32,
+            }
+            
+            pub struct EnhancedPurpose<'a> {
+              pub id: usize,
+              pub purpose_type: PurposeType,
+              pub signification: f32,
+              pub place: &'a Place,
+            }
+
+            WHOLE idea of reserved squad which attacks enemies which attack us make no sense!
+            If there is situation like:
+            - portal of enemy, signification = 1
+            - 3 squads of enemy, signification = 0.3
+            - 1 enemy squad, signification = 0.1
+
+            - our squads
+
+            then if we are trying to attack first met enemy squad, then rest (3 squads and portal) will got more signification!
+            but there is a lot of more scenario where there is no sense
+
             doesn't work! add additional signification even if it's the same enem!
             So enemy is blocker of it'self, so the nearest purpose got signification * 2
             nearest_new_purpose.signification += greatest_signification_of_blocker_purposes;
