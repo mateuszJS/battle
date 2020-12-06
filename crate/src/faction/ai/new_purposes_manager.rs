@@ -165,23 +165,23 @@ impl NewPurposesManager {
         .find(|reserved_squad| reserved_squad.squad_id == our_squad.id);
 
       let squad_can_be_taken_by_purpose = if let Some(reserved_squad) = option_reserved_squad {
-        log!(
-          "squad is reserved by other purpose, squad id: {}",
-          our_squad.id
-        );
-        log!(
-          "reserved_squad.purpose_signification: {}",
-          reserved_squad.purpose_signification
-        );
-        log!("purpose.signification: {}", purpose.signification);
+        // log!(
+        //   "squad is reserved by other purpose, squad id: {}",
+        //   our_squad.id
+        // );
+        // log!(
+        //   "reserved_squad.purpose_signification: {}",
+        //   reserved_squad.purpose_signification
+        // );
+        // log!("purpose.signification: {}", purpose.signification);
         signi_calc.is_reserved_purpose_much_less_important(reserved_squad, purpose)
       } else {
         true
       };
-      log!(
-        "can squad be used by this purpose: {}",
-        squad_can_be_taken_by_purpose
-      );
+      // log!(
+      //   "can squad be used by this purpose: {}",
+      //   squad_can_be_taken_by_purpose
+      // );
       if squad_can_be_taken_by_purpose {
         //******************** EXTRACT TO ANOTHER FUNCTION
         let option_enemy_on_track = NewPurposesManager::get_first_enemy_groups_on_track(
@@ -259,13 +259,13 @@ impl NewPurposesManager {
         .iter()
         .map(|ref_cell_squad| Rc::downgrade(ref_cell_squad))
         .collect::<Vec<Weak<RefCell<Squad>>>>();
-      log!(
-        "already handled, create plan, our_squads: {:?}, x: {}, y: {}, enemies: {}",
-        used_squads_ids,
-        purpose.place.x,
-        purpose.place.y,
-        enemy_squads.len(),
-      );
+      // log!(
+      //   "already handled, create plan, our_squads: {:?}, x: {}, y: {}, enemies: {}",
+      //   used_squads_ids,
+      //   purpose.place.x,
+      //   purpose.place.y,
+      //   enemy_squads.len(),
+      // );
       Some(Plan {
         purpose_type: purpose.purpose_type.clone(),
         squads_ids: used_squads_ids,

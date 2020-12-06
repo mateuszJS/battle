@@ -37,25 +37,25 @@ impl AlreadyHandledPurposesManager {
     if purpose.purpose_type == PurposeType::RunToSafePlace
       || collected_our_influence >= purpose.place.influence
     {
-      log!("keep already handled purpose");
-      log!(
-        "is running to safe place: {}",
-        purpose.purpose_type == PurposeType::RunToSafePlace
-      );
-      log!("{} >= {}", collected_our_influence, purpose.place.influence);
+      // log!("keep already handled purpose");
+      // log!(
+      //   "is running to safe place: {}",
+      //   purpose.purpose_type == PurposeType::RunToSafePlace
+      // );
+      // log!("{} >= {}", collected_our_influence, purpose.place.influence);
       let enemy_squads = purpose
         .place
         .squads
         .iter()
         .map(|ref_cell_squad| Rc::downgrade(ref_cell_squad))
         .collect::<Vec<Weak<RefCell<Squad>>>>();
-      log!(
-        "already handled, create plan, our_squads: {:?}, x: {}, y: {}, enemies: {}",
-        reserved_not_stolen_squads_ids,
-        purpose.place.x,
-        purpose.place.y,
-        enemy_squads.len(),
-      );
+      // log!(
+      //   "already handled, create plan, our_squads: {:?}, x: {}, y: {}, enemies: {}",
+      //   reserved_not_stolen_squads_ids,
+      //   purpose.place.x,
+      //   purpose.place.y,
+      //   enemy_squads.len(),
+      // );
       Some(Plan {
         purpose_type: purpose.purpose_type.clone(),
         squads_ids: reserved_not_stolen_squads_ids,
@@ -64,7 +64,7 @@ impl AlreadyHandledPurposesManager {
         y: purpose.place.y,
       })
     } else {
-      log!("drop already handled purpose");
+      // log!("drop already handled purpose");
       None
     }
   }

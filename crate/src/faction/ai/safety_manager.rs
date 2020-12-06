@@ -96,7 +96,7 @@ impl SafetyManager {
     );
 
     our_squads_safety.iter().for_each(|safety_info| {
-      if safety_info.collected_enemies_influence_around > std::f32::EPSILON {
+      if safety_info.collected_enemies_influence_around > 0.0 {
         let mut collected_our_influence = 0.0;
         let mut squads_ids_which_will_react = vec![];
         let mut greatest_signification_of_blocker_purposes = 0.0;
@@ -109,11 +109,11 @@ impl SafetyManager {
           let squad_cares_about_danger = if let Some(reserved_squad_index) =
             option_reserved_squad_index
           {
-            log!(
-              "reserved_squads[reserved_squad_index]: squad id: {}, singification: {}",
-              reserved_squads[reserved_squad_index].squad_id,
-              reserved_squads[reserved_squad_index].purpose_signification
-            );
+            // log!(
+            //   "reserved_squads[reserved_squad_index]: squad id: {}, singification: {}",
+            //   reserved_squads[reserved_squad_index].squad_id,
+            //   reserved_squads[reserved_squad_index].purpose_signification
+            // );
 
             let reservation_purpose_signification =
               reserved_squads[reserved_squad_index].purpose_signification;
@@ -128,6 +128,11 @@ impl SafetyManager {
               false
             }
           } else {
+            new_purposes.iter().find(|new_purpose| {
+              new_purpose.place.squads_ids.includes()
+              // find here the biggest greatest_signification_of_blocker_purposes
+            })
+            squad_id
             true
           };
 
@@ -169,10 +174,10 @@ impl SafetyManager {
               });
             }
           }
-          log!(
-            "greatest_signification_of_blocker_purposes: {}",
-            greatest_signification_of_blocker_purposes
-          );
+          // log!(
+          //   "greatest_signification_of_blocker_purposes: {}",
+          //   greatest_signification_of_blocker_purposes
+          // );
         });
 
         if squads_ids_which_will_react.len() > 0
@@ -190,22 +195,22 @@ impl SafetyManager {
               safety_info.collected_enemies_influence_around,
             ) {
             // When we are attacking enemy, then this is active, I don't think it should...
-            log!("danger place - attack");
+            // log!("danger place - attack");
             let mut nearest_index = 0;
             let mut nearest_distance = std::f32::MAX;
-            log!("new_purposes: {}", new_purposes.len());
-            log!(
-              "safety_info.collected_enemies_squads_ids_around: {:?}",
-              safety_info.collected_enemies_squads_ids_around
-            );
+            // log!("new_purposes: {}", new_purposes.len());
+            // log!(
+            //   "safety_info.collected_enemies_squads_ids_around: {:?}",
+            //   safety_info.collected_enemies_squads_ids_around
+            // );
             new_purposes
               .iter()
               .enumerate()
               .for_each(|(index, new_purpose)| {
-                log!("---------------------");
+                // log!("---------------------");
                 if new_purpose.purpose_type == PurposeType::Attack
                   && new_purpose.place.squads.iter().any(|ref_cell_squad| {
-                    log!("new purpose enemy id: {}", ref_cell_squad.borrow().id);
+                    // log!("new purpose enemy id: {}", ref_cell_squad.borrow().id);
                     safety_info
                       .collected_enemies_squads_ids_around
                       .contains(&ref_cell_squad.borrow().id)
@@ -213,7 +218,7 @@ impl SafetyManager {
                 {
                   let distance = (safety_info.place.x - new_purpose.place.x)
                     .hypot(safety_info.place.y - new_purpose.place.y);
-                  log!("attack distance: {}, index: {}", distance, index);
+                  // log!("attack distance: {}, index: {}", distance, index);
                   if distance < nearest_distance {
                     nearest_distance = distance;
                     nearest_index = index;
@@ -222,39 +227,48 @@ impl SafetyManager {
               });
             let nearest_new_purpose = &mut new_purposes[nearest_index];
 
-            pub struct Place {
-              pub place_type: PlaceType,
-              pub squads: Vec<Rc<RefCell<Squad>>>,
-              pub influence: f32,
-              pub x: f32,
-              pub y: f32,
-            }
-            
-            pub struct EnhancedPurpose<'a> {
-              pub id: usize,
-              pub purpose_type: PurposeType,
-              pub signification: f32,
-              pub place: &'a Place,
-            }
+            // pub struct Place {
+            //   pub place_type: PlaceType,
+            //   pub squads: Vec<Rc<RefCell<Squad>>>,
+            //   pub influence: f32,
+            //   pub x: f32,
+            //   pub y: f32,
+            // }
+            // pub struct EnhancedPurpose<'a> {
+            //   pub id: usize,
+            //   pub purpose_type: PurposeType,
+            //   pub signification: f32,
+            //   pub place: &'a Place,
+            // }
 
-            WHOLE idea of reserved squad which attacks enemies which attack us make no sense!
-            If there is situation like:
-            - portal of enemy, signification = 1
-            - 3 squads of enemy, signification = 0.3
-            - 1 enemy squad, signification = 0.1
+            // WHOLE idea of reserved squad which attacks enemies which attack us make no sense!
+            // If there is situation like:
+            // - portal of enemy, signification = 1
+            // - 3 squads of enemy, signification = 0.3
+            // - 1 enemy squad, signification = 0.1
 
-            - our squads
+            // - our squads
 
-            then if we are trying to attack first met enemy squad, then rest (3 squads and portal) will got more signification!
-            but there is a lot of more scenario where there is no sense
+            // then if we are trying to attack first met enemy squad, then rest (3 squads and portal) will got more signification!
+            // but there is a lot of more scenario where there is no sense
 
-            doesn't work! add additional signification even if it's the same enem!
-            So enemy is blocker of it'self, so the nearest purpose got signification * 2
+            // doesn't work! add additional signification even if it's the same enem!
+            // So enemy is blocker of itself, so the nearest purpose got signification * 2
+            log!(
+              "greatest_signification_of_blocker_purposes: {}",
+              greatest_signification_of_blocker_purposes
+            );
+            log!(
+              "nearest_new_purpose x: {}, y: {}",
+              nearest_new_purpose.place.x,
+              nearest_new_purpose.place.y
+            );
             nearest_new_purpose.signification += greatest_signification_of_blocker_purposes;
-            // to be more significate than blocked purpose! Otherwise our squads won't care about this danger, because got less signification
+            // yea we are adding two times signification, but it's okay, squad which attacks us should be market as with bigger signification
+
             (nearest_new_purpose.id, nearest_new_purpose.signification)
           } else {
-            log!("danger place - running away");
+            // log!("danger place - running away");
             let new_id = new_purposes.len();
             let signification = signi_calc.signification_running_to_safe_place();
             let safe_destination_index =

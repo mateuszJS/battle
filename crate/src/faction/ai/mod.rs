@@ -129,17 +129,17 @@ impl ArtificialIntelligence {
     );
 
     AiUtils::sort_purposes(&mut new_purposes);
-    log!("all reserved squads: {}", reserved_squads.len());
+    // log!("all reserved squads: {}", reserved_squads.len());
     for purpose in new_purposes.iter() {
       /*=============CHECKING IF CURRENT PLAN EXISTS IN NEW PURPOSES==================*/
       let squads_reserved_for_this_purpose = reserved_squads
         .iter()
         .filter(|reserved_squad| reserved_squad.purpose_id == purpose.id)
         .collect::<Vec<&ReservedSquad>>();
-      log!(
-        "squads_reserved_for_this_purpose: {}",
-        squads_reserved_for_this_purpose.len()
-      );
+      // log!(
+      //   "squads_reserved_for_this_purpose: {}",
+      //   squads_reserved_for_this_purpose.len()
+      // );
       if squads_reserved_for_this_purpose.len() > 0 {
         // have to check influence one more, just in case if some squads were stolen
         let option_new_plan = AlreadyHandledPurposesManager::handle_already_involved_purposes(

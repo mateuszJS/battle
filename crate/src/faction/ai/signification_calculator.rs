@@ -76,6 +76,7 @@ impl SignificationCalculator {
     &self,
     reserved_squad_purpose_signification: f32,
   ) -> bool {
+    // TODO: and how away is the enemy! and if the enemy attacks us!
     reserved_squad_purpose_signification < 6.0
     // otherwise squad just do the purpose, don't care about danger around
 
