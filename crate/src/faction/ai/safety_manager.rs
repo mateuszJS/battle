@@ -128,13 +128,34 @@ impl SafetyManager {
               false
             }
           } else {
-            new_purposes.iter().find(|new_purpose| {
-              new_purpose.place.squads_ids.includes()
-              // find here the biggest greatest_signification_of_blocker_purposes
-            })
-            squad_id
+            new_purposes.iter().for_each(|new_purpose| {
+              let new_purpose_includes_enemies_around =
+                new_purpose
+                  .place
+                  .squads
+                  .iter()
+                  .any(|ref_cell_new_purpose_enemy_squad| {
+                    safety_info
+                      .collected_enemies_squads_ids_around
+                      .contains(&ref_cell_new_purpose_enemy_squad.borrow().id)
+                  });
+              if new_purpose_includes_enemies_around
+                && greatest_signification_of_blocker_purposes < new_purpose.signification
+              {
+                greatest_signification_of_blocker_purposes = new_purpose.signification;
+              }
+            });
             true
           };
+
+          // OurSquadsGroupSafetyInfo {
+          //   collected_enemies_influence_who_attacks_us,
+          //   collected_enemies_influence_around,
+          //   collected_enemies_squads_ids_who_attacks_us,
+          //   collected_enemies_squads_ids_around,
+          //   our_squads_ids,
+          //   place,
+          // }
 
           if squad_cares_about_danger {
             // otherwise squads continue doing purposes, don't care about enemy nearby
