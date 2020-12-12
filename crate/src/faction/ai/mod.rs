@@ -71,15 +71,6 @@ struct MetEnemyOnTrack {
   our_collected_influence: f32,
 }
 
-pub struct OurSquadsGroupSafetyInfo<'a> {
-  pub collected_enemies_influence_who_attacks_us: f32,
-  pub collected_enemies_influence_around: f32,
-  collected_enemies_squads_ids_who_attacks_us: Vec<u32>,
-  collected_enemies_squads_ids_around: Vec<u32>,
-  our_squads_ids: Vec<u32>,
-  place: &'a Place,
-}
-
 pub struct ArtificialIntelligence {
   pub current_plans: Vec<Plan>,
   faction_id: u32,
@@ -118,7 +109,7 @@ impl ArtificialIntelligence {
     let mut reserved_squads =
       AiUtils::get_squads_reservations(&self.current_plans, &new_purposes, &our_squads);
 
-    let our_squads_safety = SafetyManager::handle_squads_safety(
+    SafetyManager::handle_squads_safety(
       self.faction_id,
       &self.signi_calc,
       &our_squads,

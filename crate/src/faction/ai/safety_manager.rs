@@ -1,7 +1,7 @@
 use super::signification_calculator::COMMON_PURPOSE_SIGNIFICATION_BASE;
 use super::SignificationCalculator;
 use super::{
-  EnhancedPurpose, FactionInfo, OurSquadsGroupSafetyInfo, PlaceType, PurposeType, ReservedSquad,
+  EnhancedPurpose, FactionInfo, Place, PlaceType, PurposeType, ReservedSquad,
 };
 use crate::squads_grid_manager::{SquadsGrid, SquadsGridManager};
 use crate::unit::STATE_SHOOT;
@@ -11,6 +11,15 @@ use crate::constants::THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER;
 use crate::weapon_types::MAX_POSSIBLE_WEAPON_RANGE;
 
 const MIN_DISTANCE_OF_SEARCHING_ENEMY: f32 = 2.0 * (MAX_POSSIBLE_WEAPON_RANGE + THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER);
+
+struct OurSquadsGroupSafetyInfo<'a> {
+  collected_enemies_influence_who_attacks_us: f32,
+  collected_enemies_influence_around: f32,
+  collected_enemies_squads_ids_who_attacks_us: Vec<u32>, maybe we should just store Ref<Squad> instead of just id
+  collected_enemies_squads_ids_around: Vec<u32>,
+  our_squads_ids: Vec<u32>,
+  place: &'a Place,
+}
 
 pub struct SafetyManager {}
 
@@ -96,15 +105,15 @@ impl SafetyManager {
       .collect::<Vec<OurSquadsGroupSafetyInfo>>()
   }
 
-  pub fn handle_squads_safety<'a>(
+  pub fn handle_squads_safety(
     our_faction_id: u32,
     signi_calc: &SignificationCalculator,
     our_squads: &Vec<Ref<Squad>>,
     reserved_squads: &mut Vec<ReservedSquad>,
-    all_factions_info: &'a Vec<FactionInfo>,
+    all_factions_info: &Vec<FactionInfo>,
     squads_grid: &SquadsGrid,
     new_purposes: &mut Vec<EnhancedPurpose>,
-  ) -> Vec<OurSquadsGroupSafetyInfo<'a>> {
+  ) {
     let our_squads_safety = SafetyManager::get_info_about_safety(
       our_faction_id,
       signi_calc,
@@ -179,15 +188,6 @@ impl SafetyManager {
             });
             true
           };
-
-          // OurSquadsGroupSafetyInfo {
-          //   collected_enemies_influence_who_attacks_us,
-          //   collected_enemies_influence_around,
-          //   collected_enemies_squads_ids_who_attacks_us,
-          //   collected_enemies_squads_ids_around,
-          //   our_squads_ids,
-          //   place,
-          // }
 
           if squad_cares_about_danger {
             // otherwise squads continue doing purposes, don't care about enemy nearby
@@ -388,7 +388,7 @@ impl SafetyManager {
           std::f32::MAX // it's the same place
         } else {
           distance * 0.5 + safety_place.collected_enemies_influence_around
-          // TODO: fix, right now it's selected squads which hare in danger
+          TODO: fix, right now it's selected squads which hare in danger
           // TODO:!!!!
         };
 
