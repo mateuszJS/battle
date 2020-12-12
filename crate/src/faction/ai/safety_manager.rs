@@ -4,6 +4,7 @@ use super::{
   EnhancedPurpose, FactionInfo, OurSquadsGroupSafetyInfo, PlaceType, PurposeType, ReservedSquad,
 };
 use crate::squads_grid_manager::{SquadsGrid, SquadsGridManager};
+use crate::unit::STATE_SHOOT;
 use crate::Squad;
 use std::cell::Ref;
 
@@ -55,8 +56,7 @@ impl SafetyManager {
             let some_squad = some_ref_cell_squad.borrow();
             if some_squad.faction_id != our_faction_id {
               collected_enemies_squads_ids_around.push(some_squad.id);
-              collected_enemies_influence_around +=
-                signi_calc.influence_enemy_squad_around_us(&some_squad);
+              collected_enemies_influence_around += some_squad.get_influence();
               let option_enemy_aim = if some_squad.shared.aim.upgrade().is_some() {
                 some_squad.shared.aim.upgrade()
               } else {
@@ -64,15 +64,24 @@ impl SafetyManager {
               };
               if let Some(enemy_aim) = option_enemy_aim {
                 if our_squads_ids.contains(&enemy_aim.borrow().id) {
-                  collected_enemies_squads_ids_who_attacks_us.push(some_squad.id);
-                  collected_enemies_influence_who_attacks_us +=
-                    signi_calc.influence_enemy_squad_attacks_us(&some_squad);
+                  let is_attacking = some_squad
+                    .members
+                    .iter()
+                    .any(|ref_cell_unit| ref_cell_unit.borrow().state == STATE_SHOOT);
+                  if is_attacking {
+                    collected_enemies_squads_ids_who_attacks_us.push(some_squad.id);
+                    collected_enemies_influence_who_attacks_us +=
+                      signi_calc.influence_enemy_squad_attacks_us(&some_squad);
+                  }
                 }
               }
             }
           }
         }
-        log!("collected_enemies_influence_who_attacks_us: {}", collected_enemies_influence_who_attacks_us);
+        // log!(
+        //   "collected_enemies_influence_who_attacks_us: {}",
+        //   collected_enemies_influence_who_attacks_us
+        // );
         OurSquadsGroupSafetyInfo {
           collected_enemies_influence_who_attacks_us,
           collected_enemies_influence_around,
@@ -120,6 +129,13 @@ impl SafetyManager {
             //   reserved_squads[reserved_squad_index].squad_id,
             //   reserved_squads[reserved_squad_index].purpose_signification
             // );
+
+            We should check if this enemy is between us and purpose
+            but if we are staying at one place, then no, just check if it's around
+
+            let reservation_purpose_id =
+              reserved_squads[reserved_squad_index].purpose_id;
+            let purpose = &new_purposes[reservation_purpose_id];
 
             let reservation_purpose_signification =
               reserved_squads[reserved_squad_index].purpose_signification;
@@ -179,27 +195,29 @@ impl SafetyManager {
                 // because this is not a squad, so cannot run away or attack
                 // so have to increase purposes with attackers
                 if new_purpose.purpose_type == PurposeType::Attack {
-                  new_purpose.signification =
-                    new_purpose
-                      .place
-                      .squads
-                      .iter()
-                      .fold(0.0, |acc, ref_cell_enemy_squad| {
-                        let enemy_squad = ref_cell_enemy_squad.borrow();
-                        if safety_info
-                          .collected_enemies_squads_ids_who_attacks_us
-                          .contains(&enemy_squad.id)
-                        {
-                          acc + signi_calc.signification_enemy_attacks_our_building(&enemy_squad)
-                        } else if safety_info
-                          .collected_enemies_squads_ids_around
-                          .contains(&enemy_squad.id)
-                        {
-                          acc + signi_calc.signification_enemy_around_our_building(&enemy_squad)
-                        } else {
-                          acc
-                        }
-                      });
+                  new_purpose.signification = new_purpose.place.squads.iter().fold(
+                    new_purpose.signification,
+                    |acc, ref_cell_enemy_squad| {
+                      let enemy_squad = ref_cell_enemy_squad.borrow();
+                      if safety_info
+                        .collected_enemies_squads_ids_who_attacks_us
+                        .contains(&enemy_squad.id)
+                      {
+                        acc
+                          + signi_calc
+                            .additional_signification_enemy_attacks_our_building(&enemy_squad)
+                      } else if safety_info
+                        .collected_enemies_squads_ids_around
+                        .contains(&enemy_squad.id)
+                      {
+                        acc
+                          + signi_calc
+                            .additional_signification_enemy_around_our_building(&enemy_squad)
+                      } else {
+                        acc
+                      }
+                    },
+                  );
                 }
               });
             }
@@ -213,7 +231,11 @@ impl SafetyManager {
           "squads_ids_which_will_react: {:?}",
           squads_ids_which_will_react
         );
-        Right now AI dont care if met enemy who attacks us :)
+        log!(
+          "safety_info.collected_enemies_influence_who_attacks_us: {}",
+          safety_info.collected_enemies_influence_who_attacks_us
+        );
+        // Right now AI dont care if met enemy who attacks us :)
         if squads_ids_which_will_react.len() > 0
           && signi_calc.should_our_squads_group_do_anything_in_danger(
             safety_info.collected_enemies_influence_who_attacks_us,
@@ -228,6 +250,7 @@ impl SafetyManager {
               safety_info.collected_enemies_influence_who_attacks_us,
               safety_info.collected_enemies_influence_around,
             ) {
+            log!("attack met enemy");
             // When we are attacking enemy, then this is active, I don't think it should...
             // log!("danger place - attack");
             let mut nearest_index = 0;
@@ -288,15 +311,15 @@ impl SafetyManager {
 
             // doesn't work! add additional signification even if it's the same enem!
             // So enemy is blocker of itself, so the nearest purpose got signification * 2
-            log!(
-              "greatest_signification_of_blocker_purposes: {}",
-              greatest_signification_of_blocker_purposes
-            );
-            log!(
-              "nearest_new_purpose x: {}, y: {}",
-              nearest_new_purpose.place.x,
-              nearest_new_purpose.place.y
-            );
+            // log!(
+            //   "greatest_signification_of_blocker_purposes: {}",
+            //   greatest_signification_of_blocker_purposes
+            // );
+            // log!(
+            //   "nearest_new_purpose x: {}, y: {}",
+            //   nearest_new_purpose.place.x,
+            //   nearest_new_purpose.place.y
+            // );
 
             // yea we are adding two times signification, but it's okay, squad which attacks us should be market as with bigger signification
             (
@@ -358,7 +381,8 @@ impl SafetyManager {
           std::f32::MAX // it's the same place
         } else {
           distance * 0.5 + safety_place.collected_enemies_influence_around
-          // TODO: fix, right now it's selected squads whic hare in danger
+          // TODO: fix, right now it's selected squads which hare in danger
+          // TODO:!!!!
         };
 
         if min_value > value {

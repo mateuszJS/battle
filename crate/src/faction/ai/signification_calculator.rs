@@ -34,12 +34,18 @@ impl SignificationCalculator {
     4.5
   }
 
-  pub fn signification_enemy_around_our_building(&self, enemy_squad: &Ref<Squad>) -> f32 {
-    self.signification_enemy_squads(enemy_squad) * 1.1
+  pub fn additional_signification_enemy_around_our_building(
+    &self,
+    enemy_squad: &Ref<Squad>,
+  ) -> f32 {
+    self.signification_enemy_squads(enemy_squad) * 0.7
   }
 
-  pub fn signification_enemy_attacks_our_building(&self, enemy_squad: &Ref<Squad>) -> f32 {
-    self.signification_enemy_squads(enemy_squad) * 35.0 // can be compared with running away
+  pub fn additional_signification_enemy_attacks_our_building(
+    &self,
+    enemy_squad: &Ref<Squad>,
+  ) -> f32 {
+    self.signification_enemy_squads(enemy_squad) * 33.0 // can be compared with running away
   }
 
   pub fn influence_our_squad(
@@ -56,20 +62,12 @@ impl SignificationCalculator {
     factor * our_squad.get_influence()
   }
 
-  pub fn influence_enemy_squad_on_the_track(&self, enemy_squad: &Ref<Squad>) -> f32 {
-    enemy_squad.get_influence() * 1.2
+  pub fn influence_our_squads_in_danger_situation(&self, our_squad: &Ref<Squad>) -> f32 {
+    our_squad.get_influence() * self.our_power_factor // faster version of influence_our_squad
   }
 
   pub fn influence_enemy_squad_attacks_us(&self, enemy_squad: &Ref<Squad>) -> f32 {
     enemy_squad.get_influence()
-  }
-
-  pub fn influence_enemy_squad_around_us(&self, enemy_squad: &Ref<Squad>) -> f32 {
-    enemy_squad.get_influence() * 0.5
-  }
-
-  pub fn influence_our_squads_in_danger_situation(&self, our_squad: &Ref<Squad>) -> f32 {
-    our_squad.get_influence() * 0.7
   }
 
   pub fn should_single_squad_react_on_met_danger(
@@ -95,8 +93,8 @@ impl SignificationCalculator {
     influence_enemies_around_us: f32,
     collected_our_influence: f32,
   ) -> bool {
-    influence_enemies_who_attacks_us > collected_our_influence * 0.1
-      // || influence_enemies_around_us > collected_our_influence * 0.0 // not really sure
+    influence_enemies_who_attacks_us > 0.0
+      || influence_enemies_around_us > collected_our_influence * 5.0 // not really sure
                                                                      // || influence_enemies_around_us > collected_our_influence * 7.0 // not really sure
   }
 

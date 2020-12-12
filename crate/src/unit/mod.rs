@@ -18,7 +18,7 @@ use utils::{Utils, FLY_DECELERATION, FLY_MIN_SPEED};
 pub const STATE_ABILITY: u8 = 8;
 const STATE_FLY: u8 = 7;
 pub const STATE_RUN: u8 = 6;
-const STATE_SHOOT: u8 = 5;
+pub const STATE_SHOOT: u8 = 5;
 pub const STATE_IDLE: u8 = 4;
 const STATE_GETUP: u8 = 3;
 pub const STATE_DIE: u8 = 0;

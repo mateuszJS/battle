@@ -41,6 +41,9 @@ impl PurposesManager {
         next_point.0,
         next_point.1,
       );
+      let distance_start_point_to_end = (point.0 - next_point.0).hypot(point.1 - next_point.1).max();
+
+      we are not checking similar thing in two places? once here and second in safety manager?
 
       /*==========CHECK IF THERE ARE ANY ENEMIES AROUND THE POINT============*/
       let mut collected_enemy_influence = 0.0;
@@ -48,11 +51,15 @@ impl PurposesManager {
       for some_weak_squad in squads_nearby.iter() {
         if let Some(some_ref_cell_squad) = some_weak_squad.upgrade() {
           let some_squad = some_ref_cell_squad.borrow();
+          let some_squad_position = some_squad.shared.center_point;
+          let distance_to_end =
+            (some_squad_position.0 - next_point.0).hypot(some_squad_position.1 - next_point.1);
           if some_squad.faction_id != our_faction_id
             && !our_aim_enemy_squads_ids.contains(&some_squad.id)
+            && distance_start_point_to_end > distance_to_end
           {
             collected_enemy_squads_ids.push(some_squad.id);
-            collected_enemy_influence += signi_calc.influence_enemy_squad_on_the_track(&some_squad);
+            collected_enemy_influence += some_squad.get_influence();
           }
         }
       }
@@ -151,6 +158,7 @@ impl PurposesManager {
                   },
                 })
               } else {
+                // Check if there are any enemy influence around us! if not, then can stop
                 log!("running away done");
                 None
               }
@@ -215,7 +223,7 @@ impl PurposesManager {
         None
       };
     }
-// And we got issue here, we have 2.0 + extra signification in reservations! But purposes are still in old order :/
+    // And we got issue here, we have 2.0 + extra signification in reservations! But purposes are still in old order :/
     our_squads.sort_by(|a_squad, b_squad| {
       let a = signi_calc.how_much_squad_fits_to_take_purpose(
         &purpose,
@@ -249,10 +257,18 @@ impl PurposesManager {
       our_squads_last_index -= 1;
       let our_squad = &our_squads[our_squads_last_index];
 
-      let option_squad_reservation = reserved_squads.iter().find(|reservation| reservation.squad_id == our_squad.id);
+      let option_squad_reservation = reserved_squads
+        .iter()
+        .find(|reservation| reservation.squad_id == our_squad.id);
       if let Some(squad_reservation) = option_squad_reservation {
-        log!("is squad free: {} > {}", squad_reservation.purpose_signification, purpose.signification);
-        if squad_reservation.purpose_id != purpose.id && squad_reservation.purpose_signification > purpose.signification {
+        log!(
+          "is squad reserved: {} > {}",
+          squad_reservation.purpose_signification,
+          purpose.signification
+        );
+        if squad_reservation.purpose_id != purpose.id
+          && squad_reservation.purpose_signification > purpose.signification
+        {
           continue;
         }
       }
@@ -312,7 +328,8 @@ impl PurposesManager {
               enemy_influence,
             )
           };
-
+        log!("blocking_enemy_influence: {}", blocking_enemy_influence);
+        // we should calc, if purpose is in totally different direction, then we don't have to destroy the enemy
         if blocking_enemy_influence <= our_blocked_influence {
           if our_blocked_squads_ids.len() == 1 {
             collected_our_influence += our_squad_influence;
