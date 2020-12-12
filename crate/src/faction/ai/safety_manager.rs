@@ -7,8 +7,10 @@ use crate::squads_grid_manager::{SquadsGrid, SquadsGridManager};
 use crate::unit::STATE_SHOOT;
 use crate::Squad;
 use std::cell::Ref;
-
+use crate::constants::THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER;
 use crate::weapon_types::MAX_POSSIBLE_WEAPON_RANGE;
+
+const MIN_DISTANCE_OF_SEARCHING_ENEMY: f32 = 2.0 * (MAX_POSSIBLE_WEAPON_RANGE + THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER);
 
 pub struct SafetyManager {}
 
@@ -130,12 +132,16 @@ impl SafetyManager {
             //   reserved_squads[reserved_squad_index].purpose_signification
             // );
 
-            We should check if this enemy is between us and purpose
-            but if we are staying at one place, then no, just check if it's around
+            // We should check if this enemy is between us and purpose
+            // but if we are staying at one place, then no, just check if it's around
 
             let reservation_purpose_id =
               reserved_squads[reserved_squad_index].purpose_id;
             let purpose = &new_purposes[reservation_purpose_id];
+            let squads_to_purpose_distance = (purpose.place.x - safety_info.place.x).hypot(purpose.place.y - safety_info.place.y).max(MIN_DISTANCE_OF_SEARCHING_ENEMY);
+            TODO: now we should calculate distance between purpose place and enemy, if that distance is bigger than squads_to_purpose_distance, then don't care about this enemy
+            but actually we should do it prob in calculatign safety
+            or we can get fro msafety reference to enemies, and here filter out which enemies are attacking us
 
             let reservation_purpose_signification =
               reserved_squads[reserved_squad_index].purpose_signification;
@@ -163,6 +169,7 @@ impl SafetyManager {
                         .collected_enemies_squads_ids_around
                         .contains(&ref_cell_new_purpose_enemy_squad.borrow().id)
                     });
+                Em, what is happening here actually???
                 if new_purpose_includes_enemies_around
                   && greatest_signification_of_blocker_purposes < new_purpose.signification
                 {
