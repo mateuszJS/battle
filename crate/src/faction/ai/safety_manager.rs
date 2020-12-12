@@ -1,3 +1,4 @@
+use super::signification_calculator::COMMON_PURPOSE_SIGNIFICATION_BASE;
 use super::SignificationCalculator;
 use super::{
   EnhancedPurpose, FactionInfo, OurSquadsGroupSafetyInfo, PlaceType, PurposeType, ReservedSquad,
@@ -56,7 +57,12 @@ impl SafetyManager {
               collected_enemies_squads_ids_around.push(some_squad.id);
               collected_enemies_influence_around +=
                 signi_calc.influence_enemy_squad_around_us(&some_squad);
-              if let Some(enemy_aim) = some_squad.shared.aim.upgrade() {
+              let option_enemy_aim = if some_squad.shared.aim.upgrade().is_some() {
+                some_squad.shared.aim.upgrade()
+              } else {
+                some_squad.shared.secondary_aim.upgrade()
+              };
+              if let Some(enemy_aim) = option_enemy_aim {
                 if our_squads_ids.contains(&enemy_aim.borrow().id) {
                   collected_enemies_squads_ids_who_attacks_us.push(some_squad.id);
                   collected_enemies_influence_who_attacks_us +=
@@ -86,7 +92,7 @@ impl SafetyManager {
     reserved_squads: &mut Vec<ReservedSquad>,
     all_factions_info: &'a Vec<FactionInfo>,
     squads_grid: &SquadsGrid,
-    new_purposes: &mut Vec<EnhancedPurpose<'a>>,
+    new_purposes: &mut Vec<EnhancedPurpose>,
   ) -> Vec<OurSquadsGroupSafetyInfo<'a>> {
     let our_squads_safety = SafetyManager::get_info_about_safety(
       our_faction_id,
@@ -125,24 +131,27 @@ impl SafetyManager {
               }
               true
             } else {
+              log!("should_single_squad_react_on_met_danger = false");
               false
             }
           } else {
             new_purposes.iter().for_each(|new_purpose| {
-              let new_purpose_includes_enemies_around =
-                new_purpose
-                  .place
-                  .squads
-                  .iter()
-                  .any(|ref_cell_new_purpose_enemy_squad| {
-                    safety_info
-                      .collected_enemies_squads_ids_around
-                      .contains(&ref_cell_new_purpose_enemy_squad.borrow().id)
-                  });
-              if new_purpose_includes_enemies_around
-                && greatest_signification_of_blocker_purposes < new_purpose.signification
-              {
-                greatest_signification_of_blocker_purposes = new_purpose.signification;
+              if new_purpose.purpose_type == PurposeType::Attack {
+                let new_purpose_includes_enemies_around =
+                  new_purpose
+                    .place
+                    .squads
+                    .iter()
+                    .any(|ref_cell_new_purpose_enemy_squad| {
+                      safety_info
+                        .collected_enemies_squads_ids_around
+                        .contains(&ref_cell_new_purpose_enemy_squad.borrow().id)
+                    });
+                if new_purpose_includes_enemies_around
+                  && greatest_signification_of_blocker_purposes < new_purpose.signification
+                {
+                  greatest_signification_of_blocker_purposes = new_purpose.signification;
+                }
               }
             });
             true
@@ -200,7 +209,10 @@ impl SafetyManager {
           //   greatest_signification_of_blocker_purposes
           // );
         });
-
+        log!(
+          "squads_ids_which_will_react: {:?}",
+          squads_ids_which_will_react
+        );
         if squads_ids_which_will_react.len() > 0
           && signi_calc.should_our_squads_group_do_anything_in_danger(
             safety_info.collected_enemies_influence_who_attacks_us,
@@ -246,7 +258,7 @@ impl SafetyManager {
                   }
                 }
               });
-            let nearest_new_purpose = &mut new_purposes[nearest_index];
+            let nearest_new_purpose = &new_purposes[nearest_index];
 
             // pub struct Place {
             //   pub place_type: PlaceType,
@@ -284,12 +296,18 @@ impl SafetyManager {
               nearest_new_purpose.place.x,
               nearest_new_purpose.place.y
             );
-            nearest_new_purpose.signification += greatest_signification_of_blocker_purposes;
-            // yea we are adding two times signification, but it's okay, squad which attacks us should be market as with bigger signification
 
-            (nearest_new_purpose.id, nearest_new_purpose.signification)
+            // yea we are adding two times signification, but it's okay, squad which attacks us should be market as with bigger signification
+            (
+              nearest_new_purpose.id,
+              (nearest_new_purpose.signification
+                + greatest_signification_of_blocker_purposes
+                + COMMON_PURPOSE_SIGNIFICATION_BASE),
+              // We should do similar stuff in collecting new purposes, when there is an enemy of the track
+              // or if there is enemy of the track, we should avoid adding that squad to purpose, one case if signification is mroe than 6.0
+            )
           } else {
-            // log!("danger place - running away");
+            log!("danger place - running away");
             let new_id = new_purposes.len();
             let signification = signi_calc.signification_running_to_safe_place();
             let safe_destination_index =
@@ -298,7 +316,7 @@ impl SafetyManager {
               id: new_id,
               purpose_type: PurposeType::RunToSafePlace,
               signification,
-              place: our_squads_safety[safe_destination_index].place,
+              place: our_squads_safety[safe_destination_index].place.clone(),
             });
 
             (new_id, signification)
@@ -339,6 +357,7 @@ impl SafetyManager {
           std::f32::MAX // it's the same place
         } else {
           distance * 0.5 + safety_place.collected_enemies_influence_around
+          // TODO: fix, right now it's selected squads whic hare in danger
         };
 
         if min_value > value {

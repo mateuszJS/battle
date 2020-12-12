@@ -9,7 +9,7 @@ use std::collections::HashMap;
 use std::rc::{Rc, Weak};
 
 // TODO: if portals are too close to each other, then it should be smaller!
-const DISTANCE_THRESHOLD_THERE_IS_ENEMY_ON_PATH: f32 = 0.75 * MAX_POSSIBLE_WEAPON_RANGE;
+const DISTANCE_THRESHOLD_THERE_IS_ENEMY_ON_PATH: f32 = 0.5 * MAX_POSSIBLE_WEAPON_RANGE;
 
 pub type SquadsGrid = HashMap<usize, Vec<Weak<RefCell<Squad>>>>;
 

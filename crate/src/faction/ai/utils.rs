@@ -14,8 +14,8 @@ impl AiUtils {
   }
   fn get_corresponding_new_purpose<'a>(
     current_plan: &Plan,
-    new_purposes: &'a Vec<EnhancedPurpose<'a>>,
-  ) -> Option<&'a EnhancedPurpose<'a>> {
+    new_purposes: &'a Vec<EnhancedPurpose>,
+  ) -> Option<&'a EnhancedPurpose> {
     match current_plan.purpose_type {
       PurposeType::Attack => new_purposes.iter().find(|new_purpose| {
         if new_purpose.purpose_type == current_plan.purpose_type {
@@ -39,7 +39,11 @@ impl AiUtils {
         }
       }),
       PurposeType::RunToSafePlace => new_purposes.iter().find(|new_purpose| {
-        (current_plan.x - new_purpose.place.x).hypot(current_plan.y - new_purpose.place.y) < 1.0
+        if new_purpose.purpose_type == PurposeType::RunToSafePlace {
+          (current_plan.x - new_purpose.place.x).hypot(current_plan.y - new_purpose.place.y) < 1.0
+        } else {
+          false
+        }
       }),
     }
   }
@@ -56,7 +60,6 @@ impl AiUtils {
           .iter()
           .filter(|squad| current_plan.squads_ids.contains(&squad.id))
           .collect::<Vec<&Ref<Squad>>>();
-
         if let Some(corresponding_new_purpose) =
           AiUtils::get_corresponding_new_purpose(current_plan, new_purposes)
         {

@@ -1,13 +1,11 @@
-mod already_handled_purposes_manager;
-mod new_purposes_manager;
+mod purposes_manager;
 mod safety_manager;
 mod signification_calculator;
 mod utils;
 
 use crate::squad::Squad;
 use crate::squads_grid_manager::SquadsGrid;
-use already_handled_purposes_manager::AlreadyHandledPurposesManager;
-use new_purposes_manager::NewPurposesManager;
+use purposes_manager::PurposesManager;
 use safety_manager::SafetyManager;
 use signification_calculator::SignificationCalculator;
 use std::cell::{Ref, RefCell};
@@ -22,13 +20,14 @@ pub enum PurposeType {
   // RunToSafePlace,
   // HelpInDanger,
 }
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub enum PlaceType {
   Squads,
   Portal,
   // StrategicPoint,
 }
 
+#[derive(Clone)]
 pub struct Place {
   pub place_type: PlaceType,
   pub squads: Vec<Rc<RefCell<Squad>>>,
@@ -43,11 +42,11 @@ pub struct FactionInfo {
   pub influence_total: f32,
 }
 
-pub struct EnhancedPurpose<'a> {
+pub struct EnhancedPurpose {
   pub id: usize,
   pub purpose_type: PurposeType,
   pub signification: f32,
-  pub place: &'a Place,
+  pub place: Place,
 }
 
 #[derive(Clone)]
@@ -108,11 +107,12 @@ impl ArtificialIntelligence {
       .map(|ref_cell_squad| ref_cell_squad.borrow())
       .collect::<Vec<Ref<Squad>>>();
 
-    let mut new_purposes = NewPurposesManager::get_purposes(
+    let mut new_purposes = PurposesManager::get_purposes(
       self.faction_id,
       &self.signi_calc,
       all_factions_info,
       &self.current_plans,
+      &our_squads,
     );
 
     let mut reserved_squads =
@@ -132,37 +132,17 @@ impl ArtificialIntelligence {
     // log!("all reserved squads: {}", reserved_squads.len());
     for purpose in new_purposes.iter() {
       /*=============CHECKING IF CURRENT PLAN EXISTS IN NEW PURPOSES==================*/
-      let squads_reserved_for_this_purpose = reserved_squads
-        .iter()
-        .filter(|reserved_squad| reserved_squad.purpose_id == purpose.id)
-        .collect::<Vec<&ReservedSquad>>();
-      // log!(
-      //   "squads_reserved_for_this_purpose: {}",
-      //   squads_reserved_for_this_purpose.len()
-      // );
-      if squads_reserved_for_this_purpose.len() > 0 {
-        // have to check influence one more, just in case if some squads were stolen
-        let option_new_plan = AlreadyHandledPurposesManager::handle_already_involved_purposes(
-          &self.signi_calc,
-          &mut our_squads,
-          &squads_reserved_for_this_purpose,
-          purpose,
-        );
-        if let Some(new_plan) = option_new_plan {
-          final_plans.push(new_plan)
-        }
-      } else {
-        let option_new_plan = NewPurposesManager::handle_new_purposes(
-          self.faction_id,
-          &self.signi_calc,
-          &mut our_squads,
-          purpose,
-          &reserved_squads,
-          squads_grid,
-        );
-        if let Some(new_plan) = option_new_plan {
-          final_plans.push(new_plan)
-        }
+
+      let option_new_plan = PurposesManager::handle_purposes(
+        self.faction_id,
+        &self.signi_calc,
+        &mut our_squads,
+        purpose,
+        &reserved_squads,
+        squads_grid,
+      );
+      if let Some(new_plan) = option_new_plan {
+        final_plans.push(new_plan)
       }
 
       if our_squads.len() == 0 {
@@ -180,6 +160,7 @@ impl ArtificialIntelligence {
           .enumerate()
           .for_each(|(index, final_plan)| {
             if final_plan.purpose_type == PurposeType::Attack {
+              // e should care about safety?!
               let squad_position = our_squad.shared.center_point;
               let distance =
                 (squad_position.0 - final_plan.x).hypot(squad_position.1 - final_plan.y);
@@ -194,6 +175,7 @@ impl ArtificialIntelligence {
             .squads_ids
             .push(our_squad.id);
         }
+        //WRONG! rn some squads shoudl sto pattacking but will go!
       });
     }
 
@@ -216,6 +198,23 @@ impl ArtificialIntelligence {
       .collect::<Vec<Plan>>();
 
     self.current_plans = final_plans;
+    self
+      .current_plans
+      .iter()
+      .for_each(|plan| match plan.purpose_type {
+        PurposeType::RunToSafePlace => log!(
+          "final purpose: run to save place x: {}, y: {}, squads_ids: {:?}",
+          plan.x,
+          plan.y,
+          plan.squads_ids
+        ),
+        PurposeType::Attack => log!(
+          "final purpose: attack x: {}, y: {}, squads_ids: {:?}",
+          plan.x,
+          plan.y,
+          plan.squads_ids
+        ),
+      });
 
     plans_needed_to_update
   }
