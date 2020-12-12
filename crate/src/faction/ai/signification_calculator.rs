@@ -96,7 +96,7 @@ impl SignificationCalculator {
     collected_our_influence: f32,
   ) -> bool {
     influence_enemies_who_attacks_us > collected_our_influence * 0.1
-      || influence_enemies_around_us > collected_our_influence * 0.0 // not really sure
+      // || influence_enemies_around_us > collected_our_influence * 0.0 // not really sure
                                                                      // || influence_enemies_around_us > collected_our_influence * 7.0 // not really sure
   }
 

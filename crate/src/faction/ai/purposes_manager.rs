@@ -215,7 +215,7 @@ impl PurposesManager {
         None
       };
     }
-And we got issue here, we have 2.0 + extra signification in reservations! But purposes are still in old order :/
+// And we got issue here, we have 2.0 + extra signification in reservations! But purposes are still in old order :/
     our_squads.sort_by(|a_squad, b_squad| {
       let a = signi_calc.how_much_squad_fits_to_take_purpose(
         &purpose,
@@ -248,6 +248,14 @@ And we got issue here, we have 2.0 + extra signification in reservations! But pu
     while collected_our_influence < purpose.place.influence && our_squads_last_index > 0 {
       our_squads_last_index -= 1;
       let our_squad = &our_squads[our_squads_last_index];
+
+      let option_squad_reservation = reserved_squads.iter().find(|reservation| reservation.squad_id == our_squad.id);
+      if let Some(squad_reservation) = option_squad_reservation {
+        log!("is squad free: {} > {}", squad_reservation.purpose_signification, purpose.signification);
+        if squad_reservation.purpose_id != purpose.id && squad_reservation.purpose_signification > purpose.signification {
+          continue;
+        }
+      }
 
       // if we have met someone on the track, then check if that enemy is really close us, maybe if exists in safety manager
       // if exists, then avoid adding this purpose

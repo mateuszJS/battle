@@ -72,7 +72,7 @@ impl SafetyManager {
             }
           }
         }
-
+        log!("collected_enemies_influence_who_attacks_us: {}", collected_enemies_influence_who_attacks_us);
         OurSquadsGroupSafetyInfo {
           collected_enemies_influence_who_attacks_us,
           collected_enemies_influence_around,
@@ -213,6 +213,7 @@ impl SafetyManager {
           "squads_ids_which_will_react: {:?}",
           squads_ids_which_will_react
         );
+        Right now AI dont care if met enemy who attacks us :)
         if squads_ids_which_will_react.len() > 0
           && signi_calc.should_our_squads_group_do_anything_in_danger(
             safety_info.collected_enemies_influence_who_attacks_us,
