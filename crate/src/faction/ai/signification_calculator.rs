@@ -1,5 +1,5 @@
+use super::EnhancedPurpose;
 use super::Squad;
-use super::{EnhancedPurpose, OurSquadsGroupSafetyInfo, Place, ReservedSquad};
 use crate::weapon_types::MAX_POSSIBLE_WEAPON_RANGE;
 
 use std::cell::Ref;

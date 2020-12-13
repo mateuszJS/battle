@@ -12,11 +12,19 @@ use crate::weapon_types::MAX_POSSIBLE_WEAPON_RANGE;
 
 const MIN_DISTANCE_OF_SEARCHING_ENEMY: f32 = 2.0 * (MAX_POSSIBLE_WEAPON_RANGE + THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER);
 
+struct EnemyInfo {
+  id: u32,
+  influence: f32,
+  x: f32,
+  y: f32,
+  is_attacking_us: bool,
+}
+
 struct OurSquadsGroupSafetyInfo<'a> {
-  collected_enemies_influence_who_attacks_us: f32,
-  collected_enemies_influence_around: f32,
-  collected_enemies_squads_ids_who_attacks_us: Vec<u32>, maybe we should just store Ref<Squad> instead of just id
-  collected_enemies_squads_ids_around: Vec<u32>,
+  // collected_enemies_influence_who_attacks_us: f32,
+  // collected_enemies_influence_around: f32,
+  // collected_enemies_squads_who_attacks_us: Vec<EnemyInfo>,
+  enemies_squads: Vec<EnemyInfo>,
   our_squads_ids: Vec<u32>,
   place: &'a Place,
 }
@@ -56,48 +64,51 @@ impl SafetyManager {
           .iter()
           .map(|ref_cell_squad| ref_cell_squad.borrow().id)
           .collect::<Vec<u32>>();
-        let mut collected_enemies_squads_ids_who_attacks_us = vec![];
-        let mut collected_enemies_squads_ids_around = vec![];
-        let mut collected_enemies_influence_who_attacks_us = 0.0;
-        let mut collected_enemies_influence_around = 0.0;
-        /*==========CHECK IF THERE ARE ANY ENEMIES AROUND THE POINT============*/
 
-        for some_weak_squad in squads_nearby.iter() {
+        /*==========CHECK IF THERE ARE ANY ENEMIES AROUND THE POINT============*/
+        let enemies_squads = squads_nearby.iter().filter_map(|some_weak_squad| {
           if let Some(some_ref_cell_squad) = some_weak_squad.upgrade() {
             let some_squad = some_ref_cell_squad.borrow();
             if some_squad.faction_id != our_faction_id {
-              collected_enemies_squads_ids_around.push(some_squad.id);
-              collected_enemies_influence_around += some_squad.get_influence();
+
               let option_enemy_aim = if some_squad.shared.aim.upgrade().is_some() {
                 some_squad.shared.aim.upgrade()
               } else {
                 some_squad.shared.secondary_aim.upgrade()
               };
-              if let Some(enemy_aim) = option_enemy_aim {
+
+              let is_attacking_us = if let Some(enemy_aim) = option_enemy_aim {
                 if our_squads_ids.contains(&enemy_aim.borrow().id) {
-                  let is_attacking = some_squad
+                  some_squad
                     .members
                     .iter()
-                    .any(|ref_cell_unit| ref_cell_unit.borrow().state == STATE_SHOOT);
-                  if is_attacking {
-                    collected_enemies_squads_ids_who_attacks_us.push(some_squad.id);
-                    collected_enemies_influence_who_attacks_us +=
-                      signi_calc.influence_enemy_squad_attacks_us(&some_squad);
-                  }
+                    .any(|ref_cell_unit| ref_cell_unit.borrow().state == STATE_SHOOT)
+                } else {
+                  false
                 }
-              }
+              } else {
+                false
+              };
+
+              Some(
+                EnemyInfo {
+                  id: some_squad.id,
+                  influence: some_squad.get_influence(),
+                  x: some_squad.shared.center_point.0,
+                  y: some_squad.shared.center_point.1,
+                  is_attacking_us,
+                }
+              )
+            } else {
+              None
             }
+          } else {
+            None
           }
-        }
-        // log!(
-        //   "collected_enemies_influence_who_attacks_us: {}",
-        //   collected_enemies_influence_who_attacks_us
-        // );
+        }).collect::<Vec<EnemyInfo>>();
+
         OurSquadsGroupSafetyInfo {
-          collected_enemies_influence_who_attacks_us,
-          collected_enemies_influence_around,
-          collected_enemies_squads_ids_who_attacks_us,
-          collected_enemies_squads_ids_around,
+          enemies_squads,
           our_squads_ids,
           place,
         }
@@ -122,7 +133,7 @@ impl SafetyManager {
     );
 
     our_squads_safety.iter().for_each(|safety_info| {
-      if safety_info.collected_enemies_influence_around > 0.0 {
+      if safety_info.enemies_squads.len() > 0 {
         let mut collected_our_influence = 0.0;
         let mut squads_ids_which_will_react = vec![];
         let mut greatest_signification_of_blocker_purposes = 0.0;
@@ -147,11 +158,11 @@ impl SafetyManager {
             let reservation_purpose_id =
               reserved_squads[reserved_squad_index].purpose_id;
             let purpose = &new_purposes[reservation_purpose_id];
-            let squads_to_purpose_distance = (purpose.place.x - safety_info.place.x).hypot(purpose.place.y - safety_info.place.y).max(MIN_DISTANCE_OF_SEARCHING_ENEMY);
-            TODO: now we should calculate distance between purpose place and enemy, if that distance is bigger than squads_to_purpose_distance, then don't care about this enemy
-            but actually we should do it prob in calculatign safety
-            or we can get fro msafety reference to enemies, and here filter out which enemies are attacking us
-
+            let distance_our_place_to_purpose = (purpose.place.x - safety_info.place.x).hypot(purpose.place.y - safety_info.place.y).max(MIN_DISTANCE_OF_SEARCHING_ENEMY);
+            let distance_enemy_to_purpose = (purpose.place.x - ).hypot(purpose.place.y - );
+            but with this way we will calc influence for each single one squad, we should?
+            it shouldn't be like for place, and in each palce for eahc group of squads with the same purpose?
+   
             let reservation_purpose_signification =
               reserved_squads[reserved_squad_index].purpose_signification;
             if signi_calc.should_single_squad_react_on_met_danger(reservation_purpose_signification)
@@ -365,8 +376,6 @@ impl SafetyManager {
         }
       }
     });
-
-    our_squads_safety
   }
 
   fn get_safe_destination_index(

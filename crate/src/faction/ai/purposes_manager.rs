@@ -349,7 +349,7 @@ impl PurposesManager {
       used_squads_ids.push(our_squad.id);
       collected_our_influence += our_squad_influence;
     }
-
+    TODO: if purpose got really high signification, then we shouldn't care if we got enough influence or not
     if collected_our_influence >= purpose.place.influence {
       our_squads.retain(|squad| !used_squads_ids.contains(&squad.id));
 
