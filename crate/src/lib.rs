@@ -217,7 +217,7 @@ impl Universe {
     //   Universe::run_squad_manager(factions, world);
     // }
 
-    // world.bullets_manager.update(&world.all_squads);
+    world.bullets_manager.update(&world.squads_on_grid);
   }
 
   pub fn get_universe_data(&mut self) -> js_sys::Float32Array {

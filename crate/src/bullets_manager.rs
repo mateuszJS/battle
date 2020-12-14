@@ -1,4 +1,4 @@
-use super::{Faction, Squad};
+use super::{Squad, SquadsGrid, SquadsGridManager};
 use crate::constants::THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER;
 use crate::unit::Unit;
 use crate::weapon_types::{get_weapon_details, WeaponType};
@@ -117,11 +117,18 @@ impl BulletsManager {
     }
   }
 
-  fn do_explosion(bullet: &BulletData, all_squads: &Vec<Weak<RefCell<Squad>>>) {
+  fn do_explosion(bullet: &BulletData, squads_on_grid: &SquadsGrid) {
     let weapon_details = get_weapon_details(bullet.weapon_type);
     let target = bullet.target.unwrap();
 
-    all_squads.iter().for_each(|weak_squad| {
+    let squads_nearby = SquadsGridManager::get_squads_in_area(
+      squads_on_grid,
+      target.0,
+      target.1,
+      weapon_details.explosion_range,
+    );
+
+    squads_nearby.iter().for_each(|weak_squad| {
       if let Some(ref_cell_squad) = weak_squad.upgrade() {
         let mut squad: std::cell::RefMut<Squad> = ref_cell_squad.borrow_mut();
         let squad_center = squad.shared.center_point;
@@ -143,11 +150,11 @@ impl BulletsManager {
     })
   }
 
-  pub fn update(&mut self, all_squads: &Vec<Weak<RefCell<Squad>>>) {
+  pub fn update(&mut self, squads_on_grid: &SquadsGrid) {
     self.bullets_data.iter_mut().for_each(|bullet| {
       if bullet.lifetime <= std::f32::EPSILON {
         if bullet.target.is_some() {
-          BulletsManager::do_explosion(bullet, all_squads);
+          BulletsManager::do_explosion(bullet, squads_on_grid);
         } else {
           if let Some(ref_cell_aim) = bullet.aim.upgrade() {
             let weapon_details = get_weapon_details(bullet.weapon_type);
