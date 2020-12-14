@@ -38,7 +38,7 @@ impl SignificationCalculator {
     &self,
     enemy_squad: &Ref<Squad>,
   ) -> f32 {
-    self.signification_enemy_squads(enemy_squad) * 0.7
+    self.signification_enemy_squads(enemy_squad) * 0.9
   }
 
   pub fn additional_signification_enemy_attacks_our_building(
@@ -89,28 +89,22 @@ impl SignificationCalculator {
 
   pub fn should_our_squads_group_do_anything_in_danger(
     &self,
-    influence_enemies_who_attacks_us: f32,
-    influence_enemies_around_us: f32,
     collected_our_influence: f32,
+    influence_enemies_who_attacks_us: f32,
+    number_of_enemies_around: usize,
   ) -> bool {
-    influence_enemies_who_attacks_us > 0.0
-      || influence_enemies_around_us > collected_our_influence * 5.0 // not really sure
-                                                                     // || influence_enemies_around_us > collected_our_influence * 7.0 // not really sure
+    influence_enemies_who_attacks_us > 0.0 || number_of_enemies_around > 10 // not really sure
+                                                                            // || influence_enemies_around_us > collected_our_influence * 7.0 // not really sure
   }
 
   pub fn should_our_group_squads_in_danger_attack_enemy(
     &self,
     our_influence: f32,
     enemies_influence_who_attacks_us: f32,
-    enemies_influence_around: f32,
+    number_of_enemies_around: usize,
   ) -> bool {
     // our_influence >= enemies_influence_who_attacks_us
     //   && 2.5 * our_influence >= enemies_influence_around
-    log!(
-      "should_our_group_squads_in_danger_attack_enemy: {} >= {}",
-      our_influence,
-      enemies_influence_who_attacks_us
-    );
     our_influence >= enemies_influence_who_attacks_us
     // our_influence >= enemies_influence_around
   }

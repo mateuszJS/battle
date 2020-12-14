@@ -1,3 +1,4 @@
+use super::safety_manager::MIN_DISTANCE_OF_SEARCHING_ENEMY;
 use super::signification_calculator::COMMON_PURPOSE_SIGNIFICATION_BASE;
 use super::SignificationCalculator;
 use super::{
@@ -8,8 +9,6 @@ use crate::squads_grid_manager::{SquadsGrid, SquadsGridManager};
 use crate::Squad;
 use std::cell::{Ref, RefCell};
 use std::rc::{Rc, Weak};
-
-const THRESHOLD_PLACE_WAS_ACHIEVED: f32 = 50.0;
 
 pub struct PurposesManager {}
 
@@ -41,9 +40,9 @@ impl PurposesManager {
         next_point.0,
         next_point.1,
       );
-      let distance_start_point_to_end = (point.0 - next_point.0).hypot(point.1 - next_point.1).max();
-
-      we are not checking similar thing in two places? once here and second in safety manager?
+      let distance_our_squads_point_to_purpose = (point.0 - next_point.0)
+        .hypot(point.1 - next_point.1)
+        .max(MIN_DISTANCE_OF_SEARCHING_ENEMY);
 
       /*==========CHECK IF THERE ARE ANY ENEMIES AROUND THE POINT============*/
       let mut collected_enemy_influence = 0.0;
@@ -52,11 +51,11 @@ impl PurposesManager {
         if let Some(some_ref_cell_squad) = some_weak_squad.upgrade() {
           let some_squad = some_ref_cell_squad.borrow();
           let some_squad_position = some_squad.shared.center_point;
-          let distance_to_end =
+          let distance_enemy_to_purpose =
             (some_squad_position.0 - next_point.0).hypot(some_squad_position.1 - next_point.1);
           if some_squad.faction_id != our_faction_id
             && !our_aim_enemy_squads_ids.contains(&some_squad.id)
-            && distance_start_point_to_end > distance_to_end
+            && distance_our_squads_point_to_purpose > distance_enemy_to_purpose
           {
             collected_enemy_squads_ids.push(some_squad.id);
             collected_enemy_influence += some_squad.get_influence();
@@ -122,7 +121,7 @@ impl PurposesManager {
                 .iter()
                 .filter(|squad| current_plan.squads_ids.contains(&squad.id))
                 .collect::<Vec<&Ref<Squad>>>();
-              log!("plan to run away: {}", current_plan_our_squads.len());
+
               if current_plan_our_squads.len() == 0 {
                 return None;
               }
@@ -141,9 +140,8 @@ impl PurposesManager {
               let avg_y = sum_y / current_plan_our_squads.len() as f32;
 
               let distance_to_purpose = (avg_x - current_plan.x).hypot(avg_y - current_plan.y);
-
+              // TODO: OR if just if around us there is no enemy!, then stop with running, we are in the safe place
               if distance_to_purpose > 150.0 {
-                log!("still running");
                 new_id += 1;
                 Some(EnhancedPurpose {
                   id: new_id as usize,
@@ -159,7 +157,6 @@ impl PurposesManager {
                 })
               } else {
                 // Check if there are any enemy influence around us! if not, then can stop
-                log!("running away done");
                 None
               }
             })
@@ -328,7 +325,6 @@ impl PurposesManager {
               enemy_influence,
             )
           };
-        log!("blocking_enemy_influence: {}", blocking_enemy_influence);
         // we should calc, if purpose is in totally different direction, then we don't have to destroy the enemy
         if blocking_enemy_influence <= our_blocked_influence {
           if our_blocked_squads_ids.len() == 1 {
@@ -349,7 +345,7 @@ impl PurposesManager {
       used_squads_ids.push(our_squad.id);
       collected_our_influence += our_squad_influence;
     }
-    TODO: if purpose got really high signification, then we shouldn't care if we got enough influence or not
+    // TODO: if purpose got really high signification, then we shouldn't care if we got enough influence or not
     if collected_our_influence >= purpose.place.influence {
       our_squads.retain(|squad| !used_squads_ids.contains(&squad.id));
 

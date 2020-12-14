@@ -120,7 +120,7 @@ impl ArtificialIntelligence {
     );
 
     AiUtils::sort_purposes(&mut new_purposes);
-    // log!("all reserved squads: {}", reserved_squads.len());
+
     for purpose in new_purposes.iter() {
       /*=============CHECKING IF CURRENT PLAN EXISTS IN NEW PURPOSES==================*/
 

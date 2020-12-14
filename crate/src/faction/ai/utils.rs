@@ -63,10 +63,6 @@ impl AiUtils {
         if let Some(corresponding_new_purpose) =
           AiUtils::get_corresponding_new_purpose(current_plan, new_purposes)
         {
-          // log!(
-          //   "make reservations, signification: {}",
-          //   corresponding_new_purpose.signification
-          // );
           squads_involved_in_current_plan
             .iter()
             .map(|squad| ReservedSquad {
