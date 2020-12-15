@@ -202,6 +202,8 @@ impl Unit {
       self.change_state_to_shoot(aim, true, squad_shared_info);
     } else if let Some(secondary_aim) = squad_shared_info.secondary_aim.upgrade() {
       self.change_state_to_shoot(secondary_aim, false, squad_shared_info);
+    } else {
+      self.state = STATE_IDLE;
     }
   }
 
@@ -276,6 +278,7 @@ impl Unit {
     }
 
     let borrowed_members = &aim.borrow().members;
+
     let (nearest_weak_unit_aim, distance_to_nearest_unit_aim) =
       borrowed_members
         .iter()

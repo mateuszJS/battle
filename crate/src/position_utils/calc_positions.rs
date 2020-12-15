@@ -1,8 +1,8 @@
 use super::basic_utils::{BasicUtils, Line, Point};
 use super::obstacles_lazy_statics::ObstaclesLazyStatics;
 use crate::constants::{
-  MATH_PI, NORMAL_SQUAD_RADIUS, OBSTACLES_CELL_SIZE, OBSTACLES_MAP_HEIGHT, OBSTACLES_MAP_SCALE_X,
-  OBSTACLES_MAP_SCALE_Y, OBSTACLES_MAP_WIDTH,
+  MAP_HEIGHT, MAP_WIDTH, MATH_PI, NORMAL_SQUAD_RADIUS, OBSTACLES_CELL_SIZE, OBSTACLES_MAP_HEIGHT,
+  OBSTACLES_MAP_SCALE_X, OBSTACLES_MAP_SCALE_Y, OBSTACLES_MAP_WIDTH,
 };
 
 const NUMBER_OF_PRECALCULATED_OFFSETS: usize = 4;
@@ -118,6 +118,20 @@ impl CalcPositions {
   }
 
   pub fn get_is_point_inside_any_obstacle((x, y): (i16, i16), is_squad: bool) -> bool {
+    /*=====CHECK IF SQUAD/UNIT IS NOT OUT OF THE MAP======*/
+    let boundaries_offset = if is_squad {
+      NORMAL_SQUAD_RADIUS as i16
+    } else {
+      0
+    };
+    if x < boundaries_offset
+      || y < boundaries_offset
+      || x > MAP_WIDTH as i16 - boundaries_offset
+      || y > MAP_HEIGHT as i16 - boundaries_offset
+    {
+      return true;
+    }
+    /*=====CHECK IF SQUAD/UNIT IS NOT ON THE OBSTACLES======*/
     let precalculdated_obstacles_map = CalcPositions::get_precalculated_obstacles_map();
     let index = (y as f32 * OBSTACLES_MAP_SCALE_Y) as usize * OBSTACLES_MAP_WIDTH
       + (x as f32 * OBSTACLES_MAP_SCALE_X as f32) as usize;
@@ -197,7 +211,7 @@ impl CalcPositions {
   ─────────────────  ┘
 
   └────────┬────────┘
-          B
+           B
 
   initial_x is toggling, once it's 0, next time B/2, and again 0, and so on and on
 
