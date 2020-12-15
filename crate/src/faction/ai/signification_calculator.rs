@@ -20,6 +20,10 @@ impl SignificationCalculator {
     }
   }
 
+  pub fn signification_strategic_point(&self) -> f32 {
+    0.5
+  }
+
   pub fn signification_enemy_squads(&self, enemy_squads: &Ref<Squad>) -> f32 {
     0.1
   }

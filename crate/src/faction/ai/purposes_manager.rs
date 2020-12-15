@@ -98,6 +98,10 @@ impl PurposesManager {
                   });
                   (PurposeType::Attack, signification)
                 }
+                PlaceType::StrategicPoint => (
+                  PurposeType::Capture,
+                  signi_calc.signification_strategic_point(),
+                ),
               };
 
               new_id += 1;
@@ -258,11 +262,6 @@ impl PurposesManager {
         .iter()
         .find(|reservation| reservation.squad_id == our_squad.id);
       if let Some(squad_reservation) = option_squad_reservation {
-        log!(
-          "is squad reserved: {} > {}",
-          squad_reservation.purpose_signification,
-          purpose.signification
-        );
         if squad_reservation.purpose_id != purpose.id
           && squad_reservation.purpose_signification > purpose.signification
         {
@@ -346,6 +345,8 @@ impl PurposesManager {
       collected_our_influence += our_squad_influence;
     }
     // TODO: if purpose got really high signification, then we shouldn't care if we got enough influence or not
+    log!("{} >= {}", collected_our_influence, purpose.place.influence);
+    log!("squads: {:?}", used_squads_ids);
     if collected_our_influence >= purpose.place.influence {
       our_squads.retain(|squad| !used_squads_ids.contains(&squad.id));
 

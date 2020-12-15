@@ -1,4 +1,5 @@
 import Factory from '~/representation/Factory'
+import StrategicPoint from '~/representation/StrategicPoint'
 import Unit from '~/representation/Unit'
 
 export const updateFactory = (factory: Factory, [progress, ...items]: number[]) => {
@@ -16,4 +17,11 @@ export const updateFactory = (factory: Factory, [progress, ...items]: number[]) 
 
 export const updateUnit = (unit: Unit, [x, y, angle, state, firstStateParam]: number[]) => {
   unit.update(state, x, y, angle, firstStateParam)
+}
+
+export const updateStrategicPoint = (
+  strategicPoint: StrategicPoint,
+  [progress, ownerFactionId]: number[],
+) => {
+  strategicPoint.update(progress, ownerFactionId)
 }

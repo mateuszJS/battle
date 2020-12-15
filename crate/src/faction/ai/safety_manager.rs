@@ -46,6 +46,7 @@ impl SafetyManager {
         let threshold_enemies_around = match place.place_type {
           PlaceType::Portal => MAX_POSSIBLE_WEAPON_RANGE * 1.5,
           PlaceType::Squads => MAX_POSSIBLE_WEAPON_RANGE,
+          PlaceType::StrategicPoint => MAX_POSSIBLE_WEAPON_RANGE * 1.25,
         };
         let squads_nearby = SquadsGridManager::get_squads_in_area(
           squads_grid,

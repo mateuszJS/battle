@@ -45,6 +45,13 @@ impl AiUtils {
           false
         }
       }),
+      PurposeType::Capture => new_purposes.iter().find(|new_purpose| {
+        if new_purpose.purpose_type == PurposeType::Capture {
+          (current_plan.x - new_purpose.place.x).hypot(current_plan.y - new_purpose.place.y) < 1.0
+        } else {
+          false
+        }
+      }),
     }
   }
 

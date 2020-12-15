@@ -15,16 +15,14 @@ use utils::AiUtils;
 #[derive(PartialEq, Clone)]
 pub enum PurposeType {
   Attack,
-  // TakeStrategicPoint,
   RunToSafePlace,
-  // RunToSafePlace,
-  // HelpInDanger,
+  Capture,
 }
 #[derive(PartialEq, Clone)]
 pub enum PlaceType {
   Squads,
   Portal,
-  // StrategicPoint,
+  StrategicPoint,
 }
 
 #[derive(Clone)]
@@ -201,6 +199,12 @@ impl ArtificialIntelligence {
         ),
         PurposeType::Attack => log!(
           "final purpose: attack x: {}, y: {}, squads_ids: {:?}",
+          plan.x,
+          plan.y,
+          plan.squads_ids
+        ),
+        PurposeType::Capture => log!(
+          "final purpose: capture x: {}, y: {}, squads_ids: {:?}",
           plan.x,
           plan.y,
           plan.squads_ids

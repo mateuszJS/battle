@@ -7,6 +7,7 @@ import render from './render'
 import { USER_FACTION_ID } from 'Consts'
 import { Universe } from '../crate/pkg/index'
 import Factory from '~/representation/Factory'
+import StrategicPoint from '~/representation/StrategicPoint'
 import initializeMouseController from './mouseController'
 import getSerializedInfoAboutWorld from './getSerializedInfoAboutWorld'
 import { createFactoryButtons } from './buttons/factory'
@@ -15,7 +16,7 @@ import { updateAbilitiesButtons, clearAbilitiesIcons } from '~/buttons/abilities
 import debugController from '~/debug'
 
 export type UniverseRepresentation = {
-  [id: number]: Factory | Unit
+  [id: number]: Factory | Unit | StrategicPoint
 }
 
 const initGame = () => {
@@ -32,9 +33,10 @@ const initGame = () => {
   const universe = Universe.new(
     serializedInfoAboutWorld.factions,
     serializedInfoAboutWorld.obstacles,
+    serializedInfoAboutWorld.strategicPoints,
   )
-  const factoriesInitData = universe.get_factories_init_data()
 
+  const factoriesInitData = universe.get_factories_init_data()
   for (let i = 0; i < factoriesInitData.length; i += 5) {
     const factoryId = factoriesInitData[i + 1]
     const factionId = factoriesInitData[i]
@@ -50,6 +52,16 @@ const initGame = () => {
         universe.create_squad(type),
       )
     }
+  }
+
+  const strategicPointsInitData = universe.get_strategic_points_init_data()
+  for (let i = 0; i < strategicPointsInitData.length; i += 3) {
+    const strategicPointId = strategicPointsInitData[i]
+    const factoryRepresentation = new StrategicPoint(
+      strategicPointsInitData[i + 1],
+      strategicPointsInitData[i + 2],
+    )
+    universeRepresentation[strategicPointId] = factoryRepresentation
   }
 
   const mouseController = new initializeMouseController(universe, universeRepresentation)

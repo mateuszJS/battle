@@ -37,8 +37,10 @@ mod representations_ids;
 mod squad;
 mod squad_types;
 mod squads_grid_manager;
+mod strategic_point;
 mod unit;
 mod weapon_types;
+
 use id_generator::IdGenerator;
 use std::collections::HashMap;
 use wasm_bindgen::prelude::*;
@@ -56,6 +58,7 @@ use representations_ids::BULLETS_REPRESENTATION_ID;
 use squad::Squad;
 use squad_types::SquadType;
 use squads_grid_manager::{SquadsGrid, SquadsGridManager};
+use strategic_point::{StrategicPoint, STRATEGIC_POINT_EMPTY_OWNER};
 
 const INDEX_OF_USER_FACTION: usize = 0;
 
@@ -64,6 +67,7 @@ const THRESHOLD_ARE_TWO_SQUADS_NEIGHBORS: f32 = 1.5 * THRESHOLD_MAX_UNIT_DISTANC
 pub struct World {
   bullets_manager: BulletsManager,
   squads_on_grid: SquadsGrid,
+  strategic_points: Vec<StrategicPoint>,
 }
 
 #[wasm_bindgen]
@@ -76,11 +80,27 @@ pub struct Universe {
 
 #[wasm_bindgen]
 impl Universe {
-  pub fn new(factions_data: Vec<f32>, obstacles_data: Vec<f32>) -> Universe {
+  pub fn new(
+    factions_data: Vec<f32>,
+    obstacles_data: Vec<f32>,
+    strategic_points_raw: Vec<f32>,
+  ) -> Universe {
     let mut factions: Vec<Faction> = vec![];
+
+    let mut strategic_points = vec![];
+    let mut i = 0;
+    while i < strategic_points_raw.len() {
+      strategic_points.push(StrategicPoint::new(
+        strategic_points_raw[i],
+        strategic_points_raw[i + 1],
+      ));
+      i += 2;
+    }
+
     let world = World {
       squads_on_grid: HashMap::new(),
       bullets_manager: BulletsManager::new(),
+      strategic_points,
     };
 
     let mut i = 0;
@@ -105,6 +125,23 @@ impl Universe {
       time: 0,
       test_ai: ArtificialIntelligence::new(0),
     }
+  }
+
+  pub fn get_strategic_points_init_data(&self) -> js_sys::Float32Array {
+    let result = self
+      .world
+      .strategic_points
+      .iter()
+      .flat_map(|strategic_point| {
+        vec![
+          strategic_point.id as f32,
+          strategic_point.x,
+          strategic_point.y,
+        ]
+      })
+      .collect::<Vec<f32>>();
+
+    js_sys::Float32Array::from(&result[..])
   }
 
   pub fn get_factories_init_data(&self) -> js_sys::Float32Array {
@@ -189,10 +226,21 @@ impl Universe {
       factions.iter_mut().for_each(|faction: &mut Faction| {
         faction.check_squads_correctness();
       });
+
+      let World {
+        ref squads_on_grid, ..
+      } = world;
+
+      world
+        .strategic_points
+        .iter_mut()
+        .for_each(|strategic_point: &mut StrategicPoint| {
+          strategic_point.update(squads_on_grid);
+        })
     }
 
     if *time % AI_CALCULATION_PERIOD == 0 {
-      let ai_input = Universe::calculate_ai_input(&factions);
+      let ai_input = Universe::calculate_ai_input(&factions, &world.strategic_points);
       factions
         .iter_mut()
         .enumerate()
@@ -227,8 +275,16 @@ impl Universe {
       .flat_map(|faction| faction.get_representation())
       .collect();
 
+    let strategic_points_representation = self
+      .world
+      .strategic_points
+      .iter()
+      .flat_map(|strategic_point| strategic_point.get_representation())
+      .collect::<Vec<f32>>();
+
     let result = [
       &universe_representation[..],
+      &strategic_points_representation[..],
       &[BULLETS_REPRESENTATION_ID],
       &self.world.bullets_manager.get_representation(),
     ]
@@ -419,8 +475,11 @@ impl Universe {
     neighbors
   }
 
-  fn calculate_ai_input(factions: &Vec<Faction>) -> Vec<FactionInfo> {
-    factions
+  fn calculate_ai_input(
+    factions: &Vec<Faction>,
+    strategic_points: &Vec<StrategicPoint>,
+  ) -> Vec<FactionInfo> {
+    let mut ai_input = factions
       .iter()
       .map(|faction| {
         let mut influence_total = 0.0;
@@ -461,6 +520,7 @@ impl Universe {
         let portal = faction.portal_squad.borrow();
         let portal_influence = portal.get_influence();
         influence_total += portal_influence;
+
         places.push(Place {
           place_type: PlaceType::Portal,
           squads: vec![faction.portal_squad.clone()],
@@ -468,13 +528,51 @@ impl Universe {
           x: portal.shared.center_point.0,
           y: portal.shared.center_point.1,
         });
+
+        strategic_points.iter().for_each(|strategic_point| {
+          if strategic_point.owner_faction_id == faction.id {
+            places.push(Place {
+              place_type: PlaceType::StrategicPoint,
+              squads: vec![],
+              influence: 0.1,
+              x: strategic_point.x,
+              y: strategic_point.y,
+            });
+          }
+        });
+
         FactionInfo {
           id: faction.id,
           places,
           influence_total,
         }
       })
-      .collect::<Vec<FactionInfo>>()
+      .collect::<Vec<FactionInfo>>();
+
+    let non_captured_points = strategic_points
+      .iter()
+      .filter_map(|strategic_point| {
+        if strategic_point.owner_faction_id == STRATEGIC_POINT_EMPTY_OWNER {
+          Some(Place {
+            place_type: PlaceType::StrategicPoint,
+            squads: vec![],
+            influence: 0.1,
+            x: strategic_point.x,
+            y: strategic_point.y,
+          })
+        } else {
+          None
+        }
+      })
+      .collect::<Vec<Place>>();
+
+    ai_input.push(FactionInfo {
+      id: STRATEGIC_POINT_EMPTY_OWNER,
+      places: non_captured_points,
+      influence_total: 0.0,
+    });
+
+    ai_input
   }
 
   pub fn get_grid(&self) -> js_sys::Float32Array {
@@ -640,7 +738,7 @@ impl Universe {
       faction.check_squads_correctness();
     });
 
-    let all_factions_info = Universe::calculate_ai_input(&factions);
+    let all_factions_info = Universe::calculate_ai_input(&factions, &vec![]);
 
     let squads = &factions[0].squads;
 

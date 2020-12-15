@@ -37,18 +37,27 @@ const obstacles = [
   ],
 ]
 
+const strategicPoints = [
+  [2000.0, 500.0],
+  [1250.0, 1250.0],
+  [500.0, 2000.0],
+]
+
 const getSerializedInfoAboutWorld = (): {
   factions: Float32Array
   obstacles: Float32Array
+  strategicPoints: Float32Array
 } => {
   const serializedPlayers = players.map(({ id, base }) => [id, base.x, base.y, base.angle]).flat()
   const serializedObstacles = obstacles
     .map(obstaclePoints => [...obstaclePoints.flat(), OBSTACLES_DIVIDER])
     .flat()
   serializedObstacles.pop() // remove last -1.0
+  const serializedStrategicPoints = strategicPoints.flat()
   return {
     factions: new Float32Array(serializedPlayers),
     obstacles: new Float32Array(serializedObstacles),
+    strategicPoints: new Float32Array(serializedStrategicPoints),
   }
 }
 

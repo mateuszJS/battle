@@ -6,6 +6,7 @@ import Unit from '~/representation/Unit'
 import UnitsFactory from '~/representation/UnitFactory'
 import { USER_FACTION_ID } from 'Consts'
 import BulletFactory from '~/representation/BulletFactory'
+import StrategicPoint from '~/representation/StrategicPoint'
 
 const render = (
   delta: number,
@@ -108,6 +109,18 @@ const render = (
           )
         }
 
+        index = newIndexValue
+        break
+      }
+      case REPRESENTATION_IDS.STRATEGIC_POINT: {
+        const indexOfId = index + 1
+        const newIndexValue = indexOfId + 3
+        const strategicPointId = universeData[indexOfId]
+        const strategicPoint = universeRepresentation[strategicPointId]
+        representationUpdaters.updateStrategicPoint(
+          strategicPoint as StrategicPoint,
+          universeData.slice(indexOfId + 1, newIndexValue),
+        )
         index = newIndexValue
         break
       }
