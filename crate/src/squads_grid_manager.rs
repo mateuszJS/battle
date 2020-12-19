@@ -69,14 +69,16 @@ impl SquadsGridManager {
     let mod_x = angle_from_start.sin() * step_distance;
     let mod_y = -angle_from_start.cos() * step_distance;
     let total_distance = (line_start_x - line_end_x).hypot(line_start_y - line_end_y);
+    let max_normalized_factor = total_distance / step_distance;
 
-    let mut indexes = (0..=(total_distance / step_distance).ceil() as usize)
+    let mut indexes = (1..=max_normalized_factor.ceil() as usize)
       .collect::<Vec<usize>>()
       .into_iter()
       .flat_map(|index| {
+        let factor = (index as f32).min(max_normalized_factor);
         SquadsGridManager::get_indexes_in_area(
-          line_start_x + index as f32 * mod_x,
-          line_start_y + index as f32 * mod_y,
+          line_start_x + factor * mod_x,
+          line_start_y + factor * mod_y,
           DISTANCE_THRESHOLD_THERE_IS_ENEMY_ON_PATH,
         )
       })

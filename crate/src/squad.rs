@@ -75,6 +75,19 @@ impl Squad {
       });
     let members_len = members.len() as f32;
     shared.center_point = (sum_x / members_len, sum_y / members_len);
+
+    if shared.center_point.0.is_nan() || shared.center_point.1.is_nan() {
+      log!(
+        "squad.rs update_center: {} {} {}",
+        sum_x,
+        sum_y,
+        members_len,
+      );
+      members.iter().for_each(|ref_cell_unit| {
+        let unit = ref_cell_unit.borrow();
+        log!("{:?} {:?}", (unit.x, unit.y), unit.state);
+      });
+    }
   }
 
   pub fn update(&mut self, world: &mut World) {
@@ -143,6 +156,14 @@ impl Squad {
 
   fn add_target(&mut self, destination: (f32, f32), keep_aim_and_ability_target: bool) {
     self.reset_state(keep_aim_and_ability_target);
+
+    if self.shared.center_point.0.is_nan() || self.shared.center_point.1.is_nan() {
+      log!(
+        "squad.rs add_target: {} {}",
+        self.shared.center_point.0,
+        self.shared.center_point.1
+      );
+    }
 
     self.shared.track = PositionUtils::get_track(
       self.shared.center_point.0,

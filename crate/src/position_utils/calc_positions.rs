@@ -36,6 +36,16 @@ impl CalcPositions {
     let obstacles_lines = ObstaclesLazyStatics::get_obstacles_lines();
     let mut number_of_intersections: usize = 0;
 
+    if p1.x.is_nan() || p1.y.is_nan() || p2.x.is_nan() || p2.y.is_nan() {
+      log!(
+        "collision_checking: {} - {} - {} - {}",
+        p1.x,
+        p1.y,
+        p2.x,
+        p2.y
+      );
+    }
+
     obstacles_lines.iter().for_each(|line| {
       if BasicUtils::check_intersection(&line_with_point, line) {
         number_of_intersections += 1;

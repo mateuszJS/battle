@@ -1,5 +1,7 @@
 use super::safety_manager::MIN_DISTANCE_OF_SEARCHING_ENEMY;
-use super::signification_calculator::COMMON_PURPOSE_SIGNIFICATION_BASE;
+use super::signification_calculator::{
+  COMMON_PURPOSE_MAX_SIGNIFICATION, THRESHOLD_SIGNIFICATION_URGENT_PURPOSE,
+};
 use super::SignificationCalculator;
 use super::{
   EnhancedPurpose, FactionInfo, MetEnemyOnTrack, Place, PlaceType, Plan, PurposeType, ReservedSquad,
@@ -21,6 +23,13 @@ impl PurposesManager {
     squads_grid: &SquadsGrid,
     our_aim_enemy_squads_ids: &Vec<u32>,
   ) -> Option<(Vec<u32>, f32)> /* (enemy_squads_ids, enemy_influence) */ {
+    if our_squad.shared.center_point.0.is_nan() || our_squad.shared.center_point.1.is_nan() {
+      log!(
+        "get_first_enemy_groups_on_track: {} {}",
+        our_squad.shared.center_point.0,
+        our_squad.shared.center_point.1
+      );
+    }
     let track = PositionUtils::get_track(
       our_squad.shared.center_point.0,
       our_squad.shared.center_point.1,
@@ -109,7 +118,7 @@ impl PurposesManager {
               EnhancedPurpose {
                 id: new_id as usize,
                 purpose_type,
-                signification: signification.min(COMMON_PURPOSE_SIGNIFICATION_BASE),
+                signification: signification.min(COMMON_PURPOSE_MAX_SIGNIFICATION),
                 place: place.clone(),
               }
             })
@@ -199,7 +208,7 @@ impl PurposesManager {
     )
   }
 
-  pub fn handle_purposes(
+  pub fn handle_purpose(
     our_faction_id: u32,
     signi_calc: &SignificationCalculator,
     our_squads: &mut Vec<Ref<Squad>>,
@@ -209,7 +218,7 @@ impl PurposesManager {
   ) -> Option<Plan> {
     let (reservations_for_this_purpose, reservations_for_other_purposes) =
       PurposesManager::get_reservation_data(purpose.id, &our_squads, &reserved_squads);
-
+    log!("purpose.signification: {}", purpose.signification);
     if purpose.purpose_type == PurposeType::RunToSafePlace {
       return if reservations_for_this_purpose.len() > 0 {
         our_squads.retain(|squad| !reservations_for_this_purpose.contains(&squad.id));
@@ -324,8 +333,10 @@ impl PurposesManager {
               enemy_influence,
             )
           };
-        // we should calc, if purpose is in totally different direction, then we don't have to destroy the enemy
-        if blocking_enemy_influence <= our_blocked_influence {
+
+        if blocking_enemy_influence <= our_blocked_influence
+          || purpose.signification >= THRESHOLD_SIGNIFICATION_URGENT_PURPOSE
+        {
           if our_blocked_squads_ids.len() == 1 {
             collected_our_influence += our_squad_influence;
           // to avoid adding our_blocked_influence another time, when previously was added
@@ -337,17 +348,17 @@ impl PurposesManager {
           }
           used_squads_ids.append(&mut our_blocked_squads_ids);
         }
-        continue;
+      } else {
+        used_squads_ids.push(our_squad.id);
+        collected_our_influence += our_squad_influence;
       }
-
-      //********************
-      used_squads_ids.push(our_squad.id);
-      collected_our_influence += our_squad_influence;
     }
     // TODO: if purpose got really high signification, then we shouldn't care if we got enough influence or not
-    log!("{} >= {}", collected_our_influence, purpose.place.influence);
-    log!("squads: {:?}", used_squads_ids);
-    if collected_our_influence >= purpose.place.influence {
+    // log!("{} >= {}", collected_our_influence, purpose.place.influence);
+    // log!("squads: {:?}", used_squads_ids);
+    if collected_our_influence >= purpose.place.influence
+      || purpose.signification >= THRESHOLD_SIGNIFICATION_URGENT_PURPOSE
+    {
       our_squads.retain(|squad| !used_squads_ids.contains(&squad.id));
 
       let enemy_squads = purpose

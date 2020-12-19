@@ -15,6 +15,7 @@ use std::rc::Rc;
 use std::rc::Weak;
 use utils::{Utils, FLY_DECELERATION, FLY_MIN_SPEED};
 
+pub const STATE_CHASING: u8 = 9; // this state is used more to notify other modules, not so useful for unit itself
 pub const STATE_ABILITY: u8 = 8;
 const STATE_FLY: u8 = 7;
 pub const STATE_RUN: u8 = 6;
@@ -124,15 +125,27 @@ impl Unit {
   }
 
   pub fn change_state_to_run(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
+    if self.x.is_nan() || self.y.is_nan() {
+      log!("change_state_to_run: {} - {}", self.x, self.y);
+    }
     self.track_index = Utils::get_initial_track_index(0, self.x, self.y, squad_shared_info);
   }
 
   fn set_target(&mut self, x: f32, y: f32) {
-    self.state = STATE_RUN;
+    if self.state != STATE_RUN && self.state != STATE_CHASING {
+      self.state = STATE_RUN;
+    }
     self.target_x = x;
     self.target_y = y;
     let angle = (x - self.x).atan2(self.y - y);
     self.mod_x = angle.sin() * self.squad_details.movement_speed;
+    if angle.is_nan() || self.squad_details.movement_speed.is_nan() {
+      log!(
+        "set_target: {} - {}",
+        angle,
+        self.squad_details.movement_speed
+      );
+    }
     self.mod_y = -angle.cos() * self.squad_details.movement_speed;
     self.angle = angle;
   }
@@ -162,8 +175,11 @@ impl Unit {
     } else {
       self.x += self.mod_x;
       self.y += self.mod_y;
-
+      if self.x.is_nan() || self.y.is_nan() {
+        log!("update_run: {} - {}", self.x, self.y);
+      }
       if self.squad_details.weapon.can_shoot_during_running && self.aim.upgrade().is_some() {
+        self.state = STATE_CHASING;
         self.update_shoot(squad_shared_info, bullet_manager);
       }
     }
@@ -188,7 +204,7 @@ impl Unit {
 
     // it's check_correctness_state method, always should be called after check correctness for squad (bc if enemy can be out of whole squad range in shooting)
     if self.track_index != -1 {
-      if self.state != STATE_RUN {
+      if self.state != STATE_RUN && self.state != STATE_CHASING {
         self.go_to_current_point_on_track(squad_shared_info);
       }
       if let Some(secondary_aim) = squad_shared_info.secondary_aim.upgrade() {
@@ -306,7 +322,7 @@ impl Unit {
         // 10.0 -> to be little bit closer
         // if there is no enough distance to new position,
         // then it will be in threshold of "target_achieved"
-        if unit_aim.state != STATE_RUN {
+        if unit_aim.state != STATE_RUN && unit_aim.state != STATE_CHASING {
           // if the enemy is running, then the faction's hunters should handle it
           self.set_target(
             angle_from_aim_to_unit.sin() * distance_to_enemy + unit_aim.x,
@@ -373,7 +389,7 @@ impl Unit {
     match self.state {
       STATE_FLY => self.update_fly(),
       STATE_GETUP => self.update_getup(squad_shared_info),
-      STATE_RUN => self.update_run(squad_shared_info, bullet_manager),
+      STATE_RUN | STATE_CHASING => self.update_run(squad_shared_info, bullet_manager),
       STATE_SHOOT => self.update_shoot(squad_shared_info, bullet_manager),
       STATE_ABILITY => Abilities::update_ability(self, squad_shared_info, bullet_manager),
       _ => {}
@@ -394,13 +410,13 @@ impl Unit {
         STATE_GETUP => self.get_upping_progress,
         STATE_SHOOT => self.time_to_next_shoot as f32,
         STATE_ABILITY => Abilities::get_representation_state(self),
-        STATE_RUN => self.get_run_representation_param(),
+        STATE_CHASING => self.get_chasing_representation_param(),
         _ => 0.0,
       },
     ]
   }
 
-  fn get_run_representation_param(&self) -> f32 {
+  fn get_chasing_representation_param(&self) -> f32 {
     if self.aim.upgrade().is_some() {
       self.time_to_next_shoot as f32
     } else {

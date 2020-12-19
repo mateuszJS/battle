@@ -122,7 +122,7 @@ impl ArtificialIntelligence {
     for purpose in new_purposes.iter() {
       /*=============CHECKING IF CURRENT PLAN EXISTS IN NEW PURPOSES==================*/
 
-      let option_new_plan = PurposesManager::handle_purposes(
+      let option_new_plan = PurposesManager::handle_purpose(
         self.faction_id,
         &self.signi_calc,
         &mut our_squads,

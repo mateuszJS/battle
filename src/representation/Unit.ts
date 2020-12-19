@@ -12,6 +12,7 @@ type PixiUnitStuff = {
 }
 
 enum State {
+  CHASING = 9,
   ABILITY = 8,
   FLY = 7,
   RUN = 6,
@@ -112,6 +113,9 @@ class Unit {
         this.deselect()
         this.frameUpdaters.goToDie(angle, this.id)
         break
+      }
+      case State.CHASING: {
+        this.frameUpdaters.goToChasing(angle, firstStateParam)
       }
     }
   }

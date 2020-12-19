@@ -137,6 +137,15 @@ impl ObstaclesLazyStatics {
                   p1: point_a,
                   p2: point_b,
                 };
+                if point_a.x.is_nan() || point_a.y.is_nan() || point_b.x.is_nan() || point_b.y.is_nan() {
+                  log!(
+                    "obstacles.iter().enumerate().f: {} - {} - {} - {}",
+                    point_a.x,
+                    point_a.y,
+                    point_b.x,
+                    point_b.y
+                  );
+                }
                 let mut is_intersect = false;
                 // this one can be slow, it's called once, jsut for lazy statics
                 obstacles_lines.iter().for_each(|obstacle_line| {

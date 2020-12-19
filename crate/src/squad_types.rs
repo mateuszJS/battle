@@ -9,6 +9,7 @@ pub enum SquadType {
   Solider,
   Raptor,
   Portal,
+  StrategicPoint,
 }
 
 pub struct SquadDetails {
@@ -67,10 +68,24 @@ static PORTAL_DETAILS: SquadDetails = SquadDetails {
   ability_range: NON_WEAPON.range,
 };
 
+static STRATEGIC_POINT_DETAILS: SquadDetails = SquadDetails {
+  movement_speed: 0.0,
+  hp: 0.0,
+  production_time: 0,
+  members_number: 0,
+  representation_type: NON_REPRESENTATION_ID,
+  selection_threshold: 100.0,
+  unit_model_offset_y: 00.0,
+  weapon: &NON_WEAPON,
+  influence_value: 0.1,
+  ability_range: NON_WEAPON.range,
+};
+
 pub fn get_squad_details(squad_type: &SquadType) -> &'static SquadDetails {
   match *squad_type {
     SquadType::Solider => &SOLIDER_DETAILS,
     SquadType::Raptor => &RAPTOR_DETAILS,
     SquadType::Portal => &PORTAL_DETAILS,
+    SquadType::StrategicPoint => &STRATEGIC_POINT_DETAILS,
   }
 }

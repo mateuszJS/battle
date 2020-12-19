@@ -1,15 +1,20 @@
-use super::signification_calculator::COMMON_PURPOSE_SIGNIFICATION_BASE;
+use super::signification_calculator::{
+  COMMON_PURPOSE_MAX_SIGNIFICATION, MET_DANGER_PURPOSE_MAX_SIGNIFICATION,
+};
 use super::SignificationCalculator;
 use super::{EnhancedPurpose, FactionInfo, Place, PlaceType, PurposeType, ReservedSquad};
 use crate::constants::MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS;
 use crate::squads_grid_manager::{SquadsGrid, SquadsGridManager};
-use crate::unit::STATE_SHOOT;
+use crate::unit::{STATE_CHASING, STATE_SHOOT};
 use crate::weapon_types::MAX_POSSIBLE_WEAPON_RANGE;
 use crate::Squad;
 use std::cell::Ref;
 
 pub const MIN_DISTANCE_OF_SEARCHING_ENEMY: f32 =
   2.0 * (MAX_POSSIBLE_WEAPON_RANGE + MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS);
+
+const SEARCHING_RANGE_ENEMIES_AROUND_PORTAL: f32 = MAX_POSSIBLE_WEAPON_RANGE * 1.5;
+const SEARCHING_RANGE_ENEMIES_AROUND_STRATEGIC_POINT: f32 = MAX_POSSIBLE_WEAPON_RANGE * 1.25;
 
 struct EnemyInfo {
   id: u32,
@@ -44,10 +49,11 @@ impl SafetyManager {
       .iter()
       .map(|place| {
         let threshold_enemies_around = match place.place_type {
-          PlaceType::Portal => MAX_POSSIBLE_WEAPON_RANGE * 1.5,
+          PlaceType::Portal => SEARCHING_RANGE_ENEMIES_AROUND_PORTAL,
           PlaceType::Squads => MAX_POSSIBLE_WEAPON_RANGE,
-          PlaceType::StrategicPoint => MAX_POSSIBLE_WEAPON_RANGE * 1.25,
+          PlaceType::StrategicPoint => SEARCHING_RANGE_ENEMIES_AROUND_STRATEGIC_POINT,
         };
+
         let squads_nearby = SquadsGridManager::get_squads_in_area(
           squads_grid,
           place.x,
@@ -76,10 +82,10 @@ impl SafetyManager {
 
                 let is_attacking_us = if let Some(enemy_aim) = option_enemy_aim {
                   if our_squads_ids.contains(&enemy_aim.borrow().id) {
-                    some_squad
-                      .members
-                      .iter()
-                      .any(|ref_cell_unit| ref_cell_unit.borrow().state == STATE_SHOOT)
+                    some_squad.members.iter().any(|ref_cell_unit| {
+                      let state = ref_cell_unit.borrow().state;
+                      state == STATE_SHOOT || state == STATE_CHASING
+                    })
                   } else {
                     false
                   }
@@ -129,7 +135,7 @@ impl SafetyManager {
       let distance_our_place_to_purpose = (purpose.place.x - safety_info.place.x)
         .hypot(purpose.place.y - safety_info.place.y)
         .max(MIN_DISTANCE_OF_SEARCHING_ENEMY);
-
+      // TODO: have to test it, looks sometimes weird
       let is_enemy_on_the_way = safety_info.enemies_squads.iter().any(|enemy_squad| {
         let distance_enemy_to_purpose =
           (purpose.place.x - enemy_squad.x).hypot(purpose.place.y - enemy_squad.y);
@@ -172,14 +178,36 @@ impl SafetyManager {
           .find(|enemy_info| enemy_info.id == enemy_squad.id);
 
         if let Some(enemy_info) = option_enemy_info {
-          if enemy_info.is_attacking_us {
-            acc + signi_calc.additional_signification_enemy_attacks_our_building(&enemy_squad)
+          let distance =
+            (safety_info.place.x - enemy_info.x).hypot(safety_info.place.y - enemy_info.y);
+
+          if safety_info.place.place_type == PlaceType::Portal {
+            if enemy_info.is_attacking_us {
+              return signi_calc
+                .additional_signification_enemy_around_our_portal(&enemy_squad, 0.0)
+                .max(acc); // prob should happen, with current implementation, but just in case
+            }
+            if distance < SEARCHING_RANGE_ENEMIES_AROUND_PORTAL {
+              return signi_calc
+                .additional_signification_enemy_around_our_portal(
+                  &enemy_squad,
+                  distance / SEARCHING_RANGE_ENEMIES_AROUND_PORTAL,
+                )
+                .max(acc);
+            }
           } else {
-            acc + signi_calc.additional_signification_enemy_around_our_building(&enemy_squad)
+            // other option it's only strategic point
+            if distance < SEARCHING_RANGE_ENEMIES_AROUND_STRATEGIC_POINT {
+              return signi_calc
+                .signification_enemy_around_our_strategic_point(
+                  &enemy_squad,
+                  distance / SEARCHING_RANGE_ENEMIES_AROUND_STRATEGIC_POINT,
+                )
+                .max(acc);
+            }
           }
-        } else {
-          acc
         }
+        return acc;
       })
   }
 
@@ -213,6 +241,7 @@ impl SafetyManager {
           if greatest_signification_of_blocker_purposes < reservation_purpose_signification {
             greatest_signification_of_blocker_purposes = reservation_purpose_signification;
           }
+
           if squad_cares_about_danger {
             // otherwise squads continue doing purposes, don't care about enemy nearby
             let option_our_squad = our_squads.iter().find(|squad| squad.id == *squad_id);
@@ -221,7 +250,7 @@ impl SafetyManager {
               collected_our_influence +=
                 signi_calc.influence_our_squads_in_danger_situation(our_squad);
             } else {
-              // IT"S NOT A SQUAD, IT"S PORTAL, STRATEGIC POINT etc.
+              // IT"S NOT A SQUAD, IT"S PORTAL, STRATEGIC POINT
               new_purposes.iter_mut().for_each(|new_purpose| {
                 // because this is not a squad, so cannot run away or attack
                 // so have to increase purposes with attackers
@@ -238,6 +267,10 @@ impl SafetyManager {
           }
         });
 
+        if squads_ids_which_will_react.len() == 0 {
+          return;
+        }
+
         let enemies_influence_who_attacks_us =
           safety_info
             .enemies_squads
@@ -250,14 +283,12 @@ impl SafetyManager {
               }
             });
 
-        if squads_ids_which_will_react.len() > 0
-          && signi_calc.should_our_squads_group_do_anything_in_danger(
-            collected_our_influence,
-            enemies_influence_who_attacks_us,
-            safety_info.enemies_squads.len(),
-          )
-        {
-          // Portal and strategic point won't get here!
+        if signi_calc.should_our_squads_group_do_anything_in_danger(
+          collected_our_influence,
+          enemies_influence_who_attacks_us,
+          safety_info.enemies_squads.len(),
+        ) {
+          // Portal won't get here!
           let (purpose_id, purpose_signification) = if signi_calc
             .should_our_group_squads_in_danger_attack_enemy(
               collected_our_influence,
@@ -293,7 +324,8 @@ impl SafetyManager {
               nearest_new_purpose.id,
               (nearest_new_purpose.signification
                 + greatest_signification_of_blocker_purposes
-                + COMMON_PURPOSE_SIGNIFICATION_BASE),
+                + COMMON_PURPOSE_MAX_SIGNIFICATION)
+                .min(MET_DANGER_PURPOSE_MAX_SIGNIFICATION),
               // We should do similar stuff in collecting new purposes, when there is an enemy of the track
               // or if there is enemy of the track, we should avoid adding that squad to purpose, one case if signification is mroe than 6.0
             )

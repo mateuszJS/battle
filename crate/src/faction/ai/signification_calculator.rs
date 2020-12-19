@@ -5,7 +5,23 @@ use crate::weapon_types::MAX_POSSIBLE_WEAPON_RANGE;
 use std::cell::Ref;
 
 const LEVERAGE_RESERVED_SQUAD_OVER_OTHER: f32 = 1.5 * MAX_POSSIBLE_WEAPON_RANGE;
-pub const COMMON_PURPOSE_SIGNIFICATION_BASE: f32 = 2.0; // common => attack, capture point
+
+const CAPTURE_POINT_SIGNIFICATION: f32 = 0.5;
+pub const COMMON_PURPOSE_MAX_SIGNIFICATION: f32 = 2.0; // attack
+pub const MET_DANGER_PURPOSE_MAX_SIGNIFICATION: f32 = 3.0; // met enemy, danger place, at least COMMON_PURPOSE_MAX_SIGNIFICATION
+const ENEMIES_AROUND_STRATEGIC_POINT_MAX_SIGNIFICATION: f32 = 1.5;
+const RUNNING_AWAY_SIGNIFICATION: f32 = 3.1;
+pub const THRESHOLD_SIGNIFICATION_URGENT_PURPOSE: f32 = 3.25;
+const ENEMIES_AROUND_BASE_MAX_SIGNIFICATION: f32 = 3.3;
+
+// TODO: no const should be public! everything should be available via SignificationCalculator methods!
+
+/*
+1. Attacking, capturing points <0, COMMON_PURPOSE_MAX_SIGNIFICATION>
+2. Attacking met enemy (danger situation) <COMMON_PURPOSE_MAX_SIGNIFICATION, MET_DANGER_PURPOSE_MAX_SIGNIFICATION>
+3. Running away MET_DANGER_PURPOSE_MAX_SIGNIFICATION + 0.1
+4. Enemies around our portal -> COMMON_PURPOSE_MAX_SIGNIFICATION_BASE, enemies attacking our portal -> MOST_IMPORTANT_PURPOSES_SIGNIFICATION_BASE + 0.1
+*/
 
 pub struct SignificationCalculator {
   our_power_factor: f32,
@@ -21,7 +37,7 @@ impl SignificationCalculator {
   }
 
   pub fn signification_strategic_point(&self) -> f32 {
-    0.5
+    CAPTURE_POINT_SIGNIFICATION
   }
 
   pub fn signification_enemy_squads(&self, enemy_squads: &Ref<Squad>) -> f32 {
@@ -35,21 +51,25 @@ impl SignificationCalculator {
   }
   // it never should be like squad instead of running away will attack on the enemy just because there is a lot of enemy squads!
   pub fn signification_running_to_safe_place(&self) -> f32 {
-    4.5
+    RUNNING_AWAY_SIGNIFICATION
   }
 
-  pub fn additional_signification_enemy_around_our_building(
+  pub fn additional_signification_enemy_around_our_portal(
     &self,
     enemy_squad: &Ref<Squad>,
+    normalized_distance: f32,
   ) -> f32 {
-    self.signification_enemy_squads(enemy_squad) * 0.9
+    self.signification_enemy_squads(enemy_squad)
+      + (1.0 - normalized_distance) * ENEMIES_AROUND_BASE_MAX_SIGNIFICATION
   }
 
-  pub fn additional_signification_enemy_attacks_our_building(
+  pub fn signification_enemy_around_our_strategic_point(
     &self,
     enemy_squad: &Ref<Squad>,
+    normalized_distance: f32,
   ) -> f32 {
-    self.signification_enemy_squads(enemy_squad) * 33.0 // can be compared with running away
+    self.signification_enemy_squads(enemy_squad)
+      + (1.0 - normalized_distance) * ENEMIES_AROUND_STRATEGIC_POINT_MAX_SIGNIFICATION
   }
 
   pub fn influence_our_squad(
