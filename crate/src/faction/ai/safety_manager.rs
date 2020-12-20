@@ -182,6 +182,7 @@ impl SafetyManager {
             (safety_info.place.x - enemy_info.x).hypot(safety_info.place.y - enemy_info.y);
 
           if safety_info.place.place_type == PlaceType::Portal {
+            // if there will be more our building, rename it to PlaceType::AttackableSquad
             if enemy_info.is_attacking_us {
               return signi_calc
                 .additional_signification_enemy_around_our_portal(&enemy_squad, 0.0)
@@ -191,7 +192,7 @@ impl SafetyManager {
               return signi_calc
                 .additional_signification_enemy_around_our_portal(
                   &enemy_squad,
-                  distance / SEARCHING_RANGE_ENEMIES_AROUND_PORTAL,
+                  (distance / SEARCHING_RANGE_ENEMIES_AROUND_PORTAL).powi(3), // power to make it more significate if is closer
                 )
                 .max(acc);
             }
@@ -201,7 +202,7 @@ impl SafetyManager {
               return signi_calc
                 .signification_enemy_around_our_strategic_point(
                   &enemy_squad,
-                  distance / SEARCHING_RANGE_ENEMIES_AROUND_STRATEGIC_POINT,
+                  (distance / SEARCHING_RANGE_ENEMIES_AROUND_STRATEGIC_POINT).powi(3),
                 )
                 .max(acc);
             }

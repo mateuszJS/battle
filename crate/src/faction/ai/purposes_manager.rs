@@ -218,7 +218,7 @@ impl PurposesManager {
   ) -> Option<Plan> {
     let (reservations_for_this_purpose, reservations_for_other_purposes) =
       PurposesManager::get_reservation_data(purpose.id, &our_squads, &reserved_squads);
-    log!("purpose.signification: {}", purpose.signification);
+    // log!("purpose.signification: {}", purpose.signification);
     if purpose.purpose_type == PurposeType::RunToSafePlace {
       return if reservations_for_this_purpose.len() > 0 {
         our_squads.retain(|squad| !reservations_for_this_purpose.contains(&squad.id));

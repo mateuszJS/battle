@@ -39,10 +39,6 @@ impl StrategicPoint {
 
     let squads_nearby = SquadsGridManager::get_squads_in_area(squads_grid, x, y, POINT_RADIUS);
 
-    if squads_nearby.len() == 0 {
-      return;
-    }
-
     let mut new_owner_id = STRATEGIC_POINT_EMPTY_OWNER;
 
     for some_weak_squad in squads_nearby.iter() {
@@ -62,7 +58,6 @@ impl StrategicPoint {
     }
 
     /* when progress will go to zero, then point is captured by other faction */
-
     if new_owner_id != STRATEGIC_POINT_EMPTY_OWNER && new_owner_id != self.owner_faction_id {
       if self.progress == 0 {
         self.progress = MAX_PROGRESS;

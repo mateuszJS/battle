@@ -187,29 +187,29 @@ impl ArtificialIntelligence {
       .collect::<Vec<Plan>>();
 
     self.current_plans = final_plans;
-    self
-      .current_plans
-      .iter()
-      .for_each(|plan| match plan.purpose_type {
-        PurposeType::RunToSafePlace => log!(
-          "final purpose: run to save place x: {}, y: {}, squads_ids: {:?}",
-          plan.x,
-          plan.y,
-          plan.squads_ids
-        ),
-        PurposeType::Attack => log!(
-          "final purpose: attack x: {}, y: {}, squads_ids: {:?}",
-          plan.x,
-          plan.y,
-          plan.squads_ids
-        ),
-        PurposeType::Capture => log!(
-          "final purpose: capture x: {}, y: {}, squads_ids: {:?}",
-          plan.x,
-          plan.y,
-          plan.squads_ids
-        ),
-      });
+    // self
+    //   .current_plans
+    //   .iter()
+    //   .for_each(|plan| match plan.purpose_type {
+    //     PurposeType::RunToSafePlace => log!(
+    //       "final purpose: run to save place x: {}, y: {}, squads_ids: {:?}",
+    //       plan.x,
+    //       plan.y,
+    //       plan.squads_ids
+    //     ),
+    //     PurposeType::Attack => log!(
+    //       "final purpose: attack x: {}, y: {}, squads_ids: {:?}",
+    //       plan.x,
+    //       plan.y,
+    //       plan.squads_ids
+    //     ),
+    //     PurposeType::Capture => log!(
+    //       "final purpose: capture x: {}, y: {}, squads_ids: {:?}",
+    //       plan.x,
+    //       plan.y,
+    //       plan.squads_ids
+    //     ),
+    //   });
 
     plans_needed_to_update
   }
