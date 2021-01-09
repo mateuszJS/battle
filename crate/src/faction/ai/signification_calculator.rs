@@ -4,8 +4,6 @@ use crate::weapon_types::MAX_POSSIBLE_WEAPON_RANGE;
 
 use std::cell::Ref;
 
-const LEVERAGE_RESERVED_SQUAD_OVER_OTHER: f32 = 1.5 * MAX_POSSIBLE_WEAPON_RANGE;
-
 const CAPTURE_POINT_SIGNIFICATION: f32 = 0.5;
 pub const COMMON_PURPOSE_MAX_SIGNIFICATION: f32 = 2.0; // attack
 pub const MET_DANGER_PURPOSE_MAX_SIGNIFICATION: f32 = 3.0; // met enemy, danger place, at least COMMON_PURPOSE_MAX_SIGNIFICATION
@@ -72,18 +70,16 @@ impl SignificationCalculator {
       + (1.0 - normalized_distance) * ENEMIES_AROUND_STRATEGIC_POINT_MAX_SIGNIFICATION
   }
 
-  pub fn influence_our_squad(
+  pub fn attack_influence_our_squad(
     &self,
     our_squad: &Ref<Squad>,
     reservations_for_this_purpose: &Vec<u32>,
   ) -> f32 {
-    let factor = if reservations_for_this_purpose.contains(&our_squad.id) {
-      self.influence_factor_already_engagement_squads
-    } else {
-      self.our_power_factor
-    };
+    self.our_power_factor * our_squad.get_influence()
+  }
 
-    factor * our_squad.get_influence()
+  pub fn running_away_influence_our_squad(&self, our_squad: &Ref<Squad>) -> f32 {
+    self.influence_factor_already_engagement_squads * our_squad.get_influence()
   }
 
   pub fn influence_our_squads_in_danger_situation(&self, our_squad: &Ref<Squad>) -> f32 {
@@ -137,25 +133,13 @@ impl SignificationCalculator {
     &self,
     purpose: &EnhancedPurpose,
     our_squad: &Ref<Squad>,
-    reservations_for_this_purpose: &Vec<u32>,
-    reservations_for_other_purposes: &Vec<u32>,
   ) -> f32 {
-    let is_squad_reserved_for_this_purpose =
-      if reservations_for_this_purpose.contains(&our_squad.id) {
-        1.0
-      } else if reservations_for_other_purposes.contains(&our_squad.id) {
-        -1.0
-      } else {
-        0.0
-      };
-
     // just to make it bigger, if both squads got the same distance
     let distance_to_purpose = ((purpose.place.x - our_squad.shared.center_point.0)
       .hypot(purpose.place.y - our_squad.shared.center_point.1)
       - our_squad.squad_details.weapon.range)
       .max(0.0);
 
-    LEVERAGE_RESERVED_SQUAD_OVER_OTHER * is_squad_reserved_for_this_purpose
-      - (distance_to_purpose / our_squad.squad_details.movement_speed)
+    -(distance_to_purpose / our_squad.squad_details.movement_speed)
   }
 }

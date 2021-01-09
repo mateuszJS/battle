@@ -3,8 +3,9 @@ use super::signification_calculator::{
   COMMON_PURPOSE_MAX_SIGNIFICATION, THRESHOLD_SIGNIFICATION_URGENT_PURPOSE,
 };
 use super::SignificationCalculator;
+use crate::weapon_types::MAX_POSSIBLE_WEAPON_RANGE;
 use super::{
-  EnhancedPurpose, FactionInfo, MetEnemyOnTrack, Place, PlaceType, Plan, PurposeType, ReservedSquad,
+  EnhancedPurpose, FactionInfo, MetEnemyOnTrack, OurSquadsGroupSafetyInfo, PlaceType, Plan, PurposeType, ReservedSquad,
 };
 use crate::position_utils::PositionUtils;
 use crate::squads_grid_manager::{SquadsGrid, SquadsGridManager};
@@ -12,31 +13,22 @@ use crate::Squad;
 use std::cell::{Ref, RefCell};
 use std::rc::{Rc, Weak};
 
+struct OurAttackerInfo {
+  squad_id: u32,
+  pos_before_purpose_x: f32,
+  pos_before_purpose_y: f32,
+}
+
 pub struct PurposesManager {}
 
 impl PurposesManager {
   fn get_first_enemy_groups_on_track(
+    track: &Vec<(f32, f32)>,
     our_faction_id: u32,
     signi_calc: &SignificationCalculator,
-    purpose: &EnhancedPurpose,
-    our_squad: &Ref<Squad>,
     squads_grid: &SquadsGrid,
     our_aim_enemy_squads_ids: &Vec<u32>,
   ) -> Option<(Vec<u32>, f32)> /* (enemy_squads_ids, enemy_influence) */ {
-    if our_squad.shared.center_point.0.is_nan() || our_squad.shared.center_point.1.is_nan() {
-      log!(
-        "get_first_enemy_groups_on_track: {} {}",
-        our_squad.shared.center_point.0,
-        our_squad.shared.center_point.1
-      );
-    }
-    let track = PositionUtils::get_track(
-      our_squad.shared.center_point.0,
-      our_squad.shared.center_point.1,
-      purpose.place.x,
-      purpose.place.y,
-    );
-
     for (index, point) in track.iter().enumerate() {
       if index == track.len() - 1 {
         break;
@@ -83,8 +75,9 @@ impl PurposesManager {
     our_faction_id: u32,
     signi_calc: &SignificationCalculator,
     all_factions_info: &Vec<FactionInfo>,
-    current_plans: &Vec<Plan>,
-    our_squads: &Vec<Ref<Squad>>,
+    // current_plans: &Vec<Plan>,
+    // our_squads: &Vec<Ref<Squad>>,
+    // our_squads_safety: &Vec<OurSquadsGroupSafetyInfo>,
   ) -> Vec<EnhancedPurpose> {
     let mut new_id = -1_isize;
 
@@ -102,6 +95,8 @@ impl PurposesManager {
                   signi_calc.signification_enemy_portal(&place.squads[0].borrow()),
                 ),
                 PlaceType::Squads => {
+                  // here we could check, if enemy is danger for us, and increase signification
+                  // or we can do it when we will calculate table for purposes x our_squads
                   let signification = place.squads.iter().fold(0.0, |acc, ref_cell_squad| {
                     acc + signi_calc.signification_enemy_squads(&ref_cell_squad.borrow())
                   });
@@ -124,88 +119,66 @@ impl PurposesManager {
             })
             .collect::<Vec<EnhancedPurpose>>()
         } else {
-          current_plans
-            .iter()
-            .filter_map(|current_plan| {
-              if current_plan.purpose_type != PurposeType::RunToSafePlace {
-                return None;
-              }
-              let current_plan_our_squads = our_squads
-                .iter()
-                .filter(|squad| current_plan.squads_ids.contains(&squad.id))
-                .collect::<Vec<&Ref<Squad>>>();
+          vec![]
+          // current_plans
+          //   .iter()
+          //   .filter_map(|current_plan| {
+          //     if current_plan.purpose_type != PurposeType::RunToSafePlace {
+          //       return None;
+          //     }
+          //     let current_plan_our_squads = our_squads
+          //       .iter()
+          //       .filter(|squad| current_plan.squads_ids.contains(&squad.id))
+          //       .collect::<Vec<&Ref<Squad>>>();
 
-              if current_plan_our_squads.len() == 0 {
-                return None;
-              }
+          //     if current_plan_our_squads.len() == 0 {
+          //       return None;
+          //     }
 
-              let (sum_x, sum_y) =
-                current_plan_our_squads
-                  .iter()
-                  .fold((0.0, 0.0), |(sum_x, sum_y), our_squad| {
-                    (
-                      sum_x + our_squad.shared.center_point.0,
-                      sum_y + our_squad.shared.center_point.1,
-                    )
-                  });
+          //     let safety_info = our_squads_safety.iter().filter(|safety_info| {
+          //       safety_info.our_squads_ids.contains(&current_plan_our_squads.id)
+          //     });
 
-              let avg_x = sum_x / current_plan_our_squads.len() as f32;
-              let avg_y = sum_y / current_plan_our_squads.len() as f32;
+          //     let (sum_x, sum_y) =
+          //       current_plan_our_squads
+          //         .iter()
+          //         .fold((0.0, 0.0), |(sum_x, sum_y), our_squad| {
+          //           (
+          //             sum_x + our_squad.shared.center_point.0,
+          //             sum_y + our_squad.shared.center_point.1,
+          //           )
+          //         });
 
-              let distance_to_purpose = (avg_x - current_plan.x).hypot(avg_y - current_plan.y);
-              // TODO: OR if just if around us there is no enemy!, then stop with running, we are in the safe place
-              if distance_to_purpose > 150.0 {
-                new_id += 1;
-                Some(EnhancedPurpose {
-                  id: new_id as usize,
-                  purpose_type: PurposeType::RunToSafePlace,
-                  signification: signi_calc.signification_running_to_safe_place(),
-                  place: Place {
-                    place_type: PlaceType::Squads, // type doesn't matter
-                    squads: vec![],
-                    influence: 0.0,
-                    x: current_plan.x,
-                    y: current_plan.y,
-                  },
-                })
-              } else {
-                // Check if there are any enemy influence around us! if not, then can stop
-                None
-              }
-            })
-            .collect::<Vec<EnhancedPurpose>>()
+          //     let avg_x = sum_x / current_plan_our_squads.len() as f32;
+          //     let avg_y = sum_y / current_plan_our_squads.len() as f32;
+
+          //     let distance_to_purpose = (avg_x - current_plan.x).hypot(avg_y - current_plan.y);
+
+          //     if distance_to_purpose > 150.0 {
+          //       new_id += 1;
+          //       Some(EnhancedPurpose {
+          //         id: new_id as usize,
+          //         purpose_type: PurposeType::RunToSafePlace,
+          //         signification: signi_calc.signification_running_to_safe_place(),
+          //         place: Place {
+          //           place_type: PlaceType::Squads, // type doesn't matter
+          //           squads: vec![],
+          //           influence: 0.0,
+          //           x: current_plan.x,
+          //           y: current_plan.y,
+          //         },
+          //       })
+          //     } else if  {
+          //       // check if is in safe place, but didn't reach the destination yet
+          //     } else {
+          //       // Check if there are any enemy influence around us! if not, then can stop
+          //       None
+          //     }
+          //   })
+          //   .collect::<Vec<EnhancedPurpose>>()
         }
       })
       .collect::<Vec<EnhancedPurpose>>()
-  }
-
-  fn get_reservation_data(
-    purpose_id: usize,
-    our_squads: &Vec<Ref<Squad>>,
-    reserved_squads: &Vec<ReservedSquad>,
-  ) -> (Vec<u32>, Vec<u32>) {
-    let our_squads_ids = our_squads
-      .iter()
-      .map(|our_squad| our_squad.id)
-      .collect::<Vec<u32>>();
-
-    let mut reservations_for_this_purpose = vec![];
-    let mut reservations_for_other_purposes = vec![];
-
-    reserved_squads.iter().for_each(|reserved_squad| {
-      if our_squads_ids.contains(&reserved_squad.squad_id) {
-        if reserved_squad.purpose_id == purpose_id {
-          reservations_for_this_purpose.push(reserved_squad.squad_id);
-        } else {
-          reservations_for_other_purposes.push(reserved_squad.squad_id);
-        }
-      }
-    });
-
-    (
-      reservations_for_this_purpose,
-      reservations_for_other_purposes,
-    )
   }
 
   pub fn handle_purpose(
@@ -213,40 +186,31 @@ impl PurposesManager {
     signi_calc: &SignificationCalculator,
     our_squads: &mut Vec<Ref<Squad>>,
     purpose: &EnhancedPurpose,
-    reserved_squads: &Vec<ReservedSquad>,
     squads_grid: &SquadsGrid,
-  ) -> Option<Plan> {
-    let (reservations_for_this_purpose, reservations_for_other_purposes) =
-      PurposesManager::get_reservation_data(purpose.id, &our_squads, &reserved_squads);
-    // log!("purpose.signification: {}", purpose.signification);
+  ) -> Option<Vec<Plan>> {
     if purpose.purpose_type == PurposeType::RunToSafePlace {
       return if reservations_for_this_purpose.len() > 0 {
+        TODO: do it in other way, like introduce special vector "willing_squads_ids: Vec<u32>"
         our_squads.retain(|squad| !reservations_for_this_purpose.contains(&squad.id));
-        Some(Plan {
-          purpose_type: PurposeType::RunToSafePlace,
-          squads_ids: reservations_for_this_purpose,
-          enemy_squads: vec![],
-          x: purpose.place.x,
-          y: purpose.place.y,
-        })
+        Some(
+          vec![
+            Plan {
+              purpose_type: PurposeType::RunToSafePlace,
+              squads_ids: reservations_for_this_purpose,
+              enemy_squads: vec![],
+              x: purpose.place.x,
+              y: purpose.place.y,
+            }
+          ]
+        )
       } else {
         None
       };
     }
     // And we got issue here, we have 2.0 + extra signification in reservations! But purposes are still in old order :/
     our_squads.sort_by(|a_squad, b_squad| {
-      let a = signi_calc.how_much_squad_fits_to_take_purpose(
-        &purpose,
-        a_squad,
-        &reservations_for_this_purpose,
-        &reservations_for_other_purposes,
-      );
-      let b = signi_calc.how_much_squad_fits_to_take_purpose(
-        &purpose,
-        b_squad,
-        &reservations_for_this_purpose,
-        &reservations_for_other_purposes,
-      );
+      let a = signi_calc.how_much_squad_fits_to_take_purpose(&purpose, a_squad);
+      let b = signi_calc.how_much_squad_fits_to_take_purpose(&purpose, b_squad);
       (a).partial_cmp(&b).unwrap()
     });
 
@@ -267,29 +231,30 @@ impl PurposesManager {
       our_squads_last_index -= 1;
       let our_squad = &our_squads[our_squads_last_index];
 
-      let option_squad_reservation = reserved_squads
-        .iter()
-        .find(|reservation| reservation.squad_id == our_squad.id);
-      if let Some(squad_reservation) = option_squad_reservation {
-        if squad_reservation.purpose_id != purpose.id
-          && squad_reservation.purpose_signification > purpose.signification
-        {
-          continue;
-        }
-      }
-
       // if we have met someone on the track, then check if that enemy is really close us, maybe if exists in safety manager
       // if exists, then avoid adding this purpose
       // if purpose is not bigger than 6.0 signi_calc.should_single_squad_react_on_met_danger()
 
-      let our_squad_influence =
-        signi_calc.influence_our_squad(our_squad, &reservations_for_this_purpose);
+      let our_squad_influence = signi_calc.influence_our_squad(our_squad);
+      
+      if our_squad.shared.center_point.0.is_nan() || our_squad.shared.center_point.1.is_nan() {
+        log!(
+          "get_first_enemy_groups_on_track: {} {}",
+          our_squad.shared.center_point.0,
+          our_squad.shared.center_point.1
+        );
+      }
+      let track = PositionUtils::get_track(
+        our_squad.shared.center_point.0,
+        our_squad.shared.center_point.1,
+        purpose.place.x,
+        purpose.place.y,
+      );
 
       let option_enemy_on_track = PurposesManager::get_first_enemy_groups_on_track(
+        &track,
         our_faction_id,
         signi_calc,
-        purpose,
-        our_squad,
         squads_grid,
         &enemy_squads_ids,
       );
@@ -299,16 +264,13 @@ impl PurposesManager {
         // if this one particular group of enemy was met a couple of times, and we got
         // enough influence to bet them, then we can use our influence as there is no enemy of the track
         // otherwise, our squads are blocked, and cannot be used in current processed purpose ;(
+
+        // START OF FUNCTION TO MOVE
         let option_met_enemy = already_met_enemies.iter_mut().find(|met_enemy| {
           enemy_squads_ids
             .iter()
             .all(|enemy_squad_id| met_enemy.enemy_squads_ids.contains(&enemy_squad_id))
         });
-
-        // 1. We should divide attackers into the tracks, and the add biggest signification to met enemy
-        //   - then also other squads will help to bite that enemy!
-        //     - but then we will have to recalculate it again...
-        //     - but seems like it makes a sense from real person point of view
 
         let (mut our_blocked_squads_ids, our_blocked_influence, blocking_enemy_influence) =
           if let Some(met_enemy) = option_met_enemy {
@@ -338,22 +300,45 @@ impl PurposesManager {
           || purpose.signification >= THRESHOLD_SIGNIFICATION_URGENT_PURPOSE
         {
           if our_blocked_squads_ids.len() == 1 {
+            /*if we already added our_blocked_squads_ids (so we bet the enemy and our_blocked_squads_ids.len() == 1)
+            then we shouldn't add to collected_our_influence already added influence, only that new one*/
             collected_our_influence += our_squad_influence;
-          // to avoid adding our_blocked_influence another time, when previously was added
-          // always will go into this case if enemy on the track is already weaker than our collected influence,
-          // and because we do not reset accumulated, it will add again already added influence
-          // when enemy on the track is weaker, but enemy from purpose still stronger!
           } else {
             collected_our_influence += our_blocked_influence;
           }
-          used_squads_ids.append(&mut our_blocked_squads_ids);
+          used_squads_ids.append(&mut our_blocked_squads_ids); // This clears our_blocked_squads_ids vector!
         }
+      // END OF FUNCTION TO MOVE
       } else {
-        used_squads_ids.push(our_squad.id);
+
+        let mut i = track.len() - 1;
+        let mut distance_sum = 0.0;
+        while i > 0 {
+          let distance = (track[i].0 - track[i - 1].0).hypot(track[i].1 - track[i - 1].1);
+          distance_sum += distance;
+          if distance_sum > 1.5 * MAX_POSSIBLE_WEAPON_RANGE {
+            break;
+          }
+          i -= 1;
+        }
+
+
+        TODO: instead of calculatign stuff liek this, we should set in the attack weapon range to 1.5 * MAX_RANGE!!!!
+
+        if i == 0 {
+          // squad is closer than 1.5 * MAX_RANGE to the purpose! 
+        } else {
+
+        }
+
+        used_squads_ids.push(OurAttackerInfo {
+          squad_id: our_squad.id,
+          pos_before_purpose_x: ,
+          pos_before_purpose_y: ,
+        });
         collected_our_influence += our_squad_influence;
       }
     }
-    // TODO: if purpose got really high signification, then we shouldn't care if we got enough influence or not
     // log!("{} >= {}", collected_our_influence, purpose.place.influence);
     // log!("squads: {:?}", used_squads_ids);
     if collected_our_influence >= purpose.place.influence
@@ -367,13 +352,12 @@ impl PurposesManager {
         .iter()
         .map(|ref_cell_squad| Rc::downgrade(ref_cell_squad))
         .collect::<Vec<Weak<RefCell<Squad>>>>();
-      // We shouldn't add enemies which are not available because there is other enemies on the track
 
-      // Maybe to fix it we sould introduce the max signification that purpose can have, if it's just attack, caputre point point
-      // like 3.0, and attack, capute point cannot be higher
-      // and add that 3.0 to each reservation for attacking enemies around, those from safety_manager
-      // Then those attacks always will go higher signification than other purposes!
+      TODO: collect our squads with position also, not only with id! Here we could add purpose to wait, instead of Attack
+      point 1.
 
+      we should check track, from last part. Add distance of each line, and if distance then is bigger than 1.5 * MAX_RANGE
+      then set it to be equal 1.5 * MAX_RANGE
       Some(Plan {
         purpose_type: purpose.purpose_type.clone(),
         squads_ids: used_squads_ids,

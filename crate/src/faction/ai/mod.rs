@@ -12,11 +12,27 @@ use std::cell::{Ref, RefCell};
 use std::rc::{Rc, Weak};
 use utils::AiUtils;
 
+pub struct EnemyInfo {
+  id: u32,
+  influence: f32,
+  x: f32,
+  y: f32,
+  is_attacking_us: bool,
+  not_on_the_way: bool,
+}
+
+pub struct OurSquadsGroupSafetyInfo<'a> {
+  enemies_squads: Vec<EnemyInfo>,
+  our_squads_ids: Vec<u32>,
+  place: &'a Place,
+}
+
 #[derive(PartialEq, Clone)]
 pub enum PurposeType {
   Attack,
   RunToSafePlace,
   Capture,
+  ReGroupBeforeAttack,
 }
 #[derive(PartialEq, Clone)]
 pub enum PlaceType {
@@ -96,28 +112,35 @@ impl ArtificialIntelligence {
       .map(|ref_cell_squad| ref_cell_squad.borrow())
       .collect::<Vec<Ref<Squad>>>();
 
+    let our_squads_safety =
+      SafetyManager::get_info_about_safety(self.faction_id, all_factions_info, squads_grid);
+
     let mut new_purposes = PurposesManager::get_purposes(
       self.faction_id,
       &self.signi_calc,
       all_factions_info,
-      &self.current_plans,
-      &our_squads,
+      // &self.current_plans,
+      // &our_squads,
+      // &our_squads_safety,
     );
 
-    let mut reserved_squads =
-      AiUtils::get_squads_reservations(&self.current_plans, &new_purposes, &our_squads);
+    // let mut reserved_squads =
+    //   AiUtils::get_squads_reservations(&self.current_plans, &new_purposes, &our_squads);
 
-    SafetyManager::handle_squads_safety(
-      self.faction_id,
-      &self.signi_calc,
-      &our_squads,
-      &mut reserved_squads,
-      all_factions_info,
-      squads_grid,
-      &mut new_purposes,
-    );
+    // If we want to do thins like this (increase purpose signification) then do it in purpose creation
+    // SafetyManager::handle_squads_safety(
+    //   self.faction_id,
+    //   &self.signi_calc,
+    //   &our_squads,
+    //   // &mut reserved_squads,
+    //   all_factions_info,
+    //   squads_grid,
+    //   &mut new_purposes,
+    //   &our_squads_safety,
+    // );
 
-    AiUtils::sort_purposes(&mut new_purposes);
+    // We should prob do it when we calculate whole table purposes x our_squads
+    // AiUtils::sort_purposes(&mut new_purposes);
 
     for purpose in new_purposes.iter() {
       /*=============CHECKING IF CURRENT PLAN EXISTS IN NEW PURPOSES==================*/
@@ -127,11 +150,11 @@ impl ArtificialIntelligence {
         &self.signi_calc,
         &mut our_squads,
         purpose,
-        &reserved_squads,
+        // &reserved_squads,
         squads_grid,
       );
-      if let Some(new_plan) = option_new_plan {
-        final_plans.push(new_plan)
+      if let Some(new_plans) = option_new_plan {
+        final_plans.append(&mut new_plans)
       }
 
       if our_squads.len() == 0 {
