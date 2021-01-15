@@ -71,35 +71,75 @@ impl SafetyManager {
     all_factions_info: &'a Vec<FactionInfo>,
     squads_grid: &SquadsGrid,
   ) -> Vec<OurSquadsGroupSafetyInfo<'a>> {
+    // How it looks like rn:
 
-    How it looks like rn:
+    // pub struct OurSquadsGroupSafetyInfo<'a> {
+    //   enemies_squads: Vec<EnemyInfo>,
+    //   our_squads_ids: Vec<u32>,
+    //   place: &'a Place,
+    // }
 
-    pub struct OurSquadsGroupSafetyInfo<'a> {
-      enemies_squads: Vec<EnemyInfo>,
-      our_squads_ids: Vec<u32>,
-      place: &'a Place,
-    }
+    // let's change it, to focus on enemy! Like one item per one enemy group, not like focus on place where we are!
+    // Vec<{
+    //   enemy_place: &Place,
+    //   our_squads_ids: -> to check, add all the enemies groups which attacks us, and decide if we are in danger or not
+    //   and also useful, to calc later by how many signification should be increase (of course if signification increase will depend on our squads)
 
-    let's change it, to focus on enemy! Like one item per one enemy group, not like focus on place where we are!
-    Vec<{
-      enemy_place: &Place,
-      our_squads_ids: -> to check, add all the enemies groups which attacks us, and decide if we are in danger or not
-      and also useful, to calc later by how many signification should be increase (of course if signification increase will depend on our squads)
+    //   TODO: BUT how to use it, to figure out if we should run away, or stay!!
+    //   we should just add here information, how much this enemy_place is covered with our squads
+    //   if it's fully covered, then don't care about this enemy, is not a danger
+    //   but if not covered enough, then care about it
 
-      TODO: BUT how to use it, to figure out if we should run away, or stay!!
-      we should just add here information, how much this enemy_place is covered with our squads
-      if it's fully covered, then don't care about this enemy, is not a danger
-      but if not covered enough, then care about it
+    //   enemy squad is covered by out squads, when our squads has the enemy as the aim/secondary aim
 
-      enemy squad is covered by out squads, when our squads has the enemy as the aim/secondary aim
+    //   so THEN, we are add together all around non covered enemies, and check, if we are able to face them
+    //   but what in case, if we got two our squads groups. influence 1, 1, and enemy influence 1.5
+    //   so our single group is not able to face that 1.5 group, but together are able!!
+    //   SOOOoooo.... before running away we should increase signification, and then check if we should run away, of that enemy will be covered?
 
-      so THEN, we are add together all around non covered enemies, and check, if we are able to face them
-      but what in case, if we got two our squads groups. influence 1, 1, and enemy influence 1.5
-      so our single group is not able to face that 1.5 group, but together are able!!
-      SOOOoooo.... before running away we should increase signification, and then check if we should run away, of that enemy will be covered?
+    // }> only enemies that are in area of our Squads, Portal, Strategic Point
 
+    // 1. Increase signification
+    // 2. Do all calculation related with table, so we now know, which one squad should go where
+    // BUT here, we add tasks also to squads which are in danger!!! Now if we will run away, we won't support some purposes!
 
-    }> only enemies that are in area of our Squads, Portal, Strategic Point
+    // Sooooo, running away should be included in the table? with very high signification?
+    // But how to include action with two options:
+    //   a) run away
+    //   b) attack met enemy!
+
+    // Yea, it should be in this way:
+    //   In the table, we cna include all our squads, but those ones who are in danger, can be included only in attacking met enemy, or running away!
+
+    //   TODO: so we are here rn
+
+    //   ----- At very end of all table calcs lets check:
+    //     1. Calc all enemies who attacks us
+    //     2. Go though all those enemies, and find how many of the are our purpose no
+    //     3. Go tohugh all squad from 2. (though our suqads) and find how many enemies are attacking usize
+    //     4. Go over enemies from point 3., and check how many our squads got purpose with them
+    //     After sum all those our and enemies squads, let's compare them, and decide to run away with those squads, or stay
+
+    // Maybe firstly we should figure out how table will work at all...
+    //   cell will means "How much squad will fits/ how much value will that squad in that purpose gives for us/ how much it costs"
+
+    // If we want to calc result for purpose x our_squad, then we should limit number of purposes :x
+
+    // When we will limit somehow purposes, then we should calc for each purpose minimum required squads.
+
+    // Then we should compare purposes, how much value will we got (signification) and how much costs will we pay (squad number or squad influence)
+
+    // Remember to calc distance correctly to the purpose.
+    // Also we should include it in purposes comparsion, if squads are far away from purpose, then lower signification/higher costs
+
+    // When squads are sharing between different purposes in their minimal required squad number, then we should somehow decide,
+    // compare, which set of purposes will be best overall
+
+    // IMPORTANT INFO: We could try to include distance in the costs of squad!!!! Farther squad is, is bigger cost!
+    // and also include here id squad can even attack this enemy. If our squad is in danger, then can attack or run away! (alternativly attack enemies which attacks portal)
+
+    // ALGORYTM PLECAKOWY! (knapsack problem)
+    // https://gist.github.com/lqt0223/21f033450a9d762ce8aee4da336363b1
 
     // in params we should get our squads group
     let our_faction_info = all_factions_info

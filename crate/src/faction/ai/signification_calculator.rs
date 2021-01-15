@@ -70,11 +70,7 @@ impl SignificationCalculator {
       + (1.0 - normalized_distance) * ENEMIES_AROUND_STRATEGIC_POINT_MAX_SIGNIFICATION
   }
 
-  pub fn attack_influence_our_squad(
-    &self,
-    our_squad: &Ref<Squad>,
-    reservations_for_this_purpose: &Vec<u32>,
-  ) -> f32 {
+  pub fn attack_influence_our_squad(&self, our_squad: &Ref<Squad>) -> f32 {
     self.our_power_factor * our_squad.get_influence()
   }
 

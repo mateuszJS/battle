@@ -188,25 +188,25 @@ impl PurposesManager {
     purpose: &EnhancedPurpose,
     squads_grid: &SquadsGrid,
   ) -> Option<Vec<Plan>> {
-    if purpose.purpose_type == PurposeType::RunToSafePlace {
-      return if reservations_for_this_purpose.len() > 0 {
-        TODO: do it in other way, like introduce special vector "willing_squads_ids: Vec<u32>"
-        our_squads.retain(|squad| !reservations_for_this_purpose.contains(&squad.id));
-        Some(
-          vec![
-            Plan {
-              purpose_type: PurposeType::RunToSafePlace,
-              squads_ids: reservations_for_this_purpose,
-              enemy_squads: vec![],
-              x: purpose.place.x,
-              y: purpose.place.y,
-            }
-          ]
-        )
-      } else {
-        None
-      };
-    }
+    // if purpose.purpose_type == PurposeType::RunToSafePlace {
+      // return if reservations_for_this_purpose.len() > 0 {
+        // TODO: do it in other way, like introduce special vector "willing_squads_ids: Vec<u32>"
+    //     our_squads.retain(|squad| !reservations_for_this_purpose.contains(&squad.id));
+    //     Some(
+    //       vec![
+    //         Plan {
+    //           purpose_type: PurposeType::RunToSafePlace,
+    //           squads_ids: reservations_for_this_purpose,
+    //           enemy_squads: vec![],
+    //           x: purpose.place.x,
+    //           y: purpose.place.y,
+    //         }
+    //       ]
+    //     )
+    //   } else {
+    //     None
+    //   };
+    // }
     // And we got issue here, we have 2.0 + extra signification in reservations! But purposes are still in old order :/
     our_squads.sort_by(|a_squad, b_squad| {
       let a = signi_calc.how_much_squad_fits_to_take_purpose(&purpose, a_squad);
@@ -235,7 +235,7 @@ impl PurposesManager {
       // if exists, then avoid adding this purpose
       // if purpose is not bigger than 6.0 signi_calc.should_single_squad_react_on_met_danger()
 
-      let our_squad_influence = signi_calc.influence_our_squad(our_squad);
+      let our_squad_influence = signi_calc.attack_influence_our_squad(our_squad);
       
       if our_squad.shared.center_point.0.is_nan() || our_squad.shared.center_point.1.is_nan() {
         log!(
