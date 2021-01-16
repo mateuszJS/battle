@@ -14,9 +14,9 @@ use std::cell::Ref;
 
 pub const MIN_DISTANCE_OF_SEARCHING_ENEMY: f32 = 1.3 * MAX_POSSIBLE_WEAPON_RANGE;
 
-const SEARCHING_RANGE_ENEMIES_AROUND_SQUAD: f32 = MAX_POSSIBLE_WEAPON_RANGE;
-const SEARCHING_RANGE_ENEMIES_AROUND_PORTAL: f32 = MAX_POSSIBLE_WEAPON_RANGE * 1.5;
-const SEARCHING_RANGE_ENEMIES_AROUND_STRATEGIC_POINT: f32 = MAX_POSSIBLE_WEAPON_RANGE * 1.25;
+const SEARCHING_RANGE_ENEMIES_AROUND_SQUAD: f32 = MAX_POSSIBLE_WEAPON_RANGE * 1.5;
+const SEARCHING_RANGE_ENEMIES_AROUND_PORTAL: f32 = MAX_POSSIBLE_WEAPON_RANGE * 2.0;
+const SEARCHING_RANGE_ENEMIES_AROUND_STRATEGIC_POINT: f32 = MAX_POSSIBLE_WEAPON_RANGE * 1.5;
 
 pub struct SafetyManager {}
 
@@ -148,8 +148,8 @@ impl SafetyManager {
     our_faction_info
       .places
       .iter()
-      .map(|place| {
-        let threshold_enemies_around = match place.place_type {
+      .map(|our_place| {
+        let threshold_enemies_around = match our_place.place_type {
           PlaceType::Portal => SEARCHING_RANGE_ENEMIES_AROUND_PORTAL,
           PlaceType::Squads => SEARCHING_RANGE_ENEMIES_AROUND_SQUAD,
           PlaceType::StrategicPoint => SEARCHING_RANGE_ENEMIES_AROUND_STRATEGIC_POINT,
@@ -157,7 +157,16 @@ impl SafetyManager {
 
         all_factions_info
           .iter()
-          .find(|faction_info| faction_info.id == our_faction_id)
+          .for_each(|faction_info| {
+            if faction_info.id != our_faction_id {
+              faction_info.places.iter().for_each(|enemy_place| {
+                let distance_our_place_to_enemy_place = (our_place.x - enemy_place.x).hypot(our_place.y - enemy_place.y);
+                if distance_our_place_to_enemy_place < threshold_enemies_around {
+                  1. Do we have already 
+                }
+              })
+            }
+          });
 
         // let squads_nearby = SquadsGridManager::get_squads_in_area(
         //   squads_grid,
@@ -166,13 +175,13 @@ impl SafetyManager {
         //   threshold_enemies_around,
         // );
 
-        let our_squads_ids = place
+        let our_squads_ids = our_place
           .squads
           .iter()
           .map(|ref_cell_squad| ref_cell_squad.borrow().id)
           .collect::<Vec<u32>>();
 
-        let (angle_threshold, angle_mean) = SafetyManager::get_squad_group_angle_info(place);
+        let (angle_threshold, angle_mean) = SafetyManager::get_squad_group_angle_info(our_place);
 
         let enemies_squads = squads_nearby
           .iter()
@@ -201,8 +210,8 @@ impl SafetyManager {
                 false
               };
 
-              let angle_from_our_place_to_enemy = (some_squad.shared.center_point.0 - place.x)
-                .atan2(place.y - some_squad.shared.center_point.1);
+              let angle_from_our_place_to_enemy = (some_squad.shared.center_point.0 - our_place.x)
+                .atan2(our_place.y - some_squad.shared.center_point.1);
               let not_on_the_way =
                 angle_diff!(angle_from_our_place_to_enemy, angle_mean) > angle_threshold;
 
@@ -223,7 +232,7 @@ impl SafetyManager {
         OurSquadsGroupSafetyInfo {
           enemies_squads,
           our_squads_ids,
-          place,
+          place: our_place,
         }
       })
       .collect::<Vec<OurSquadsGroupSafetyInfo>>()
