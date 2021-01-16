@@ -85,17 +85,6 @@ struct MetEnemyOnTrack {
   our_collected_influence: f32,
 }
 
-#[derive(Clone)]
-struct Item {
-  w: usize,
-  v: usize,
-}
-
-struct SubSolution {
-  max_value: usize,
-  subset: Vec<Item>,
-}
-
 pub struct ArtificialIntelligence {
   pub current_plans: Vec<Plan>,
   faction_id: u32,
@@ -109,80 +98,6 @@ impl ArtificialIntelligence {
       faction_id,
       signi_calc: SignificationCalculator::new(),
     }
-  }
-
-  fn get_solution(
-    row: usize,
-    cap: usize,
-    items: &Vec<Item>,
-    memo: &Vec<Vec<SubSolution>>,
-  ) -> SubSolution {
-    let NO_SOLUTION = SubSolution {
-      max_value: 0,
-      subset: vec![],
-    };
-    // the column number starts from zero.
-    let col = cap - 1;
-    let last_item = items[row];
-    // The remaining capacity for the sub-problem to solve.
-    let remaining = cap - last_item.w; // TODO: here we should include if squad can be taken (danger situation)
-
-    // Refer to the last solution for this capacity,
-    // which is in the cell of the previous row with the same column
-    let last_solution = if row > 0 {
-      &memo[row - 1][col]
-    } else {
-      &NO_SOLUTION
-    };
-    // Refer to the last solution for the remaining capacity,
-    // which is in the cell of the previous row with the corresponding column
-    let last_sub_solution = if row > 0 {
-      &memo[row - 1][remaining - 1]
-    } else {
-      &NO_SOLUTION
-    };
-
-    // If any one of the items weights greater than the 'cap', return the last solution
-    if remaining < 0 {
-      return *last_solution.clone();
-    }
-
-    // Compare the current best solution for the sub-problem with a specific capacity
-    // to a new solution trial with the lastItem(new item) added
-    let last_value = last_solution.max_value;
-    let last_sub_value = last_sub_solution.max_value;
-
-    let new_value = last_sub_value + last_item.v;
-    if new_value >= last_value {
-      // copy the subset of the last sub-problem solution
-      let _last_sub_set = last_sub_solution.subset.clone();
-      _last_sub_set.push(last_item);
-      return SubSolution {
-        max_value: new_value,
-        subset: _last_sub_set,
-      };
-    } else {
-      return *last_solution.clone();
-    }
-  }
-
-  fn zero_one_knapsack_problem_dynamic_programming(items: Vec<Item>, capacity: usize) {
-    let memo = vec![];
-    // Filling the sub-problem solutions grid.
-    let mut i = 0;
-    while i < items.len() {
-      let row = vec![];
-      let mut cap = 1;
-      while cap <= capacity {
-        row.push(ArtificialIntelligence::get_solution(i, cap, &items, &memo));
-        cap += 1;
-      }
-      memo.push(row);
-      i += 1;
-    }
-
-    let last_wow = memo[memo.len() - 1];
-    last_wow[last_wow.len() - 1];
   }
 
   pub fn work(
@@ -200,15 +115,34 @@ impl ArtificialIntelligence {
     let our_squads_safety =
       SafetyManager::get_info_about_safety(self.faction_id, all_factions_info, squads_grid);
 
+    // OurSquadsGroupSafetyInfo {
+    //   enemies_squads,
+    //   our_squads_ids,
+    //   place,
+    // }
+
+    // Some(EnemyInfo {
+    //   id: some_squad.id,
+    //   influence: some_squad.get_influence(),
+    //   x: some_squad.shared.center_point.0,
+    //   y: some_squad.shared.center_point.1,
+    //   is_attacking_us,
+    //   not_on_the_way,
+    // })
+
     let mut new_purposes = PurposesManager::get_purposes(
       self.faction_id,
       &self.signi_calc,
       all_factions_info,
       // &self.current_plans,
       // &our_squads,
-      // &our_squads_safety,
+      &our_squads_safety,
     );
 
+    // struct SubSolution {
+    //   max_value: usize,
+    //   subset: Vec<Item>,
+    // }
     // let mut reserved_squads =
     //   AiUtils::get_squads_reservations(&self.current_plans, &new_purposes, &our_squads);
 
@@ -243,25 +177,43 @@ impl ArtificialIntelligence {
     // ALGORYTM PLECAKOWY! (knapsack problem)
     // https://gist.github.com/lqt0223/21f033450a9d762ce8aee4da336363b1
 
+    /*
+      IN OUR PREVIOUS FLOW :) with sorting purposes
+      let's just check. we are looping over current purpose:
+        1. we go signification 3, enemy_influence: 5
+        2. Go over next purposes on the list, until sum on enemy_influence will be equal or little bit smaller than currently iterated purpose
+        3. If sum of signification of those purposes is bigger than currently iterated purpose, then avoid this purpose, and go to them!
+
+        4. Then when you calculate purpose right behind that ommited one, check if that was true, bc! For example purpose can
+
+
+        OR we should maybe just not sort only by signification ,but also influence that will be needed.... but then we have to take care also about met enemies :thinking:
+
+        Rmeember to also update attacking. Run only when we got 1.2 * our_influence < enemy_influence!
+    */
+
     for purpose in new_purposes.iter() {
       /*=============CHECKING IF CURRENT PLAN EXISTS IN NEW PURPOSES==================*/
 
-      // let option_new_plan = PurposesManager::handle_purpose(
-      //   self.faction_id,
-      //   &self.signi_calc,
-      //   &mut our_squads,
-      //   purpose,
-      //   // &reserved_squads,
-      //   squads_grid,
-      // );
-      // if let Some(new_plans) = option_new_plan {
-      //   final_plans.append(&mut new_plans)
-      // }
+      let option_new_plan = PurposesManager::handle_purpose(
+        self.faction_id,
+        &self.signi_calc,
+        &mut our_squads,
+        purpose,
+        // &reserved_squads,
+        squads_grid,
+      );
+      if let Some(new_plan) = option_new_plan {
+        final_plans.push(new_plan)
+      }
 
-      // if our_squads.len() == 0 {
-      //   break;
-      // }
+      if our_squads.len() == 0 {
+        break;
+      }
     }
+
+    // TODO: when we are attacking, set attack with 1.5 * MAX_RANGE distance
+    // if above half of squads are < 2.0 * MAX_RANGE, then attack!
 
     if our_squads.len() > 0 {
       our_squads.iter().for_each(|our_squad| {

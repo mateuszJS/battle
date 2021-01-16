@@ -304,6 +304,7 @@ impl Faction {
         PurposeType::Attack => self.attack_closest_enemies(plan),
         PurposeType::RunToSafePlace => self.task_add_target(&plan.squads_ids, plan.x, plan.y),
         PurposeType::Capture => self.task_add_target(&plan.squads_ids, plan.x, plan.y),
+        PurposeType::ReGroupBeforeAttack => {}
       })
   }
 

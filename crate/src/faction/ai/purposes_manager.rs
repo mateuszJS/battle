@@ -3,12 +3,13 @@ use super::signification_calculator::{
   COMMON_PURPOSE_MAX_SIGNIFICATION, THRESHOLD_SIGNIFICATION_URGENT_PURPOSE,
 };
 use super::SignificationCalculator;
-use crate::weapon_types::MAX_POSSIBLE_WEAPON_RANGE;
 use super::{
-  EnhancedPurpose, FactionInfo, MetEnemyOnTrack, OurSquadsGroupSafetyInfo, PlaceType, Plan, PurposeType, ReservedSquad,
+  EnhancedPurpose, FactionInfo, MetEnemyOnTrack, OurSquadsGroupSafetyInfo, PlaceType, Plan,
+  PurposeType, ReservedSquad,
 };
 use crate::position_utils::PositionUtils;
 use crate::squads_grid_manager::{SquadsGrid, SquadsGridManager};
+use crate::weapon_types::MAX_POSSIBLE_WEAPON_RANGE;
 use crate::Squad;
 use std::cell::{Ref, RefCell};
 use std::rc::{Rc, Weak};
@@ -77,7 +78,7 @@ impl PurposesManager {
     all_factions_info: &Vec<FactionInfo>,
     // current_plans: &Vec<Plan>,
     // our_squads: &Vec<Ref<Squad>>,
-    // our_squads_safety: &Vec<OurSquadsGroupSafetyInfo>,
+    our_squads_safety: &Vec<OurSquadsGroupSafetyInfo>,
   ) -> Vec<EnhancedPurpose> {
     let mut new_id = -1_isize;
 
@@ -95,8 +96,92 @@ impl PurposesManager {
                   signi_calc.signification_enemy_portal(&place.squads[0].borrow()),
                 ),
                 PlaceType::Squads => {
+                  // HERE======================
+                  // 1. Easy find the enemy place! And check, what our places are attacking by this enemy,
+                  // around which places is, is on the way of our running squads?
+                  // Actually what we need here it's just signification!
+
+                  // And what we will need later is info, if our squad is in danger or not
+                  Code here will be easy, jsut increaste signfiication
+                  but code in runnign away it's osmethign that we need to rethink
+
+
+
+                  
                   // here we could check, if enemy is danger for us, and increase signification
                   // or we can do it when we will calculate table for purposes x our_squads
+
+
+                  // TODO: Here we should calculate safety info!
+                  // here we should find all our squads around enemy place
+                  // but then, will we be able to check for our running squad, if enemy is on the way?
+
+
+                  let place_enemies_ids = place.squads.iter().map(|ref_cell_squad| ref_cell_squad.borrow().id).collect::<Vec<u32>>();
+
+                  our_squads_safety.iter().for_each(|safety_info| {
+                    let is_any_safety_info_here = safety_info.enemies_squads.iter().any(|)
+                  })
+
+    // OurSquadsGroupSafetyInfo {
+    //   enemies_squads,
+    //   our_squads_ids,
+    //   place,
+    // }
+
+    // Some(EnemyInfo {
+    //   id: some_squad.id,
+    //   influence: some_squad.get_influence(),
+    //   x: some_squad.shared.center_point.0,
+    //   y: some_squad.shared.center_point.1,
+    //   is_attacking_us,
+    //   not_on_the_way,
+    // })
+
+
+        let option_enemy_info = safety_info
+          .enemies_squads
+          .iter()
+          .find(|enemy_info| enemy_info.id == enemy_squad.id);
+
+        if let Some(enemy_info) = option_enemy_info {
+          let distance =
+            (safety_info.place.x - enemy_info.x).hypot(safety_info.place.y - enemy_info.y);
+
+          if safety_info.place.place_type == PlaceType::Squads {
+            return MET_DANGER_PURPOSE_MAX_SIGNIFICATION.max(acc);
+          } else if safety_info.place.place_type == PlaceType::Portal {
+            // if there will be more our building, rename it to PlaceType::AttackableSquad
+            if enemy_info.is_attacking_us {
+              return signi_calc
+                .additional_signification_enemy_around_our_portal(&enemy_squad, 0.0)
+                .max(acc); // prob should happen, with current implementation, but just in case
+            }
+            if distance < SEARCHING_RANGE_ENEMIES_AROUND_PORTAL {
+              return signi_calc
+                .additional_signification_enemy_around_our_portal(
+                  &enemy_squad,
+                  (distance / SEARCHING_RANGE_ENEMIES_AROUND_PORTAL).powi(3), // power to make it more significate if is closer
+                )
+                .max(acc);
+            }
+          } else if safety_info.place.place_type == PlaceType::StrategicPoint {
+            if distance < SEARCHING_RANGE_ENEMIES_AROUND_STRATEGIC_POINT {
+              return signi_calc
+                .signification_enemy_around_our_strategic_point(
+                  &enemy_squad,
+                  (distance / SEARCHING_RANGE_ENEMIES_AROUND_STRATEGIC_POINT).powi(3),
+                )
+                .max(acc);
+            }
+          }
+        }
+
+
+
+
+
+
                   let signification = place.squads.iter().fold(0.0, |acc, ref_cell_squad| {
                     acc + signi_calc.signification_enemy_squads(&ref_cell_squad.borrow())
                   });
@@ -187,10 +272,10 @@ impl PurposesManager {
     our_squads: &mut Vec<Ref<Squad>>,
     purpose: &EnhancedPurpose,
     squads_grid: &SquadsGrid,
-  ) -> Option<Vec<Plan>> {
+  ) -> Option<Plan> {
     // if purpose.purpose_type == PurposeType::RunToSafePlace {
-      // return if reservations_for_this_purpose.len() > 0 {
-        // TODO: do it in other way, like introduce special vector "willing_squads_ids: Vec<u32>"
+    //   return if reservations_for_this_purpose.len() > 0 {
+    // // TODO: do it in other way, like introduce special vector "willing_squads_ids: Vec<u32>"
     //     our_squads.retain(|squad| !reservations_for_this_purpose.contains(&squad.id));
     //     Some(
     //       vec![
@@ -236,7 +321,6 @@ impl PurposesManager {
       // if purpose is not bigger than 6.0 signi_calc.should_single_squad_react_on_met_danger()
 
       let our_squad_influence = signi_calc.attack_influence_our_squad(our_squad);
-      
       if our_squad.shared.center_point.0.is_nan() || our_squad.shared.center_point.1.is_nan() {
         log!(
           "get_first_enemy_groups_on_track: {} {}",
@@ -310,32 +394,32 @@ impl PurposesManager {
         }
       // END OF FUNCTION TO MOVE
       } else {
+        // I think that is shouldn't be liek this, we should just calc angle between us and enemy, and add RANGE * 1.5
+        // let mut i = track.len() - 1;
+        // let mut distance_sum = 0.0;
+        // while i > 0 {
+        //   let distance = (track[i].0 - track[i - 1].0).hypot(track[i].1 - track[i - 1].1);
+        //   distance_sum += distance;
+        //   if distance_sum > 1.5 * MAX_POSSIBLE_WEAPON_RANGE {
+        //     break;
+        //   }
+        //   i -= 1;
+        // }
 
-        let mut i = track.len() - 1;
-        let mut distance_sum = 0.0;
-        while i > 0 {
-          let distance = (track[i].0 - track[i - 1].0).hypot(track[i].1 - track[i - 1].1);
-          distance_sum += distance;
-          if distance_sum > 1.5 * MAX_POSSIBLE_WEAPON_RANGE {
-            break;
-          }
-          i -= 1;
-        }
+        // TODO: instead of calculatign stuff liek this, we should set in the attack weapon range to 1.5 * MAX_RANGE!!!!
 
+        // if i == 0 {
+        //   // squad is closer than 1.5 * MAX_RANGE to the purpose!
+        // } else {
 
-        TODO: instead of calculatign stuff liek this, we should set in the attack weapon range to 1.5 * MAX_RANGE!!!!
+        // }
 
-        if i == 0 {
-          // squad is closer than 1.5 * MAX_RANGE to the purpose! 
-        } else {
-
-        }
-
-        used_squads_ids.push(OurAttackerInfo {
-          squad_id: our_squad.id,
-          pos_before_purpose_x: ,
-          pos_before_purpose_y: ,
-        });
+        used_squads_ids.push(our_squad.id);
+        // used_squads_ids.push(OurAttackerInfo {
+        //   squad_id: our_squad.id,
+        //   pos_before_purpose_x: ,
+        //   pos_before_purpose_y: ,
+        // });
         collected_our_influence += our_squad_influence;
       }
     }
@@ -353,11 +437,11 @@ impl PurposesManager {
         .map(|ref_cell_squad| Rc::downgrade(ref_cell_squad))
         .collect::<Vec<Weak<RefCell<Squad>>>>();
 
-      TODO: collect our squads with position also, not only with id! Here we could add purpose to wait, instead of Attack
-      point 1.
+      // TODO: collect our squads with position also, not only with id! Here we could add purpose to wait, instead of Attack
+      // point 1.
 
-      we should check track, from last part. Add distance of each line, and if distance then is bigger than 1.5 * MAX_RANGE
-      then set it to be equal 1.5 * MAX_RANGE
+      // we should check track, from last part. Add distance of each line, and if distance then is bigger than 1.5 * MAX_RANGE
+      // then set it to be equal 1.5 * MAX_RANGE
       Some(Plan {
         purpose_type: purpose.purpose_type.clone(),
         squads_ids: used_squads_ids,

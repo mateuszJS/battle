@@ -31,31 +31,29 @@ impl SafetyManager {
       let track_max_index = squad
         .members
         .iter()
-        .fold(0, |acc_track_index, ref_cell_member| {
+        .fold(-1, |acc_track_index, ref_cell_member| {
           acc_track_index.max(ref_cell_member.borrow().track_index)
         });
-
       if track_max_index == -1 {
         interrupted_angle_mean_calc = true;
         break;
       }
 
       let (source_x, source_y) = squad.shared.center_point;
-      let (track_dest_x, track_dest_y) = squad.shared.track[squad.shared.track.len() - 1];
+      let (track_dest_x, track_dest_y) =
+        squad.shared.track[(squad.shared.track.len() as isize - 1) as usize];
       let distance_to_dest = (source_x - track_dest_x).hypot(source_y - track_dest_y);
 
       if distance_to_dest < MIN_DISTANCE_OF_SEARCHING_ENEMY {
         interrupted_angle_mean_calc = true;
         break;
       }
-
       let (track_next_point_x, track_next_point_y) = squad.shared.track[track_max_index as usize];
       let angle = (track_next_point_x - source_x).atan2(source_y - track_next_point_y);
 
       mean_angle_sin += angle.sin();
       mean_angle_cos += angle.cos();
     }
-
     if interrupted_angle_mean_calc {
       let squads_number = place.squads.len() as f32;
       let angle_mean = (mean_angle_sin / squads_number).atan2(mean_angle_cos / squads_number);
@@ -157,12 +155,16 @@ impl SafetyManager {
           PlaceType::StrategicPoint => SEARCHING_RANGE_ENEMIES_AROUND_STRATEGIC_POINT,
         };
 
-        let squads_nearby = SquadsGridManager::get_squads_in_area(
-          squads_grid,
-          place.x,
-          place.y,
-          threshold_enemies_around,
-        );
+        all_factions_info
+          .iter()
+          .find(|faction_info| faction_info.id == our_faction_id)
+
+        // let squads_nearby = SquadsGridManager::get_squads_in_area(
+        //   squads_grid,
+        //   place.x,
+        //   place.y,
+        //   threshold_enemies_around,
+        // );
 
         let our_squads_ids = place
           .squads
@@ -217,7 +219,7 @@ impl SafetyManager {
             }
           })
           .collect::<Vec<EnemyInfo>>();
-
+        // TODO: add enemies in groups! Not like rn, each signle oen squad in counted
         OurSquadsGroupSafetyInfo {
           enemies_squads,
           our_squads_ids,
