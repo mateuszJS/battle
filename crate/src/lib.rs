@@ -476,6 +476,8 @@ impl Universe {
     factions: &Vec<Faction>,
     strategic_points: &Vec<StrategicPoint>,
   ) -> Vec<FactionInfo> {
+    let mut place_id = 0;
+
     let mut ai_input = factions
       .iter()
       .map(|faction| {
@@ -505,7 +507,10 @@ impl Universe {
               });
           let neighbours_len = neighbours.len() as f32;
           influence_total += sum_influence;
+
+          place_id += 1;
           places.push(Place {
+            id: place_id,
             place_type: PlaceType::Squads,
             squads: neighbours,
             influence: sum_influence,
@@ -518,7 +523,9 @@ impl Universe {
         let portal_influence = portal.get_influence();
         influence_total += portal_influence;
 
+        place_id += 1;
         places.push(Place {
+          id: place_id,
           place_type: PlaceType::Portal,
           squads: vec![faction.portal_squad.clone()],
           influence: portal_influence,
@@ -530,7 +537,9 @@ impl Universe {
           if strategic_point.owner_faction_id == faction.id {
             let strategic_point_squad = strategic_point.squad.borrow();
             let (x, y) = strategic_point_squad.shared.center_point;
+            place_id += 1;
             places.push(Place {
+              id: place_id,
               place_type: PlaceType::StrategicPoint,
               squads: vec![strategic_point.squad.clone()],
               influence: strategic_point_squad.get_influence(),
@@ -554,7 +563,9 @@ impl Universe {
         if strategic_point.owner_faction_id == STRATEGIC_POINT_EMPTY_OWNER {
           let strategic_point_squad = strategic_point.squad.borrow();
           let (x, y) = strategic_point_squad.shared.center_point;
+          place_id += 1;
           Some(Place {
+            id: place_id,
             place_type: PlaceType::StrategicPoint,
             squads: vec![strategic_point.squad.clone()],
             influence: strategic_point_squad.get_influence(),

@@ -1,7 +1,6 @@
 mod purposes_manager;
 mod safety_manager;
 mod signification_calculator;
-mod utils;
 
 use crate::squad::Squad;
 use crate::squads_grid_manager::SquadsGrid;
@@ -10,7 +9,6 @@ use safety_manager::SafetyManager;
 use signification_calculator::SignificationCalculator;
 use std::cell::{Ref, RefCell};
 use std::rc::{Rc, Weak};
-use utils::AiUtils;
 
 pub struct EnemyInfo {
   id: u32,
@@ -32,7 +30,6 @@ pub enum PurposeType {
   Attack,
   RunToSafePlace,
   Capture,
-  ReGroupBeforeAttack,
 }
 #[derive(PartialEq, Clone)]
 pub enum PlaceType {
@@ -43,6 +40,7 @@ pub enum PlaceType {
 
 #[derive(Clone)]
 pub struct Place {
+  pub id: u32,
   pub place_type: PlaceType,
   pub squads: Vec<Rc<RefCell<Squad>>>,
   pub influence: f32,
@@ -65,6 +63,7 @@ pub struct EnhancedPurpose {
 
 #[derive(Clone)]
 pub struct Plan {
+  pub place_id: u32,
   pub purpose_type: PurposeType,
   pub squads_ids: Vec<u32>,
   pub enemy_squads: Vec<Weak<RefCell<Squad>>>,
@@ -85,6 +84,13 @@ struct MetEnemyOnTrack {
   our_collected_influence: f32,
 }
 
+pub struct DangerPlace<'a> {
+  enemy_place: &'a Place,
+  additional_signification: f32,
+  our_places: Vec<&'a Place>, // TODO: is it needed?
+  is_attacking_us: bool,
+}
+
 pub struct ArtificialIntelligence {
   pub current_plans: Vec<Plan>,
   faction_id: u32,
@@ -100,6 +106,11 @@ impl ArtificialIntelligence {
     }
   }
 
+  fn get_purpose_sort_value(purpose: &EnhancedPurpose) -> f32 {
+    purpose.signification
+    // TODO: handle influence, how far is from our portal
+  }
+
   pub fn work(
     &mut self,
     our_squads_ref_cells: &Vec<Rc<RefCell<Squad>>>,
@@ -112,23 +123,8 @@ impl ArtificialIntelligence {
       .map(|ref_cell_squad| ref_cell_squad.borrow())
       .collect::<Vec<Ref<Squad>>>();
 
-    let our_squads_safety =
-      SafetyManager::get_info_about_safety(self.faction_id, all_factions_info, squads_grid);
-
-    // OurSquadsGroupSafetyInfo {
-    //   enemies_squads,
-    //   our_squads_ids,
-    //   place,
-    // }
-
-    // Some(EnemyInfo {
-    //   id: some_squad.id,
-    //   influence: some_squad.get_influence(),
-    //   x: some_squad.shared.center_point.0,
-    //   y: some_squad.shared.center_point.1,
-    //   is_attacking_us,
-    //   not_on_the_way,
-    // })
+    let (safe_places, danger_places) =
+      SafetyManager::get_info_about_safety(self.faction_id, all_factions_info, &self.signi_calc);
 
     let mut new_purposes = PurposesManager::get_purposes(
       self.faction_id,
@@ -136,65 +132,17 @@ impl ArtificialIntelligence {
       all_factions_info,
       // &self.current_plans,
       // &our_squads,
-      &our_squads_safety,
+      &danger_places,
     );
 
-    // struct SubSolution {
-    //   max_value: usize,
-    //   subset: Vec<Item>,
-    // }
-    // let mut reserved_squads =
-    //   AiUtils::get_squads_reservations(&self.current_plans, &new_purposes, &our_squads);
-
-    // If we want to do thins like this (increase purpose signification) then do it in purpose creation
-    // SafetyManager::handle_squads_safety(
-    //   self.faction_id,
-    //   &self.signi_calc,
-    //   &our_squads,
-    //   // &mut reserved_squads,
-    //   all_factions_info,
-    //   squads_grid,
-    //   &mut new_purposes,
-    //   &our_squads_safety,
-    // );
-
-    // We should prob do it when we calculate whole table purposes x our_squads
-    // AiUtils::sort_purposes(&mut new_purposes);
-
-    // When we will limit somehow purposes, then we should calc for each purpose minimum required squads.
-
-    // Then we should compare purposes, how much value will we got (signification) and how much costs will we pay (squad number or squad influence)
-
-    // Remember to calc distance correctly to the purpose.
-    // Also we should include it in purposes comparsion, if squads are far away from purpose, then lower signification/higher costs
-
-    // When squads are sharing between different purposes in their minimal required squad number, then we should somehow decide,
-    // compare, which set of purposes will be best overall
-
-    // IMPORTANT INFO: We could try to include distance in the costs of squad!!!! Farther squad is, is bigger cost!
-    // and also include here id squad can even attack this enemy. If our squad is in danger, then can attack or run away! (alternativly attack enemies which attacks portal)
-
-    // ALGORYTM PLECAKOWY! (knapsack problem)
-    // https://gist.github.com/lqt0223/21f033450a9d762ce8aee4da336363b1
-
-    /*
-      IN OUR PREVIOUS FLOW :) with sorting purposes
-      let's just check. we are looping over current purpose:
-        1. we go signification 3, enemy_influence: 5
-        2. Go over next purposes on the list, until sum on enemy_influence will be equal or little bit smaller than currently iterated purpose
-        3. If sum of signification of those purposes is bigger than currently iterated purpose, then avoid this purpose, and go to them!
-
-        4. Then when you calculate purpose right behind that ommited one, check if that was true, bc! For example purpose can
-
-
-        OR we should maybe just not sort only by signification ,but also influence that will be needed.... but then we have to take care also about met enemies :thinking:
-
-        Rmeember to also update attacking. Run only when we got 1.2 * our_influence < enemy_influence!
-    */
+    new_purposes.sort_by(|a_purpose, b_purpose| {
+      (ArtificialIntelligence::get_purpose_sort_value(&b_purpose))
+        .partial_cmp(&ArtificialIntelligence::get_purpose_sort_value(&a_purpose))
+        .unwrap()
+    });
 
     for purpose in new_purposes.iter() {
       /*=============CHECKING IF CURRENT PLAN EXISTS IN NEW PURPOSES==================*/
-
       let option_new_plan = PurposesManager::handle_purpose(
         self.faction_id,
         &self.signi_calc,
@@ -212,37 +160,97 @@ impl ArtificialIntelligence {
       }
     }
 
-    // TODO: when we are attacking, set attack with 1.5 * MAX_RANGE distance
-    // if above half of squads are < 2.0 * MAX_RANGE, then attack!
+    danger_places.iter().for_each(|danger_place| {
+      if !danger_place.is_attacking_us {
+        return;
+      }
+      let enemy_handled = final_plans
+        .iter()
+        .any(|plan| danger_place.enemy_place.id == plan.place_id);
 
-    if our_squads.len() > 0 {
-      our_squads.iter().for_each(|our_squad| {
-        let mut min_distance = std::f32::MAX;
-        let mut min_index = -1_isize;
+      if !enemy_handled {
+        danger_place.our_places.iter().for_each(|our_place| {
+          if danger_place.enemy_place.influence > our_place.influence * 1.2 {
+            let mut min_index = 0;
+            let mut min_value = std::f32::MAX;
+            safe_places
+              .iter()
+              .enumerate()
+              .for_each(|(index, safe_place)| {
+                let distance = (our_place.x - safe_place.x).hypot(our_place.y - safe_place.y);
+                let value = if distance < 500.0 && safe_place.place_type != PlaceType::Portal {
+                  std::f32::MAX
+                } else {
+                  distance
+                };
 
-        final_plans
-          .iter()
-          .enumerate()
-          .for_each(|(index, final_plan)| {
-            if final_plan.purpose_type == PurposeType::Attack {
-              // e should care about safety?!
-              let squad_position = our_squad.shared.center_point;
-              let distance =
-                (squad_position.0 - final_plan.x).hypot(squad_position.1 - final_plan.y);
-              if min_distance > distance {
-                min_distance = distance;
-                min_index = index as isize;
-              }
-            }
-          });
-        if min_index >= 0 {
-          final_plans[min_index as usize]
-            .squads_ids
-            .push(our_squad.id);
-        }
-        //WRONG! rn some squads shoudl sto pattacking but will go!
-      });
-    }
+                if min_value > value {
+                  min_value = value;
+                  min_index = index;
+                }
+              });
+
+            final_plans.push(Plan {
+              place_id: 0, // not needed now
+              purpose_type: PurposeType::RunToSafePlace,
+              squads_ids: our_place
+                .squads
+                .iter()
+                .map(|ref_cell_our_squad| ref_cell_our_squad.borrow().id)
+                .collect::<Vec<u32>>(),
+              enemy_squads: vec![],
+              x: safe_places[min_index].x,
+              y: safe_places[min_index].y,
+            })
+          }
+        });
+
+        // enemy_place: &'a Place,
+        // additional_signification: f32,
+        // our_places: Vec<&'a Place>, // TODO: is it needed?
+        // is_attacking_us: bool,
+
+        // let new_id = new_purposes.len();
+        // let safe_destination_index =
+        //   SafetyManager::get_safe_destination_index(&safety_info, &our_squads_safety);
+        // new_purposes.push(EnhancedPurpose {
+        //   id: new_id,
+        //   purpose_type: PurposeType::RunToSafePlace,
+        //   signification,
+        //   place: our_squads_safety[safe_destination_index].place.clone(),
+        // });
+      }
+      // }
+    });
+
+    // if our_squads.len() > 0 {
+    //   our_squads.iter().for_each(|our_squad| {
+    //     let mut min_distance = std::f32::MAX;
+    //     let mut min_index = -1_isize;
+
+    //     final_plans
+    //       .iter()
+    //       .enumerate()
+    //       .for_each(|(index, final_plan)| {
+    //         if final_plan.purpose_type == PurposeType::Attack {
+    //           // e should care about safety?!
+    //           let squad_position = our_squad.shared.center_point;
+    //           let distance =
+    //             (squad_position.0 - final_plan.x).hypot(squad_position.1 - final_plan.y);
+    //           if min_distance > distance {
+    //             min_distance = distance;
+    //             min_index = index as isize;
+    //           }
+    //         }
+    //       });
+    //     if min_index >= 0 {
+    //       final_plans[min_index as usize]
+    //         .squads_ids
+    //         .push(our_squad.id);
+    //     }
+    //     //WRONG! rn some squads shoudl sto pattacking but will go!
+    //   });
+    // }
 
     let plans_needed_to_update = final_plans
       .clone()

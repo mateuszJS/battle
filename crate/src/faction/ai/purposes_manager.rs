@@ -1,11 +1,9 @@
 use super::safety_manager::MIN_DISTANCE_OF_SEARCHING_ENEMY;
-use super::signification_calculator::{
-  COMMON_PURPOSE_MAX_SIGNIFICATION, THRESHOLD_SIGNIFICATION_URGENT_PURPOSE,
-};
+use super::signification_calculator::THRESHOLD_SIGNIFICATION_URGENT_PURPOSE;
 use super::SignificationCalculator;
 use super::{
-  EnhancedPurpose, FactionInfo, MetEnemyOnTrack, OurSquadsGroupSafetyInfo, PlaceType, Plan,
-  PurposeType, ReservedSquad,
+  DangerPlace, EnhancedPurpose, FactionInfo, MetEnemyOnTrack, OurSquadsGroupSafetyInfo, PlaceType,
+  Plan, PurposeType, ReservedSquad,
 };
 use crate::position_utils::PositionUtils;
 use crate::squads_grid_manager::{SquadsGrid, SquadsGridManager};
@@ -78,10 +76,11 @@ impl PurposesManager {
     all_factions_info: &Vec<FactionInfo>,
     // current_plans: &Vec<Plan>,
     // our_squads: &Vec<Ref<Squad>>,
-    our_squads_safety: &Vec<OurSquadsGroupSafetyInfo>,
+    danger_places: &Vec<DangerPlace>,
   ) -> Vec<EnhancedPurpose> {
     let mut new_id = -1_isize;
-
+    // TODO: add signification base on distance between purpose and portal, but it's very little
+    // just to make it little bit bigger than other purposes at the end of map!
     all_factions_info
       .iter()
       .flat_map(|faction_info| {
@@ -93,103 +92,26 @@ impl PurposesManager {
               let (purpose_type, signification) = match place.place_type {
                 PlaceType::Portal => (
                   PurposeType::Attack,
-                  signi_calc.signification_enemy_portal(&place.squads[0].borrow()),
+                  signi_calc.base_signification_enemy_portal(&place.squads[0].borrow()),
                 ),
                 PlaceType::Squads => {
-                  // HERE======================
-                  // 1. Easy find the enemy place! And check, what our places are attacking by this enemy,
-                  // around which places is, is on the way of our running squads?
-                  // Actually what we need here it's just signification!
-
-                  // And what we will need later is info, if our squad is in danger or not
-                  Code here will be easy, jsut increaste signfiication
-                  but code in runnign away it's osmethign that we need to rethink
-
-
-
-                  
-                  // here we could check, if enemy is danger for us, and increase signification
-                  // or we can do it when we will calculate table for purposes x our_squads
-
-
-                  // TODO: Here we should calculate safety info!
-                  // here we should find all our squads around enemy place
-                  // but then, will we be able to check for our running squad, if enemy is on the way?
-
-
-                  let place_enemies_ids = place.squads.iter().map(|ref_cell_squad| ref_cell_squad.borrow().id).collect::<Vec<u32>>();
-
-                  our_squads_safety.iter().for_each(|safety_info| {
-                    let is_any_safety_info_here = safety_info.enemies_squads.iter().any(|)
-                  })
-
-    // OurSquadsGroupSafetyInfo {
-    //   enemies_squads,
-    //   our_squads_ids,
-    //   place,
-    // }
-
-    // Some(EnemyInfo {
-    //   id: some_squad.id,
-    //   influence: some_squad.get_influence(),
-    //   x: some_squad.shared.center_point.0,
-    //   y: some_squad.shared.center_point.1,
-    //   is_attacking_us,
-    //   not_on_the_way,
-    // })
-
-
-        let option_enemy_info = safety_info
-          .enemies_squads
-          .iter()
-          .find(|enemy_info| enemy_info.id == enemy_squad.id);
-
-        if let Some(enemy_info) = option_enemy_info {
-          let distance =
-            (safety_info.place.x - enemy_info.x).hypot(safety_info.place.y - enemy_info.y);
-
-          if safety_info.place.place_type == PlaceType::Squads {
-            return MET_DANGER_PURPOSE_MAX_SIGNIFICATION.max(acc);
-          } else if safety_info.place.place_type == PlaceType::Portal {
-            // if there will be more our building, rename it to PlaceType::AttackableSquad
-            if enemy_info.is_attacking_us {
-              return signi_calc
-                .additional_signification_enemy_around_our_portal(&enemy_squad, 0.0)
-                .max(acc); // prob should happen, with current implementation, but just in case
-            }
-            if distance < SEARCHING_RANGE_ENEMIES_AROUND_PORTAL {
-              return signi_calc
-                .additional_signification_enemy_around_our_portal(
-                  &enemy_squad,
-                  (distance / SEARCHING_RANGE_ENEMIES_AROUND_PORTAL).powi(3), // power to make it more significate if is closer
-                )
-                .max(acc);
-            }
-          } else if safety_info.place.place_type == PlaceType::StrategicPoint {
-            if distance < SEARCHING_RANGE_ENEMIES_AROUND_STRATEGIC_POINT {
-              return signi_calc
-                .signification_enemy_around_our_strategic_point(
-                  &enemy_squad,
-                  (distance / SEARCHING_RANGE_ENEMIES_AROUND_STRATEGIC_POINT).powi(3),
-                )
-                .max(acc);
-            }
-          }
-        }
-
-
-
-
-
-
-                  let signification = place.squads.iter().fold(0.0, |acc, ref_cell_squad| {
-                    acc + signi_calc.signification_enemy_squads(&ref_cell_squad.borrow())
-                  });
-                  (PurposeType::Attack, signification)
+                  let option_danger_place = danger_places
+                    .iter()
+                    .find(|danger_place| danger_place.enemy_place.id == place.id);
+                  let additional_signification = if let Some(danger_place) = option_danger_place {
+                    danger_place.additional_signification
+                  } else {
+                    0.0
+                  };
+                  (
+                    PurposeType::Attack,
+                    signi_calc.base_signification_enemy_squads_place(place.influence)
+                      + additional_signification,
+                  )
                 }
                 PlaceType::StrategicPoint => (
                   PurposeType::Capture,
-                  signi_calc.signification_strategic_point(),
+                  signi_calc.base_signification_strategic_point(),
                 ),
               };
 
@@ -198,7 +120,7 @@ impl PurposesManager {
               EnhancedPurpose {
                 id: new_id as usize,
                 purpose_type,
-                signification: signification.min(COMMON_PURPOSE_MAX_SIGNIFICATION),
+                signification,
                 place: place.clone(),
               }
             })
@@ -443,6 +365,7 @@ impl PurposesManager {
       // we should check track, from last part. Add distance of each line, and if distance then is bigger than 1.5 * MAX_RANGE
       // then set it to be equal 1.5 * MAX_RANGE
       Some(Plan {
+        place_id: purpose.place.id,
         purpose_type: purpose.purpose_type.clone(),
         squads_ids: used_squads_ids,
         enemy_squads,

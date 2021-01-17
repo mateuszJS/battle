@@ -5,12 +5,12 @@ use crate::weapon_types::MAX_POSSIBLE_WEAPON_RANGE;
 use std::cell::Ref;
 
 const CAPTURE_POINT_SIGNIFICATION: f32 = 0.5;
-pub const COMMON_PURPOSE_MAX_SIGNIFICATION: f32 = 2.0; // attack
-pub const MET_DANGER_PURPOSE_MAX_SIGNIFICATION: f32 = 3.0; // met enemy, danger place, at least COMMON_PURPOSE_MAX_SIGNIFICATION
-const ENEMIES_AROUND_STRATEGIC_POINT_MAX_SIGNIFICATION: f32 = 1.5;
+const ENEMY_SQUADS_MAX_BASE_SIGNIFICATION: f32 = 2.0; // attack
+const MET_DANGER_PURPOSE_MAX_ADDITIONAL_SIGNIFICATION: f32 = 1.0; // met enemy, danger place, at least COMMON_PURPOSE_MAX_SIGNIFICATION
+const ENEMY_PLACE_AROUND_STRATEGIC_POINT_MAX_ADDITIONAL_SIGNIFICATION: f32 = 1.5;
 const RUNNING_AWAY_SIGNIFICATION: f32 = 3.1;
 pub const THRESHOLD_SIGNIFICATION_URGENT_PURPOSE: f32 = 3.3;
-const ENEMIES_AROUND_BASE_MAX_SIGNIFICATION: f32 = 4.0;
+const ENEMY_PLACE_AROUND_OUR_BASE_MAX_ADDITIONAL_SIGNIFICATION: f32 = 4.0;
 
 // TODO: no const should be public! everything should be available via SignificationCalculator methods!
 
@@ -34,15 +34,16 @@ impl SignificationCalculator {
     }
   }
 
-  pub fn signification_strategic_point(&self) -> f32 {
+  pub fn base_signification_strategic_point(&self) -> f32 {
+    // TODO: if capturing already started, then add more signification
     CAPTURE_POINT_SIGNIFICATION
   }
 
-  pub fn signification_enemy_squads(&self, enemy_squads: &Ref<Squad>) -> f32 {
-    0.1
+  pub fn base_signification_enemy_squads_place(&self, place_influence: f32) -> f32 {
+    (place_influence * 0.14).min(ENEMY_SQUADS_MAX_BASE_SIGNIFICATION)
   }
 
-  pub fn signification_enemy_portal(&self, portal_squad: &Ref<Squad>) -> f32 {
+  pub fn base_signification_enemy_portal(&self, portal_squad: &Ref<Squad>) -> f32 {
     let portal_unit = portal_squad.members[0].borrow();
 
     1.0 + (1.0 - portal_unit.hp / portal_squad.squad_details.hp) * 0.5 // <0, 1.5>
@@ -52,22 +53,40 @@ impl SignificationCalculator {
     RUNNING_AWAY_SIGNIFICATION
   }
 
-  pub fn additional_signification_enemy_around_our_portal(
+  pub fn additional_signification_enemy_place_around_our_squad(
     &self,
-    enemy_squad: &Ref<Squad>,
-    normalized_distance: f32,
+    distance: f32,
+    max_distance_threshold: f32,
+    is_attacking_us: bool,
   ) -> f32 {
-    self.signification_enemy_squads(enemy_squad)
-      + (1.0 - normalized_distance) * ENEMIES_AROUND_BASE_MAX_SIGNIFICATION
+    if is_attacking_us {
+      MET_DANGER_PURPOSE_MAX_ADDITIONAL_SIGNIFICATION
+    } else {
+      MET_DANGER_PURPOSE_MAX_ADDITIONAL_SIGNIFICATION * 0.2
+    }
   }
 
-  pub fn signification_enemy_around_our_strategic_point(
+  pub fn additional_signification_enemy_place_around_our_portal(
     &self,
-    enemy_squad: &Ref<Squad>,
-    normalized_distance: f32,
+    distance: f32,
+    max_distance_threshold: f32,
+    is_attacking_us: bool,
   ) -> f32 {
-    self.signification_enemy_squads(enemy_squad)
-      + (1.0 - normalized_distance) * ENEMIES_AROUND_STRATEGIC_POINT_MAX_SIGNIFICATION
+    let normalized_distance = if is_attacking_us {
+      0.0
+    } else {
+      (distance / max_distance_threshold).powi(3)
+    };
+    (1.0 - normalized_distance) * ENEMY_PLACE_AROUND_OUR_BASE_MAX_ADDITIONAL_SIGNIFICATION
+  }
+
+  pub fn additional_signification_enemy_place_around_our_strategic_point(
+    &self,
+    distance: f32,
+    max_distance_threshold: f32,
+  ) -> f32 {
+    let normalized_distance = (distance / max_distance_threshold).powi(3);
+    (1.0 - normalized_distance) * ENEMY_PLACE_AROUND_STRATEGIC_POINT_MAX_ADDITIONAL_SIGNIFICATION
   }
 
   pub fn attack_influence_our_squad(&self, our_squad: &Ref<Squad>) -> f32 {
