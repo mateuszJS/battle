@@ -153,7 +153,7 @@ impl SignificationCalculator {
     let distance_to_purpose = ((purpose.place.x - our_squad.shared.center_point.0)
       .hypot(purpose.place.y - our_squad.shared.center_point.1)
       - our_squad.squad_details.weapon.range)
-      .max(0.0);
+      .max(1.0 / our_squad.id as f32); // should be zero, but to keep always the same order, used squad.id to calc small (< 1.0) diff
 
     -(distance_to_purpose / our_squad.squad_details.movement_speed)
   }

@@ -182,7 +182,8 @@ impl SafetyManager {
           })
         }
       });
-      if number_of_collected_so_far_danger_places == danger_places.len()
+      if (number_of_collected_so_far_danger_places == danger_places.len()
+        && our_place.place_type == PlaceType::StrategicPoint)
         || our_place.place_type == PlaceType::Portal
       {
         // no danger places related with this place!
