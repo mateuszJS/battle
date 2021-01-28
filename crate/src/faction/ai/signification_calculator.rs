@@ -1,5 +1,6 @@
 use super::EnhancedPurpose;
 use super::Squad;
+use crate::strategic_point::STRATEGIC_POINT_EMPTY_OWNER;
 use crate::weapon_types::MAX_POSSIBLE_WEAPON_RANGE;
 
 use std::cell::Ref;
@@ -7,6 +8,7 @@ use std::cell::Ref;
 const CAPTURE_POINT_SIGNIFICATION: f32 = 0.5;
 const MET_DANGER_PURPOSE_MAX_ADDITIONAL_SIGNIFICATION: f32 = 1.0; // met enemy, danger place, at least COMMON_PURPOSE_MAX_SIGNIFICATION
 const ENEMY_PLACE_AROUND_STRATEGIC_POINT_MAX_ADDITIONAL_SIGNIFICATION: f32 = 1.5;
+const CAPTURE_POINT_MAX_ADDITIONAL_SIGNIFICATION: f32 = 2.0;
 const ENEMY_SQUADS_MAX_BASE_SIGNIFICATION: f32 = 2.0; // attack
 const ENEMY_PLACE_AROUND_OUR_BASE_MAX_ADDITIONAL_SIGNIFICATION: f32 = 2.5;
 pub const THRESHOLD_SIGNIFICATION_URGENT_PURPOSE: f32 = 3.6;
@@ -24,25 +26,35 @@ pub const THRESHOLD_SIGNIFICATION_URGENT_PURPOSE: f32 = 3.6;
 */
 
 pub struct SignificationCalculator {
+  faction_id: u32,
   attack_enemy_place_mod: f32,
   run_away_enemy_place_mod: f32,
 }
 
 impl SignificationCalculator {
-  pub fn new() -> SignificationCalculator {
+  pub fn new(faction_id: u32) -> SignificationCalculator {
     SignificationCalculator {
+      faction_id,
       attack_enemy_place_mod: 1.2,
       run_away_enemy_place_mod: 0.8,
     }
   }
 
-  pub fn base_signification_strategic_point(&self) -> f32 {
-    // TODO: if capturing already started, then add more signification
-    CAPTURE_POINT_SIGNIFICATION
+  pub fn base_signification_strategic_point(&self, strategic_point: Ref<Squad>) -> f32 {
+    if strategic_point
+      .all_faction_ids_around
+      .contains(&self.faction_id)
+      && strategic_point.id == STRATEGIC_POINT_EMPTY_OWNER
+    {
+      CAPTURE_POINT_SIGNIFICATION
+        + strategic_point.capturing_progress * CAPTURE_POINT_MAX_ADDITIONAL_SIGNIFICATION
+    } else {
+      CAPTURE_POINT_SIGNIFICATION
+    }
   }
 
   pub fn base_signification_enemy_squads_place(&self, place_influence: f32) -> f32 {
-    (place_influence * 0.14).min(ENEMY_SQUADS_MAX_BASE_SIGNIFICATION)
+    (place_influence * 0.02).min(ENEMY_SQUADS_MAX_BASE_SIGNIFICATION)
   }
 
   pub fn base_signification_enemy_portal(&self, portal_squad: &Ref<Squad>) -> f32 {
@@ -93,27 +105,6 @@ impl SignificationCalculator {
 
   pub fn running_away_influence_enemy_place(&self, enemy_place_influence: f32) -> f32 {
     self.run_away_enemy_place_mod * enemy_place_influence
-  }
-
-  pub fn influence_enemy_squad_attacks_us(&self, enemy_squad: &Ref<Squad>) -> f32 {
-    enemy_squad.get_influence()
-  }
-
-  pub fn should_single_squad_react_on_met_danger(
-    &self,
-    reserved_squad_purpose_signification: f32,
-  ) -> bool {
-    // TODO: and how away is the enemy! and if the enemy attacks us!
-    reserved_squad_purpose_signification < 4.0 // so will run away without attacking
-                                               // otherwise squad just do the purpose, don't care about danger around
-
-    // TODO: rn we have signification od running away = 2
-    // we should do it in smarter way
-    // like if there is too many enemies, then don't run though them
-    // bc our units will be killed
-
-    // reserved_squad.purpose_signification * 5.0 < safety_info.collected_enemies_influence_around
-    // also handle enemies which attacks us
   }
 
   pub fn should_our_squads_group_do_anything_in_danger(

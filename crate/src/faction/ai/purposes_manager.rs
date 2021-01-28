@@ -117,7 +117,7 @@ impl PurposesManager {
                 }
                 PlaceType::StrategicPoint => (
                   PurposeType::Capture,
-                  signi_calc.base_signification_strategic_point(),
+                  signi_calc.base_signification_strategic_point(place.squads[0].borrow()),
                   false,
                 ),
               };

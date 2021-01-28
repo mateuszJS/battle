@@ -26,12 +26,16 @@ pub struct TaskTodo {
 pub struct Squad {
   pub id: u32,
   pub faction_id: u32,
-  is_during_keeping_coherency: bool,
   pub members: Vec<Rc<RefCell<Unit>>>,
   pub shared: SquadUnitSharedDataSet,
   pub squad_details: &'static SquadDetails,
+  is_during_keeping_coherency: bool,
   task_todo: TaskTodo,
   require_check_correctness: bool,
+
+  // useful only for strategic points
+  pub all_faction_ids_around: Vec<u32>,
+  pub capturing_progress: f32,
 }
 
 impl Squad {
@@ -44,6 +48,8 @@ impl Squad {
       squad_details: details,
       is_during_keeping_coherency: false,
       require_check_correctness: false,
+      all_faction_ids_around: vec![],
+      capturing_progress: 0.0,
       task_todo: TaskTodo {
         ability_target: None,
         track_destination: None,

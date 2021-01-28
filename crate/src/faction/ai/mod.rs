@@ -105,7 +105,7 @@ impl ArtificialIntelligence {
     ArtificialIntelligence {
       current_plans: vec![],
       faction_id,
-      signi_calc: SignificationCalculator::new(),
+      signi_calc: SignificationCalculator::new(faction_id),
     }
   }
 

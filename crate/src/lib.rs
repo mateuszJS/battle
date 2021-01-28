@@ -534,15 +534,15 @@ impl Universe {
         });
 
         strategic_points.iter().for_each(|strategic_point| {
-          if strategic_point.owner_faction_id == faction.id {
+          if strategic_point.squad.borrow().id == faction.id {
             let strategic_point_squad = strategic_point.squad.borrow();
             let (x, y) = strategic_point_squad.shared.center_point;
             place_id += 1;
             places.push(Place {
               id: place_id,
               place_type: PlaceType::StrategicPoint,
-              squads: vec![strategic_point.squad.clone()],
-              influence: strategic_point_squad.get_influence(),
+              squads: vec![strategic_point.get_squad_copy()],
+              influence: std::f32::EPSILON,
               x,
               y,
             });
@@ -560,15 +560,15 @@ impl Universe {
     let non_captured_points = strategic_points
       .iter()
       .filter_map(|strategic_point| {
-        if strategic_point.owner_faction_id == STRATEGIC_POINT_EMPTY_OWNER {
+        if strategic_point.squad.borrow().id == STRATEGIC_POINT_EMPTY_OWNER {
           let strategic_point_squad = strategic_point.squad.borrow();
           let (x, y) = strategic_point_squad.shared.center_point;
           place_id += 1;
           Some(Place {
             id: place_id,
             place_type: PlaceType::StrategicPoint,
-            squads: vec![strategic_point.squad.clone()],
-            influence: strategic_point_squad.get_influence(),
+            squads: vec![strategic_point.get_squad_copy()],
+            influence: std::f32::EPSILON,
             x,
             y,
           })

@@ -36,7 +36,7 @@ class StrategicPoint {
   }
 
   update(progress: number, ownerFactionId: number) {
-    this.graphics.rotation = (progress / 100) * 2 * Math.PI
+    this.graphics.rotation = progress * 2 * Math.PI
 
     if (USER_FACTION_ID == ownerFactionId) {
       this.graphics.tint = 0x0000ff
