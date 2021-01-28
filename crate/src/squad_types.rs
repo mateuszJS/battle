@@ -77,7 +77,7 @@ static STRATEGIC_POINT_DETAILS: SquadDetails = SquadDetails {
   selection_threshold: 100.0,
   unit_model_offset_y: 00.0,
   weapon: &NON_WEAPON,
-  influence_value: 0.1,
+  influence_value: 2.0 * std::f32::EPSILON,
   ability_range: NON_WEAPON.range,
 };
 

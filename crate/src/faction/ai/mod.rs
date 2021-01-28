@@ -61,6 +61,7 @@ pub struct EnhancedPurpose {
   pub purpose_type: PurposeType,
   pub signification: f32,
   pub place: Place,
+  pub is_attacking_us: bool, // used to handle purpose, if it's true then we can attack even is we got slightly weaker army
 }
 
 #[derive(Clone)]
@@ -178,7 +179,6 @@ impl ArtificialIntelligence {
         &self.signi_calc,
         &mut our_squads,
         purpose,
-        // &reserved_squads,
         squads_grid,
       );
       if let Some(new_plan) = option_new_plan {

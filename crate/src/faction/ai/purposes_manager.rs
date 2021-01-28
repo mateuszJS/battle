@@ -89,29 +89,36 @@ impl PurposesManager {
             .places
             .iter()
             .map(|place| {
-              let (purpose_type, signification) = match place.place_type {
+              let (purpose_type, signification, is_attacking_us) = match place.place_type {
                 PlaceType::Portal => (
                   PurposeType::Attack,
                   signi_calc.base_signification_enemy_portal(&place.squads[0].borrow()),
+                  false,
                 ),
                 PlaceType::Squads => {
                   let option_danger_place = danger_places
                     .iter()
                     .find(|danger_place| danger_place.enemy_place.id == place.id);
-                  let additional_signification = if let Some(danger_place) = option_danger_place {
-                    danger_place.additional_signification
-                  } else {
-                    0.0
-                  };
+                  let (additional_signification, is_attacking_us) =
+                    if let Some(danger_place) = option_danger_place {
+                      (
+                        danger_place.additional_signification,
+                        danger_place.is_attacking_us,
+                      )
+                    } else {
+                      (0.0, false)
+                    };
                   (
                     PurposeType::Attack,
                     signi_calc.base_signification_enemy_squads_place(place.influence)
                       + additional_signification,
+                    is_attacking_us,
                   )
                 }
                 PlaceType::StrategicPoint => (
                   PurposeType::Capture,
                   signi_calc.base_signification_strategic_point(),
+                  false,
                 ),
               };
 
@@ -122,6 +129,7 @@ impl PurposesManager {
                 purpose_type,
                 signification,
                 place: place.clone(),
+                is_attacking_us,
               }
             })
             .collect::<Vec<EnhancedPurpose>>()
@@ -194,27 +202,8 @@ impl PurposesManager {
     our_squads: &mut Vec<Ref<Squad>>,
     purpose: &EnhancedPurpose,
     squads_grid: &SquadsGrid,
+    // enemy_squads_ids_attacked_in_previous_iter: &Vec<u32>,
   ) -> Option<Plan> {
-    // if purpose.purpose_type == PurposeType::RunToSafePlace {
-    //   return if reservations_for_this_purpose.len() > 0 {
-    // // TODO: do it in other way, like introduce special vector "willing_squads_ids: Vec<u32>"
-    //     our_squads.retain(|squad| !reservations_for_this_purpose.contains(&squad.id));
-    //     Some(
-    //       vec![
-    //         Plan {
-    //           purpose_type: PurposeType::RunToSafePlace,
-    //           squads_ids: reservations_for_this_purpose,
-    //           enemy_squads: vec![],
-    //           x: purpose.place.x,
-    //           y: purpose.place.y,
-    //         }
-    //       ]
-    //     )
-    //   } else {
-    //     None
-    //   };
-    // }
-    // And we got issue here, we have 2.0 + extra signification in reservations! But purposes are still in old order :/
     our_squads.sort_by(|a_squad, b_squad| {
       let a = signi_calc.how_much_squad_fits_to_take_purpose(&purpose, a_squad);
       let b = signi_calc.how_much_squad_fits_to_take_purpose(&purpose, b_squad);
@@ -233,8 +222,9 @@ impl PurposesManager {
       .collect::<Vec<u32>>();
 
     let mut already_met_enemies: Vec<MetEnemyOnTrack> = vec![];
+    let enemy_place_influence = signi_calc.attack_influence_enemy_place(purpose.place.influence);
 
-    while collected_our_influence < purpose.place.influence && our_squads_last_index > 0 {
+    while collected_our_influence < enemy_place_influence && our_squads_last_index > 0 {
       our_squads_last_index -= 1;
       let our_squad = &our_squads[our_squads_last_index];
 
@@ -242,7 +232,7 @@ impl PurposesManager {
       // if exists, then avoid adding this purpose
       // if purpose is not bigger than 6.0 signi_calc.should_single_squad_react_on_met_danger()
 
-      let our_squad_influence = signi_calc.attack_influence_our_squad(our_squad);
+      let our_squad_influence = our_squad.get_influence();
       if our_squad.shared.center_point.0.is_nan() || our_squad.shared.center_point.1.is_nan() {
         log!(
           "get_first_enemy_groups_on_track: {} {}",
@@ -290,7 +280,7 @@ impl PurposesManager {
           } else {
             let new_entry = MetEnemyOnTrack {
               enemy_squads_ids,
-              enemy_influence,
+              enemy_influence: signi_calc.attack_influence_enemy_place(enemy_influence),
               our_collected_squads_ids: vec![our_squad.id],
               our_collected_influence: our_squad_influence,
             };
@@ -302,7 +292,11 @@ impl PurposesManager {
             )
           };
 
-        if blocking_enemy_influence <= our_blocked_influence
+        // actually it's more complicated
+        // it's like: we need 0.8 * our_influence to attack, but since attack started we can keep attack until our_squads * 1.2 are bigger than enemy
+        // but at the same time, if our squads are between 0.8 and 1.2 then send more our squads (support) maybe
+        // log!("{} >= {}", blocking_enemy_influence, our_blocked_influence);
+        if blocking_enemy_influence <= our_blocked_influence // TODO: maybe we can do this whole comparison in signi_calc?
           || purpose.signification >= THRESHOLD_SIGNIFICATION_URGENT_PURPOSE
         {
           if our_blocked_squads_ids.len() == 1 {
@@ -345,11 +339,15 @@ impl PurposesManager {
         collected_our_influence += our_squad_influence;
       }
     }
-    // log!("{} >= {}", collected_our_influence, purpose.place.influence);
-    // log!("squads: {:?}", used_squads_ids);
-    if collected_our_influence >= purpose.place.influence
-      || purpose.signification >= THRESHOLD_SIGNIFICATION_URGENT_PURPOSE
-    {
+
+    if collected_our_influence >= enemy_place_influence // if we collected enough
+    || purpose.signification >= THRESHOLD_SIGNIFICATION_URGENT_PURPOSE // if purpose is so important, that it does not matter
+    || (
+      purpose.is_attacking_us
+      && our_squads.len() == used_squads_ids.len()
+      && collected_our_influence
+        >= signi_calc.running_away_influence_enemy_place(purpose.place.influence) // if we already attacked, and can take purpose with smaller army
+    ) {
       our_squads.retain(|squad| !used_squads_ids.contains(&squad.id));
 
       let enemy_squads = purpose

@@ -5,14 +5,16 @@ use crate::weapon_types::MAX_POSSIBLE_WEAPON_RANGE;
 use std::cell::Ref;
 
 const CAPTURE_POINT_SIGNIFICATION: f32 = 0.5;
-const ENEMY_SQUADS_MAX_BASE_SIGNIFICATION: f32 = 2.0; // attack
 const MET_DANGER_PURPOSE_MAX_ADDITIONAL_SIGNIFICATION: f32 = 1.0; // met enemy, danger place, at least COMMON_PURPOSE_MAX_SIGNIFICATION
 const ENEMY_PLACE_AROUND_STRATEGIC_POINT_MAX_ADDITIONAL_SIGNIFICATION: f32 = 1.5;
-const RUNNING_AWAY_SIGNIFICATION: f32 = 3.1;
-pub const THRESHOLD_SIGNIFICATION_URGENT_PURPOSE: f32 = 3.3;
-const ENEMY_PLACE_AROUND_OUR_BASE_MAX_ADDITIONAL_SIGNIFICATION: f32 = 4.0;
-
-// TODO: no const should be public! everything should be available via SignificationCalculator methods!
+const ENEMY_SQUADS_MAX_BASE_SIGNIFICATION: f32 = 2.0; // attack
+const ENEMY_PLACE_AROUND_OUR_BASE_MAX_ADDITIONAL_SIGNIFICATION: f32 = 2.5;
+pub const THRESHOLD_SIGNIFICATION_URGENT_PURPOSE: f32 = 3.6;
+/* 3.6 =
+  + max of base influence (ENEMY_SQUADS_MAX_BASE_SIGNIFICATION)
+  + max additional influence ENEMY_PLACE_AROUND_STRATEGIC_POINT_MAX_ADDITIONAL_SIGNIFICATION
+  + 0.1
+*/
 
 /*
 1. Attacking, capturing points <0, COMMON_PURPOSE_MAX_SIGNIFICATION>
@@ -22,15 +24,15 @@ const ENEMY_PLACE_AROUND_OUR_BASE_MAX_ADDITIONAL_SIGNIFICATION: f32 = 4.0;
 */
 
 pub struct SignificationCalculator {
-  our_power_factor: f32,
-  influence_factor_already_engagement_squads: f32,
+  attack_enemy_place_mod: f32,
+  run_away_enemy_place_mod: f32,
 }
 
 impl SignificationCalculator {
   pub fn new() -> SignificationCalculator {
     SignificationCalculator {
-      our_power_factor: 0.8, // lower -> less desperation
-      influence_factor_already_engagement_squads: 1.2,
+      attack_enemy_place_mod: 1.2,
+      run_away_enemy_place_mod: 0.8,
     }
   }
 
@@ -47,10 +49,6 @@ impl SignificationCalculator {
     let portal_unit = portal_squad.members[0].borrow();
 
     1.0 + (1.0 - portal_unit.hp / portal_squad.squad_details.hp) * 0.5 // <0, 1.5>
-  }
-  // it never should be like squad instead of running away will attack on the enemy just because there is a lot of enemy squads!
-  pub fn signification_running_to_safe_place(&self) -> f32 {
-    RUNNING_AWAY_SIGNIFICATION
   }
 
   pub fn additional_signification_enemy_place_around_our_squad(
@@ -89,16 +87,12 @@ impl SignificationCalculator {
     (1.0 - normalized_distance) * ENEMY_PLACE_AROUND_STRATEGIC_POINT_MAX_ADDITIONAL_SIGNIFICATION
   }
 
-  pub fn attack_influence_our_squad(&self, our_squad: &Ref<Squad>) -> f32 {
-    self.our_power_factor * our_squad.get_influence()
+  pub fn attack_influence_enemy_place(&self, enemy_place_influence: f32) -> f32 {
+    self.attack_enemy_place_mod * enemy_place_influence
   }
 
-  pub fn running_away_influence_our_squad(&self, our_squad: &Ref<Squad>) -> f32 {
-    self.influence_factor_already_engagement_squads * our_squad.get_influence()
-  }
-
-  pub fn influence_our_squads_in_danger_situation(&self, our_squad: &Ref<Squad>) -> f32 {
-    our_squad.get_influence() * self.our_power_factor // faster version of influence_our_squad
+  pub fn running_away_influence_enemy_place(&self, enemy_place_influence: f32) -> f32 {
+    self.run_away_enemy_place_mod * enemy_place_influence
   }
 
   pub fn influence_enemy_squad_attacks_us(&self, enemy_squad: &Ref<Squad>) -> f32 {
