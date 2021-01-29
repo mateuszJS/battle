@@ -2,6 +2,7 @@ mod purposes_manager;
 mod safety_manager;
 mod signification_calculator;
 
+use crate::constants::NORMAL_SQUAD_RADIUS;
 use crate::squad::Squad;
 use crate::squads_grid_manager::SquadsGrid;
 use crate::weapon_types::MAX_POSSIBLE_WEAPON_RANGE;
@@ -112,6 +113,21 @@ impl ArtificialIntelligence {
   fn get_purpose_sort_value(purpose: &EnhancedPurpose) -> f32 {
     purpose.signification
     // TODO: handle influence, how far is from our portal
+  }
+
+  fn find_index_of_closest_purpose<'a>(x: f32, y: f32, plans: &Vec<Plan>) -> usize {
+    let mut min_index = 0;
+    let mut min_distance = std::f32::MAX;
+    plans.iter().enumerate().for_each(|(index, plan)| {
+      let distance = (x - plan.x).hypot(y - plan.y);
+
+      if distance < min_distance {
+        min_distance = distance;
+        min_index = index;
+      }
+    });
+
+    min_index
   }
 
   fn find_index_of_best_place_to_run<'a>(
@@ -239,24 +255,39 @@ impl ArtificialIntelligence {
     });
 
     if our_squads.len() > 0 {
-      our_squads.iter().for_each(|our_squad| {
-        let squad_position = our_squad.shared.center_point;
-        let best_safe_place_index = ArtificialIntelligence::find_index_of_best_place_to_run(
-          squad_position.0,
-          squad_position.1,
-          &safe_places,
-          0.0,
-        );
+      if final_plans.len() > 0 {
+        our_squads.iter().for_each(|our_squad| {
+          let squad_position = our_squad.shared.center_point;
+          let closes_plan_index = ArtificialIntelligence::find_index_of_closest_purpose(
+            squad_position.0,
+            squad_position.1,
+            &final_plans,
+          );
 
-        if our_squads_to_running_to_safe_places.contains_key(&best_safe_place_index) {
-          let squads_list = &mut our_squads_to_running_to_safe_places
-            .get_mut(&best_safe_place_index)
-            .unwrap();
-          squads_list.push(our_squad.id);
-        } else {
-          our_squads_to_running_to_safe_places.insert(best_safe_place_index, vec![our_squad.id]);
-        }
-      });
+          final_plans[closes_plan_index].squads_ids.push(our_squad.id);
+        });
+      } else {
+        // We do not have any plans
+        our_squads.iter().for_each(|our_squad| {
+          let squad_position = our_squad.shared.center_point;
+          // there is always at least one safe place, our portal
+          let best_safe_place_index = ArtificialIntelligence::find_index_of_best_place_to_run(
+            squad_position.0,
+            squad_position.1,
+            &safe_places,
+            0.0, // maybe should be minus epsilon?
+          );
+
+          if our_squads_to_running_to_safe_places.contains_key(&best_safe_place_index) {
+            let squads_list = &mut our_squads_to_running_to_safe_places
+              .get_mut(&best_safe_place_index)
+              .unwrap();
+            squads_list.push(our_squad.id);
+          } else {
+            our_squads_to_running_to_safe_places.insert(best_safe_place_index, vec![our_squad.id]);
+          }
+        });
+      }
     }
 
     for (safe_place_index, our_squads_ids) in our_squads_to_running_to_safe_places {
@@ -283,37 +314,14 @@ impl ArtificialIntelligence {
               .squads_ids
               .iter()
               .all(|squad_id| final_plan.squads_ids.contains(&squad_id))
-            && (current_plan.x - final_plan.x).hypot(current_plan.y - final_plan.y) < 1.0
-            // TODO: if we attacking, we will set new final plan each time if enemy will move!
+            && (current_plan.x - final_plan.x).hypot(current_plan.y - final_plan.y)
+              < NORMAL_SQUAD_RADIUS
             && current_plan.enemy_squads.len() == final_plan.enemy_squads.len() // do not check exactly each enemy
         })
       })
       .collect::<Vec<Plan>>();
 
     self.current_plans = final_plans;
-    // self
-    //   .current_plans
-    //   .iter()
-    //   .for_each(|plan| match plan.purpose_type {
-    //     PurposeType::RunToSafePlace => log!(
-    //       "final purpose: run to save place x: {}, y: {}, squads_ids: {:?}",
-    //       plan.x,
-    //       plan.y,
-    //       plan.squads_ids
-    //     ),
-    //     PurposeType::Attack => log!(
-    //       "final purpose: attack x: {}, y: {}, squads_ids: {:?}",
-    //       plan.x,
-    //       plan.y,
-    //       plan.squads_ids
-    //     ),
-    //     PurposeType::Capture => log!(
-    //       "final purpose: capture x: {}, y: {}, squads_ids: {:?}",
-    //       plan.x,
-    //       plan.y,
-    //       plan.squads_ids
-    //     ),
-    //   });
 
     plans_needed_to_update
   }

@@ -15,7 +15,7 @@ class StrategicPoint {
     graphics.beginFill(0xffffff)
     graphics.drawRect(-15, -50, 30, 50)
     graphics.beginFill(0x00ff00, 0.2)
-    graphics.drawCircle(0, 0, 50)
+    graphics.drawCircle(0, 0, 100)
     graphics.tint = 0x888888
     this.x = x
     this.y = y
@@ -23,11 +23,9 @@ class StrategicPoint {
     this.sprite.addChild(graphics)
 
     const selection = getMySelection(false)
-    selection.x = x
-    selection.y = y
-    selection.width = 100
-    selection.height = 100
-    console.log('add strategic point', x, y)
+    selection.width = 250
+    selection.height = 250
+
     this.sprite.addChild(selection)
     this.sprite.x = x
     this.sprite.y = y

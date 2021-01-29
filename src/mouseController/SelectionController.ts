@@ -10,6 +10,7 @@ import {
   deselectAllSimilarAbilities,
   getAllSimilarAvailableAbilitiesIds,
 } from '~/buttons/abilities'
+import StrategicPoint from '~/representation/StrategicPoint'
 
 class SelectionController {
   private startPoint: null | Point
@@ -46,13 +47,13 @@ class SelectionController {
     if (selectedEnemyUnitsIds.length === 0) return
 
     selectedEnemyUnitsIds.forEach(id => {
-      const unit = this.universeRepresentation[id] as Unit | Factory
+      const unit = this.universeRepresentation[id] as Unit | Factory | StrategicPoint
       unit.select()
     })
 
     setTimeout(() => {
       selectedEnemyUnitsIds.forEach(id => {
-        const unit = this.universeRepresentation[id] as Unit | Factory
+        const unit = this.universeRepresentation[id] as Unit | Factory | StrategicPoint
         unit.deselect()
       })
     }, 2000)

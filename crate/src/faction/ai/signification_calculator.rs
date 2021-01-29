@@ -47,7 +47,7 @@ impl SignificationCalculator {
       && strategic_point.id == STRATEGIC_POINT_EMPTY_OWNER
     {
       CAPTURE_POINT_SIGNIFICATION
-        + strategic_point.capturing_progress * CAPTURE_POINT_MAX_ADDITIONAL_SIGNIFICATION
+        + (1.0 - strategic_point.capturing_progress) * CAPTURE_POINT_MAX_ADDITIONAL_SIGNIFICATION
     } else {
       CAPTURE_POINT_SIGNIFICATION
     }

@@ -58,7 +58,7 @@ use representations_ids::BULLETS_REPRESENTATION_ID;
 use squad::Squad;
 use squad_types::SquadType;
 use squads_grid_manager::{SquadsGrid, SquadsGridManager};
-use strategic_point::{StrategicPoint, STRATEGIC_POINT_EMPTY_OWNER};
+use strategic_point::{StrategicPoint, POINT_RADIUS, STRATEGIC_POINT_EMPTY_OWNER};
 
 const INDEX_OF_USER_FACTION: usize = 0;
 
@@ -404,7 +404,7 @@ impl Universe {
     squads_ids: Vec<u32>,
     target_x: f32,
     target_y: f32,
-  ) -> js_sys::Float32Array {
+  ) -> js_sys::Uint32Array {
     let Universe {
       ref mut factions,
       ref world,
@@ -422,7 +422,7 @@ impl Universe {
               .borrow()
               .members
               .iter()
-              .map(|unit| unit.borrow().id as f32)
+              .map(|unit| unit.borrow().id)
               .collect()
           } else {
             vec![]
@@ -430,11 +430,21 @@ impl Universe {
         }
         None => {
           user_faction.task_add_target(&squads_ids, target_x, target_y);
-          vec![]
+
+          let option_strategic_point = world.strategic_points.iter().find(|strategic_point| {
+            let (x, y) = strategic_point.squad.borrow().shared.center_point;
+            (target_x - x).hypot(target_y - y) < POINT_RADIUS
+          });
+
+          if let Some(strategic_point) = option_strategic_point {
+            vec![strategic_point.id]
+          } else {
+            vec![]
+          }
         }
       };
 
-    js_sys::Float32Array::from(&selected_enemy_units[..])
+    js_sys::Uint32Array::from(&selected_enemy_units[..])
   }
 
   pub fn use_ability(&mut self, squads_ids: Vec<u32>, target_x: f32, target_y: f32) {

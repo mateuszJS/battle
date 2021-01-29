@@ -6,7 +6,7 @@ use crate::squads_grid_manager::{SquadsGrid, SquadsGridManager};
 use std::cell::RefCell;
 use std::rc::Rc;
 
-const POINT_RADIUS: f32 = 100.0;
+pub const POINT_RADIUS: f32 = 100.0;
 const CAPTURING_PROGRESS_STEP: f32 = 0.01;
 pub static STRATEGIC_POINT_EMPTY_OWNER: u32 = 0; // ids start's from 100
 

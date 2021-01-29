@@ -185,6 +185,7 @@ impl SafetyManager {
       if (number_of_collected_so_far_danger_places == danger_places.len()
         && our_place.place_type == PlaceType::StrategicPoint)
         || our_place.place_type == PlaceType::Portal
+      // that's to that, there is always at least one safe place, our portal
       {
         // no danger places related with this place!
         safe_places.push(our_place);
