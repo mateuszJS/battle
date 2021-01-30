@@ -16,6 +16,10 @@ impl Utils {
     // time = strength * 0.95.powi(x) < 0.035
     let time = (FLY_MIN_SPEED / strength).log(FLY_DECELERATION).ceil();
 
+    if time <= std::f32::EPSILON {
+      return (0.0, 0.0); // to avoid dividing by zero let factor = distance / all_speeds_sum;
+    }
+
     // to calculate all_speeds_sum we are using geometric sequence
     // all_speeds_sum = strength * (1 - 0.95.powi(time)) / (1 - 0.95)
     let all_speeds_sum = strength * (1.0 - FLY_DECELERATION.powf(time)) / (1.0 - FLY_DECELERATION);
@@ -29,7 +33,7 @@ impl Utils {
     // in case if distance have to be shorted bc of the obstacles
     let distance_portion = all_speeds_sum / FLY_DISTANCE_PRECISION;
 
-    while distance > 0.0 {
+    while distance > std::f32::EPSILON {
       let x = (angle.sin() * distance + x) as i16;
       let y = (-angle.cos() * distance + y) as i16;
       if CalcPositions::get_is_point_inside_any_obstacle((x, y), false) {

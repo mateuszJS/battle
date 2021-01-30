@@ -12,7 +12,7 @@ use std::rc::{Rc, Weak};
 pub struct SquadsManager {}
 
 impl SquadsManager {
-  pub fn set_positions(squads: &Vec<&Rc<RefCell<Squad>>>, target: (f32, f32)) {
+  pub fn set_aggressor_positions(squads: &Vec<&Rc<RefCell<Squad>>>, target: (f32, f32)) {
     let squads_out_of_range = squads
       .into_iter()
       .filter_map(|ref_cell_squad| {
@@ -41,6 +41,29 @@ impl SquadsManager {
       });
   }
 
+  pub fn set_positions_to_use_ability(
+    squads: &Vec<&Rc<RefCell<Squad>>>,
+    target: (f32, f32),
+    range: f32,
+  ) {
+    let mut squads_out_of_range = squads
+      .into_iter()
+      .filter_map(|ref_cell_squad| {
+        let squad = ref_cell_squad.borrow_mut();
+        let (x, y) = squad.shared.center_point;
+        if (x - target.0).hypot(y - target.1) + NORMAL_SQUAD_RADIUS
+          < squad.squad_details.weapon.range
+        {
+          None
+        } else {
+          Some(*ref_cell_squad)
+        }
+      })
+      .collect::<Vec<&Rc<RefCell<Squad>>>>();
+
+    SquadsManager::set_positions_by_range(&mut squads_out_of_range, target, range)
+  }
+
   // fn divide_squads_by_position(squads: Vec<&Rc<RefCell<Squad>>>) -> Vec<(u16, Vec<&Rc<RefCell<Squad>>>)> {
   // TODO: if will be necessary we can implement it, but don't have to slow down whole app for just this effect
   // }
@@ -64,11 +87,7 @@ impl SquadsManager {
     squads_divided_by_range
   }
 
-  pub fn set_positions_by_range(
-    squads: &mut Vec<&Rc<RefCell<Squad>>>,
-    target: (f32, f32),
-    range: f32,
-  ) {
+  fn set_positions_by_range(squads: &mut Vec<&Rc<RefCell<Squad>>>, target: (f32, f32), range: f32) {
     let mut positions = PositionUtils::get_attackers_position(
       squads.len(),
       SquadsManager::calc_army_center(&squads),
@@ -271,7 +290,7 @@ impl SquadsManager {
           curr_enemy_position
         };
         if was_moved {
-          SquadsManager::set_positions(&squads_list, enemy_position);
+          SquadsManager::set_aggressor_positions(&squads_list, enemy_position);
         }
       }
     }

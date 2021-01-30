@@ -22,7 +22,7 @@ pub struct SquadDetails {
   pub selection_threshold: f32, // for selection
   pub weapon: &'static Weapon,
   pub influence_value: f32,
-  pub ability_range: f32,
+  pub ability: &'static Weapon,
 }
 
 static SOLIDER_DETAILS: SquadDetails = SquadDetails {
@@ -37,7 +37,7 @@ static SOLIDER_DETAILS: SquadDetails = SquadDetails {
   unit_model_offset_y: 20.0,
   weapon: &STANDARD_RIFLE_DETAILS,
   influence_value: 1.0,
-  ability_range: GRENADE_DETAILS.range,
+  ability: &GRENADE_DETAILS,
 };
 
 static RAPTOR_DETAILS: SquadDetails = SquadDetails {
@@ -52,7 +52,7 @@ static RAPTOR_DETAILS: SquadDetails = SquadDetails {
   unit_model_offset_y: 20.0,
   weapon: &LASER_RIFLE_DETAILS,
   influence_value: 1.3,
-  ability_range: HIT_THE_GROUND.range,
+  ability: &HIT_THE_GROUND,
 };
 
 static PORTAL_DETAILS: SquadDetails = SquadDetails {
@@ -65,7 +65,7 @@ static PORTAL_DETAILS: SquadDetails = SquadDetails {
   unit_model_offset_y: 40.0,
   weapon: &NON_WEAPON,
   influence_value: 5.0,
-  ability_range: NON_WEAPON.range,
+  ability: &NON_WEAPON,
 };
 
 static STRATEGIC_POINT_DETAILS: SquadDetails = SquadDetails {
@@ -78,7 +78,7 @@ static STRATEGIC_POINT_DETAILS: SquadDetails = SquadDetails {
   unit_model_offset_y: 00.0,
   weapon: &NON_WEAPON,
   influence_value: 0.0, // not used
-  ability_range: NON_WEAPON.range,
+  ability: &NON_WEAPON,
 };
 
 pub fn get_squad_details(squad_type: &SquadType) -> &'static SquadDetails {

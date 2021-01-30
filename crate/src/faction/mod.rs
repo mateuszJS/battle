@@ -200,7 +200,7 @@ impl Faction {
       .iter()
       .for_each(|squad| squad.borrow_mut().task_attack_enemy(weak_enemy));
 
-    SquadsManager::set_positions(&attackers, enemy_squad.shared.center_point);
+    SquadsManager::set_aggressor_positions(&attackers, enemy_squad.shared.center_point);
   }
 
   pub fn update_squads_centers(&mut self) {
@@ -233,20 +233,46 @@ impl Faction {
       return;
     }
 
-    let ability_range = squads[0].borrow().squad_details.ability_range;
+    let ability = squads[0].borrow().squad_details.ability;
 
-    let ability_targets = PositionUtils::get_squads_positions(squads.len(), target_x, target_y);
+    // let ability_targets = PositionUtils::get_squads_positions(squads.len(), target_x, target_y);
+    let is_squads_distance_spread = ability.scatter > 1.0;
 
-    squads.iter().enumerate().for_each(|(index, rc_hunter)| {
-      rc_hunter
-        .borrow_mut()
-        .task_use_ability(ability_targets[index])
-    });
+    let (target_position_offsets, origin_x, origin_y) = if is_squads_distance_spread {
+      (
+        PositionUtils::get_squads_positions(squads.len(), target_x, target_y),
+        0.0,
+        0.0,
+      ) // only vector with positions is used
+    } else {
+      let (x, y) = PositionUtils::get_squads_positions(1, target_x, target_y)[0];
+      (
+        PositionUtils::get_units_in_squad_position(squads.len().min(7)).clone(), // clone just change it from read reference to value
+        x,
+        y,
+      )
+    };
 
-    squads.iter().enumerate().for_each(|(index, squad)| {
-      let target = ability_targets[index];
-      SquadsManager::set_positions_by_range(&mut vec![squad], target, ability_range);
-    });
+    let offsets_number = target_position_offsets.len();
+
+    squads
+      .iter()
+      .enumerate()
+      .for_each(|(index, ref_cell_squad)| {
+        let ability_target = if is_squads_distance_spread {
+          target_position_offsets[index]
+        } else {
+          let (offset_x, offset_y) = target_position_offsets[index % offsets_number];
+          (origin_x + offset_x, origin_y + offset_y)
+        };
+
+        ref_cell_squad.borrow_mut().task_use_ability(ability_target);
+        SquadsManager::set_positions_to_use_ability(
+          &mut vec![ref_cell_squad],
+          ability_target,
+          ability.range,
+        );
+      });
   }
 
   fn attack_closest_enemies(&mut self, plan: Plan) {

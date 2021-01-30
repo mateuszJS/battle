@@ -5,17 +5,23 @@ use crate::strategic_point::STRATEGIC_POINT_EMPTY_OWNER;
 use std::cell::Ref;
 
 const CAPTURE_POINT_SIGNIFICATION: f32 = 0.5;
-const MET_DANGER_PURPOSE_MAX_ADDITIONAL_SIGNIFICATION: f32 = 1.0; // met enemy, danger place, at least COMMON_PURPOSE_MAX_SIGNIFICATION
-const ENEMY_PLACE_AROUND_STRATEGIC_POINT_MAX_ADDITIONAL_SIGNIFICATION: f32 = 1.5; // met enemy should be bigger signification than enemy capturing point!
+const ENEMY_PLACE_AROUND_STRATEGIC_POINT_MAX_ADDITIONAL_SIGNIFICATION: f32 = 1.0; // met enemy should be bigger signification than enemy capturing point!
+const MET_DANGER_PURPOSE_MAX_ADDITIONAL_SIGNIFICATION: f32 = 1.5; // met enemy, danger place (100% used if attack us)
 const CAPTURE_POINT_MAX_ADDITIONAL_SIGNIFICATION: f32 = 2.0;
-const ENEMY_SQUADS_MAX_BASE_SIGNIFICATION: f32 = 2.0; // attack
-const ENEMY_PLACE_AROUND_OUR_BASE_MAX_ADDITIONAL_SIGNIFICATION: f32 = 2.5;
+const ENEMY_SQUADS_MAX_BASE_SIGNIFICATION: f32 = 2.0;
+const ENEMY_PLACE_AROUND_OUR_BASE_MAX_ADDITIONAL_SIGNIFICATION: f32 = 3.0;
 pub const THRESHOLD_SIGNIFICATION_URGENT_PURPOSE: f32 = 3.6;
 
 /* 3.6 =
   + max of base influence (ENEMY_SQUADS_MAX_BASE_SIGNIFICATION)
-  + max additional influence ENEMY_PLACE_AROUND_STRATEGIC_POINT_MAX_ADDITIONAL_SIGNIFICATION
+  + max additional influence MET_DANGER_PURPOSE_MAX_ADDITIONAL_SIGNIFICATION
   + 0.1
+*/
+
+/*
+COUPLE OF USEFUL RULES RELATED TO SETTING SIGNIFICATION
+- attacking on an enemy portal or enemy who is capturing our point should be always smaller than minimal signification of enemy who attacks us
+- remember that aim of this calculator, is also to sort purposes correctly (by calculating correct signification)
 */
 
 pub struct SignificationCalculator {

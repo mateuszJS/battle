@@ -55,12 +55,12 @@ pub static GRENADE_DETAILS: Weapon = Weapon {
   chances_to_reload: 0.0,
   reload_time: 0,
   shoot_time: 0,
-  scatter: 0.0, // (smaller -> more precise)
-  bullets_speed: 5.0,
+  scatter: 0.0, // for abilities, if > 1.0, it's squad spread distance, if < 1.0, it's squad members spread distance
+  bullets_speed: 7.5,
   damage: 30.0,
   representation_id: 2.0,
   explosion_range: 200.0,
-  range: 300.0,
+  range: 600.0,
   can_shoot_during_running: false,
   max_angle_during_run: 0.0,
 };
@@ -70,7 +70,7 @@ pub static HIT_THE_GROUND: Weapon = Weapon {
   chances_to_reload: 0.0,
   reload_time: 0,
   shoot_time: 0,
-  scatter: 0.0, // (smaller -> more precise)
+  scatter: 2.0, // for abilities, if > 1.0, it's squad spread distance, if < 1.0, it's squad members spread distance
   bullets_speed: 1.0,
   damage: 15.0,
   representation_id: 3.0,
