@@ -1,28 +1,21 @@
 use super::EnhancedPurpose;
 use super::Squad;
 use crate::strategic_point::STRATEGIC_POINT_EMPTY_OWNER;
-use crate::weapon_types::MAX_POSSIBLE_WEAPON_RANGE;
 
 use std::cell::Ref;
 
 const CAPTURE_POINT_SIGNIFICATION: f32 = 0.5;
 const MET_DANGER_PURPOSE_MAX_ADDITIONAL_SIGNIFICATION: f32 = 1.0; // met enemy, danger place, at least COMMON_PURPOSE_MAX_SIGNIFICATION
-const ENEMY_PLACE_AROUND_STRATEGIC_POINT_MAX_ADDITIONAL_SIGNIFICATION: f32 = 1.5;
+const ENEMY_PLACE_AROUND_STRATEGIC_POINT_MAX_ADDITIONAL_SIGNIFICATION: f32 = 1.5; // met enemy should be bigger signification than enemy capturing point!
 const CAPTURE_POINT_MAX_ADDITIONAL_SIGNIFICATION: f32 = 2.0;
 const ENEMY_SQUADS_MAX_BASE_SIGNIFICATION: f32 = 2.0; // attack
 const ENEMY_PLACE_AROUND_OUR_BASE_MAX_ADDITIONAL_SIGNIFICATION: f32 = 2.5;
 pub const THRESHOLD_SIGNIFICATION_URGENT_PURPOSE: f32 = 3.6;
+
 /* 3.6 =
   + max of base influence (ENEMY_SQUADS_MAX_BASE_SIGNIFICATION)
   + max additional influence ENEMY_PLACE_AROUND_STRATEGIC_POINT_MAX_ADDITIONAL_SIGNIFICATION
   + 0.1
-*/
-
-/*
-1. Attacking, capturing points <0, COMMON_PURPOSE_MAX_SIGNIFICATION>
-2. Attacking met enemy (danger situation) <COMMON_PURPOSE_MAX_SIGNIFICATION, MET_DANGER_PURPOSE_MAX_SIGNIFICATION>
-3. Running away MET_DANGER_PURPOSE_MAX_SIGNIFICATION + 0.1
-4. Enemies around our portal -> COMMON_PURPOSE_MAX_SIGNIFICATION_BASE, enemies attacking our portal -> MOST_IMPORTANT_PURPOSES_SIGNIFICATION_BASE + 0.1
 */
 
 pub struct SignificationCalculator {
@@ -107,28 +100,6 @@ impl SignificationCalculator {
     self.run_away_enemy_place_mod * enemy_place_influence
   }
 
-  pub fn should_our_squads_group_do_anything_in_danger(
-    &self,
-    collected_our_influence: f32,
-    influence_enemies_who_attacks_us: f32,
-    number_of_enemies_around: usize,
-  ) -> bool {
-    influence_enemies_who_attacks_us > 0.0 || number_of_enemies_around > 10 // not really sure
-                                                                            // || influence_enemies_around_us > collected_our_influence * 7.0 // not really sure
-  }
-
-  pub fn should_our_group_squads_in_danger_attack_enemy(
-    &self,
-    our_influence: f32,
-    enemies_influence_who_attacks_us: f32,
-    number_of_enemies_around: usize,
-  ) -> bool {
-    // our_influence >= enemies_influence_who_attacks_us
-    //   && 2.5 * our_influence >= enemies_influence_around
-    our_influence >= enemies_influence_who_attacks_us
-    // our_influence >= enemies_influence_around
-  }
-
   pub fn how_much_squad_fits_to_take_purpose(
     &self,
     purpose: &EnhancedPurpose,
@@ -141,5 +112,10 @@ impl SignificationCalculator {
       .max(1.0 / our_squad.id as f32); // should be zero, but to keep always the same order, used squad.id to calc small (< 1.0) diff
 
     -(distance_to_purpose / our_squad.squad_details.movement_speed)
+  }
+
+  pub fn get_purpose_sort_value(&self, purpose: &EnhancedPurpose) -> f32 {
+    purpose.signification
+    // TODO: handle influence, how far is from our portal
   }
 }

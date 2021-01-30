@@ -1,15 +1,6 @@
-use super::{
-  DangerPlace, EnemyInfo, EnhancedPurpose, FactionInfo, OurSquadsGroupSafetyInfo, Place, PlaceType,
-  PurposeType, SignificationCalculator,
-};
-use crate::constants::{MATH_PI, NORMAL_SQUAD_RADIUS};
-use crate::squads_grid_manager::{SquadsGrid, SquadsGridManager};
+use super::{DangerPlace, FactionInfo, Place, PlaceType, SignificationCalculator};
 use crate::unit::{STATE_CHASING, STATE_SHOOT};
 use crate::weapon_types::MAX_POSSIBLE_WEAPON_RANGE;
-use crate::Squad;
-use std::cell::Ref;
-
-pub const MIN_DISTANCE_OF_SEARCHING_ENEMY: f32 = 1.3 * MAX_POSSIBLE_WEAPON_RANGE;
 
 const SEARCHING_RANGE_ENEMIES_AROUND_SQUAD: f32 = MAX_POSSIBLE_WEAPON_RANGE * 1.5;
 const SEARCHING_RANGE_ENEMIES_AROUND_PORTAL: f32 = MAX_POSSIBLE_WEAPON_RANGE * 2.0;
@@ -18,49 +9,6 @@ const SEARCHING_RANGE_ENEMIES_AROUND_STRATEGIC_POINT: f32 = MAX_POSSIBLE_WEAPON_
 pub struct SafetyManager {}
 
 impl SafetyManager {
-  fn get_squad_group_angle_info(place: &Place) -> (f32, f32) {
-    let mut mean_angle_sin = 0.0;
-    let mut mean_angle_cos = 0.0;
-    let mut interrupted_angle_mean_calc = false;
-
-    for ref_cell_squad in place.squads.iter() {
-      let squad = ref_cell_squad.borrow();
-      let track_max_index = squad
-        .members
-        .iter()
-        .fold(-1, |acc_track_index, ref_cell_member| {
-          acc_track_index.max(ref_cell_member.borrow().track_index)
-        });
-      if track_max_index == -1 {
-        interrupted_angle_mean_calc = true;
-        break;
-      }
-
-      let (source_x, source_y) = squad.shared.center_point;
-      let (track_dest_x, track_dest_y) =
-        squad.shared.track[(squad.shared.track.len() as isize - 1) as usize];
-      let distance_to_dest = (source_x - track_dest_x).hypot(source_y - track_dest_y);
-
-      if distance_to_dest < MIN_DISTANCE_OF_SEARCHING_ENEMY {
-        interrupted_angle_mean_calc = true;
-        break;
-      }
-      let (track_next_point_x, track_next_point_y) = squad.shared.track[track_max_index as usize];
-      let angle = (track_next_point_x - source_x).atan2(source_y - track_next_point_y);
-
-      mean_angle_sin += angle.sin();
-      mean_angle_cos += angle.cos();
-    }
-    if interrupted_angle_mean_calc {
-      let squads_number = place.squads.len() as f32;
-      let angle_mean = (mean_angle_sin / squads_number).atan2(mean_angle_cos / squads_number);
-      (MATH_PI * 0.3, angle_mean)
-    } else {
-      // squad are almost in the destination, so search around, instead of front only
-      (MATH_PI, 0.0)
-    }
-  }
-
   pub fn get_info_about_safety<'a>(
     our_faction_id: u32,
     all_factions_info: &'a Vec<FactionInfo>,
@@ -87,7 +35,7 @@ impl SafetyManager {
         .map(|ref_cell_squad| ref_cell_squad.borrow().id)
         .collect::<Vec<u32>>();
 
-      let number_of_collected_so_far_danger_places = danger_places.len();
+      let mut no_enemy_squads_around_our_place = true;
 
       all_factions_info.iter().for_each(|faction_info| {
         if faction_info.id != our_faction_id {
@@ -101,6 +49,8 @@ impl SafetyManager {
             if distance_our_place_to_enemy_place > threshold_enemies_around {
               return;
             }
+
+            no_enemy_squads_around_our_place = false;
 
             let is_attacking_us = enemy_place.squads.iter().any(|ref_cell_enemy_squad| {
               let enemy_squad = ref_cell_enemy_squad.borrow();
@@ -145,18 +95,6 @@ impl SafetyManager {
                 ),
             };
 
-            /*
-            if our_place.place_type == PlaceType::Squads {
-              let (angle_threshold, angle_mean) = SafetyManager::get_squad_group_angle_info(our_place);
-
-              let angle_from_our_place_to_enemy = (some_squad.shared.center_point.0 - our_place.x)
-              .atan2(our_place.y - some_squad.shared.center_point.1);
-              let not_on_the_way =
-                angle_diff!(angle_from_our_place_to_enemy, angle_mean) > angle_threshold;
-              // TODO: do something with not_on_the_way
-            }
-            */
-
             let already_existing_danger_place = danger_places
               .iter_mut()
               .find(|danger_place| danger_place.enemy_place.id == enemy_place.id);
@@ -177,13 +115,10 @@ impl SafetyManager {
                 is_attacking_us,
               })
             }
-
-            // 1. Do we have already
           })
         }
       });
-      if (number_of_collected_so_far_danger_places == danger_places.len()
-        && our_place.place_type == PlaceType::StrategicPoint)
+      if (no_enemy_squads_around_our_place && our_place.place_type == PlaceType::StrategicPoint)
         || our_place.place_type == PlaceType::Portal
       // that's to that, there is always at least one safe place, our portal
       {

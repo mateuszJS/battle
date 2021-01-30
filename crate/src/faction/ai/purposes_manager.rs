@@ -1,9 +1,7 @@
-use super::safety_manager::MIN_DISTANCE_OF_SEARCHING_ENEMY;
 use super::signification_calculator::THRESHOLD_SIGNIFICATION_URGENT_PURPOSE;
 use super::SignificationCalculator;
 use super::{
-  DangerPlace, EnhancedPurpose, FactionInfo, MetEnemyOnTrack, OurSquadsGroupSafetyInfo, PlaceType,
-  Plan, PurposeType, ReservedSquad,
+  DangerPlace, EnhancedPurpose, FactionInfo, MetEnemyOnTrack, PlaceType, Plan, PurposeType,
 };
 use crate::position_utils::PositionUtils;
 use crate::squads_grid_manager::{SquadsGrid, SquadsGridManager};
@@ -12,11 +10,7 @@ use crate::Squad;
 use std::cell::{Ref, RefCell};
 use std::rc::{Rc, Weak};
 
-struct OurAttackerInfo {
-  squad_id: u32,
-  pos_before_purpose_x: f32,
-  pos_before_purpose_y: f32,
-}
+const MIN_DISTANCE_OF_SEARCHING_ENEMY: f32 = 1.3 * MAX_POSSIBLE_WEAPON_RANGE;
 
 pub struct PurposesManager {}
 
@@ -24,7 +18,6 @@ impl PurposesManager {
   fn get_first_enemy_groups_on_track(
     track: &Vec<(f32, f32)>,
     our_faction_id: u32,
-    signi_calc: &SignificationCalculator,
     squads_grid: &SquadsGrid,
     our_aim_enemy_squads_ids: &Vec<u32>,
   ) -> Option<(Vec<u32>, f32)> /* (enemy_squads_ids, enemy_influence) */ {
@@ -135,62 +128,6 @@ impl PurposesManager {
             .collect::<Vec<EnhancedPurpose>>()
         } else {
           vec![]
-          // current_plans
-          //   .iter()
-          //   .filter_map(|current_plan| {
-          //     if current_plan.purpose_type != PurposeType::RunToSafePlace {
-          //       return None;
-          //     }
-          //     let current_plan_our_squads = our_squads
-          //       .iter()
-          //       .filter(|squad| current_plan.squads_ids.contains(&squad.id))
-          //       .collect::<Vec<&Ref<Squad>>>();
-
-          //     if current_plan_our_squads.len() == 0 {
-          //       return None;
-          //     }
-
-          //     let safety_info = our_squads_safety.iter().filter(|safety_info| {
-          //       safety_info.our_squads_ids.contains(&current_plan_our_squads.id)
-          //     });
-
-          //     let (sum_x, sum_y) =
-          //       current_plan_our_squads
-          //         .iter()
-          //         .fold((0.0, 0.0), |(sum_x, sum_y), our_squad| {
-          //           (
-          //             sum_x + our_squad.shared.center_point.0,
-          //             sum_y + our_squad.shared.center_point.1,
-          //           )
-          //         });
-
-          //     let avg_x = sum_x / current_plan_our_squads.len() as f32;
-          //     let avg_y = sum_y / current_plan_our_squads.len() as f32;
-
-          //     let distance_to_purpose = (avg_x - current_plan.x).hypot(avg_y - current_plan.y);
-
-          //     if distance_to_purpose > 150.0 {
-          //       new_id += 1;
-          //       Some(EnhancedPurpose {
-          //         id: new_id as usize,
-          //         purpose_type: PurposeType::RunToSafePlace,
-          //         signification: signi_calc.signification_running_to_safe_place(),
-          //         place: Place {
-          //           place_type: PlaceType::Squads, // type doesn't matter
-          //           squads: vec![],
-          //           influence: 0.0,
-          //           x: current_plan.x,
-          //           y: current_plan.y,
-          //         },
-          //       })
-          //     } else if  {
-          //       // check if is in safe place, but didn't reach the destination yet
-          //     } else {
-          //       // Check if there are any enemy influence around us! if not, then can stop
-          //       None
-          //     }
-          //   })
-          //   .collect::<Vec<EnhancedPurpose>>()
         }
       })
       .collect::<Vec<EnhancedPurpose>>()
@@ -250,12 +187,12 @@ impl PurposesManager {
       let option_enemy_on_track = PurposesManager::get_first_enemy_groups_on_track(
         &track,
         our_faction_id,
-        signi_calc,
         squads_grid,
         &enemy_squads_ids,
       );
       // definitely we are tacking enemies much from too big range
-      if let Some((enemy_squads_ids, enemy_influence)) = option_enemy_on_track {
+      if let Some((enemy_squads_ids, enemy_raw_influence)) = option_enemy_on_track {
+        let enemy_influence = signi_calc.attack_influence_enemy_place(enemy_raw_influence);
         // here we are counting how many our squads will got enemy on the track
         // if this one particular group of enemy was met a couple of times, and we got
         // enough influence to bet them, then we can use our influence as there is no enemy of the track
@@ -280,7 +217,7 @@ impl PurposesManager {
           } else {
             let new_entry = MetEnemyOnTrack {
               enemy_squads_ids,
-              enemy_influence: signi_calc.attack_influence_enemy_place(enemy_influence),
+              enemy_influence,
               our_collected_squads_ids: vec![our_squad.id],
               our_collected_influence: our_squad_influence,
             };
@@ -292,11 +229,7 @@ impl PurposesManager {
             )
           };
 
-        // actually it's more complicated
-        // it's like: we need 0.8 * our_influence to attack, but since attack started we can keep attack until our_squads * 1.2 are bigger than enemy
-        // but at the same time, if our squads are between 0.8 and 1.2 then send more our squads (support) maybe
-        // log!("{} >= {}", blocking_enemy_influence, our_blocked_influence);
-        if blocking_enemy_influence <= our_blocked_influence // TODO: maybe we can do this whole comparison in signi_calc?
+        if blocking_enemy_influence <= our_blocked_influence
           || purpose.signification >= THRESHOLD_SIGNIFICATION_URGENT_PURPOSE
         {
           if our_blocked_squads_ids.len() == 1 {
@@ -310,32 +243,7 @@ impl PurposesManager {
         }
       // END OF FUNCTION TO MOVE
       } else {
-        // I think that is shouldn't be liek this, we should just calc angle between us and enemy, and add RANGE * 1.5
-        // let mut i = track.len() - 1;
-        // let mut distance_sum = 0.0;
-        // while i > 0 {
-        //   let distance = (track[i].0 - track[i - 1].0).hypot(track[i].1 - track[i - 1].1);
-        //   distance_sum += distance;
-        //   if distance_sum > 1.5 * MAX_POSSIBLE_WEAPON_RANGE {
-        //     break;
-        //   }
-        //   i -= 1;
-        // }
-
-        // TODO: instead of calculatign stuff liek this, we should set in the attack weapon range to 1.5 * MAX_RANGE!!!!
-
-        // if i == 0 {
-        //   // squad is closer than 1.5 * MAX_RANGE to the purpose!
-        // } else {
-
-        // }
-
         used_squads_ids.push(our_squad.id);
-        // used_squads_ids.push(OurAttackerInfo {
-        //   squad_id: our_squad.id,
-        //   pos_before_purpose_x: ,
-        //   pos_before_purpose_y: ,
-        // });
         collected_our_influence += our_squad_influence;
       }
     }
@@ -357,11 +265,6 @@ impl PurposesManager {
         .map(|ref_cell_squad| Rc::downgrade(ref_cell_squad))
         .collect::<Vec<Weak<RefCell<Squad>>>>();
 
-      // TODO: collect our squads with position also, not only with id! Here we could add purpose to wait, instead of Attack
-      // point 1.
-
-      // we should check track, from last part. Add distance of each line, and if distance then is bigger than 1.5 * MAX_RANGE
-      // then set it to be equal 1.5 * MAX_RANGE
       Some(Plan {
         place_id: purpose.place.id,
         purpose_type: purpose.purpose_type.clone(),

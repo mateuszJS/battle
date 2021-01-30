@@ -13,21 +13,6 @@ use std::cell::{Ref, RefCell};
 use std::collections::HashMap;
 use std::rc::{Rc, Weak};
 
-pub struct EnemyInfo {
-  id: u32,
-  influence: f32,
-  x: f32,
-  y: f32,
-  is_attacking_us: bool,
-  not_on_the_way: bool,
-}
-
-pub struct OurSquadsGroupSafetyInfo<'a> {
-  enemies_squads: Vec<EnemyInfo>,
-  our_squads_ids: Vec<u32>,
-  place: &'a Place,
-}
-
 #[derive(PartialEq, Clone)]
 pub enum PurposeType {
   Attack,
@@ -75,12 +60,6 @@ pub struct Plan {
   pub y: f32,
 }
 
-pub struct ReservedSquad {
-  pub purpose_signification: f32,
-  squad_id: u32,
-  purpose_id: usize,
-}
-
 struct MetEnemyOnTrack {
   enemy_squads_ids: Vec<u32>,
   enemy_influence: f32,
@@ -108,11 +87,6 @@ impl ArtificialIntelligence {
       faction_id,
       signi_calc: SignificationCalculator::new(faction_id),
     }
-  }
-
-  fn get_purpose_sort_value(purpose: &EnhancedPurpose) -> f32 {
-    purpose.signification
-    // TODO: handle influence, how far is from our portal
   }
 
   fn find_index_of_closest_purpose<'a>(x: f32, y: f32, plans: &Vec<Plan>) -> usize {
@@ -183,8 +157,8 @@ impl ArtificialIntelligence {
     );
 
     new_purposes.sort_by(|a_purpose, b_purpose| {
-      (ArtificialIntelligence::get_purpose_sort_value(&b_purpose))
-        .partial_cmp(&ArtificialIntelligence::get_purpose_sort_value(&a_purpose))
+      (self.signi_calc.get_purpose_sort_value(&b_purpose))
+        .partial_cmp(&self.signi_calc.get_purpose_sort_value(&a_purpose))
         .unwrap()
     });
 
@@ -220,6 +194,7 @@ impl ArtificialIntelligence {
         danger_place.our_places.iter().for_each(|our_place| {
           if danger_place.enemy_place.influence > our_place.influence {
             // TODO: include signi_calc here!
+            // and also handle case when one our place is attacked by multiple enemies! Not only one place with enemy
             let best_safe_place_index = ArtificialIntelligence::find_index_of_best_place_to_run(
               our_place.x,
               our_place.y,
