@@ -137,8 +137,8 @@ impl CalcPositions {
     };
     if x < boundaries_offset
       || y < boundaries_offset
-      || x > MAP_WIDTH as i16 - boundaries_offset
-      || y > MAP_HEIGHT as i16 - boundaries_offset
+      || x >= MAP_WIDTH as i16 - boundaries_offset
+      || y >= MAP_HEIGHT as i16 - boundaries_offset
     {
       return true;
     }
