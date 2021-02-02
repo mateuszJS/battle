@@ -166,6 +166,7 @@ impl Faction {
   }
 
   pub fn task_add_target(&mut self, squads_ids: &Vec<u32>, target_x: f32, target_y: f32) {
+    // TODO: Check if suqad can jump away
     let position = PositionUtils::get_squads_positions(squads_ids.len(), target_x, target_y);
     let mut index = 0;
     self.squads.iter_mut().for_each(|ref_cell_squad| {
@@ -236,9 +237,9 @@ impl Faction {
     let ability = squads[0].borrow().squad_details.ability;
 
     // let ability_targets = PositionUtils::get_squads_positions(squads.len(), target_x, target_y);
-    let is_squads_distance_spread = ability.scatter > 1.0;
+    let is_big_spread_between_abilities_target = ability.scatter > 1.0;
 
-    let (target_position_offsets, origin_x, origin_y) = if is_squads_distance_spread {
+    let (target_position_offsets, origin_x, origin_y) = if is_big_spread_between_abilities_target {
       (
         PositionUtils::get_squads_positions(squads.len(), target_x, target_y),
         0.0,
@@ -259,7 +260,7 @@ impl Faction {
       .iter()
       .enumerate()
       .for_each(|(index, ref_cell_squad)| {
-        let ability_target = if is_squads_distance_spread {
+        let ability_target = if is_big_spread_between_abilities_target {
           target_position_offsets[index]
         } else {
           let (offset_x, offset_y) = target_position_offsets[index % offsets_number];
@@ -276,6 +277,8 @@ impl Faction {
   }
 
   fn attack_closest_enemies(&mut self, plan: Plan) {
+    // TODO: Check if you can use grenade, and if squads have grenade
+    // or if squad can jump
     let mut group_by_closest_enemies: HashMap<u32, (&Weak<RefCell<Squad>>, Vec<u32>)> =
       HashMap::new();
 

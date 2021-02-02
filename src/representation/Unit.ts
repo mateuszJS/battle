@@ -2,7 +2,6 @@ import EffectFactory from './EffectFactory'
 import { FrameUpdaters } from './getSprites'
 import { ObjectType } from '~/render/representationsIds'
 import { UpdateAbilityCallback } from './UnitFactory'
-import { disableAbility } from '~/buttons/abilities'
 
 type PixiUnitStuff = {
   container: PIXI.Container
@@ -85,7 +84,6 @@ class Unit {
 
     switch (state) {
       case State.ABILITY:
-        disableAbility(this.squadId)
         this.updateAbility(x, y, angle, firstStateParam)
         break
 

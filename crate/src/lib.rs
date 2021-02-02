@@ -163,45 +163,6 @@ impl Universe {
     js_sys::Float32Array::from(&result[..])
   }
 
-  fn run_squad_manager(factions: &mut Vec<Faction>, world: &mut World) {
-    // world
-    //   .all_squads
-    //   .retain(|weak_squad| weak_squad.upgrade().is_some());
-
-    // collect squads which moved
-    // let all_moved_squads: Vec<Rc<RefCell<Squad>>> = world
-    //   .all_squads
-    //   .iter()
-    //   .filter_map(|weak_squad| {
-    //     if weak_squad
-    //       .upgrade()
-    //       .unwrap()
-    //       .borrow()
-    //       .was_center_point_changed()
-    //     {
-    //       Some(weak_squad.upgrade().unwrap())
-    //     } else {
-    //       None
-    //     }
-    //   })
-    //   .collect();
-
-    // let all_squads: Vec<Rc<RefCell<Squad>>> = world
-    //   .all_squads
-    //   .iter()
-    //   .map(|squad| squad.upgrade().unwrap())
-    //   .collect();
-
-    // search for enemy
-    // factions.iter_mut().for_each(|faction: &mut Faction| {
-    //   faction.search_for_enemies(&all_moved_squads, &all_squads);
-    // });
-
-    // world.all_squads.iter().for_each(|squad| {
-    //   squad.upgrade().unwrap().borrow_mut().update_moved_status();
-    // });
-  }
-
   pub fn update(&mut self) {
     let Universe {
       ref mut factions,
@@ -257,10 +218,6 @@ impl Universe {
       faction.resources += 1;
       faction.update(world);
     });
-
-    // if *time % SEARCH_FOR_ENEMIES_PERIOD == 0 {
-    //   Universe::run_squad_manager(factions, world);
-    // }
 
     world.bullets_manager.update(&world.squads_on_grid);
   }
@@ -447,8 +404,29 @@ impl Universe {
     js_sys::Uint32Array::from(&selected_enemy_units[..])
   }
 
-  pub fn use_ability(&mut self, squads_ids: Vec<u32>, target_x: f32, target_y: f32) {
+  pub fn use_ability(
+    &mut self,
+    selected_squad_ids: Vec<u32>,
+    ability_type: f32,
+    target_x: f32,
+    target_y: f32,
+  ) {
     let user_faction = &mut self.factions[INDEX_OF_USER_FACTION];
+    let squads_ids = user_faction
+      .squads
+      .iter()
+      .filter_map(|ref_cell_squad| {
+        let mut squad = ref_cell_squad.borrow();
+        if selected_squad_ids.contains(&squad.id)
+          && (squad.squad_details.representation_type - ability_type).abs() < std::f32::EPSILON
+        {
+          Some(squad.id)
+        } else {
+          None
+        }
+      })
+      .collect::<Vec<u32>>();
+
     user_faction.task_use_ability(&squads_ids, target_x, target_y);
   }
 
@@ -664,6 +642,7 @@ impl Universe {
     let serialized_squads_data = squads
       .iter()
       .flat_map(|squad| {
+        // TODO: squad.upgrade().unwrap() doesn't have to exists!, we should check also other places, when we assume that weak reference still lives!
         let (squad_x, squad_y) = squad.upgrade().unwrap().borrow().shared.center_point;
         vec![squad_x, squad_y]
       })
@@ -712,6 +691,48 @@ impl Universe {
     squad id, squad x, squad y,
     squad id, squad x, squad y
   */
+
+  pub fn get_abilities_cool_downs(
+    &mut self,
+    selected_squad_ids: Vec<u32>,
+    selected_ability: f32,
+  ) -> js_sys::Float32Array {
+    let user_faction = &self.factions[INDEX_OF_USER_FACTION];
+
+    let result = user_faction
+      .squads
+      .iter()
+      .flat_map(|ref_cell_squad| {
+        let mut squad = ref_cell_squad.borrow_mut();
+        if selected_squad_ids.contains(&squad.id)
+          && (
+            selected_ability < std::f32::EPSILON // there is no selected ability
+            || (squad.squad_details.representation_type - selected_ability).abs() < std::f32::EPSILON
+            // it's just comparing floats which hold representation id
+          )
+        {
+          squad.update_center();
+          let (x, y) = squad.shared.center_point;
+          vec![
+            squad.squad_details.representation_type,
+            if squad.ability_cool_down == 0 {
+              1.0
+            } else {
+              0.0
+            },
+            squad.ability_cool_down as f32 / squad.squad_details.ability.reload_time as f32,
+            x,
+            y,
+          ]
+        } else {
+          vec![]
+        }
+      })
+      .collect::<Vec<f32>>();
+
+    js_sys::Float32Array::from(&result[..])
+  }
+
   pub fn test_ai(&mut self, input: Vec<f32>) -> js_sys::Float32Array {
     let mut factions = vec![];
     let mut index = 0;

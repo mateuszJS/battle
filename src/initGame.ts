@@ -12,7 +12,6 @@ import initializeMouseController from './mouseController'
 import getSerializedInfoAboutWorld from './getSerializedInfoAboutWorld'
 import { createFactoryButtons } from './buttons/factory'
 import REPRESENTATION_IDS from '~/render/representationsIds'
-import { updateAbilitiesButtons, clearAbilitiesIcons } from '~/buttons/abilities'
 import debugController from '~/debug'
 
 export type UniverseRepresentation = {
@@ -66,8 +65,6 @@ const initGame = () => {
 
   const mouseController = new initializeMouseController(universe, universeRepresentation)
 
-  let timeToClearAbilitiesIcons = 1000
-
   debugController.init()
   let timeToCreateEnemy = 0
   window.app.ticker.add((delta: number) => {
@@ -93,14 +90,6 @@ const initGame = () => {
       Array.from(universeData), // TODO: check how long does it take, and try with raw Float32Array
       universeRepresentation,
     )
-
-    updateAbilitiesButtons(universeRepresentation)
-
-    if (timeToClearAbilitiesIcons === 0) {
-      clearAbilitiesIcons(universeRepresentation)
-      timeToClearAbilitiesIcons = 1000
-    }
-    timeToClearAbilitiesIcons--
   })
 }
 

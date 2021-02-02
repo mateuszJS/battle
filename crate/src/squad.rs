@@ -29,6 +29,7 @@ pub struct Squad {
   pub members: Vec<Rc<RefCell<Unit>>>,
   pub shared: SquadUnitSharedDataSet,
   pub squad_details: &'static SquadDetails,
+  pub ability_cool_down: u16,
   is_during_keeping_coherency: bool,
   task_todo: TaskTodo,
   require_check_correctness: bool,
@@ -50,6 +51,7 @@ impl Squad {
       require_check_correctness: false,
       all_faction_ids_around: vec![],
       capturing_progress: 0.0,
+      ability_cool_down: 0,
       task_todo: TaskTodo {
         ability_target: None,
         track_destination: None,
@@ -111,6 +113,10 @@ impl Squad {
       .members
       .iter_mut()
       .for_each(|unit| unit.borrow_mut().update(shared, &mut world.bullets_manager));
+
+    if self.ability_cool_down != 0 {
+      self.ability_cool_down -= 1;
+    }
   }
 
   pub fn get_representation(&self) -> Vec<f32> {
@@ -286,6 +292,7 @@ impl Squad {
     self.remove_died_members();
     /*=================USING ABILITY START===================*/
     if self.shared.any_unit_started_using_ability {
+      self.ability_cool_down = self.squad_details.ability.reload_time;
       if self.has_all_members_finish_using_ability() {
         self.shared.ability_target = None;
         self.shared.any_unit_started_using_ability = false;
