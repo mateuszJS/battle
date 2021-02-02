@@ -102,7 +102,7 @@ impl Unit {
     self.get_upping_progress = 0.0;
   }
 
-  fn update_getup(&mut self, squad_shared_info: &mut SquadUnitSharedDataSet) {
+  fn update_getup(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
     self.get_upping_progress += 0.01;
     if self.get_upping_progress >= 1.0 {
       self.state = STATE_IDLE;

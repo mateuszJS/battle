@@ -38,6 +38,7 @@ const getDisableIconTexture = (representationId: RepresentationId) => {
 }
 
 export type Ability = {
+  state: 'selected' | 'disabled' | 'ready'
   sprite: PIXI.Sprite
   container: PIXI.Container
   mask: PIXI.Graphics
@@ -45,7 +46,8 @@ export type Ability = {
   progressBar: PIXI.Sprite
   representationId: RepresentationId
   select: VoidFunction
-  deselect: VoidFunction
+  ready: VoidFunction
+  disable: VoidFunction
 }
 
 const createNewIcon = (
@@ -90,11 +92,49 @@ const createNewIcon = (
   container.interactive = true
   container.buttonMode = true
 
+  const changeDisableAssetsVisibility = (isVisible: boolean) => {
+    disableAbilitySprite.visible = isVisible
+    progressBar.visible = isVisible
+    mask.visible = isVisible
+  }
+
+  const ability: Ability = {
+    state: 'ready',
+    sprite,
+    container,
+    mask,
+    disableAbilitySprite,
+    progressBar,
+    representationId,
+    select() {
+      this.state = 'selected'
+      this.sprite.texture = MAP_ID_TO_ABILITY_DETAILS[representationId].iconHover
+      container.interactive = false
+      changeDisableAssetsVisibility(false)
+    },
+    ready() {
+      this.state = 'ready'
+      this.sprite.texture = MAP_ID_TO_ABILITY_DETAILS[representationId].iconNormal
+      container.interactive = true
+      changeDisableAssetsVisibility(false)
+    },
+    disable() {
+      this.state = 'disabled'
+      this.sprite.texture = MAP_ID_TO_ABILITY_DETAILS[representationId].iconNormal
+      container.interactive = false
+      changeDisableAssetsVisibility(true)
+    },
+  }
+
   container.on('mouseover', function() {
-    sprite.texture = MAP_ID_TO_ABILITY_DETAILS[representationId].iconHover
+    if (ability.state === 'ready') {
+      sprite.texture = MAP_ID_TO_ABILITY_DETAILS[representationId].iconHover
+    }
   })
   container.on('mouseout', function() {
-    sprite.texture = MAP_ID_TO_ABILITY_DETAILS[representationId].iconNormal
+    if (ability.state === 'ready') {
+      sprite.texture = MAP_ID_TO_ABILITY_DETAILS[representationId].iconNormal
+    }
   })
 
   container.on('mouseup', function(event) {
@@ -108,26 +148,7 @@ const createNewIcon = (
 
   window.ui.addChild(container)
 
-  const select = () => {
-    container.interactive = false // to disable changing texture by hover (and unhover)
-    sprite.texture = MAP_ID_TO_ABILITY_DETAILS[representationId].iconHover
-  }
-  const deselect = () => {
-    console.log('deselect')
-    container.interactive = true // can hover now
-    sprite.texture = MAP_ID_TO_ABILITY_DETAILS[representationId].iconNormal
-  }
-
-  return {
-    sprite,
-    container,
-    mask,
-    disableAbilitySprite,
-    progressBar,
-    representationId,
-    select,
-    deselect,
-  }
+  return ability
 }
 
 export default createNewIcon

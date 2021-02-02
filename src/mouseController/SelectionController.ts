@@ -77,7 +77,10 @@ class SelectionController {
         return
       }
       const unit = this.universeRepresentation[id] as Unit
-      unit.select()
+      if (unit) {
+        // update wasn't called yet, with new unit
+        unit.select()
+      }
       this.selectedUnits.push(unit)
       collectedUnits.push(id)
     })

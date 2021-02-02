@@ -8,8 +8,8 @@ use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 
 pub struct SquadUnitSharedDataSet {
-  pub any_unit_started_using_ability: bool, // used in unit, only for jump
-  pub ability_target: Option<(f32, f32)>,   // grenade ability will remove it inside the unit
+  pub any_unit_started_using_ability: bool,
+  pub ability_target: Option<(f32, f32)>, // grenade ability will remove it inside the unit
   pub center_point: (f32, f32),
   pub track: Vec<(f32, f32)>,
   pub aim: Weak<RefCell<Squad>>,
@@ -99,18 +99,18 @@ impl Squad {
   }
 
   pub fn update(&mut self, world: &mut World) {
-    let shared = &mut self.shared;
-
     if self.require_check_correctness {
-      self
-        .members
-        .iter_mut()
-        .for_each(|unit| unit.borrow_mut().set_correct_state(shared));
+      self.check_members_correctness();
       self.require_check_correctness = false;
-    }
+    };
 
-    self
-      .members
+    let Self {
+      ref mut members,
+      ref mut shared,
+      ..
+    } = self;
+
+    members
       .iter_mut()
       .for_each(|unit| unit.borrow_mut().update(shared, &mut world.bullets_manager));
 
@@ -242,13 +242,10 @@ impl Squad {
   }
 
   fn is_taking_new_task_disabled(&self) -> bool {
-    self.is_during_keeping_coherency
-      || (self.shared.any_unit_started_using_ability
-        && !self.has_all_members_finish_using_ability())
+    self.is_during_keeping_coherency || self.shared.any_unit_started_using_ability
   }
 
   fn has_all_members_finish_using_ability(&self) -> bool {
-    // some abilities don't have to be used by all members!
     !self
       .members
       .iter()
@@ -324,9 +321,18 @@ impl Squad {
       }
     }
     /*=================KEEPING COHERENCY END===================*/
+    self.check_members_correctness();
+  }
 
-    self.members.iter().for_each(|ref_cell_unit| {
-      ref_cell_unit.borrow_mut().set_correct_state(&self.shared);
+  fn check_members_correctness(&mut self) {
+    let Self {
+      ref mut members,
+      ref mut shared,
+      ..
+    } = self;
+
+    members.iter_mut().for_each(|ref_cell_unit| {
+      ref_cell_unit.borrow_mut().set_correct_state(&shared);
     });
   }
 

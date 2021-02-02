@@ -419,6 +419,7 @@ impl Universe {
         let mut squad = ref_cell_squad.borrow();
         if selected_squad_ids.contains(&squad.id)
           && (squad.squad_details.representation_type - ability_type).abs() < std::f32::EPSILON
+          && squad.ability_cool_down == 0
         {
           Some(squad.id)
         } else {

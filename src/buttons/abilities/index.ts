@@ -17,32 +17,20 @@ const updateAbilityIcon = (
   isAvailable: boolean,
   isSelected: boolean,
 ) => {
-  console.log('isAvailable', isAvailable)
-  if (isSelected) {
-    if (ability.container.interactive) {
-      ability.select()
-    }
-  } else {
-    if (!ability.container.interactive) {
-      ability.deselect()
-    }
-  }
-
-  if (isAvailable) {
-    if (ability.mask.visible) {
-      ability.disableAbilitySprite.visible = false
-      ability.progressBar.visible = false
-      ability.mask.visible = false
-    }
-  } else {
-    if (!ability.mask.visible) {
-      // is disabled texture visible
-      ability.disableAbilitySprite.visible = true
-      ability.progressBar.visible = true
-      ability.mask.visible = true
+  if (!isAvailable) {
+    if (ability.state !== 'disabled') {
+      ability.disable()
     }
     ability.mask.scale.set(1, progress)
     ability.progressBar.y = (1 - progress) * ICON_HEIGHT
+  } else if (isSelected) {
+    if (ability.state !== 'selected') {
+      ability.select()
+    }
+  } else {
+    if (ability.state !== 'ready') {
+      ability.ready()
+    }
   }
 
   ability.container.x = x
@@ -94,8 +82,8 @@ const updateAbilitiesButtons = (
     const index = abilitiesIndexes[squadType]
     if (abilitiesIcons[squadType][index] && abilitiesIcons[squadType][index].container.visible) {
       // optimization, avoid loop if first icon is already hidden
-      for (let j = 0; j < abilitiesIcons[squadType].length; j++) {
-        abilitiesIcons[squadType][index].container.visible = false
+      for (let j = index; j < abilitiesIcons[squadType].length; j++) {
+        abilitiesIcons[squadType][j].container.visible = false
       }
     }
   })

@@ -55,9 +55,15 @@ impl Abilities {
     squad_shared_info: &mut SquadUnitSharedDataSet,
     bullet_manager: &mut BulletsManager,
   ) {
-    if unit.get_upping_progress < 0.0 {
-      return;
-    }
+    // This should never happen, but will leave it commented for now, for fast access
+    // if unit.get_upping_progress < 0.0 {
+    //   log!(
+    //     "has_finished_using_ability: {}",
+    //     unit.has_finished_using_ability
+    //   );
+    //   // prob it should be changes to unit.has_finished_using_ability
+    //   return;
+    // }
     squad_shared_info.any_unit_started_using_ability = true;
     let ability_target = squad_shared_info.ability_target.unwrap();
     let target_x = ability_target.0 + unit.position_offset_x;
@@ -65,7 +71,7 @@ impl Abilities {
 
     if unit.get_upping_progress > 0.99 {
       unit.has_finished_using_ability = true;
-      unit.get_upping_progress = -1.0;
+      // unit.get_upping_progress = -1.0;
       bullet_manager.add_explosion(
         unit.id as f32,
         unit.x,
@@ -111,22 +117,27 @@ impl Abilities {
     squad_shared_info: &mut SquadUnitSharedDataSet,
     bullet_manager: &mut BulletsManager,
   ) {
-    if let Some(ability_target) = squad_shared_info.ability_target {
+    if !squad_shared_info.any_unit_started_using_ability {
+      // if let Some(ability_target) = squad_shared_info.ability_target {
+      if squad_shared_info.ability_target.is_none() {
+        // TODO: prob happen only when squad dies, and we are trying to call ability
+        // or maybe when we call squad.task_add_target, and trying to clear ability_target
+        // or squad.reset_state
+        log!("error! it shouldn't happen! unit.hp: {}", unit.hp)
+      }
       bullet_manager.add_explosion(
         unit.id as f32,
         unit.x,
         unit.y,
-        ability_target,
+        squad_shared_info.ability_target.unwrap(),
         &WeaponType::Grenade,
       );
-      squad_shared_info.ability_target = None; // for grenade it works, but for jump when every unit needs to make a jump NOT!
     } else {
-      // We can do it at the same time as add explosion but then get_representation
-      // will never returns self.state = ABILITY_STATE
-      // so ability icon will never be disabled
-      // self.change_state_to_idle();
       unit.state = STATE_IDLE;
     }
+
+    squad_shared_info.any_unit_started_using_ability = true;
+    unit.has_finished_using_ability = true;
   }
 
   fn calc_jump_progress(unit: &Unit) -> f32 {
