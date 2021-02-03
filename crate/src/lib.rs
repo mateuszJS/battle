@@ -642,10 +642,13 @@ impl Universe {
 
     let serialized_squads_data = squads
       .iter()
-      .flat_map(|squad| {
-        // TODO: squad.upgrade().unwrap() doesn't have to exists!, we should check also other places, when we assume that weak reference still lives!
-        let (squad_x, squad_y) = squad.upgrade().unwrap().borrow().shared.center_point;
-        vec![squad_x, squad_y]
+      .flat_map(|weak_squad| {
+        if let Some(ref_cell_squad) = weak_squad.upgrade() {
+          let (squad_x, squad_y) = ref_cell_squad.borrow().shared.center_point;
+          vec![squad_x, squad_y]
+        } else {
+          vec![]
+        }
       })
       .collect::<Vec<f32>>();
     let result = [

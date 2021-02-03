@@ -118,7 +118,6 @@ impl Abilities {
     bullet_manager: &mut BulletsManager,
   ) {
     if !squad_shared_info.any_unit_started_using_ability {
-      // if let Some(ability_target) = squad_shared_info.ability_target {
       if squad_shared_info.ability_target.is_none() {
         // TODO: prob happen only when squad dies, and we are trying to call ability
         // or maybe when we call squad.task_add_target, and trying to clear ability_target
