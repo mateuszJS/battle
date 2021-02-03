@@ -71,8 +71,9 @@ impl Abilities {
 
     if unit.get_upping_progress > 0.99 {
       unit.has_finished_using_ability = true;
-      // unit.get_upping_progress = -1.0;
+
       bullet_manager.add_explosion(
+        squad_shared_info.faction_id,
         unit.id as f32,
         unit.x,
         unit.y,
@@ -125,6 +126,7 @@ impl Abilities {
         log!("error! it shouldn't happen! unit.hp: {}", unit.hp)
       }
       bullet_manager.add_explosion(
+        squad_shared_info.faction_id,
         unit.id as f32,
         unit.x,
         unit.y,

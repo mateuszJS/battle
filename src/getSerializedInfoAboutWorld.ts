@@ -4,7 +4,7 @@ const OBSTACLES_DIVIDER = -1
 
 const players = [
   {
-    id: USER_FACTION_ID,
+    id: USER_FACTION_ID, // faction ids should start with 1, never 0! 0 is used for placeholder sometimes
     base: {
       x: 250,
       y: 250,

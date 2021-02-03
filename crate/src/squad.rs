@@ -8,6 +8,7 @@ use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 
 pub struct SquadUnitSharedDataSet {
+  pub faction_id: u32,
   pub any_unit_started_using_ability: bool,
   pub ability_target: Option<(f32, f32)>, // grenade ability will remove it inside the unit
   pub center_point: (f32, f32),
@@ -58,6 +59,7 @@ impl Squad {
         aim: Weak::new(),
       },
       shared: SquadUnitSharedDataSet {
+        faction_id,
         any_unit_started_using_ability: false,
         ability_target: None,
         center_point: (0.0, 0.0),

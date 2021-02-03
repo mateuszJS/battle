@@ -14,6 +14,7 @@ struct BulletRepresentation {
 }
 
 struct BulletData {
+  owner_faction_id: u32,
   weapon_type: &'static WeaponType,
   aim: Weak<RefCell<Unit>>,
   lifetime: f32,
@@ -35,6 +36,7 @@ impl BulletsManager {
 
   pub fn add_explosion(
     &mut self,
+    owner_faction_id: u32,
     unit_id: f32,
     source_x: f32,
     source_y: f32,
@@ -55,6 +57,7 @@ impl BulletsManager {
     });
 
     self.bullets_data.push(BulletData {
+      owner_faction_id,
       weapon_type: weapon_type,
       aim: Weak::new(),
       lifetime,
@@ -108,6 +111,7 @@ impl BulletsManager {
 
       if hit {
         self.bullets_data.push(BulletData {
+          owner_faction_id: 0, // not needed for bullet, only for explosion
           weapon_type,
           aim: weak_aim,
           lifetime,
@@ -130,12 +134,14 @@ impl BulletsManager {
 
     squads_nearby.iter().for_each(|weak_squad| {
       if let Some(ref_cell_squad) = weak_squad.upgrade() {
-        let mut squad: std::cell::RefMut<Squad> = ref_cell_squad.borrow_mut();
+        let mut squad = ref_cell_squad.borrow_mut();
         let squad_center = squad.shared.center_point;
         let squad_in_range = (squad_center.0 - target.0).hypot(squad_center.1 - target.1)
           <= weapon_details.explosion_range + THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER;
 
-        if squad_in_range {
+        if squad_in_range
+          && (weapon_details.is_hitting_allies || squad.faction_id != bullet.owner_faction_id)
+        {
           squad.members.iter_mut().for_each(|ref_cell_unit| {
             let mut unit = ref_cell_unit.borrow_mut();
             let distance = (unit.x - target.0).hypot(unit.y - target.1);

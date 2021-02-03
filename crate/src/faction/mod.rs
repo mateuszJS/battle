@@ -277,18 +277,20 @@ impl Faction {
   }
 
   fn attack_closest_enemies(&mut self, plan: Plan) {
-    // TODO: Check if you can use grenade, and if squads have grenade
-    // or if squad can jump
     let mut group_by_closest_enemies: HashMap<u32, (&Weak<RefCell<Squad>>, Vec<u32>)> =
       HashMap::new();
 
+    // key is enemy_id, value is (Vec<our squad ids, target ability x, y)>)
+    let mut group_by_ability: HashMap<u32, (Vec<u32>, (f32, f32))> = HashMap::new();
+
     plan.squads_ids.iter().for_each(|squad_id| {
-      let squad = self
+      let ref_cell_squad = self
         .squads
         .iter()
         .find(|ref_cell_squad| ref_cell_squad.borrow().id == *squad_id)
         .unwrap();
-      let squad_position = squad.borrow().shared.center_point;
+      let squad = ref_cell_squad.borrow();
+      let squad_position = squad.shared.center_point;
 
       let mut closest_weak_enemy = &plan.enemy_squads[0];
       let mut closest_distance = std::f32::MAX;
@@ -315,10 +317,36 @@ impl Faction {
           group_by_closest_enemies.insert(closest_enemy_id, (closest_weak_enemy, vec![*squad_id]));
         }
       };
+
+      if squad.ability_cool_down == 0 && closest_distance < squad.squad_details.ability.range {
+        match group_by_ability.get_mut(&closest_enemy_id) {
+          Some(our_squads) => {
+            our_squads.0.push(*squad_id);
+          }
+          None => {
+            group_by_ability.insert(
+              closest_enemy_id,
+              (
+                vec![*squad_id],
+                closest_weak_enemy
+                  .upgrade()
+                  .unwrap()
+                  .borrow()
+                  .shared
+                  .center_point,
+              ),
+            );
+          }
+        };
+      }
     });
 
     for (_key, (weak_enemy, our_squads_ids)) in group_by_closest_enemies.iter() {
       self.task_attack_enemy(our_squads_ids, weak_enemy);
+    }
+
+    for (_key, (our_squads_ids, (x, y))) in group_by_ability.iter() {
+      self.task_use_ability(our_squads_ids, *x, *y);
     }
   }
 

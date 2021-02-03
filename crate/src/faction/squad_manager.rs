@@ -51,9 +51,7 @@ impl SquadsManager {
       .filter_map(|ref_cell_squad| {
         let squad = ref_cell_squad.borrow_mut();
         let (x, y) = squad.shared.center_point;
-        if (x - target.0).hypot(y - target.1) + NORMAL_SQUAD_RADIUS
-          < squad.squad_details.weapon.range
-        {
+        if (x - target.0).hypot(y - target.1) + NORMAL_SQUAD_RADIUS < range {
           None
         } else {
           Some(*ref_cell_squad)

@@ -18,6 +18,7 @@ pub struct Weapon {
   pub range: f32, // between <DISTANCE_BETWEEN_ATTACKERS, MAX_WEAPON_RANGE>  from calc_positions
   pub can_shoot_during_running: bool,
   pub max_angle_during_run: f32,
+  pub is_hitting_allies: bool,
 }
 
 pub static STANDARD_RIFLE_DETAILS: Weapon = Weapon {
@@ -33,6 +34,7 @@ pub static STANDARD_RIFLE_DETAILS: Weapon = Weapon {
   range: 600.0,
   can_shoot_during_running: true,
   max_angle_during_run: 0.7,
+  is_hitting_allies: false,
 };
 
 pub static LASER_RIFLE_DETAILS: Weapon = Weapon {
@@ -48,6 +50,7 @@ pub static LASER_RIFLE_DETAILS: Weapon = Weapon {
   range: 400.0,
   can_shoot_during_running: true,
   max_angle_during_run: 0.7,
+  is_hitting_allies: false,
 };
 
 pub static GRENADE_DETAILS: Weapon = Weapon {
@@ -63,6 +66,7 @@ pub static GRENADE_DETAILS: Weapon = Weapon {
   range: 600.0,
   can_shoot_during_running: false,
   max_angle_during_run: 0.0,
+  is_hitting_allies: true,
 };
 
 pub static HIT_THE_GROUND: Weapon = Weapon {
@@ -78,6 +82,7 @@ pub static HIT_THE_GROUND: Weapon = Weapon {
   range: 900.0,
   can_shoot_during_running: false,
   max_angle_during_run: 0.0,
+  is_hitting_allies: false,
 };
 
 pub static NON_WEAPON: Weapon = Weapon {
@@ -93,6 +98,7 @@ pub static NON_WEAPON: Weapon = Weapon {
   range: 0.0,
   can_shoot_during_running: false,
   max_angle_during_run: 0.0,
+  is_hitting_allies: false,
 };
 
 // TODO: always remember to update this const
