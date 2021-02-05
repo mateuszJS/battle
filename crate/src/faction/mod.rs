@@ -236,10 +236,7 @@ impl Faction {
 
     let ability = squads[0].borrow().squad_details.ability;
 
-    // let ability_targets = PositionUtils::get_squads_positions(squads.len(), target_x, target_y);
-    let is_big_spread_between_abilities_target = ability.scatter > 1.0;
-
-    let (target_position_offsets, origin_x, origin_y) = if is_big_spread_between_abilities_target {
+    let (target_position_offsets, origin_x, origin_y) = if ability.is_squad_spread {
       (
         PositionUtils::get_squads_positions(squads.len(), target_x, target_y),
         0.0,
@@ -260,7 +257,7 @@ impl Faction {
       .iter()
       .enumerate()
       .for_each(|(index, ref_cell_squad)| {
-        let ability_target = if is_big_spread_between_abilities_target {
+        let ability_target = if ability.is_squad_spread {
           target_position_offsets[index]
         } else {
           let (offset_x, offset_y) = target_position_offsets[index % offsets_number];
@@ -281,7 +278,7 @@ impl Faction {
       HashMap::new();
 
     // key is enemy_id, value is (Vec<our squad ids, target ability x, y)>)
-    let mut group_by_ability: HashMap<u32, (Vec<u32>, (f32, f32))> = HashMap::new();
+    // let mut group_by_ability: HashMap<u32, (Vec<u32>, (f32, f32))> = HashMap::new();
 
     plan.squads_ids.iter().for_each(|squad_id| {
       let ref_cell_squad = self
@@ -318,49 +315,50 @@ impl Faction {
         }
       };
 
-      if squad.ability_cool_down == 0 && closest_distance < squad.squad_details.ability.range {
-        match group_by_ability.get_mut(&closest_enemy_id) {
-          Some(our_squads) => {
-            our_squads.0.push(*squad_id);
-          }
-          None => {
-            group_by_ability.insert(
-              closest_enemy_id,
-              (
-                vec![*squad_id],
-                closest_weak_enemy
-                  .upgrade()
-                  .unwrap()
-                  .borrow()
-                  .shared
-                  .center_point,
-              ),
-            );
-          }
-        };
-      }
+      // if squad.ability_cool_down == 0 && closest_distance < squad.squad_details.ability.range {
+      //   match group_by_ability.get_mut(&closest_enemy_id) {
+      //     Some(our_squads) => {
+      //       our_squads.0.push(*squad_id);
+      //     }
+      //     None => {
+      //       group_by_ability.insert(
+      //         closest_enemy_id,
+      //         (
+      //           vec![*squad_id],
+      //           closest_weak_enemy
+      //             .upgrade()
+      //             .unwrap()
+      //             .borrow()
+      //             .shared
+      //             .center_point,
+      //         ),
+      //       );
+      //     }
+      //   };
+      // }
     });
 
     for (_key, (weak_enemy, our_squads_ids)) in group_by_closest_enemies.iter() {
       self.task_attack_enemy(our_squads_ids, weak_enemy);
     }
-
-    for (_key, (our_squads_ids, (x, y))) in group_by_ability.iter() {
-      self.task_use_ability(our_squads_ids, *x, *y);
-    }
+    // Update this, remove castign abilities, create same fucntio nfor abilities, to cast them on closest units
+    // for (_key, (our_squads_ids, (x, y))) in group_by_ability.iter() {
+    //   self.task_use_ability(our_squads_ids, *x, *y);
+    // }
   }
 
   pub fn do_ai(&mut self, all_factions_info: &Vec<FactionInfo>, squads_on_grid: &SquadsGrid) {
     let Self { ref squads, .. } = self;
 
     let squads_plans = self.ai.work(squads, all_factions_info, squads_on_grid);
-
+    // We can handle also abilities here ,but then we will have to update somehow plans in ai
     squads_plans
       .into_iter()
       .for_each(|plan| match plan.purpose_type {
         PurposeType::Attack => self.attack_closest_enemies(plan),
         PurposeType::RunToSafePlace => self.task_add_target(&plan.squads_ids, plan.x, plan.y),
         PurposeType::Capture => self.task_add_target(&plan.squads_ids, plan.x, plan.y),
+        PurposeType::Ability => self.task_use_ability(&plan.squads_ids, plan.x, plan.y),
       })
   }
 

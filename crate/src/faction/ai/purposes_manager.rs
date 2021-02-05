@@ -140,7 +140,7 @@ impl PurposesManager {
     purpose: &EnhancedPurpose,
     squads_grid: &SquadsGrid,
     // enemy_squads_ids_attacked_in_previous_iter: &Vec<u32>,
-  ) -> Option<Plan> {
+  ) -> Vec<Plan> {
     our_squads.sort_by(|a_squad, b_squad| {
       let a = signi_calc.how_much_squad_fits_to_take_purpose(&purpose, a_squad);
       let b = signi_calc.how_much_squad_fits_to_take_purpose(&purpose, b_squad);
@@ -248,6 +248,8 @@ impl PurposesManager {
       }
     }
 
+    let mut new_plans = vec![];
+
     if collected_our_influence >= enemy_place_influence // if we collected enough
     || purpose.signification >= THRESHOLD_SIGNIFICATION_URGENT_PURPOSE // if purpose is so important, that it does not matter
     || (
@@ -256,7 +258,23 @@ impl PurposesManager {
       && collected_our_influence
         >= signi_calc.running_away_influence_enemy_place(purpose.place.influence) // if we already attacked, and can take purpose with smaller army
     ) {
-      our_squads.retain(|squad| !used_squads_ids.contains(&squad.id));
+      let mut squads_to_cast_ability = vec![];
+      let mut squads_to_do_purpose_in_standard_way = vec![];
+
+      our_squads.retain(|squad| {
+        if used_squads_ids.contains(&squad.id) {
+          // check if type of the ability is attack
+          if purpose.purpose_type == PurposeType::Attack && squad.ability_cool_down == 0 {
+            squads_to_cast_ability.push(squad.id);
+          } else {
+            squads_to_do_purpose_in_standard_way.push(squad.id);
+          }
+
+          false
+        } else {
+          true
+        }
+      });
 
       let enemy_squads = purpose
         .place
@@ -265,16 +283,28 @@ impl PurposesManager {
         .map(|ref_cell_squad| Rc::downgrade(ref_cell_squad))
         .collect::<Vec<Weak<RefCell<Squad>>>>();
 
-      Some(Plan {
-        place_id: purpose.place.id,
-        purpose_type: purpose.purpose_type.clone(),
-        squads_ids: used_squads_ids,
-        enemy_squads,
-        x: purpose.place.x,
-        y: purpose.place.y,
-      })
-    } else {
-      None
+      if squads_to_cast_ability.len() > 0 {
+        new_plans.push(Plan {
+          purpose_type: PurposeType::Ability,
+          place_id: purpose.place.id,
+          squads_ids: squads_to_cast_ability,
+          x: purpose.place.x,
+          y: purpose.place.y,
+          enemy_squads: vec![],
+        });
+      }
+
+      if squads_to_do_purpose_in_standard_way.len() > 0 {
+        new_plans.push(Plan {
+          purpose_type: purpose.purpose_type.clone(),
+          place_id: purpose.place.id,
+          squads_ids: squads_to_do_purpose_in_standard_way,
+          enemy_squads,
+          x: purpose.place.x,
+          y: purpose.place.y,
+        });
+      }
     }
+    new_plans
   }
 }

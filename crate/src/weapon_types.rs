@@ -56,14 +56,14 @@ pub static LASER_RIFLE_DETAILS: Weapon = Weapon {
 pub static GRENADE_DETAILS: Weapon = Weapon {
   name: WeaponType::Grenade,
   chances_to_reload: 0.0,
-  reload_time: 1200,
+  reload_time: 0,
   shoot_time: 0,
-  scatter: 0.0, // for abilities, if > 1.0, it's squad spread distance, if < 1.0, it's squad members spread distance
+  scatter: 0.0,
   bullets_speed: 7.5,
   damage: 30.0,
   representation_id: 2.0,
   explosion_range: 200.0,
-  range: 600.0,
+  range: 0.0,
   can_shoot_during_running: false,
   max_angle_during_run: 0.0,
   is_hitting_allies: true,
@@ -72,14 +72,14 @@ pub static GRENADE_DETAILS: Weapon = Weapon {
 pub static HIT_THE_GROUND: Weapon = Weapon {
   name: WeaponType::HitTheGround,
   chances_to_reload: 0.0,
-  reload_time: 900,
+  reload_time: 0,
   shoot_time: 0,
-  scatter: 2.0, // for abilities, if > 1.0, it's squad spread distance, if < 1.0, it's squad members spread distance
+  scatter: 0.0,
   bullets_speed: 1.0,
   damage: 15.0,
   representation_id: 3.0,
   explosion_range: 80.0,
-  range: 900.0,
+  range: 0.0,
   can_shoot_during_running: false,
   max_angle_during_run: 0.0,
   is_hitting_allies: false,
@@ -102,6 +102,7 @@ pub static NON_WEAPON: Weapon = Weapon {
 };
 
 // TODO: always remember to update this const
+// also it's max range of abilities!
 pub const MAX_POSSIBLE_WEAPON_RANGE: f32 = 900.0;
 
 pub fn get_weapon_details(weapon_type: &WeaponType) -> &'static Weapon {

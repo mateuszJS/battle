@@ -12,11 +12,14 @@ const MAX_JUMP_HEIGHT: f32 = 1200.0; // the same constant exists in JS
 pub struct Abilities {}
 
 impl Abilities {
-  pub fn change_state_to_ability(unit: &mut Unit, squad_shared_info: &SquadUnitSharedDataSet) {
+  pub fn change_state_to_ability(unit: &mut Unit, squad_shared_info: &mut SquadUnitSharedDataSet) {
     if unit.state == STATE_ABILITY || unit.has_finished_using_ability {
       return;
     }
+
     unit.state = STATE_ABILITY;
+    squad_shared_info.any_unit_started_using_ability = true;
+
     match unit.squad_details.representation_type as u8 {
       RAPTOR_REPRESENTATION_ID_U8 => Abilities::start_jump(unit, squad_shared_info),
       _ => {}
@@ -64,7 +67,7 @@ impl Abilities {
     //   // prob it should be changes to unit.has_finished_using_ability
     //   return;
     // }
-    squad_shared_info.any_unit_started_using_ability = true;
+
     let ability_target = squad_shared_info.ability_target.unwrap();
     let target_x = ability_target.0 + unit.position_offset_x;
     let target_y = ability_target.1 + unit.position_offset_y;
@@ -91,10 +94,12 @@ impl Abilities {
       if unit.get_upping_progress > 0.3 && unit.get_upping_progress < 0.7 {
         if unit.time_to_next_shoot == 0 {
           let random = LookUpTable::get_random() - 0.5;
+
           let y_modifier = Abilities::calc_jump_progress(unit) * MAX_JUMP_HEIGHT;
           let unit_y = unit.y - y_modifier;
           let aim_x = target_x + random * 140.0;
           let aim_y = target_y + random * 140.0;
+
           bullet_manager.add_fake_bullet(
             unit.id as f32,
             (unit.x - aim_x).hypot(unit_y - aim_y) + random * 0.1,
@@ -108,8 +113,10 @@ impl Abilities {
       }
       unit.x += unit.mod_x * acceleration;
       unit.y += unit.mod_y * acceleration;
-      unit.get_upping_progress =
+
+      let new_getting_up_progress =
         (unit.x - unit.ability_start_point) / (target_x - unit.ability_start_point);
+      unit.get_upping_progress = new_getting_up_progress.min(1.0).max(0.0);
     }
   }
 
@@ -118,26 +125,20 @@ impl Abilities {
     squad_shared_info: &mut SquadUnitSharedDataSet,
     bullet_manager: &mut BulletsManager,
   ) {
-    if !squad_shared_info.any_unit_started_using_ability {
-      if squad_shared_info.ability_target.is_none() {
-        // TODO: prob happen only when squad dies, and we are trying to call ability
-        // or maybe when we call squad.task_add_target, and trying to clear ability_target
-        // or squad.reset_state
-        log!("error! it shouldn't happen! unit.hp: {}", unit.hp)
-      }
+    if let Some(ability_target) = squad_shared_info.ability_target {
+      squad_shared_info.ability_target = None;
       bullet_manager.add_explosion(
         squad_shared_info.faction_id,
         unit.id as f32,
         unit.x,
         unit.y,
-        squad_shared_info.ability_target.unwrap(),
+        ability_target,
         &WeaponType::Grenade,
       );
     } else {
       unit.state = STATE_IDLE;
     }
 
-    squad_shared_info.any_unit_started_using_ability = true;
     unit.has_finished_using_ability = true;
   }
 

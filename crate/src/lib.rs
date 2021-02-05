@@ -31,6 +31,7 @@ mod factory;
 mod id_generator;
 mod look_up_table;
 // public just to import it in bench
+mod ability_types;
 mod bullets_manager;
 pub mod position_utils;
 mod representations_ids;

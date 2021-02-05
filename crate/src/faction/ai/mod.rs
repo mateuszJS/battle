@@ -18,6 +18,7 @@ pub enum PurposeType {
   Attack,
   RunToSafePlace,
   Capture,
+  Ability,
 }
 #[derive(PartialEq, Clone)]
 pub enum PlaceType {
@@ -164,16 +165,15 @@ impl ArtificialIntelligence {
 
     for purpose in new_purposes.iter() {
       /*=============CHECKING IF CURRENT PLAN EXISTS IN NEW PURPOSES==================*/
-      let option_new_plan = PurposesManager::handle_purpose(
+      let mut new_plans = PurposesManager::handle_purpose(
         self.faction_id,
         &self.signi_calc,
         &mut our_squads,
         purpose,
         squads_grid,
       );
-      if let Some(new_plan) = option_new_plan {
-        final_plans.push(new_plan)
-      }
+
+      final_plans.append(&mut new_plans); // bc we can receive plans to do purpose, and to cast abilities
 
       if our_squads.len() == 0 {
         break;
@@ -182,6 +182,7 @@ impl ArtificialIntelligence {
 
     let mut our_squads_to_running_to_safe_places: HashMap<usize, Vec<u32>> = HashMap::new();
 
+    //=================HANDLE DANGER PLACES====================
     danger_places.iter().for_each(|danger_place| {
       if !danger_place.is_attacking_us {
         return;
@@ -202,10 +203,29 @@ impl ArtificialIntelligence {
               MAX_POSSIBLE_WEAPON_RANGE,
             );
 
+            let best_safe_place_position = &safe_places[best_safe_place_index];
+            let distance_to_best_safe_place = (our_place.x - best_safe_place_position.x)
+              .hypot(our_place.y - best_safe_place_position.y);
+
+            let mut squads_to_cast_ability = vec![]; // squads which can cast ability to get faster to safe place
+            let mut squads_ids_to_run = vec![]; // squads which will run in a standard way
+
             let mut squads_ids = our_place
               .squads
               .iter()
-              .map(|ref_cell_our_squad| ref_cell_our_squad.borrow().id)
+              .map(|ref_cell_our_squad| {
+                let squad = ref_cell_our_squad.borrow();
+
+                if squad.ability_cool_down == 0 && distance_to_best_safe_place > 450.0
+                // && squad.squad_details.ability.range > distance_to_best_safe_place
+                {
+                  squads_to_cast_ability.push(squad.id)
+                } else {
+                  squads_ids_to_run.push(squad.id)
+                }
+
+                squad.id
+              })
               .collect::<Vec<u32>>();
 
             our_squads.retain(|our_squad| !squads_ids.contains(&our_squad.id));
@@ -216,19 +236,35 @@ impl ArtificialIntelligence {
                 .retain(|our_squad_id| !squads_ids.contains(our_squad_id));
             });
 
-            if our_squads_to_running_to_safe_places.contains_key(&best_safe_place_index) {
-              let squads_list = &mut our_squads_to_running_to_safe_places
-                .get_mut(&best_safe_place_index)
-                .unwrap();
-              squads_list.append(&mut squads_ids);
-            } else {
-              our_squads_to_running_to_safe_places.insert(best_safe_place_index, squads_ids);
+            if squads_to_cast_ability.len() > 0 {
+              // check if type of the ability is transport
+              final_plans.push(Plan {
+                purpose_type: PurposeType::Ability,
+                place_id: best_safe_place_position.id,
+                squads_ids: squads_to_cast_ability,
+                x: best_safe_place_position.x,
+                y: best_safe_place_position.y,
+                enemy_squads: vec![],
+              })
+            }
+
+            if squads_ids_to_run.len() > 0 {
+              // if cannot use ability to get faster, then go in standard way, by running
+              if our_squads_to_running_to_safe_places.contains_key(&best_safe_place_index) {
+                let squads_list = &mut our_squads_to_running_to_safe_places
+                  .get_mut(&best_safe_place_index)
+                  .unwrap();
+                squads_list.append(&mut squads_ids);
+              } else {
+                our_squads_to_running_to_safe_places.insert(best_safe_place_index, squads_ids);
+              }
             }
           }
         });
       }
     });
 
+    //=================HANDLE IDLE SQUADS====================
     if our_squads.len() > 0 {
       if final_plans.len() > 0 {
         our_squads.iter().for_each(|our_squad| {
@@ -265,6 +301,7 @@ impl ArtificialIntelligence {
       }
     }
 
+    //=================HANDLE RESULTS OF DANGER PLACES AND IDLE SQUADS====================
     for (safe_place_index, our_squads_ids) in our_squads_to_running_to_safe_places {
       let best_safe_place = safe_places[safe_place_index];
       final_plans.push(Plan {

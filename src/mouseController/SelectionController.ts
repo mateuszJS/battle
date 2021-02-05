@@ -49,7 +49,9 @@ class SelectionController {
     setTimeout(() => {
       selectedEnemyUnitsIds.forEach(id => {
         const unit = this.universeRepresentation[id] as Unit | Factory | StrategicPoint
-        unit.deselect()
+        if (unit) {
+          unit.deselect()
+        }
       })
     }, 2000)
   }
@@ -108,7 +110,7 @@ class SelectionController {
   }
 
   private clearSelection() {
-    this.selectedUnits.forEach(unit => unit.deselect())
+    this.selectedUnits.forEach(unit => unit && unit.deselect())
     this.selectedUnits = []
     this.selectedSquads = new Uint32Array()
   }

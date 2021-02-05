@@ -197,7 +197,7 @@ impl Unit {
     }
   }
 
-  pub fn set_correct_state(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
+  pub fn set_correct_state(&mut self, squad_shared_info: &mut SquadUnitSharedDataSet) {
     if !self.can_change_state() {
       return;
     }

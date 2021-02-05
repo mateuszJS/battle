@@ -334,7 +334,7 @@ impl Squad {
     } = self;
 
     members.iter_mut().for_each(|ref_cell_unit| {
-      ref_cell_unit.borrow_mut().set_correct_state(&shared);
+      ref_cell_unit.borrow_mut().set_correct_state(shared);
     });
   }
 
