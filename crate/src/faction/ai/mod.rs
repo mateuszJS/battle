@@ -216,8 +216,9 @@ impl ArtificialIntelligence {
               .map(|ref_cell_our_squad| {
                 let squad = ref_cell_our_squad.borrow();
 
-                if squad.ability_cool_down == 0 && distance_to_best_safe_place > 450.0
-                // && squad.squad_details.ability.range > distance_to_best_safe_place
+                if squad.squad_details.ability.usage.transport
+                  && squad.ability_cool_down == 0
+                  && distance_to_best_safe_place > squad.squad_details.ability.range / 2.0
                 {
                   squads_to_cast_ability.push(squad.id)
                 } else {
@@ -326,8 +327,7 @@ impl ArtificialIntelligence {
               .squads_ids
               .iter()
               .all(|squad_id| final_plan.squads_ids.contains(&squad_id))
-            && (current_plan.x - final_plan.x).hypot(current_plan.y - final_plan.y)
-              < NORMAL_SQUAD_RADIUS
+            && (current_plan.x - final_plan.x).hypot(current_plan.y - final_plan.y) < 10.0
             && current_plan.enemy_squads.len() == final_plan.enemy_squads.len() // do not check exactly each enemy
         })
       })

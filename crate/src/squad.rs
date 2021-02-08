@@ -248,10 +248,17 @@ impl Squad {
   }
 
   fn has_all_members_finish_using_ability(&self) -> bool {
-    !self
-      .members
-      .iter()
-      .any(|member| !member.borrow().has_finished_using_ability)
+    if self.squad_details.ability.called_by_one_members {
+      self
+        .members
+        .iter()
+        .any(|member| member.borrow().has_finished_using_ability)
+    } else {
+      !self
+        .members
+        .iter()
+        .any(|member| !member.borrow().has_finished_using_ability)
+    }
   }
 
   fn store_current_task_as_todo_task(&mut self) {

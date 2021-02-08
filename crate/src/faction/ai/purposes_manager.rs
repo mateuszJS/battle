@@ -263,8 +263,10 @@ impl PurposesManager {
 
       our_squads.retain(|squad| {
         if used_squads_ids.contains(&squad.id) {
-          // check if type of the ability is attack
-          if purpose.purpose_type == PurposeType::Attack && squad.ability_cool_down == 0 {
+          if squad.squad_details.ability.usage.attack
+            && purpose.purpose_type == PurposeType::Attack
+            && squad.ability_cool_down == 0
+          {
             squads_to_cast_ability.push(squad.id);
           } else {
             squads_to_do_purpose_in_standard_way.push(squad.id);

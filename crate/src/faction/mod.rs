@@ -227,6 +227,70 @@ impl Faction {
       .collect()
   }
 
+  fn ai_task_use_ability(&mut self, squads_ids: &Vec<u32>, target_x: f32, target_y: f32) {
+    let squads = self.get_squads_from_ids(squads_ids);
+
+    if squads.len() == 0 {
+      return;
+    }
+    // (x, y, ability max radius, Vec<squad id>)
+    let mut group_by_ability: HashMap<u32, (f32, f32, f32, Vec<u32>)> = HashMap::new();
+
+    squads.iter().for_each(|ref_cell_squad| {
+      let squad = ref_cell_squad.borrow();
+      let ability = squad.squad_details.ability;
+
+      match group_by_ability.get_mut(&ability.id) {
+        Some(our_squads) => {
+          our_squads.0 += squad.shared.center_point.0;
+          our_squads.1 += squad.shared.center_point.1;
+          our_squads.3.push(squad.id);
+        }
+        None => {
+          group_by_ability.insert(
+            ability.id,
+            (
+              squad.shared.center_point.0,
+              squad.shared.center_point.1,
+              ability.range,
+              vec![squad.id],
+            ),
+          );
+        }
+      };
+    });
+
+    for (_key, (sum_x, sum_y, ability_radius, squad_ids)) in group_by_ability.iter() {
+      let squads_len = squad_ids.len() as f32;
+      let center_x = sum_x / squads_len;
+      let center_y = sum_y / squads_len;
+      let track = PositionUtils::get_track(center_x, center_y, target_x, target_y);
+
+      let mut last_visited_point = (center_x, center_y);
+
+      for (x, y) in track.iter() {
+        let distance = (center_x - x).hypot(center_y - y);
+        if distance > *ability_radius {
+          let angle_from_last_visited_point =
+            (x - last_visited_point.0).atan2(last_visited_point.1 - y);
+
+          loop {
+            let new_x = last_visited_point.0 + angle_from_last_visited_point.sin() * 100.0;
+            let new_y = last_visited_point.1 - angle_from_last_visited_point.cos() * 100.0;
+
+            if (center_x - new_x).hypot(center_y - new_y) > *ability_radius {
+              break;
+            }
+            last_visited_point = (new_x, new_y);
+          }
+          break;
+        }
+        last_visited_point = (*x, *y);
+      }
+      self.task_use_ability(squad_ids, last_visited_point.0, last_visited_point.1);
+    }
+  }
+
   pub fn task_use_ability(&mut self, squads_ids: &Vec<u32>, target_x: f32, target_y: f32) {
     let squads = self.get_squads_from_ids(squads_ids);
 
@@ -273,7 +337,7 @@ impl Faction {
       });
   }
 
-  fn attack_closest_enemies(&mut self, plan: Plan) {
+  fn ai_attack_closest_enemies(&mut self, plan: Plan) {
     let mut group_by_closest_enemies: HashMap<u32, (&Weak<RefCell<Squad>>, Vec<u32>)> =
       HashMap::new();
 
@@ -314,37 +378,11 @@ impl Faction {
           group_by_closest_enemies.insert(closest_enemy_id, (closest_weak_enemy, vec![*squad_id]));
         }
       };
-
-      // if squad.ability_cool_down == 0 && closest_distance < squad.squad_details.ability.range {
-      //   match group_by_ability.get_mut(&closest_enemy_id) {
-      //     Some(our_squads) => {
-      //       our_squads.0.push(*squad_id);
-      //     }
-      //     None => {
-      //       group_by_ability.insert(
-      //         closest_enemy_id,
-      //         (
-      //           vec![*squad_id],
-      //           closest_weak_enemy
-      //             .upgrade()
-      //             .unwrap()
-      //             .borrow()
-      //             .shared
-      //             .center_point,
-      //         ),
-      //       );
-      //     }
-      //   };
-      // }
     });
 
     for (_key, (weak_enemy, our_squads_ids)) in group_by_closest_enemies.iter() {
       self.task_attack_enemy(our_squads_ids, weak_enemy);
     }
-    // Update this, remove castign abilities, create same fucntio nfor abilities, to cast them on closest units
-    // for (_key, (our_squads_ids, (x, y))) in group_by_ability.iter() {
-    //   self.task_use_ability(our_squads_ids, *x, *y);
-    // }
   }
 
   pub fn do_ai(&mut self, all_factions_info: &Vec<FactionInfo>, squads_on_grid: &SquadsGrid) {
@@ -355,10 +393,10 @@ impl Faction {
     squads_plans
       .into_iter()
       .for_each(|plan| match plan.purpose_type {
-        PurposeType::Attack => self.attack_closest_enemies(plan),
+        PurposeType::Attack => self.ai_attack_closest_enemies(plan),
         PurposeType::RunToSafePlace => self.task_add_target(&plan.squads_ids, plan.x, plan.y),
         PurposeType::Capture => self.task_add_target(&plan.squads_ids, plan.x, plan.y),
-        PurposeType::Ability => self.task_use_ability(&plan.squads_ids, plan.x, plan.y),
+        PurposeType::Ability => self.ai_task_use_ability(&plan.squads_ids, plan.x, plan.y),
       })
   }
 

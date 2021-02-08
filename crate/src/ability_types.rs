@@ -5,23 +5,27 @@ pub enum AbilityType {
 }
 
 pub struct Usage {
-  attack: bool,
-  transport: bool,
+  pub attack: bool,
+  pub transport: bool,
 }
 
 pub struct Ability {
+  pub id: u32,
   pub name: AbilityType,
   pub reload_time: u16,
   pub is_squad_spread: bool,
   pub range: f32,
+  pub called_by_one_members: bool,
   pub usage: Usage,
 }
 
 pub static THROW_GRENADE: Ability = Ability {
+  id: 1,
   name: AbilityType::ThrowGrenade,
   reload_time: 1200,
   is_squad_spread: false,
   range: 600.0,
+  called_by_one_members: true,
   usage: Usage {
     attack: true,
     transport: false,
@@ -29,10 +33,12 @@ pub static THROW_GRENADE: Ability = Ability {
 };
 
 pub static JUMP: Ability = Ability {
+  id: 2,
   name: AbilityType::Jump,
   reload_time: 900,
   is_squad_spread: true,
   range: 900.0,
+  called_by_one_members: false,
   usage: Usage {
     attack: true,
     transport: true,
@@ -40,10 +46,12 @@ pub static JUMP: Ability = Ability {
 };
 
 pub static NON_ABILITY: Ability = Ability {
+  id: 0,
   name: AbilityType::Jump,
   reload_time: 0,
   is_squad_spread: false,
   range: 0.0,
+  called_by_one_members: false,
   usage: Usage {
     attack: false,
     transport: false,
