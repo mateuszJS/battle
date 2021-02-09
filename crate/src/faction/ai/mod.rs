@@ -2,7 +2,6 @@ mod purposes_manager;
 mod safety_manager;
 mod signification_calculator;
 
-use crate::constants::NORMAL_SQUAD_RADIUS;
 use crate::squad::Squad;
 use crate::squads_grid_manager::SquadsGrid;
 use crate::weapon_types::MAX_POSSIBLE_WEAPON_RANGE;
@@ -90,15 +89,17 @@ impl ArtificialIntelligence {
     }
   }
 
-  fn find_index_of_closest_purpose<'a>(x: f32, y: f32, plans: &Vec<Plan>) -> usize {
-    let mut min_index = 0;
+  fn find_index_of_closest_purpose<'a>(x: f32, y: f32, plans: &Vec<Plan>) -> isize {
+    let mut min_index = -1;
     let mut min_distance = std::f32::MAX;
     plans.iter().enumerate().for_each(|(index, plan)| {
       let distance = (x - plan.x).hypot(y - plan.y);
 
-      if distance < min_distance {
+      if [PurposeType::Attack, PurposeType::Capture].contains(&plan.purpose_type)
+        && distance < min_distance
+      {
         min_distance = distance;
-        min_index = index;
+        min_index = index as isize;
       }
     });
 
@@ -267,7 +268,11 @@ impl ArtificialIntelligence {
 
     //=================HANDLE IDLE SQUADS====================
     if our_squads.len() > 0 {
-      if final_plans.len() > 0 {
+      let is_any_plan_without_ability = final_plans
+        .iter()
+        .any(|purpose| purpose.purpose_type != PurposeType::Ability);
+
+      if is_any_plan_without_ability {
         our_squads.iter().for_each(|our_squad| {
           let squad_position = our_squad.shared.center_point;
           let closes_plan_index = ArtificialIntelligence::find_index_of_closest_purpose(
@@ -275,8 +280,11 @@ impl ArtificialIntelligence {
             squad_position.1,
             &final_plans,
           );
-
-          final_plans[closes_plan_index].squads_ids.push(our_squad.id);
+          if closes_plan_index != -1 {
+            final_plans[closes_plan_index as usize]
+              .squads_ids
+              .push(our_squad.id);
+          }
         });
       } else {
         // We do not have any plans

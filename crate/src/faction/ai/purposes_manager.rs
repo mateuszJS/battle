@@ -11,6 +11,7 @@ use std::cell::{Ref, RefCell};
 use std::rc::{Rc, Weak};
 
 const MIN_DISTANCE_OF_SEARCHING_ENEMY: f32 = 1.3 * MAX_POSSIBLE_WEAPON_RANGE;
+const ABILITY_RANGE: f32 = 120.0;
 
 pub struct PurposesManager {}
 
@@ -133,13 +134,36 @@ impl PurposesManager {
       .collect::<Vec<EnhancedPurpose>>()
   }
 
+  pub fn get_ability_targets(
+    our_squads_positions: Vec<(f32, f32)>,
+    purpose: &EnhancedPurpose,
+  ) -> Vec<(f32, f32)> {
+    let mut potential_abilities_targets = vec![];
+    purpose.place.squads.iter().for_each(|ref_cell_squad| {
+      let enemy_squad_pos = ref_cell_squad.borrow().shared.center_point;
+      // TODO: enemy_squad_pos check if members are far away, or close ot the center!
+      let is_too_close_to_other_ability_effects = potential_abilities_targets
+        .iter()
+        .any(|(x, y)| (enemy_squad_pos.0 - x).hypot(enemy_squad_pos.1 - y) < ABILITY_RANGE);
+      if !is_too_close_to_other_ability_effects {
+        let is_too_close_to_allies = our_squads_positions
+          .iter()
+          .any(|(x, y)| (enemy_squad_pos.0 - x).hypot(enemy_squad_pos.1 - y) < ABILITY_RANGE);
+        if !is_too_close_to_allies {
+          potential_abilities_targets.push(enemy_squad_pos);
+        }
+      }
+    });
+
+    potential_abilities_targets
+  }
+
   pub fn handle_purpose(
     our_faction_id: u32,
     signi_calc: &SignificationCalculator,
     our_squads: &mut Vec<Ref<Squad>>,
     purpose: &EnhancedPurpose,
     squads_grid: &SquadsGrid,
-    // enemy_squads_ids_attacked_in_previous_iter: &Vec<u32>,
   ) -> Vec<Plan> {
     our_squads.sort_by(|a_squad, b_squad| {
       let a = signi_calc.how_much_squad_fits_to_take_purpose(&purpose, a_squad);
@@ -258,6 +282,19 @@ impl PurposesManager {
       && collected_our_influence
         >= signi_calc.running_away_influence_enemy_place(purpose.place.influence) // if we already attacked, and can take purpose with smaller army
     ) {
+      let squads_positions = our_squads
+        .iter()
+        .filter_map(|squad| {
+          if used_squads_ids.contains(&squad.id) {
+            Some(squad.shared.center_point)
+          } else {
+            None
+          }
+        })
+        .collect::<Vec<(f32, f32)>>();
+
+      let ability_targets = PurposesManager::get_ability_targets(squads_positions, purpose);
+
       let mut squads_to_cast_ability = vec![];
       let mut squads_to_do_purpose_in_standard_way = vec![];
 
@@ -266,6 +303,10 @@ impl PurposesManager {
           if squad.squad_details.ability.usage.attack
             && purpose.purpose_type == PurposeType::Attack
             && squad.ability_cool_down == 0
+            && squads_to_cast_ability.len() < ability_targets.len()
+            && (squad.shared.center_point.0 - purpose.place.x)
+              .hypot(squad.shared.center_point.1 - purpose.place.y)
+              < squad.squad_details.ability.range
           {
             squads_to_cast_ability.push(squad.id);
           } else {
@@ -286,14 +327,21 @@ impl PurposesManager {
         .collect::<Vec<Weak<RefCell<Squad>>>>();
 
       if squads_to_cast_ability.len() > 0 {
-        new_plans.push(Plan {
-          purpose_type: PurposeType::Ability,
-          place_id: purpose.place.id,
-          squads_ids: squads_to_cast_ability,
-          x: purpose.place.x,
-          y: purpose.place.y,
-          enemy_squads: vec![],
-        });
+        squads_to_cast_ability
+          .iter()
+          .enumerate()
+          .for_each(|(index, squad_id)| {
+            let ability_target = ability_targets[index];
+
+            new_plans.push(Plan {
+              purpose_type: PurposeType::Ability,
+              place_id: purpose.place.id,
+              squads_ids: vec![*squad_id],
+              x: ability_target.0,
+              y: ability_target.1,
+              enemy_squads: vec![],
+            });
+          })
       }
 
       if squads_to_do_purpose_in_standard_way.len() > 0 {
