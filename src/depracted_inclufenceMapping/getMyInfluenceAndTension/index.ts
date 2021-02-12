@@ -26,7 +26,7 @@ const getMyInfluenceAndTension = (
   geometry: PIXI.Geometry,
   mapWidth: number,
   mapHeight: number,
-  scale: number,
+  scale: [number, number],
 ) => {
   const allFactionsData: Array<{
     id: number

@@ -5,6 +5,7 @@ const REPRESENTATIONS_IDS = {
   USER_FACTORY: 3.0,
   BULLETS: 4.0,
   RAPTOR: 5.0,
+  STRATEGIC_POINT: 7.0,
 } as const
 
 export type ObjectType = ValueOf<typeof REPRESENTATIONS_IDS>

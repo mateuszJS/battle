@@ -15,6 +15,7 @@ const STATE_FLY_MIDDLE_BASE = 5000
 const STATE_FLY_DOWN_BASE = 6000
 const STATE_GETUP_BASE = 7000
 const STATE_DIE_BASE = 8000
+const STATE_CHASING_BASE = 9000
 
 type FramesPeriods = {
   [key in 'IDLE' | 'SHOOT' | 'RUN' | 'FLY' | 'GETUP' | 'DIE']: {
@@ -101,6 +102,20 @@ const getSprites = () => {
       },
       goToRun(angle: number) {
         const currentPhase = STATE_RUN_BASE + Math.round(angle * 100)
+        if (previousPhase !== currentPhase) {
+          previousPhase = currentPhase
+          const indexOfStartingFrame = getIndexOfStartingFrame(angle, framesPeriods.RUN)
+          const indexOfLastFrame = indexOfStartingFrame + framesPeriods.RUN.length
+          movieClip.onFrameChange = getCallbackGoToFirstOnLastFrame(
+            indexOfStartingFrame,
+            indexOfLastFrame,
+          )
+          movieClip.gotoAndPlay(indexOfStartingFrame)
+        }
+      },
+      goToChasing(angle: number, angleOfWeapon: number) {
+        // for now it's the same as running
+        const currentPhase = STATE_CHASING_BASE + Math.round(angle * 100)
         if (previousPhase !== currentPhase) {
           previousPhase = currentPhase
           const indexOfStartingFrame = getIndexOfStartingFrame(angle, framesPeriods.RUN)

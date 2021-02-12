@@ -33,13 +33,55 @@
       top: 10px;
       right: 10px;
       padding: 10px;
-      background-color: white;
+      background-color: rgba(255, 255, 255, 0.7);
       border-radius: 4px;
       z-index: 1;
     }
 
     #debug-panel label {
       display: block;
+    }
+
+    .ground {
+      position: absolute;
+      top: 0;
+      left: 0;
+      background-color: #333;
+    }
+
+    .squad {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      margin-top: -15px;
+      margin-left: -15px;
+      border-radius: 50%;
+      position: absolute;
+      font-size: 20px;
+      -webkit-user-select: none;
+      cursor: pointer;
+    }
+
+    .portal {
+      width: 60px;
+      height: 60px;
+      font-size: 30px;
+      margin-top: -30px;
+      margin-left: -30px;
+    }
+
+    .arrow {
+      position: absolute;
+      height: 3px;
+      background-color: white;
+      transform-origin: 0 50%;
+    }
+
+    .grid-line {
+      background-color: rgba(255, 255, 255, 0.2);
+      position: absolute;
     }
   </style>
 </head>

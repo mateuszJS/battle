@@ -1,9 +1,10 @@
 use super::basic_utils::{BasicUtils, Line, Point};
 use super::obstacles_lazy_statics::ObstaclesLazyStatics;
 use crate::constants::{
-  MATH_PI, NORMAL_SQUAD_RADIUS, OBSTACLES_CELL_SIZE, OBSTACLES_MAP_HEIGHT, OBSTACLES_MAP_SCALE,
-  OBSTACLES_MAP_WIDTH,
+  MAP_HEIGHT, MAP_WIDTH, MATH_PI, NORMAL_SQUAD_RADIUS, OBSTACLES_CELL_SIZE, OBSTACLES_MAP_HEIGHT,
+  OBSTACLES_MAP_SCALE_X, OBSTACLES_MAP_SCALE_Y, OBSTACLES_MAP_WIDTH,
 };
+use crate::weapon_types::MAX_POSSIBLE_WEAPON_RANGE;
 
 const NUMBER_OF_PRECALCULATED_OFFSETS: usize = 4;
 const TRIANGLE_BASE_WIDTH: i16 = 140;
@@ -13,8 +14,8 @@ const DISTANCE_BETWEEN_ATTACKERS: f32 = 2.0 * NORMAL_SQUAD_RADIUS;
 const UNIT_INSIDE_OBSTACLE: u8 = 0;
 const SQUAD_INSIDE_OBSTACLE: u8 = 1;
 const IS_NOT_IN_OBSTACLE: u8 = 2;
-const MAX_WEAPON_RANGE: f32 = 1000.0;
-const NUMBER_OF_RANGE_BREAKPOINTS: usize = (MAX_WEAPON_RANGE / DISTANCE_BETWEEN_ATTACKERS) as usize;
+const NUMBER_OF_RANGE_BREAKPOINTS: usize =
+  (MAX_POSSIBLE_WEAPON_RANGE / DISTANCE_BETWEEN_ATTACKERS) as usize;
 
 type PositionPoint = (i16, i16);
 
@@ -36,6 +37,16 @@ impl CalcPositions {
     let obstacles_lines = ObstaclesLazyStatics::get_obstacles_lines();
     let mut number_of_intersections: usize = 0;
 
+    if p1.x.is_nan() || p1.y.is_nan() || p2.x.is_nan() || p2.y.is_nan() {
+      log!(
+        "collision_checking: {} - {} - {} - {}",
+        p1.x,
+        p1.y,
+        p2.x,
+        p2.y
+      );
+    }
+
     obstacles_lines.iter().for_each(|line| {
       if BasicUtils::check_intersection(&line_with_point, line) {
         number_of_intersections += 1;
@@ -47,8 +58,8 @@ impl CalcPositions {
 
   pub fn test((x, y): (i16, i16)) -> u8 {
     let precalculdated_obstacles_map = CalcPositions::get_precalculated_obstacles_map();
-    let index = (y as f32 * OBSTACLES_MAP_SCALE) as usize * OBSTACLES_MAP_WIDTH
-      + (x as f32 * OBSTACLES_MAP_SCALE as f32) as usize;
+    let index = (y as f32 * OBSTACLES_MAP_SCALE_Y) as usize * OBSTACLES_MAP_WIDTH
+      + (x as f32 * OBSTACLES_MAP_SCALE_X as f32) as usize;
     let precalculated_value = precalculdated_obstacles_map[index];
 
     precalculated_value
@@ -81,8 +92,8 @@ impl CalcPositions {
           .collect::<Vec<usize>>()
           .iter()
           .map(|index| {
-            let y = (index / OBSTACLES_MAP_WIDTH) as f32 / OBSTACLES_MAP_SCALE;
-            let x = (index % OBSTACLES_MAP_WIDTH) as f32 / OBSTACLES_MAP_SCALE;
+            let y = (index / OBSTACLES_MAP_WIDTH) as f32 / OBSTACLES_MAP_SCALE_Y;
+            let x = (index % OBSTACLES_MAP_WIDTH) as f32 / OBSTACLES_MAP_SCALE_X;
 
             let unit_will_collide_with_any_obstacle =
               check_cell_corners.iter().any(|(mod_x, mod_y)| {
@@ -118,9 +129,23 @@ impl CalcPositions {
   }
 
   pub fn get_is_point_inside_any_obstacle((x, y): (i16, i16), is_squad: bool) -> bool {
+    /*=====CHECK IF SQUAD/UNIT IS NOT OUT OF THE MAP======*/
+    let boundaries_offset = if is_squad {
+      NORMAL_SQUAD_RADIUS as i16
+    } else {
+      0
+    };
+    if x < boundaries_offset
+      || y < boundaries_offset
+      || x >= MAP_WIDTH as i16 - boundaries_offset
+      || y >= MAP_HEIGHT as i16 - boundaries_offset
+    {
+      return true;
+    }
+    /*=====CHECK IF SQUAD/UNIT IS NOT ON THE OBSTACLES======*/
     let precalculdated_obstacles_map = CalcPositions::get_precalculated_obstacles_map();
-    let index = (y as f32 * OBSTACLES_MAP_SCALE) as usize * OBSTACLES_MAP_WIDTH
-      + (x as f32 * OBSTACLES_MAP_SCALE as f32) as usize;
+    let index = (y as f32 * OBSTACLES_MAP_SCALE_Y) as usize * OBSTACLES_MAP_WIDTH
+      + (x as f32 * OBSTACLES_MAP_SCALE_X as f32) as usize;
     let precalculated_value = precalculdated_obstacles_map[index];
 
     if precalculated_value == IS_NOT_IN_OBSTACLE {
@@ -197,7 +222,7 @@ impl CalcPositions {
   ─────────────────  ┘
 
   └────────┬────────┘
-          B
+           B
 
   initial_x is toggling, once it's 0, next time B/2, and again 0, and so on and on
 

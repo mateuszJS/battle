@@ -3,13 +3,9 @@ import { Universe } from '../../crate/pkg/index'
 import { UniverseRepresentation } from '~/initGame'
 import Unit from '~/representation/Unit'
 import Factory from '~/representation/Factory'
-import {
-  addAbilitiesButton,
-  hideAbilitiesButtons,
-  selectAllSimilarAbilities,
-  deselectAllSimilarAbilities,
-  getAllSimilarAvailableAbilitiesIds,
-} from '~/buttons/abilities'
+import updateAbilitiesButtons from '~/buttons/abilities'
+import { RepresentationId } from '~/buttons/abilities/createIcon'
+import StrategicPoint from '~/representation/StrategicPoint'
 
 class SelectionController {
   private startPoint: null | Point
@@ -18,7 +14,7 @@ class SelectionController {
   private universeRepresentation: UniverseRepresentation
   private selectedUnits: Unit[]
   private selectedSquads: Uint32Array
-  private selectedAbilityType: number | null
+  private selectedAbilityType: RepresentationId | null
 
   constructor(universe: Universe, universeRepresentation: UniverseRepresentation) {
     this.universe = universe
@@ -46,14 +42,16 @@ class SelectionController {
     if (selectedEnemyUnitsIds.length === 0) return
 
     selectedEnemyUnitsIds.forEach(id => {
-      const unit = this.universeRepresentation[id] as Unit | Factory
+      const unit = this.universeRepresentation[id] as Unit | Factory | StrategicPoint
       unit.select()
     })
 
     setTimeout(() => {
       selectedEnemyUnitsIds.forEach(id => {
-        const unit = this.universeRepresentation[id] as Unit | Factory
-        unit.deselect()
+        const unit = this.universeRepresentation[id] as Unit | Factory | StrategicPoint
+        if (unit) {
+          unit.deselect()
+        }
       })
     }, 2000)
   }
@@ -81,32 +79,28 @@ class SelectionController {
         return
       }
       const unit = this.universeRepresentation[id] as Unit
-      unit.select()
+      if (unit) {
+        // update wasn't called yet, with new unit
+        unit.select()
+      }
       this.selectedUnits.push(unit)
       collectedUnits.push(id)
     })
-
-    addAbilitiesButton(this.universeRepresentation, iconsPayload, squadsIds, (abilityId: number) =>
-      this.selectAbility(abilityId),
-    )
-  }
-
-  private selectAbility(abilityId: number) {
-    window.app.stage.cursor = "url('assets/aim_icon.png'),auto"
-    selectAllSimilarAbilities(abilityId, Array.from(this.selectedSquads))
-    // select for all the squads with the same and available ability
-    this.selectedAbilityType = abilityId
   }
 
   private deselectAbility() {
-    deselectAllSimilarAbilities(this.selectedAbilityType, Array.from(this.selectedSquads))
     window.app.stage.cursor = 'default'
     this.selectedAbilityType = null
   }
 
+  private selectAbility = (abilityType: RepresentationId) => {
+    window.app.stage.cursor = "url('assets/aim_icon.png') 15 15,crosshair"
+    this.selectedAbilityType = abilityType
+  }
+
   public startSelection(point: Point) {
     if (this.selectedAbilityType) {
-      this.universe.use_ability(getAllSimilarAvailableAbilitiesIds(), point.x, point.y)
+      this.universe.use_ability(this.selectedSquads, this.selectedAbilityType, point.x, point.y)
       this.deselectAbility()
       return
     }
@@ -115,12 +109,19 @@ class SelectionController {
   }
 
   private clearSelection() {
-    this.selectedUnits.forEach(unit => unit.deselect())
+    this.selectedUnits.forEach(unit => unit && unit.deselect())
     this.selectedUnits = []
-    hideAbilitiesButtons()
+    this.selectedSquads = new Uint32Array()
   }
 
   public updateSelection({ x, y }: Point) {
+    updateAbilitiesButtons(
+      this.selectedSquads,
+      this.universe,
+      this.selectedAbilityType,
+      this.selectAbility,
+    )
+
     if (!this.startPoint) return
 
     this.clearSelection()

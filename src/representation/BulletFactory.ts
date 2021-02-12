@@ -1,6 +1,5 @@
 import { UniverseRepresentation } from '~/initGame'
 import { framesPeriods } from '~/representation/getSprites'
-import { disableAbility } from '~/buttons/abilities'
 import Unit from './Unit'
 
 const STANDARD_RIFLE = 1.0

@@ -3,6 +3,7 @@ use crate::constants::{
 };
 use crate::position_utils::PositionUtils;
 use crate::squad::Squad;
+use crate::squads_grid_manager::SquadsGrid;
 use crate::SquadsGridManager;
 use std::cell::{Ref, RefCell};
 use std::collections::HashMap;
@@ -11,7 +12,7 @@ use std::rc::{Rc, Weak};
 pub struct SquadsManager {}
 
 impl SquadsManager {
-  pub fn set_positions(squads: &Vec<&Rc<RefCell<Squad>>>, target: (f32, f32)) {
+  pub fn set_aggressor_positions(squads: &Vec<&Rc<RefCell<Squad>>>, target: (f32, f32)) {
     let squads_out_of_range = squads
       .into_iter()
       .filter_map(|ref_cell_squad| {
@@ -40,8 +41,29 @@ impl SquadsManager {
       });
   }
 
+  pub fn set_positions_to_use_ability(
+    squads: &Vec<&Rc<RefCell<Squad>>>,
+    target: (f32, f32),
+    range: f32,
+  ) {
+    let mut squads_out_of_range = squads
+      .into_iter()
+      .filter_map(|ref_cell_squad| {
+        let squad = ref_cell_squad.borrow_mut();
+        let (x, y) = squad.shared.center_point;
+        if (x - target.0).hypot(y - target.1) + NORMAL_SQUAD_RADIUS < range {
+          None
+        } else {
+          Some(*ref_cell_squad)
+        }
+      })
+      .collect::<Vec<&Rc<RefCell<Squad>>>>();
+
+    SquadsManager::set_positions_by_range(&mut squads_out_of_range, target, range)
+  }
+
   // fn divide_squads_by_position(squads: Vec<&Rc<RefCell<Squad>>>) -> Vec<(u16, Vec<&Rc<RefCell<Squad>>>)> {
-  // TODO: if will be necessary we can implement it, but don't have to slow down whole app for just this effect
+  // NOTE: if will be necessary we can implement it, but don't have to slow down whole app for just this effect
   // }
 
   fn divide_squads_by_range(
@@ -63,11 +85,7 @@ impl SquadsManager {
     squads_divided_by_range
   }
 
-  pub fn set_positions_by_range(
-    squads: &mut Vec<&Rc<RefCell<Squad>>>,
-    target: (f32, f32),
-    range: f32,
-  ) {
+  fn set_positions_by_range(squads: &mut Vec<&Rc<RefCell<Squad>>>, target: (f32, f32), range: f32) {
     let mut positions = PositionUtils::get_attackers_position(
       squads.len(),
       SquadsManager::calc_army_center(&squads),
@@ -104,10 +122,7 @@ impl SquadsManager {
     (sum_x / len, sum_y / len)
   }
 
-  fn search_for_enemy(
-    ref_cell_squad: &mut Rc<RefCell<Squad>>,
-    squads_grid: &HashMap<usize, Vec<Weak<RefCell<Squad>>>>,
-  ) {
+  fn search_for_enemy(ref_cell_squad: &mut Rc<RefCell<Squad>>, squads_grid: &SquadsGrid) {
     // Current secondary aim can be totally okay
     let (faction_id, squad_position, squad_weapon, is_squad_running, option_secondary_aim_id) = {
       let squad = ref_cell_squad.borrow();
@@ -206,7 +221,7 @@ impl SquadsManager {
   pub fn manage_hunters(
     all_squads: &mut Vec<Rc<RefCell<Squad>>>,
     hunters_aims: &HashMap<u32, (Weak<RefCell<Squad>>, (f32, f32))>,
-    squads_grid: &HashMap<usize, Vec<Weak<RefCell<Squad>>>>,
+    squads_grid: &SquadsGrid,
   ) -> HashMap<u32, (Weak<RefCell<Squad>>, (f32, f32))> {
     /*=======COLLECT_ENEMIES_THAT_MOVED_AND_THEIR_NEW_POSITION=====*/
     let mut enemies_that_moved: Vec<(u32, (f32, f32))> = vec![]; // value is to check, if we are using still this enemy
@@ -264,7 +279,7 @@ impl SquadsManager {
     /*=====CONSUME GROUPED OUR SQUADS AND CREATE NEW HUNTERS HASH MAP======*/
     let mut new_hunters_aims: HashMap<u32, (Weak<RefCell<Squad>>, (f32, f32))> = HashMap::new();
     for (enemy_id, (was_moved, squads_list)) in used_enemies {
-      if squads_list.len() > 1 {
+      if squads_list.len() > 0 {
         let enemy_position = {
           let first_squad = squads_list[0].borrow();
           let weak_aim = &first_squad.shared.aim;
@@ -273,7 +288,7 @@ impl SquadsManager {
           curr_enemy_position
         };
         if was_moved {
-          SquadsManager::set_positions(&squads_list, enemy_position);
+          SquadsManager::set_aggressor_positions(&squads_list, enemy_position);
         }
       }
     }

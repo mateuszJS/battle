@@ -22,6 +22,19 @@ impl TrackUtils {
 
     [&start_point, &end_point].iter().for_each(|track_point| {
       obstacles_points.iter().for_each(|obstacle_point| {
+        if track_point.x.is_nan()
+          || track_point.y.is_nan()
+          || obstacle_point.x.is_nan()
+          || obstacle_point.y.is_nan()
+        {
+          log!(
+            "START checking intersection: {} - {} - {} - {}",
+            track_point.x,
+            track_point.y,
+            obstacle_point.x,
+            obstacle_point.y
+          );
+        }
         // ------------START checking intersection-------------------
         let new_line = Line {
           p1: track_point,
@@ -53,6 +66,19 @@ impl TrackUtils {
   }
 
   pub fn calculate_track<'a>(start_point: &'a Point, end_point: &'a Point) -> Vec<&'a Point> {
+    if start_point.x.is_nan()
+      || start_point.y.is_nan()
+      || end_point.x.is_nan()
+      || end_point.y.is_nan()
+    {
+      log!(
+        "calculate_track: {} - {} - {} - {}",
+        start_point.x,
+        start_point.y,
+        end_point.x,
+        end_point.y
+      );
+    }
     let obstacles_lines = ObstaclesLazyStatics::get_obstacles_lines();
     // ------------START checking intersection-------------------
     let direct_connection_line = Line {

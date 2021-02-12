@@ -1,5 +1,4 @@
 use crate::constants::MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS;
-use crate::id_generator::IdGenerator;
 use crate::position_utils::PositionUtils;
 use crate::squad_types::{get_squad_details, SquadDetails, SquadType};
 use crate::unit::{Unit, STATE_DIE};
@@ -9,8 +8,9 @@ use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 
 pub struct SquadUnitSharedDataSet {
-  pub any_unit_started_using_ability: bool, // used in unit, only for jump
-  pub ability_target: Option<(f32, f32)>,   // grenade ability will remove it inside the unit
+  pub faction_id: u32,
+  pub any_unit_started_using_ability: bool,
+  pub ability_target: Option<(f32, f32)>, // grenade ability will remove it inside the unit
   pub center_point: (f32, f32),
   pub track: Vec<(f32, f32)>,
   pub aim: Weak<RefCell<Squad>>,
@@ -18,7 +18,7 @@ pub struct SquadUnitSharedDataSet {
   pub weapon: &'static Weapon,
 }
 
-struct TaskTodo {
+pub struct TaskTodo {
   ability_target: Option<(f32, f32)>,
   track_destination: Option<(f32, f32)>,
   aim: Weak<RefCell<Squad>>,
@@ -27,30 +27,39 @@ struct TaskTodo {
 pub struct Squad {
   pub id: u32,
   pub faction_id: u32,
-  is_during_keeping_coherency: bool,
   pub members: Vec<Rc<RefCell<Unit>>>,
   pub shared: SquadUnitSharedDataSet,
   pub squad_details: &'static SquadDetails,
+  pub ability_cool_down: u16,
+  is_during_keeping_coherency: bool,
   task_todo: TaskTodo,
   require_check_correctness: bool,
+
+  // useful only for strategic points
+  pub all_faction_ids_around: Vec<u32>,
+  pub capturing_progress: f32,
 }
 
 impl Squad {
-  pub fn new(faction_id: u32, squad_type: SquadType) -> Squad {
+  pub fn new(faction_id: u32, id: u32, squad_type: SquadType) -> Squad {
     let details = get_squad_details(&squad_type);
     Squad {
-      id: IdGenerator::generate_id(),
+      id,
       faction_id,
       members: vec![],
       squad_details: details,
       is_during_keeping_coherency: false,
       require_check_correctness: false,
+      all_faction_ids_around: vec![],
+      capturing_progress: 0.0,
+      ability_cool_down: 0,
       task_todo: TaskTodo {
         ability_target: None,
         track_destination: None,
         aim: Weak::new(),
       },
       shared: SquadUnitSharedDataSet {
+        faction_id,
         any_unit_started_using_ability: false,
         ability_target: None,
         center_point: (0.0, 0.0),
@@ -76,23 +85,40 @@ impl Squad {
       });
     let members_len = members.len() as f32;
     shared.center_point = (sum_x / members_len, sum_y / members_len);
+
+    if shared.center_point.0.is_nan() || shared.center_point.1.is_nan() {
+      log!(
+        "squad.rs update_center: {} {} {}",
+        sum_x,
+        sum_y,
+        members_len,
+      );
+      members.iter().for_each(|ref_cell_unit| {
+        let unit = ref_cell_unit.borrow();
+        log!("{:?} {:?}", (unit.x, unit.y), unit.state);
+      });
+    }
   }
 
   pub fn update(&mut self, world: &mut World) {
-    let shared = &mut self.shared;
-
     if self.require_check_correctness {
-      self
-        .members
-        .iter_mut()
-        .for_each(|unit| unit.borrow_mut().set_correct_state(shared));
+      self.check_members_correctness();
       self.require_check_correctness = false;
-    }
+    };
 
-    self
-      .members
+    let Self {
+      ref mut members,
+      ref mut shared,
+      ..
+    } = self;
+
+    members
       .iter_mut()
       .for_each(|unit| unit.borrow_mut().update(shared, &mut world.bullets_manager));
+
+    if self.ability_cool_down != 0 {
+      self.ability_cool_down -= 1;
+    }
   }
 
   pub fn get_representation(&self) -> Vec<f32> {
@@ -144,6 +170,14 @@ impl Squad {
 
   fn add_target(&mut self, destination: (f32, f32), keep_aim_and_ability_target: bool) {
     self.reset_state(keep_aim_and_ability_target);
+
+    if self.shared.center_point.0.is_nan() || self.shared.center_point.1.is_nan() {
+      log!(
+        "squad.rs add_target: {} {}",
+        self.shared.center_point.0,
+        self.shared.center_point.1
+      );
+    }
 
     self.shared.track = PositionUtils::get_track(
       self.shared.center_point.0,
@@ -210,17 +244,21 @@ impl Squad {
   }
 
   fn is_taking_new_task_disabled(&self) -> bool {
-    self.is_during_keeping_coherency
-      || (self.shared.any_unit_started_using_ability
-        && !self.has_all_members_finish_using_ability())
+    self.is_during_keeping_coherency || self.shared.any_unit_started_using_ability
   }
 
   fn has_all_members_finish_using_ability(&self) -> bool {
-    // some abilities don't have to be used by all members!
-    !self
-      .members
-      .iter()
-      .any(|member| !member.borrow().has_finished_using_ability)
+    if self.squad_details.ability.called_by_one_members {
+      self
+        .members
+        .iter()
+        .any(|member| member.borrow().has_finished_using_ability)
+    } else {
+      !self
+        .members
+        .iter()
+        .any(|member| !member.borrow().has_finished_using_ability)
+    }
   }
 
   fn store_current_task_as_todo_task(&mut self) {
@@ -260,6 +298,7 @@ impl Squad {
     self.remove_died_members();
     /*=================USING ABILITY START===================*/
     if self.shared.any_unit_started_using_ability {
+      self.ability_cool_down = self.squad_details.ability.reload_time;
       if self.has_all_members_finish_using_ability() {
         self.shared.ability_target = None;
         self.shared.any_unit_started_using_ability = false;
@@ -291,9 +330,18 @@ impl Squad {
       }
     }
     /*=================KEEPING COHERENCY END===================*/
+    self.check_members_correctness();
+  }
 
-    self.members.iter().for_each(|ref_cell_unit| {
-      ref_cell_unit.borrow_mut().set_correct_state(&self.shared);
+  fn check_members_correctness(&mut self) {
+    let Self {
+      ref mut members,
+      ref mut shared,
+      ..
+    } = self;
+
+    members.iter_mut().for_each(|ref_cell_unit| {
+      ref_cell_unit.borrow_mut().set_correct_state(shared);
     });
   }
 
@@ -339,5 +387,9 @@ impl Squad {
       .members
       .iter_mut()
       .for_each(|member| member.borrow_mut().aim = Weak::new());
+  }
+
+  pub fn get_influence(&self) -> f32 {
+    self.members.len() as f32 * self.squad_details.influence_value
   }
 }

@@ -12,12 +12,13 @@ pub struct Weapon {
   pub shoot_time: u16,
   pub scatter: f32,
   pub bullets_speed: f32,
-  pub damage: u8,
+  pub damage: f32,
   pub representation_id: f32,
   pub explosion_range: f32,
   pub range: f32, // between <DISTANCE_BETWEEN_ATTACKERS, MAX_WEAPON_RANGE>  from calc_positions
   pub can_shoot_during_running: bool,
   pub max_angle_during_run: f32,
+  pub is_hitting_allies: bool,
 }
 
 pub static STANDARD_RIFLE_DETAILS: Weapon = Weapon {
@@ -27,12 +28,13 @@ pub static STANDARD_RIFLE_DETAILS: Weapon = Weapon {
   shoot_time: 40,
   scatter: 0.3, // (smaller -> more precise)
   bullets_speed: 10.0,
-  damage: 10,
+  damage: 10.0,
   representation_id: 1.0,
   explosion_range: 0.0,
   range: 600.0,
   can_shoot_during_running: true,
   max_angle_during_run: 0.7,
+  is_hitting_allies: false,
 };
 
 pub static LASER_RIFLE_DETAILS: Weapon = Weapon {
@@ -42,12 +44,13 @@ pub static LASER_RIFLE_DETAILS: Weapon = Weapon {
   shoot_time: 40,
   scatter: 0.3, // (smaller -> more precise)
   bullets_speed: 10.0,
-  damage: 10,
+  damage: 10.0,
   representation_id: 1.0,
   explosion_range: 0.0,
   range: 400.0,
   can_shoot_during_running: true,
   max_angle_during_run: 0.7,
+  is_hitting_allies: false,
 };
 
 pub static GRENADE_DETAILS: Weapon = Weapon {
@@ -55,14 +58,15 @@ pub static GRENADE_DETAILS: Weapon = Weapon {
   chances_to_reload: 0.0,
   reload_time: 0,
   shoot_time: 0,
-  scatter: 0.0, // (smaller -> more precise)
-  bullets_speed: 5.0,
-  damage: 30,
+  scatter: 0.0,
+  bullets_speed: 7.5,
+  damage: 30.0,
   representation_id: 2.0,
   explosion_range: 200.0,
-  range: 300.0,
+  range: 0.0,
   can_shoot_during_running: false,
   max_angle_during_run: 0.0,
+  is_hitting_allies: true,
 };
 
 pub static HIT_THE_GROUND: Weapon = Weapon {
@@ -70,14 +74,15 @@ pub static HIT_THE_GROUND: Weapon = Weapon {
   chances_to_reload: 0.0,
   reload_time: 0,
   shoot_time: 0,
-  scatter: 0.0, // (smaller -> more precise)
+  scatter: 0.0,
   bullets_speed: 1.0,
-  damage: 15,
+  damage: 15.0,
   representation_id: 3.0,
   explosion_range: 80.0,
-  range: 900.0,
+  range: 0.0,
   can_shoot_during_running: false,
   max_angle_during_run: 0.0,
+  is_hitting_allies: false,
 };
 
 pub static NON_WEAPON: Weapon = Weapon {
@@ -87,13 +92,18 @@ pub static NON_WEAPON: Weapon = Weapon {
   shoot_time: 0,
   scatter: 0.0,
   bullets_speed: 0.0,
-  damage: 0,
+  damage: 0.0,
   representation_id: 0.0,
   explosion_range: 0.0,
   range: 0.0,
   can_shoot_during_running: false,
   max_angle_during_run: 0.0,
+  is_hitting_allies: false,
 };
+
+// NOTE: always remember to update this const
+// also it's max range of abilities!
+pub const MAX_POSSIBLE_WEAPON_RANGE: f32 = 900.0;
 
 pub fn get_weapon_details(weapon_type: &WeaponType) -> &'static Weapon {
   match *weapon_type {

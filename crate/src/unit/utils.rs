@@ -16,6 +16,10 @@ impl Utils {
     // time = strength * 0.95.powi(x) < 0.035
     let time = (FLY_MIN_SPEED / strength).log(FLY_DECELERATION).ceil();
 
+    if time <= std::f32::EPSILON {
+      return (0.0, 0.0); // to avoid dividing by zero let factor = distance / all_speeds_sum;
+    }
+
     // to calculate all_speeds_sum we are using geometric sequence
     // all_speeds_sum = strength * (1 - 0.95.powi(time)) / (1 - 0.95)
     let all_speeds_sum = strength * (1.0 - FLY_DECELERATION.powf(time)) / (1.0 - FLY_DECELERATION);
@@ -29,7 +33,7 @@ impl Utils {
     // in case if distance have to be shorted bc of the obstacles
     let distance_portion = all_speeds_sum / FLY_DISTANCE_PRECISION;
 
-    while distance > 0.0 {
+    while distance > std::f32::EPSILON {
       let x = (angle.sin() * distance + x) as i16;
       let y = (-angle.cos() * distance + y) as i16;
       if CalcPositions::get_is_point_inside_any_obstacle((x, y), false) {
@@ -40,6 +44,18 @@ impl Utils {
     }
 
     let factor = distance / all_speeds_sum;
+    if angle.is_nan() || strength.is_nan() || factor.is_nan() {
+      log!(
+        "get_fly_mods: {} * {} * {} * {} * {} * {} * {}",
+        angle,
+        strength,
+        factor,
+        time,
+        all_speeds_sum,
+        distance,
+        distance_portion
+      ); // index_bg.js?0d72:329 get_fly_mods: -0.7266991 - 0.03401947 - NaN
+    }
     // used just strength * factor for simplicity, but to be more precise
     // we should do reverse engineering up to the time calculation
     (
@@ -49,6 +65,15 @@ impl Utils {
   }
 
   pub fn check_if_can_go_to_point(x: f32, y: f32, point: (f32, f32)) -> bool {
+    if x.is_nan() || y.is_nan() || point.0.is_nan() || point.1.is_nan() {
+      log!(
+        "check_if_can_go_to_point: {} - {} - {} - {}",
+        x,
+        y,
+        point.0,
+        point.1
+      );
+    }
     // function used to check, if unit can run directly into next target
     // (not current one, bc in most cases it's current position of the squad)
     let obstacles_lines = ObstaclesLazyStatics::get_obstacles_lines();
