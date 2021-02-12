@@ -95,7 +95,6 @@ class SelectionController {
 
   private selectAbility = (abilityType: RepresentationId) => {
     window.app.stage.cursor = "url('assets/aim_icon.png') 15 15,crosshair"
-    // TODO: fix placement, right now real center of the cursor is the top left corner
     this.selectedAbilityType = abilityType
   }
 

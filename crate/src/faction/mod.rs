@@ -166,7 +166,6 @@ impl Faction {
   }
 
   pub fn task_add_target(&mut self, squads_ids: &Vec<u32>, target_x: f32, target_y: f32) {
-    // TODO: Check if suqad can jump away
     let position = PositionUtils::get_squads_positions(squads_ids.len(), target_x, target_y);
     let mut index = 0;
     self.squads.iter_mut().for_each(|ref_cell_squad| {

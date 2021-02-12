@@ -101,7 +101,7 @@ pub static NON_WEAPON: Weapon = Weapon {
   is_hitting_allies: false,
 };
 
-// TODO: always remember to update this const
+// NOTE: always remember to update this const
 // also it's max range of abilities!
 pub const MAX_POSSIBLE_WEAPON_RANGE: f32 = 900.0;
 

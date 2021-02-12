@@ -15,7 +15,7 @@ pub const THRESHOLD_SIGNIFICATION_URGENT_PURPOSE: f32 = 3.6;
 /* 3.6 =
   + max of base influence (ENEMY_SQUADS_MAX_BASE_SIGNIFICATION)
   + max additional influence MET_DANGER_PURPOSE_MAX_ADDITIONAL_SIGNIFICATION
-  + 0.1
+  + 0.1 signification which comes from distance to our portal
 */
 
 /*
@@ -27,7 +27,7 @@ COUPLE OF USEFUL RULES RELATED TO SETTING SIGNIFICATION
 pub struct SignificationCalculator {
   faction_id: u32,
   attack_enemy_place_mod: f32,
-  run_away_enemy_place_mod: f32,
+  already_involved_in_attack_enemy_place_mod: f32,
 }
 
 impl SignificationCalculator {
@@ -35,7 +35,7 @@ impl SignificationCalculator {
     SignificationCalculator {
       faction_id,
       attack_enemy_place_mod: 1.2,
-      run_away_enemy_place_mod: 0.8,
+      already_involved_in_attack_enemy_place_mod: 0.8,
     }
   }
 
@@ -102,8 +102,11 @@ impl SignificationCalculator {
     self.attack_enemy_place_mod * enemy_place_influence
   }
 
-  pub fn running_away_influence_enemy_place(&self, enemy_place_influence: f32) -> f32 {
-    self.run_away_enemy_place_mod * enemy_place_influence
+  pub fn already_involved_in_attack_influence_enemy_place(
+    &self,
+    enemy_place_influence: f32,
+  ) -> f32 {
+    self.already_involved_in_attack_enemy_place_mod * enemy_place_influence
   }
 
   pub fn how_much_squad_fits_to_take_purpose(
@@ -118,10 +121,5 @@ impl SignificationCalculator {
       .max(1.0 / our_squad.id as f32); // should be zero, but to keep always the same order, used squad.id to calc small (< 1.0) diff
 
     -(distance_to_purpose / our_squad.squad_details.movement_speed)
-  }
-
-  pub fn get_purpose_sort_value(&self, purpose: &EnhancedPurpose) -> f32 {
-    purpose.signification
-    // TODO: handle influence, how far is from our portal
   }
 }

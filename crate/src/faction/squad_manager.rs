@@ -63,7 +63,7 @@ impl SquadsManager {
   }
 
   // fn divide_squads_by_position(squads: Vec<&Rc<RefCell<Squad>>>) -> Vec<(u16, Vec<&Rc<RefCell<Squad>>>)> {
-  // TODO: if will be necessary we can implement it, but don't have to slow down whole app for just this effect
+  // NOTE: if will be necessary we can implement it, but don't have to slow down whole app for just this effect
   // }
 
   fn divide_squads_by_range(

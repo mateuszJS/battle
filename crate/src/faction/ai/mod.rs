@@ -70,7 +70,7 @@ struct MetEnemyOnTrack {
 pub struct DangerPlace<'a> {
   enemy_place: &'a Place,
   additional_signification: f32,
-  our_places: Vec<&'a Place>, // TODO: is it needed?
+  our_places: Vec<&'a Place>,
   is_attacking_us: bool,
 }
 
@@ -149,18 +149,21 @@ impl ArtificialIntelligence {
     let (safe_places, danger_places) =
       SafetyManager::get_info_about_safety(self.faction_id, all_factions_info, &self.signi_calc);
 
+    let our_portal_place = safe_places
+      .iter()
+      .find(|place| place.place_type == PlaceType::Portal)
+      .unwrap();
     let mut new_purposes = PurposesManager::get_purposes(
       self.faction_id,
       &self.signi_calc,
       all_factions_info,
-      // &self.current_plans,
-      // &our_squads,
       &danger_places,
+      our_portal_place,
     );
 
     new_purposes.sort_by(|a_purpose, b_purpose| {
-      (self.signi_calc.get_purpose_sort_value(&b_purpose))
-        .partial_cmp(&self.signi_calc.get_purpose_sort_value(&a_purpose))
+      (b_purpose.signification)
+        .partial_cmp(&a_purpose.signification)
         .unwrap()
     });
 
@@ -185,17 +188,29 @@ impl ArtificialIntelligence {
 
     //=================HANDLE DANGER PLACES====================
     danger_places.iter().for_each(|danger_place| {
-      if !danger_place.is_attacking_us {
-        return;
-      }
       let enemy_handled = final_plans
         .iter()
         .any(|plan| danger_place.enemy_place.id == plan.place_id);
 
       if !enemy_handled {
         danger_place.our_places.iter().for_each(|our_place| {
-          if danger_place.enemy_place.influence > our_place.influence {
-            // TODO: include signi_calc here!
+          if !danger_place.is_attacking_us {
+            // if enemy is attacking us, then pass the guard
+            let distance = (danger_place.enemy_place.x - our_place.x)
+              .hypot(danger_place.enemy_place.y - our_place.y);
+
+            if danger_place.enemy_place.influence < 3.0 * our_place.influence
+              || distance > MAX_POSSIBLE_WEAPON_RANGE
+            {
+              return;
+            }
+          }
+
+          if self
+            .signi_calc
+            .already_involved_in_attack_influence_enemy_place(danger_place.enemy_place.influence) // 0.8 * enemy_influence
+            > our_place.influence
+          {
             // and also handle case when one our place is attacked by multiple enemies! Not only one place with enemy
             let best_safe_place_index = ArtificialIntelligence::find_index_of_best_place_to_run(
               our_place.x,
@@ -219,7 +234,7 @@ impl ArtificialIntelligence {
 
                 if squad.squad_details.ability.usage.transport
                   && squad.ability_cool_down == 0
-                  && distance_to_best_safe_place > squad.squad_details.ability.range / 2.0
+                  && distance_to_best_safe_place > squad.squad_details.ability.range / 3.0
                 {
                   squads_to_cast_ability.push(squad.id)
                 } else {
@@ -239,7 +254,6 @@ impl ArtificialIntelligence {
             });
 
             if squads_to_cast_ability.len() > 0 {
-              // check if type of the ability is transport
               final_plans.push(Plan {
                 purpose_type: PurposeType::Ability,
                 place_id: best_safe_place_position.id,

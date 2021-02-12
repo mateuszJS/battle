@@ -1,8 +1,9 @@
 use super::signification_calculator::THRESHOLD_SIGNIFICATION_URGENT_PURPOSE;
 use super::SignificationCalculator;
 use super::{
-  DangerPlace, EnhancedPurpose, FactionInfo, MetEnemyOnTrack, PlaceType, Plan, PurposeType,
+  DangerPlace, EnhancedPurpose, FactionInfo, MetEnemyOnTrack, Place, PlaceType, Plan, PurposeType,
 };
+use crate::constants::{MAP_HEIGHT, MAP_WIDTH};
 use crate::position_utils::PositionUtils;
 use crate::squads_grid_manager::{SquadsGrid, SquadsGridManager};
 use crate::weapon_types::MAX_POSSIBLE_WEAPON_RANGE;
@@ -68,13 +69,12 @@ impl PurposesManager {
     our_faction_id: u32,
     signi_calc: &SignificationCalculator,
     all_factions_info: &Vec<FactionInfo>,
-    // current_plans: &Vec<Plan>,
-    // our_squads: &Vec<Ref<Squad>>,
     danger_places: &Vec<DangerPlace>,
+    our_portal_place: &Place,
   ) -> Vec<EnhancedPurpose> {
+    let MAX_DISTANCE: f32 = MAP_WIDTH.hypot(MAP_HEIGHT);
     let mut new_id = -1_isize;
-    // TODO: add signification base on distance between purpose and portal, but it's very little
-    // just to make it little bit bigger than other purposes at the end of map!
+
     all_factions_info
       .iter()
       .flat_map(|faction_info| {
@@ -118,10 +118,14 @@ impl PurposesManager {
 
               new_id += 1;
 
+              let distance_to_our_portal =
+                (our_portal_place.x - place.x).hypot(our_portal_place.y - place.y);
+              let distance_factor = 1.0 - distance_to_our_portal / MAX_DISTANCE;
+
               EnhancedPurpose {
                 id: new_id as usize,
                 purpose_type,
-                signification,
+                signification: signification + distance_factor * 0.1,
                 place: place.clone(),
                 is_attacking_us,
               }
@@ -141,7 +145,7 @@ impl PurposesManager {
     let mut potential_abilities_targets = vec![];
     purpose.place.squads.iter().for_each(|ref_cell_squad| {
       let enemy_squad_pos = ref_cell_squad.borrow().shared.center_point;
-      // TODO: enemy_squad_pos check if members are far away, or close ot the center!
+
       let is_too_close_to_other_ability_effects = potential_abilities_targets
         .iter()
         .any(|(x, y)| (enemy_squad_pos.0 - x).hypot(enemy_squad_pos.1 - y) < ABILITY_RANGE);
@@ -280,7 +284,7 @@ impl PurposesManager {
       purpose.is_attacking_us
       && our_squads.len() == used_squads_ids.len()
       && collected_our_influence
-        >= signi_calc.running_away_influence_enemy_place(purpose.place.influence) // if we already attacked, and can take purpose with smaller army
+        >= signi_calc.already_involved_in_attack_influence_enemy_place(purpose.place.influence) // if we already attacked, and can take purpose with smaller army
     ) {
       let squads_positions = our_squads
         .iter()

@@ -61,7 +61,6 @@ impl StrategicPoint {
         }
       }
     }
-    // TODO: handle case, bc point is 1.0 progress and in neutral or someone else, hen significaion is hight, but shouldn't!
     strategic_point_squad.all_faction_ids_around = all_faction_ids_around;
 
     /* when progress will go to zero, then point is captured by other faction */
