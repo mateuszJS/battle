@@ -22,7 +22,7 @@ const STATE_CHASING_BASE = 9000
 const getMovieClipCreator = (framesData: readonly FrameDataEntry[]) => () => {
   const framesPeriods = getFramePeriods(framesData)
   const frames = Object.values(framesPeriods).reduce(
-    (result, { sides, length, anchor, getName }) => [...result, ...getFrames(sides * length, anchor, getName)],
+    (result, { sides, length, getName }) => [...result, ...getFrames(sides * length, getName)],
     [],
   )
 
@@ -36,6 +36,7 @@ const getMovieClipCreator = (framesData: readonly FrameDataEntry[]) => () => {
       const currentPhase = STATE_IDLE_BASE + Math.round(angle * 100)
       if (previousPhase !== currentPhase) {
         previousPhase = currentPhase
+        movieClip.anchor.set(framesPeriods.IDLE.anchor.x, framesPeriods.IDLE.anchor.y)
         movieClip.onFrameChange = null
         const indexOfStartingFrame = getIndexOfStartingFrame(angle, framesPeriods.IDLE)
         movieClip.gotoAndStop(indexOfStartingFrame)
@@ -45,6 +46,7 @@ const getMovieClipCreator = (framesData: readonly FrameDataEntry[]) => () => {
       const currentPhase = STATE_RUN_BASE + Math.round(angle * 100)
       if (previousPhase !== currentPhase) {
         previousPhase = currentPhase
+        movieClip.anchor.set(framesPeriods.RUN.anchor.x, framesPeriods.RUN.anchor.y)
         const indexOfStartingFrame = getIndexOfStartingFrame(angle, framesPeriods.RUN)
         const indexOfLastFrame = indexOfStartingFrame + framesPeriods.RUN.length - 1
         movieClip.onFrameChange = getCallbackGoToFirstOnLastFrame(
@@ -59,6 +61,7 @@ const getMovieClipCreator = (framesData: readonly FrameDataEntry[]) => () => {
       const currentPhase = STATE_CHASING_BASE + Math.round(angle * 100)
       if (previousPhase !== currentPhase) {
         previousPhase = currentPhase
+        movieClip.anchor.set(framesPeriods.RUN.anchor.x, framesPeriods.RUN.anchor.y)
         const indexOfStartingFrame = getIndexOfStartingFrame(angle, framesPeriods.RUN)
         const indexOfLastFrame = indexOfStartingFrame + framesPeriods.RUN.length - 1
         movieClip.onFrameChange = getCallbackGoToFirstOnLastFrame(
@@ -74,6 +77,7 @@ const getMovieClipCreator = (framesData: readonly FrameDataEntry[]) => () => {
 
       if (previousPhase !== currentPhase) {
         previousPhase = currentPhase
+        movieClip.anchor.set(framesPeriods.SHOOT.anchor.x, framesPeriods.SHOOT.anchor.y)
         movieClip.onFrameChange = null
         const indexOfStartingFrame = getIndexOfStartingFrame(angle, framesPeriods.SHOOT)
         movieClip.gotoAndStop(indexOfStartingFrame)
@@ -99,6 +103,7 @@ const getMovieClipCreator = (framesData: readonly FrameDataEntry[]) => () => {
       if (currentFrame < framesPeriods.FLY.first || currentFrame > framesPeriods.FLY.last) {
         previousPhase = STATE_FLY_UP_BASE
         movieClip.onFrameChange = null
+        movieClip.anchor.set(framesPeriods.FLY.anchor.x, framesPeriods.FLY.anchor.y)
         movieClip.animationSpeed = 0.3
         movieClip.gotoAndPlay(indexOfStartingFrame)
       } else if (
@@ -122,10 +127,12 @@ const getMovieClipCreator = (framesData: readonly FrameDataEntry[]) => () => {
         indexOfStartingFrame + Math.floor(getUppingProgress * (framesPeriods.GETUP.length - 1))
       movieClip.gotoAndStop(indexOfCurrentFrame)
       previousPhase = STATE_GETUP_BASE
+      movieClip.anchor.set(framesPeriods.GETUP.anchor.x, framesPeriods.GETUP.anchor.y)
     },
     goToDie(angle: number, clearUnitArtefacts: VoidFunction) {
       if (previousPhase !== STATE_DIE_BASE) {
         previousPhase = STATE_DIE_BASE
+        movieClip.anchor.set(framesPeriods.FLY.anchor.x, framesPeriods.FLY.anchor.y)
         const indexOfStartingFrame = getIndexOfStartingFrame(angle, framesPeriods.FLY)
 
         movieClip.onFrameChange = getCallbackStopOnLastFrameAndRunCustomCallback(

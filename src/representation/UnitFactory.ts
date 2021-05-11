@@ -71,10 +71,8 @@ class UnitsFactory {
 
     const frameUpdaters = {
       goToIdle(angle: number) {
-        // troopBodyFrameUpdaters.goToIdle(angle)
-        // regularAccessoriesFrameUpdaters.goToIdle(angle)
-        troopBodyFrameUpdaters.goToRun(angle)
-        regularAccessoriesFrameUpdaters.goToRun(angle)
+        troopBodyFrameUpdaters.goToIdle(angle)
+        regularAccessoriesFrameUpdaters.goToIdle(angle)
       },
       goToRun(angle: number) {
         troopBodyFrameUpdaters.goToRun(angle)

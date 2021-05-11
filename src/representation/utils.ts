@@ -9,14 +9,12 @@ const getAngleOffsetInFrames = (angle: number, numberOfSides: number) => {
   return Math.floor(safeAngle / singleAngleSlice)
 }
 
-export const getFrames = (numberOfIteration: number, anchor: Point, getTextureName: (id: string) => string) => {
+export const getFrames = (numberOfIteration: number, getTextureName: (id: string) => string) => {
   const frames: PIXI.Texture[] = []
   for (let i = 0; i < numberOfIteration; i++) {
     const formattedNumber = getFormattedNumber(i)
     const textureName = getTextureName(formattedNumber)
-    const texture = PIXI.Texture.from(textureName)
-    texture.defaultAnchor.set(anchor.x, anchor.y)
-    frames.push(texture)
+    frames.push(PIXI.Texture.from(textureName))
   }
   return frames
 }

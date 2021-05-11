@@ -1,0 +1,272 @@
+{
+  "frames": {
+    "rri_0000": {
+      "frame": {
+        "x": 163,
+        "y": 60,
+        "w": 62,
+        "h": 82
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 62,
+        "h": 82
+      },
+      "sourceSize": {
+        "w": 62,
+        "h": 84
+      }
+    },
+    "rri_0001": {
+      "frame": {
+        "x": 83,
+        "y": 124,
+        "w": 62,
+        "h": 84
+      },
+      "rotated": true,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 62,
+        "h": 84
+      },
+      "sourceSize": {
+        "w": 62,
+        "h": 84
+      }
+    },
+    "rri_0002": {
+      "frame": {
+        "x": 83,
+        "y": 188,
+        "w": 62,
+        "h": 84
+      },
+      "rotated": true,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 62,
+        "h": 84
+      },
+      "sourceSize": {
+        "w": 62,
+        "h": 84
+      }
+    },
+    "rri_0003": {
+      "frame": {
+        "x": 169,
+        "y": 124,
+        "w": 62,
+        "h": 83
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 1,
+        "w": 62,
+        "h": 83
+      },
+      "sourceSize": {
+        "w": 62,
+        "h": 84
+      }
+    },
+    "rri_0004": {
+      "frame": {
+        "x": 169,
+        "y": 188,
+        "w": 62,
+        "h": 81
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 3,
+        "w": 62,
+        "h": 81
+      },
+      "sourceSize": {
+        "w": 62,
+        "h": 84
+      }
+    },
+    "rri_0005": {
+      "frame": {
+        "x": 1,
+        "y": 119,
+        "w": 62,
+        "h": 80
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 4,
+        "w": 62,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 62,
+        "h": 84
+      }
+    },
+    "rri_0006": {
+      "frame": {
+        "x": 1,
+        "y": 183,
+        "w": 62,
+        "h": 80
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 4,
+        "w": 62,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 62,
+        "h": 84
+      }
+    },
+    "rri_0007": {
+      "frame": {
+        "x": 169,
+        "y": 1,
+        "w": 57,
+        "h": 80
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 4,
+        "w": 57,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 62,
+        "h": 84
+      }
+    },
+    "rri_0008": {
+      "frame": {
+        "x": 1,
+        "y": 1,
+        "w": 54,
+        "h": 81
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 3,
+        "w": 54,
+        "h": 81
+      },
+      "sourceSize": {
+        "w": 62,
+        "h": 84
+      }
+    },
+    "rri_0009": {
+      "frame": {
+        "x": 84,
+        "y": 1,
+        "w": 55,
+        "h": 83
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 1,
+        "w": 55,
+        "h": 83
+      },
+      "sourceSize": {
+        "w": 62,
+        "h": 84
+      }
+    },
+    "rri_0010": {
+      "frame": {
+        "x": 1,
+        "y": 57,
+        "w": 60,
+        "h": 80
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 60,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 62,
+        "h": 84
+      }
+    },
+    "rri_0011": {
+      "frame": {
+        "x": 83,
+        "y": 58,
+        "w": 61,
+        "h": 78
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 61,
+        "h": 78
+      },
+      "sourceSize": {
+        "w": 62,
+        "h": 84
+      }
+    }
+  },
+  "animations": {
+    "rri": [
+      "rri_0000",
+      "rri_0001",
+      "rri_0002",
+      "rri_0003",
+      "rri_0004",
+      "rri_0005",
+      "rri_0006",
+      "rri_0007",
+      "rri_0008",
+      "rri_0009",
+      "rri_0010",
+      "rri_0011"
+    ]
+  },
+  "meta": {
+    "app": "https://www.codeandweb.com/texturepacker",
+    "version": "1.0",
+    "image": "troop-body-idle.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 253,
+      "h": 251
+    },
+    "scale": "1",
+    "smartupdate": "$TexturePacker:SmartUpdate:78b0322e4a0f640289e0b2dd8572eccc:7bfa4dcb01f173d9a517902bd5798912:afbb230401786126210c2f07f3c33059$"
+  }
+}

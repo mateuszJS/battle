@@ -5,8 +5,8 @@ class EffectsFactory {
   static portalEffectFrames = []
 
   static initialize() {
-    EffectsFactory.boomEffectFrames = getFrames(7, { x: 0.5, y: 0.5 }, (id: string) => `fireEffect_${id[3]}.png`)
-    EffectsFactory.portalEffectFrames = getFrames(97, { x: 0.5, y: 1 }, id => `Gate_FX_000${id.slice(-2)}.png`)
+    EffectsFactory.boomEffectFrames = getFrames(7, (id: string) => `fireEffect_${id[3]}.png`)
+    EffectsFactory.portalEffectFrames = getFrames(97, id => `Gate_FX_000${id.slice(-2)}.png`)
   }
 
   static createBoomEffect(x: number, y: number) {
@@ -15,6 +15,7 @@ class EffectsFactory {
     movieClip.x = x
     movieClip.y = y
     movieClip.loop = false
+    movieClip.anchor.set(0.5)
     movieClip.scale.set(2)
     movieClip.onComplete = function() {
       this.destroy()
@@ -29,6 +30,7 @@ class EffectsFactory {
     movieClip.x = x
     movieClip.y = y
     movieClip.loop = false
+    movieClip.anchor.set(0.5 ,1)
 
     movieClip.onFrameChange = function() {
       if (this.currentFrame > 65) {
