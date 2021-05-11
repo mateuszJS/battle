@@ -47,10 +47,6 @@ const getMovieClipCreator = (framesData: readonly FrameDataEntry[]) => () => {
         previousPhase = currentPhase
         const indexOfStartingFrame = getIndexOfStartingFrame(angle, framesPeriods.RUN)
         const indexOfLastFrame = indexOfStartingFrame + framesPeriods.RUN.length - 1
-        console.log(
-          indexOfStartingFrame,
-          indexOfLastFrame,
-        )
         movieClip.onFrameChange = getCallbackGoToFirstOnLastFrame(
           indexOfStartingFrame,
           indexOfLastFrame,
