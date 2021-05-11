@@ -38,4 +38,8 @@ export default [
   'assets/pure_background_with_traced_images.jpg',
   'assets/divider.png',
   'assets/btnStartHover.png',
+
+
+  'assets/troop-body-run/troop-body-run.json',
+  'assets/regular-accessories-run/regular-accessories-run.json',
 ]

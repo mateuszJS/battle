@@ -5,20 +5,18 @@ const getFormattedNumber = (value: number) => {
 
 const getAngleOffsetInFrames = (angle: number, numberOfSides: number) => {
   const singleAngleSlice = (2 * Math.PI) / numberOfSides
-  const centeredAngle = angle - singleAngleSlice / 2
-
-  const positiveCenteredAngle = centeredAngle < 0 ? centeredAngle + Math.PI * 2 : centeredAngle
-  const framesAngle = Math.abs(positiveCenteredAngle - 2 * Math.PI) + 2 * Math.PI * 0.75 // remove when sprites will be prepared correctly
-  const preparedAngle = framesAngle % (Math.PI * 2)
-  return Math.floor(preparedAngle / singleAngleSlice)
+  const safeAngle = (angle + Math.PI + singleAngleSlice / 2) % (2 * Math.PI)
+  return Math.floor(safeAngle / singleAngleSlice)
 }
 
-export const getFrames = (numberOfIteration: number, getTextureName: (id: string) => string) => {
+export const getFrames = (numberOfIteration: number, anchor: Point, getTextureName: (id: string) => string) => {
   const frames: PIXI.Texture[] = []
   for (let i = 0; i < numberOfIteration; i++) {
     const formattedNumber = getFormattedNumber(i)
     const textureName = getTextureName(formattedNumber)
-    frames.push(PIXI.Texture.from(textureName))
+    const texture = PIXI.Texture.from(textureName)
+    texture.defaultAnchor.set(anchor.x, anchor.y)
+    frames.push(texture)
   }
   return frames
 }
@@ -33,9 +31,10 @@ export const getIndexOfStartingFrame = (
 
 export const getCallbackStopOnLastFrame = (lastFrame: number) =>
   function() {
-    if (this.currentFrame >= lastFrame) {
+    if (this.currentFrame > lastFrame) {
       this.onFrameChange = null
       this.gotoAndStop(lastFrame)
+      return true // stop rendering a new frame
     }
   }
 
@@ -44,24 +43,27 @@ export const getCallbackStopOnLastFrameAndRunCustomCallback = (
   customCallback: VoidFunction,
 ) =>
   function() {
-    if (this.currentFrame >= lastFrame) {
+    if (this.currentFrame > lastFrame) {
       this.onFrameChange = null
       this.gotoAndStop(lastFrame)
       customCallback()
+      return true // stop rendering a new frame
     }
   }
 
 export const getCallbackGoToFirstOnLastFrame = (firstFrame: number, lastFrame: number) =>
   function() {
-    if (this.currentFrame >= lastFrame) {
+    if (this.currentFrame > lastFrame) {
       this.gotoAndPlay(firstFrame)
+      return true // stop rendering a new frame
     }
   }
 
 export const getCallbackGoToFirstOnLastFrameAndStop = (firstFrame: number, lastFrame: number) =>
   function() {
-    if (this.currentFrame >= lastFrame) {
+    if (this.currentFrame > lastFrame) {
       this.gotoAndStop(firstFrame)
       this.onFrameChange = null
+      return true // stop rendering a new frame
     }
   }

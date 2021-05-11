@@ -1,11 +1,10 @@
 import EffectFactory from './EffectFactory'
-import { FrameUpdaters } from './getSprites'
+import type { FrameUpdaters } from './UnitFactory'
 import { ObjectType } from '~/render/representationsIds'
 import { UpdateAbilityCallback } from './UnitFactory'
 
 type PixiUnitStuff = {
   container: PIXI.Container
-  movieClip: PIXI.AnimatedSprite
   frameUpdaters: FrameUpdaters
   selectionSprite: PIXI.Sprite
 }
@@ -24,7 +23,6 @@ enum State {
 
 class Unit {
   public graphics: PIXI.Container
-  public movieClip: PIXI.AnimatedSprite
   public frameUpdaters: FrameUpdaters
   public type: ObjectType
   public squadId?: number // value is set when ability icon will be created
@@ -47,14 +45,8 @@ class Unit {
     this.type = type
     this.updateAbility = updateAbility.bind(this)
     this.graphics = pixiStuff.container
-    this.movieClip = pixiStuff.movieClip
     this.frameUpdaters = pixiStuff.frameUpdaters
     this.selectionSprite = pixiStuff.selectionSprite
-
-    this.graphics.addChild(this.selectionSprite)
-    this.graphics.addChild(this.movieClip)
-    this.movieClip.x = -this.movieClip.width / 2
-    this.movieClip.y = -this.movieClip.height * 0.7
 
     this.graphics.x = x
     this.graphics.y = y
@@ -70,12 +62,6 @@ class Unit {
     this.indicator.endFill()
 
     this.graphics.addChild(this.indicator)
-  }
-
-  goToFrame(frame: number) {
-    if (frame !== this.movieClip.currentFrame) {
-      this.movieClip.gotoAndStop(frame)
-    }
   }
 
   update(state: State, x: number, y: number, angle: number, firstStateParam: number) {

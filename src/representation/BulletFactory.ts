@@ -1,5 +1,4 @@
 import { UniverseRepresentation } from '~/initGame'
-import { framesPeriods } from '~/representation/getSprites'
 import Unit from './Unit'
 
 const STANDARD_RIFLE = 1.0
@@ -121,20 +120,13 @@ class Bullet {
   }
 }
 
-const { first, length, sides } = framesPeriods.SHOOT
-const getAngle = (currentFrame: number) => {
-  const movieClipAngle = (Math.floor((currentFrame - first) / length) / sides) * (2 * Math.PI)
-  const angle = 2 * Math.PI - movieClipAngle - 0.5 * Math.PI
-  return angle
-}
-
 class BulletFactory {
   private static bullets: Bullet[] = []
 
   static getBulletPosition(type: number, unit: Unit) {
     switch (type) {
       case STANDARD_RIFLE: {
-        const angle = getAngle(unit.movieClip.currentFrame)
+        const angle = unit.frameUpdaters.getAngleWhenShooting()
         return [unit.graphics.x + Math.sin(angle) * 45, unit.graphics.y - 30 - Math.cos(angle) * 45]
       }
       case GRENADE: {
