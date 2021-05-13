@@ -23,9 +23,9 @@ export default [
   {
     name: 'FLY',
     sides: 8,
-    length: 31,
-    prefix: '_s_h',
-    anchor: { x: 0, y: 0 },
+    length: 30,
+    prefix: 'rrf_',
+    anchor: { x: 0.51, y: 0.772 },
   },
   {
     name: 'GETUP',

@@ -44,4 +44,6 @@ export default [
   'assets/regular-accessories-run/regular-accessories-run.json',
   'assets/troop-body-idle/troop-body-idle.json',
   'assets/regular-accessories-idle/regular-accessories-idle.json',
+  'assets/troop-body-fly/troop-body-fly.json',
+  'assets/regular-accessories-fly/regular-accessories-fly.json',
 ]

@@ -28,7 +28,7 @@ static SOLIDER_DETAILS: SquadDetails = SquadDetails {
   movement_speed: 2.5,
   hp: 100.0,
   production_time: 200,
-  members_number: 1,
+  members_number: 7,
   // predicted max number of units in squad in utils is 7 MAX_NUMBER_OF_UNITS_IN_SQUAD
   // to increase that number have to update calc position in squad
   representation_type: SOLIDER_REPRESENTATION_ID,
