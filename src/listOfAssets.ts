@@ -46,4 +46,8 @@ export default [
   'assets/regular-accessories-idle/regular-accessories-idle.json',
   'assets/troop-body-fly/troop-body-fly.json',
   'assets/regular-accessories-fly/regular-accessories-fly.json',
+  'assets/troop-body-getup/troop-body-getup.json',
+  'assets/regular-accessories-getup/regular-accessories-getup.json',
+  'assets/troop-body-shoot/troop-body-shoot.json',
+  'assets/regular-accessories-shoot/regular-accessories-shoot.json',
 ]

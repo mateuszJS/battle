@@ -3,7 +3,7 @@ import {
   getIndexOfStartingFrame,
   getCallbackStopOnLastFrame,
   getCallbackGoToFirstOnLastFrame,
-  getCallbackGoToFirstOnLastFrameAndStop,
+  getCallbackGoBackOnLastFrameAndStop,
   getCallbackStopOnLastFrameAndRunCustomCallback,
 } from './utils'
 import type { FrameDataEntry } from './frame-periods'
@@ -18,6 +18,9 @@ const STATE_FLY_DOWN_BASE = 6000
 const STATE_GETUP_BASE = 7000
 const STATE_DIE_BASE = 8000
 const STATE_CHASING_BASE = 9000
+
+const STANDARD_MOVIE_CLIP_SPEED = 0.3;
+export const SHOOT_MOVIE_CLIP_SPEED = 0.45;
 
 const getMovieClipCreator = (framesData: readonly FrameDataEntry[]) => () => {
   const framesPeriods = getFramePeriods(framesData)
@@ -37,6 +40,7 @@ const getMovieClipCreator = (framesData: readonly FrameDataEntry[]) => () => {
       if (previousPhase !== currentPhase) {
         previousPhase = currentPhase
         movieClip.anchor.set(framesPeriods.IDLE.anchor.x, framesPeriods.IDLE.anchor.y)
+        movieClip.animationSpeed = STANDARD_MOVIE_CLIP_SPEED
         movieClip.onFrameChange = null
         const indexOfStartingFrame = getIndexOfStartingFrame(angle, framesPeriods.IDLE)
         movieClip.gotoAndStop(indexOfStartingFrame)
@@ -47,6 +51,7 @@ const getMovieClipCreator = (framesData: readonly FrameDataEntry[]) => () => {
       if (previousPhase !== currentPhase) {
         previousPhase = currentPhase
         movieClip.anchor.set(framesPeriods.RUN.anchor.x, framesPeriods.RUN.anchor.y)
+        movieClip.animationSpeed = STANDARD_MOVIE_CLIP_SPEED
         const indexOfStartingFrame = getIndexOfStartingFrame(angle, framesPeriods.RUN)
         const indexOfLastFrame = indexOfStartingFrame + framesPeriods.RUN.length - 1
         movieClip.onFrameChange = getCallbackGoToFirstOnLastFrame(
@@ -62,6 +67,7 @@ const getMovieClipCreator = (framesData: readonly FrameDataEntry[]) => () => {
       if (previousPhase !== currentPhase) {
         previousPhase = currentPhase
         movieClip.anchor.set(framesPeriods.RUN.anchor.x, framesPeriods.RUN.anchor.y)
+        movieClip.animationSpeed = STANDARD_MOVIE_CLIP_SPEED
         const indexOfStartingFrame = getIndexOfStartingFrame(angle, framesPeriods.RUN)
         const indexOfLastFrame = indexOfStartingFrame + framesPeriods.RUN.length - 1
         movieClip.onFrameChange = getCallbackGoToFirstOnLastFrame(
@@ -88,10 +94,11 @@ const getMovieClipCreator = (framesData: readonly FrameDataEntry[]) => () => {
         const indexOfLastFrame = indexOfStartingFrame + framesPeriods.SHOOT.length - 1
         // actually we cold create frames with half of shotY
         // and after the last frame, just animate in reverse, to first frame
-        movieClip.onFrameChange = getCallbackGoToFirstOnLastFrameAndStop(
+        movieClip.onFrameChange = getCallbackGoBackOnLastFrameAndStop(
           indexOfStartingFrame,
           indexOfLastFrame,
         )
+        movieClip.animationSpeed = SHOOT_MOVIE_CLIP_SPEED
         movieClip.gotoAndPlay(indexOfStartingFrame)
       }
     },
@@ -104,7 +111,7 @@ const getMovieClipCreator = (framesData: readonly FrameDataEntry[]) => () => {
         previousPhase = STATE_FLY_UP_BASE
         movieClip.onFrameChange = null
         movieClip.anchor.set(framesPeriods.FLY.anchor.x, framesPeriods.FLY.anchor.y)
-        movieClip.animationSpeed = 0.3
+        movieClip.animationSpeed = STANDARD_MOVIE_CLIP_SPEED
         movieClip.gotoAndPlay(indexOfStartingFrame)
       } else if (
         previousPhase === STATE_FLY_UP_BASE &&
@@ -128,11 +135,13 @@ const getMovieClipCreator = (framesData: readonly FrameDataEntry[]) => () => {
       movieClip.gotoAndStop(indexOfCurrentFrame)
       previousPhase = STATE_GETUP_BASE
       movieClip.anchor.set(framesPeriods.GETUP.anchor.x, framesPeriods.GETUP.anchor.y)
+      movieClip.animationSpeed = STANDARD_MOVIE_CLIP_SPEED
     },
     goToDie(angle: number, clearUnitArtefacts: VoidFunction) {
       if (previousPhase !== STATE_DIE_BASE) {
         previousPhase = STATE_DIE_BASE
         movieClip.anchor.set(framesPeriods.FLY.anchor.x, framesPeriods.FLY.anchor.y)
+        movieClip.animationSpeed = STANDARD_MOVIE_CLIP_SPEED
         const indexOfStartingFrame = getIndexOfStartingFrame(angle, framesPeriods.FLY)
 
         movieClip.onFrameChange = getCallbackStopOnLastFrameAndRunCustomCallback(

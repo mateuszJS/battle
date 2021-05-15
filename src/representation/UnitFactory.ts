@@ -3,7 +3,7 @@ import Unit from './Unit'
 import getMovieClipCreator from './get-movie-clip-creator'
 import getMySelection from './getMySelection'
 import troopBodyFramesData from './framesData/troop-body';
-import regularAccessoriesFramesData from './framesData/regular-accessories-run';
+import regularAccessoriesFramesData from './framesData/regular-accessories';
 
 const MAX_JUMP_HEIGHT = 1200
 // the same constant exists in rust

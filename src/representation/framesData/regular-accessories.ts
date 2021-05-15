@@ -16,9 +16,9 @@ export default [
   {
     name: 'SHOOT',
     sides: 12,
-    length: 6,
-    prefix: '_s_f',
-    anchor: { x: 0, y: 0 },
+    length: 5,
+    prefix: 'ras_',
+    anchor: { x: 0.474, y: 1.346 },
   },
   {
     name: 'FLY',
@@ -30,8 +30,8 @@ export default [
   {
     name: 'GETUP',
     sides: 8,
-    length: 24,
-    prefix: '_s_gu',
-    anchor: { x: 0, y: 0 },
+    length: 25,
+    prefix: 'rag_',
+    anchor: { x: 0.512, y: 0.693 },
   },
 ] as const

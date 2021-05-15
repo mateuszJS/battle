@@ -109,9 +109,9 @@ const initGame = () => {
     if (window.debugAiMode) return
 
     if (timeToCreateEnemy == 0) {
-      // universe.create_enemy_squad(
-      //   nextIsRaptor ? REPRESENTATION_IDS.RAPTOR : REPRESENTATION_IDS.SOLIDER,
-      // )
+      universe.create_enemy_squad(
+        nextIsRaptor ? REPRESENTATION_IDS.RAPTOR : REPRESENTATION_IDS.SOLIDER,
+      )
       nextIsRaptor = !nextIsRaptor
 
       timeToCreateEnemy = 1500

@@ -1,3 +1,5 @@
+import { SHOOT_MOVIE_CLIP_SPEED } from './get-movie-clip-creator'
+
 const getFormattedNumber = (value: number) => {
   const stringifiedValue = `${value}`
   return new Array(5 - stringifiedValue.length).join('0') + stringifiedValue
@@ -57,11 +59,18 @@ export const getCallbackGoToFirstOnLastFrame = (firstFrame: number, lastFrame: n
     }
   }
 
-export const getCallbackGoToFirstOnLastFrameAndStop = (firstFrame: number, lastFrame: number) =>
+export const getCallbackGoBackOnLastFrameAndStop = (firstFrame: number, lastFrame: number) =>
   function() {
     if (this.currentFrame > lastFrame) {
-      this.gotoAndStop(firstFrame)
-      this.onFrameChange = null
+      this.animationSpeed = -SHOOT_MOVIE_CLIP_SPEED
+
+      this.onFrameChange = function() {
+        if (this.currentFrame < firstFrame) {
+          this.gotoAndStop(firstFrame)
+          this.animationSpeed = SHOOT_MOVIE_CLIP_SPEED
+          return true
+        }
+      }
       return true // stop rendering a new frame
     }
   }
