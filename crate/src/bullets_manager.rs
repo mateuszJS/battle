@@ -148,6 +148,9 @@ impl BulletsManager {
             if distance <= weapon_details.explosion_range {
               let angle = (unit.x - target.0).atan2(target.1 - unit.y);
               let strength = (weapon_details.explosion_range - distance) * 0.05;
+              unit.take_damage(
+                weapon_details.damage * (1.0 - distance / weapon_details.explosion_range),
+              );
               unit.change_state_to_fly(angle, strength);
             }
           })

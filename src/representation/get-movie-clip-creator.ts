@@ -143,13 +143,14 @@ const getMovieClipCreator = (framesData: readonly FrameDataEntry[]) => () => {
         movieClip.anchor.set(framesPeriods.FLY.anchor.x, framesPeriods.FLY.anchor.y)
         movieClip.animationSpeed = STANDARD_MOVIE_CLIP_SPEED
         const indexOfStartingFrame = getIndexOfStartingFrame(angle, framesPeriods.FLY)
-
+        const indexOfLastFrame = indexOfStartingFrame + framesPeriods.FLY.length - 1
+        const isAlreadyFly = indexOfStartingFrame <= movieClip.currentFrame && movieClip.currentFrame <= indexOfLastFrame
         movieClip.onFrameChange = getCallbackStopOnLastFrameAndRunCustomCallback(
-          indexOfStartingFrame + framesPeriods.FLY.length - 1,
+          indexOfLastFrame,
           clearUnitArtefacts,
         )
 
-        movieClip.gotoAndPlay(indexOfStartingFrame)
+        movieClip.gotoAndPlay(isAlreadyFly ? movieClip.currentFrame : indexOfStartingFrame)
       }
     },
     getAngleWhenShooting() {

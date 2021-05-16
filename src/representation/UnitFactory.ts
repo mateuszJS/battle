@@ -97,8 +97,11 @@ class UnitsFactory {
       goToDie(angle: number, id: number) {
         regularAccessoriesFrameUpdaters.goToDie(angle, () => {})
         troopBodyFrameUpdaters.goToDie(angle, () => {
-          window.world.removeChild(container)
-          window.universeRepresentation[id] = undefined
+          setTimeout(() => {
+            window.world.removeChild(container)
+            window.universeRepresentation[id] = undefined
+          }, 5000)
+          // TODO: replace setTimeout with dying animation
         })
       },
       getAngleWhenShooting: troopBodyFrameUpdaters.getAngleWhenShooting,
