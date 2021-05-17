@@ -29,7 +29,8 @@ const getMovieClipCreator = (framesData: readonly FrameDataEntry[]) => () => {
     [],
   )
 
-  const movieClip = new PIXI.AnimatedSprite(frames)
+  const movieClip = new PIXI.AnimatedSprite([...frames, PIXI.Texture.WHITE]) // we are adding last PIXI.Texture.WHITE texture
+  // so we can check currentFrame > lastFrame, instead of >= what will change frame too fast
   movieClip.animationSpeed = 0.01
   let previousPhase = 0
 
@@ -61,20 +62,20 @@ const getMovieClipCreator = (framesData: readonly FrameDataEntry[]) => () => {
         movieClip.gotoAndPlay(indexOfStartingFrame)
       }
     },
-    goToChasing(angle: number, angleOfWeapon: number) {
-      // for now it's the same as running
+    goToChasing(angle: number, getStartFrameOffset: () => number) {
       const currentPhase = STATE_CHASING_BASE + Math.round(angle * 100)
       if (previousPhase !== currentPhase) {
         previousPhase = currentPhase
-        movieClip.anchor.set(framesPeriods.RUN.anchor.x, framesPeriods.RUN.anchor.y)
+        movieClip.anchor.set(framesPeriods.CHASING.anchor.x, framesPeriods.CHASING.anchor.y)
         movieClip.animationSpeed = STANDARD_MOVIE_CLIP_SPEED
-        const indexOfStartingFrame = getIndexOfStartingFrame(angle, framesPeriods.RUN)
-        const indexOfLastFrame = indexOfStartingFrame + framesPeriods.RUN.length - 1
+        const indexOfStartingFrame = getIndexOfStartingFrame(angle, framesPeriods.CHASING)
+        const indexOfLastFrame = indexOfStartingFrame + framesPeriods.CHASING.length - 1
+
         movieClip.onFrameChange = getCallbackGoToFirstOnLastFrame(
           indexOfStartingFrame,
           indexOfLastFrame,
         )
-        movieClip.gotoAndPlay(indexOfStartingFrame)
+        movieClip.gotoAndPlay(indexOfStartingFrame + getStartFrameOffset())
       }
     },
     goToShoot(angle: number, shootProgress: number) {
@@ -154,13 +155,11 @@ const getMovieClipCreator = (framesData: readonly FrameDataEntry[]) => () => {
       }
     },
     getAngleWhenShooting() {
-      // const currentPhase = STATE_SHOOT_BASE + Math.round(angle * 100)
       return (previousPhase - STATE_SHOOT_BASE) / 100
-      // const { first, length, sides } = framesPeriods.SHOOT
-      // const movieClipAngle = (Math.floor((movieClip.currentFrame - first) / length) / sides) * (2 * Math.PI)
-      // const angle = 2 * Math.PI - movieClipAngle - 0.5 * Math.PI
-      // return angle
     },
+    getRunFrameOffset() {
+      return (movieClip.currentFrame - framesPeriods.RUN.first) % framesPeriods.RUN.length
+    }
   }
 }
 

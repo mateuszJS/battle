@@ -50,4 +50,5 @@ export default [
   'assets/regular-accessories-getup/regular-accessories-getup.json',
   'assets/troop-body-shoot/troop-body-shoot.json',
   'assets/regular-accessories-shoot/regular-accessories-shoot.json',
+  'assets/regular-accessories-chasing/regular-accessories-chasing.json',
 ]

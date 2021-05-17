@@ -99,7 +99,7 @@ class Unit {
         break
       }
       case State.CHASING: {
-        this.frameUpdaters.goToChasing(angle, firstStateParam)
+        this.frameUpdaters.goToChasing(angle) // there is additional parma from rust, but for solider we don't use it
       }
     }
   }

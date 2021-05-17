@@ -7,7 +7,7 @@ export interface FrameDataEntry {
 }
 
 export type FramePeriods = {
-  [key in 'IDLE' | 'SHOOT' | 'RUN' | 'FLY' | 'GETUP' | 'DIE']?: {
+  [key in 'IDLE' | 'SHOOT' | 'RUN' | 'FLY' | 'GETUP' | 'DIE' | 'CHASING']?: {
     first: number
     sides: number
     length: number

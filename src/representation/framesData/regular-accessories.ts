@@ -34,4 +34,11 @@ export default [
     prefix: 'rag_',
     anchor: { x: 0.512, y: 0.693 },
   },
+  {
+    name: 'CHASING',
+    sides: 12,
+    length: 16,
+    prefix: 'rrc_',
+    anchor: { x: 0.501, y: 1.213 },
+  },
 ] as const

@@ -11,7 +11,7 @@ const MAX_JUMP_HEIGHT = 1200
 export interface FrameUpdaters {
   goToIdle(angle: number): void,
   goToRun(angle: number): void,
-  goToChasing(angle: number, angleOfWeapon: number): void,
+  goToChasing(angle: number): void,
   goToShoot(angle: number, shootProgress: number): void,
   goToFly(angle: number, flyingProgress: number): void,
   goToGetUp(angle: number, getUppingProgress: number): void,
@@ -78,9 +78,9 @@ class UnitsFactory {
         troopBodyFrameUpdaters.goToRun(angle)
         regularAccessoriesFrameUpdaters.goToRun(angle)
       },
-      goToChasing(angle: number, angleOfWeapon: number) {
-        troopBodyFrameUpdaters.goToChasing(angle, angleOfWeapon) // TODO: one angle is only needed!
-        regularAccessoriesFrameUpdaters.goToChasing(angle, angleOfWeapon)
+      goToChasing(angle: number) {
+        troopBodyFrameUpdaters.goToRun(angle)
+        regularAccessoriesFrameUpdaters.goToChasing(angle, troopBodyFrameUpdaters.getRunFrameOffset)
       },
       goToShoot(angle: number, shootProgress: number) {
         troopBodyFrameUpdaters.goToShoot(angle, shootProgress)
