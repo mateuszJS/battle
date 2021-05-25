@@ -127,7 +127,7 @@ class BulletFactory {
     switch (type) {
       case STANDARD_RIFLE: {
         const angle = unit.frameUpdaters.getAngleWhenShooting()
-        return [unit.graphics.x + Math.sin(angle) * 45, unit.graphics.y - 30 - Math.cos(angle) * 45]
+        return [unit.graphics.x + Math.sin(angle) * 40, unit.graphics.y - 47 - Math.cos(angle) * 30]
       }
       case GRENADE: {
         return [unit.graphics.x, unit.graphics.y - 30]
