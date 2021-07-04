@@ -98,8 +98,12 @@ impl Unit {
   }
 
   fn change_state_to_getup(&mut self) {
-    self.state = STATE_GETUP;
-    self.get_upping_progress = 0.0;
+    if self.hp <= 0.0 {
+      self.change_state_to_die();
+    } else {
+      self.state = STATE_GETUP;
+      self.get_upping_progress = 0.0;
+    }
   }
 
   fn update_getup(&mut self, squad_shared_info: &SquadUnitSharedDataSet) {
@@ -436,8 +440,8 @@ impl Unit {
   }
 
   pub fn take_damage(&mut self, damage: f32) {
+    self.hp -= damage;
     if self.state != STATE_ABILITY && self.state != STATE_FLY {
-      self.hp -= damage;
       if self.hp <= 0.0 {
         self.change_state_to_die();
       }

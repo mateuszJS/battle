@@ -25,7 +25,7 @@ pub struct SquadDetails {
 }
 
 static SOLIDER_DETAILS: SquadDetails = SquadDetails {
-  movement_speed: 2.5,
+  movement_speed: 2.0,
   hp: 100.0,
   production_time: 200,
   members_number: 7,
@@ -40,7 +40,7 @@ static SOLIDER_DETAILS: SquadDetails = SquadDetails {
 };
 
 static RAPTOR_DETAILS: SquadDetails = SquadDetails {
-  movement_speed: 2.5,
+  movement_speed: 2.0,
   hp: 120.0,
   production_time: 100,
   members_number: 3,

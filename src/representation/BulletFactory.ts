@@ -1,5 +1,4 @@
 import { UniverseRepresentation } from '~/initGame'
-import { framesPeriods } from '~/representation/getSprites'
 import Unit from './Unit'
 
 const STANDARD_RIFLE = 1.0
@@ -31,7 +30,7 @@ const MAP_TYPE_TO_GRAPHIC_CONSTRUCTOR = {
     graphics.y = -25
     return graphics
   },
-}
+} as const
 
 const MAP_TYPE_TO_UPDATE_FUNC = {
   [STANDARD_RIFLE]: (
@@ -89,6 +88,8 @@ const MAP_TYPE_TO_UPDATE_FUNC = {
   },
 }
 
+type bulletType = keyof typeof MAP_TYPE_TO_GRAPHIC_CONSTRUCTOR
+
 class Bullet {
   public sprite: PIXI.Sprite
   public lifetime: number
@@ -97,13 +98,18 @@ class Bullet {
   public modY: number
   public update: VoidFunction
 
-  constructor(type: number, x: number, y: number, [angle, speed, lifetime]: number[]) {
+  constructor(type: bulletType, x: number, y: number, [angle, speed, lifetime]: number[]) {
     const sprite = new PIXI.Sprite()
     sprite.x = x
     sprite.y = y
     sprite.angle = (angle * 180) / Math.PI
     sprite.addChild(MAP_TYPE_TO_GRAPHIC_CONSTRUCTOR[type]())
-    window.world.addChild(sprite)
+
+    if (type === STANDARD_RIFLE) {
+      window.smallPieces.addChild(sprite)
+    } else {
+      window.world.addChild(sprite)
+    }
 
     this.sprite = sprite
     this.lifetime = lifetime
@@ -114,21 +120,14 @@ class Bullet {
   }
 }
 
-const { first, length, sides } = framesPeriods.SHOOT
-const getAngle = (currentFrame: number) => {
-  const movieClipAngle = (Math.floor((currentFrame - first) / length) / sides) * (2 * Math.PI)
-  const angle = 2 * Math.PI - movieClipAngle - 0.5 * Math.PI
-  return angle
-}
-
 class BulletFactory {
   private static bullets: Bullet[] = []
 
   static getBulletPosition(type: number, unit: Unit) {
     switch (type) {
       case STANDARD_RIFLE: {
-        const angle = getAngle(unit.movieClip.currentFrame)
-        return [unit.graphics.x + Math.sin(angle) * 45, unit.graphics.y - 30 - Math.cos(angle) * 45]
+        const angle = unit.frameUpdaters.getAngleWhenShooting()
+        return [unit.graphics.x + Math.sin(angle) * 40, unit.graphics.y - 47 - Math.cos(angle) * 30]
       }
       case GRENADE: {
         return [unit.graphics.x, unit.graphics.y - 30]
@@ -141,12 +140,12 @@ class BulletFactory {
 
   static create(bulletsData: number[], universeRepresentation: UniverseRepresentation) {
     for (let i = 0; i < bulletsData.length; i += 5) {
-      const type = bulletsData[i]
+      const type = bulletsData[i] as bulletType
       const unitId = bulletsData[i + 1]
 
       const [x, y] = this.getBulletPosition(type, universeRepresentation[unitId] as Unit)
       this.bullets.push(new Bullet(type, x, y, bulletsData.slice(i + 2, i + 5)))
-      this.createBoom(bulletsData.slice(i, i + 3))
+      this.createBoom(type, x, y)
     }
   }
 
@@ -154,7 +153,7 @@ class BulletFactory {
     this.bullets = this.bullets.filter(bullet => {
       if (bullet.lifetime <= 0) {
         // create boom
-        window.world.removeChild(bullet.sprite)
+        bullet.sprite.parent.removeChild(bullet.sprite)
         return false
       } else {
         bullet.lifetime -= 1
@@ -164,7 +163,7 @@ class BulletFactory {
     })
   }
 
-  static createBoom([type, x, y]: number[]) {
+  static createBoom(type: number, x: number, y: number) {
     // create boom
   }
 }

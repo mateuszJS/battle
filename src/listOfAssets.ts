@@ -38,4 +38,17 @@ export default [
   'assets/pure_background_with_traced_images.jpg',
   'assets/divider.png',
   'assets/btnStartHover.png',
+
+
+  'assets/units/troop-body/troop-body-run.json',
+  'assets/units/troop-body/troop-body-idle.json',
+  'assets/units/troop-body/troop-body-fly.json',
+  'assets/units/troop-body/troop-body-getup.json',
+  'assets/units/troop-body/troop-body-shoot.json',
+  'assets/units/troop-regular-accessories/regular-accessories-run.json',
+  'assets/units/troop-regular-accessories/regular-accessories-idle.json',
+  'assets/units/troop-regular-accessories/regular-accessories-fly.json',
+  'assets/units/troop-regular-accessories/regular-accessories-getup.json',
+  'assets/units/troop-regular-accessories/regular-accessories-shoot.json',
+  'assets/units/troop-regular-accessories/regular-accessories-chasing.json',
 ]

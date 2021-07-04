@@ -44,7 +44,11 @@ const createBackgroundTexture = () => {
   mapSprite.width = MAP_WIDTH
   mapSprite.height = MAP_HEIGHT
 
+  const platformSprite = new PIXI.Sprite(PIXI.Texture.from('assets/platform-test.png'));
+  mapSprite.addChild(platformSprite);
+
   return mapSprite
 }
 
 export default createBackgroundTexture
+

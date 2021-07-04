@@ -1,12 +1,8 @@
-import { MIN_CAMERA_X, MAX_CAMERA_X, MIN_CAMERA_Y, MAX_CAMERA_Y } from 'Consts'
-
 import { Universe } from '../../crate/pkg/index'
 import { UniverseRepresentation } from '~/initGame'
 import SelectionController from './SelectionController'
 import getCameraPositionModificators from './getCameraPositionModificators'
-
-const MOUSE_LEFT_BUTTON = 0
-const MOUSE_RIGHT_BUTTON = 2
+import { MAP_WIDTH, MAP_HEIGHT } from 'Consts'
 
 class MouseController {
   private modX: number
@@ -16,6 +12,12 @@ class MouseController {
   private mouseX: number
   private mouseY: number
   private selectionController: SelectionController
+  private boundaries: {
+    maxCameraX: number
+    maxCameraY: number
+    minCameraX: number
+    minCameraY: number
+  }
 
   constructor(universe: Universe, universeRepresentation: UniverseRepresentation) {
     this.modX = 0
@@ -25,12 +27,26 @@ class MouseController {
     this.mouseX = 0
     this.mouseY = 0
     this.selectionController = new SelectionController(universe, universeRepresentation)
+    this.updateCameraBoundaries()
     window.app.stage.interactive = true
     window.app.stage.on('mousedown', this.onMouseDown)
     window.app.stage.on('rightdown', this.onMouseRightBtnDown)
     window.app.stage.on('mouseup', this.onMouseUp)
     window.app.view.addEventListener('mousemove', this.onMouseMove)
     window.app.view.addEventListener('mouseleave', this.onMouseLeave)
+    window.addEventListener('resize', this.updateCameraBoundaries)
+  }
+
+  private updateCameraBoundaries = () => {
+    this.boundaries = {
+      maxCameraX: 0,
+      maxCameraY: 0,
+      minCameraX: -(MAP_WIDTH - window.innerWidth),
+      minCameraY: -(MAP_HEIGHT - window.innerHeight),
+    }
+    // console.log('updateCameraBoundaries')
+    this.updateScenePosition()
+    window.app.renderer.resize(window.innerWidth, window.innerHeight)
   }
 
   private onMouseDown = () => {
@@ -68,8 +84,16 @@ class MouseController {
   }
 
   public updateScenePosition() {
-    this.sceneX = Math.clamp(this.sceneX + this.modX, MIN_CAMERA_X, MAX_CAMERA_X)
-    this.sceneY = Math.clamp(this.sceneY + this.modY, MIN_CAMERA_Y, MAX_CAMERA_Y)
+    this.sceneX = Math.clamp(
+      this.sceneX + this.modX,
+      this.boundaries.minCameraX,
+      this.boundaries.maxCameraX,
+    )
+    this.sceneY = Math.clamp(
+      this.sceneY + this.modY,
+      this.boundaries.minCameraY,
+      this.boundaries.maxCameraY,
+    )
 
     window.app.stage.x = this.sceneX
     window.app.stage.y = this.sceneY

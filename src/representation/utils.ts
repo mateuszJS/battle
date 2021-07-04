@@ -1,3 +1,5 @@
+import { SHOOT_MOVIE_CLIP_SPEED } from './get-movie-clip-creator'
+
 const getFormattedNumber = (value: number) => {
   const stringifiedValue = `${value}`
   return new Array(5 - stringifiedValue.length).join('0') + stringifiedValue
@@ -5,17 +7,13 @@ const getFormattedNumber = (value: number) => {
 
 const getAngleOffsetInFrames = (angle: number, numberOfSides: number) => {
   const singleAngleSlice = (2 * Math.PI) / numberOfSides
-  const centeredAngle = angle - singleAngleSlice / 2
-
-  const positiveCenteredAngle = centeredAngle < 0 ? centeredAngle + Math.PI * 2 : centeredAngle
-  const framesAngle = Math.abs(positiveCenteredAngle - 2 * Math.PI) + 2 * Math.PI * 0.75 // remove when sprites will be prepared correctly
-  const preparedAngle = framesAngle % (Math.PI * 2)
-  return Math.floor(preparedAngle / singleAngleSlice)
+  const safeAngle = (angle + Math.PI + singleAngleSlice / 2) % (2 * Math.PI)
+  return Math.floor(safeAngle / singleAngleSlice)
 }
 
 export const getFrames = (numberOfIteration: number, getTextureName: (id: string) => string) => {
   const frames: PIXI.Texture[] = []
-  for (let i = 0; i < numberOfIteration; i++) {
+  for (let i = 1; i <= numberOfIteration; i++) {
     const formattedNumber = getFormattedNumber(i)
     const textureName = getTextureName(formattedNumber)
     frames.push(PIXI.Texture.from(textureName))
@@ -33,9 +31,10 @@ export const getIndexOfStartingFrame = (
 
 export const getCallbackStopOnLastFrame = (lastFrame: number) =>
   function() {
-    if (this.currentFrame >= lastFrame) {
+    if (this.currentFrame > lastFrame) {
       this.onFrameChange = null
       this.gotoAndStop(lastFrame)
+      return true // stop rendering a new frame
     }
   }
 
@@ -44,24 +43,34 @@ export const getCallbackStopOnLastFrameAndRunCustomCallback = (
   customCallback: VoidFunction,
 ) =>
   function() {
-    if (this.currentFrame >= lastFrame) {
+    if (this.currentFrame > lastFrame) {
       this.onFrameChange = null
       this.gotoAndStop(lastFrame)
       customCallback()
+      return true // stop rendering a new frame
     }
   }
 
 export const getCallbackGoToFirstOnLastFrame = (firstFrame: number, lastFrame: number) =>
   function() {
-    if (this.currentFrame >= lastFrame) {
+    if (this.currentFrame > lastFrame) {
       this.gotoAndPlay(firstFrame)
+      return true // stop rendering a new frame
     }
   }
 
-export const getCallbackGoToFirstOnLastFrameAndStop = (firstFrame: number, lastFrame: number) =>
+export const getCallbackGoBackOnLastFrameAndStop = (firstFrame: number, lastFrame: number) =>
   function() {
-    if (this.currentFrame >= lastFrame) {
-      this.gotoAndStop(firstFrame)
-      this.onFrameChange = null
+    if (this.currentFrame > lastFrame) {
+      this.animationSpeed = -SHOOT_MOVIE_CLIP_SPEED
+
+      this.onFrameChange = function() {
+        if (this.currentFrame < firstFrame) {
+          this.gotoAndStop(firstFrame)
+          this.animationSpeed = SHOOT_MOVIE_CLIP_SPEED
+          return true
+        }
+      }
+      return true // stop rendering a new frame
     }
   }

@@ -1,10 +1,23 @@
 import REPRESENTATION_IDS, { ObjectType } from '~/render/representationsIds'
 import Unit from './Unit'
-import createSoliderSprite from './getSprites'
+import getMovieClipCreator from './get-movie-clip-creator'
 import getMySelection from './getMySelection'
+import troopBodyFramesData from './framesData/troop-body';
+import regularAccessoriesFramesData from './framesData/regular-accessories';
 
 const MAX_JUMP_HEIGHT = 1200
 // the same constant exists in rust
+
+export interface FrameUpdaters {
+  goToIdle(angle: number): void,
+  goToRun(angle: number): void,
+  goToChasing(angle: number): void,
+  goToShoot(angle: number, shootProgress: number): void,
+  goToFly(angle: number, flyingProgress: number): void,
+  goToGetUp(angle: number, getUppingProgress: number): void,
+  goToDie(angle: number, id: number): void
+  getAngleWhenShooting(): number
+}
 
 export type UpdateAbilityCallback = (
   x: number,
@@ -35,10 +48,12 @@ const MAP_UPDATE_ABILITY = {
 }
 
 class UnitsFactory {
-  private static getSoliderSprite: ReturnType<typeof createSoliderSprite>
+  private static getTroopBodySprite: ReturnType<typeof getMovieClipCreator>
+  private static getRegularAccessoriesSprite: ReturnType<typeof getMovieClipCreator>
 
   static initializationTypes() {
-    this.getSoliderSprite = createSoliderSprite()
+    this.getTroopBodySprite = getMovieClipCreator(troopBodyFramesData)
+    this.getRegularAccessoriesSprite = getMovieClipCreator(regularAccessoriesFramesData)
   }
 
   static createUnit(
@@ -50,17 +65,64 @@ class UnitsFactory {
     state: number,
     type: ObjectType,
   ) {
-    const { movieClip, container, ...frameUpdaters } = this.getSoliderSprite()
-    const graphicParams = {
-      container,
-      movieClip: movieClip,
-      frameUpdaters,
-      selectionSprite: getMySelection(isAllianceUnit),
+    const { movieClip: troopBodyMovieClip, ...troopBodyFrameUpdaters } = this.getTroopBodySprite()
+    const { movieClip: regularAccessoriesMovieClip, ...regularAccessoriesFrameUpdaters } = this.getRegularAccessoriesSprite()
+
+
+    const frameUpdaters = {
+      goToIdle(angle: number) {
+        troopBodyFrameUpdaters.goToIdle(angle)
+        regularAccessoriesFrameUpdaters.goToIdle(angle)
+      },
+      goToRun(angle: number) {
+        troopBodyFrameUpdaters.goToRun(angle)
+        regularAccessoriesFrameUpdaters.goToRun(angle)
+      },
+      goToChasing(angle: number) {
+        troopBodyFrameUpdaters.goToRun(angle)
+        regularAccessoriesFrameUpdaters.goToChasing(angle, troopBodyFrameUpdaters.getRunFrameOffset)
+      },
+      goToShoot(angle: number, shootProgress: number) {
+        troopBodyFrameUpdaters.goToShoot(angle, shootProgress)
+        regularAccessoriesFrameUpdaters.goToShoot(angle, shootProgress)
+      },
+      goToFly(angle: number, flyingProgress: number) {
+        troopBodyFrameUpdaters.goToFly(angle, flyingProgress)
+        regularAccessoriesFrameUpdaters.goToFly(angle, flyingProgress)
+      },
+      goToGetUp(angle: number, getUppingProgress: number) {
+        troopBodyFrameUpdaters.goToGetUp(angle, getUppingProgress)
+        regularAccessoriesFrameUpdaters.goToGetUp(angle, getUppingProgress)
+      },
+      goToDie(angle: number, id: number) {
+        regularAccessoriesFrameUpdaters.goToDie(angle, () => {})
+        troopBodyFrameUpdaters.goToDie(angle, () => {
+          setTimeout(() => {
+            window.world.removeChild(container)
+            window.universeRepresentation[id] = undefined
+          }, 5000)
+          // TODO: replace setTimeout with dying animation
+        })
+      },
+      getAngleWhenShooting: troopBodyFrameUpdaters.getAngleWhenShooting,
     }
 
-    if (type === REPRESENTATION_IDS.RAPTOR) {
-      graphicParams.movieClip.tint = 0xffff00
+    const container = new PIXI.Container()
+    const selectionSprite = getMySelection(isAllianceUnit)
+
+    container.addChild(selectionSprite)
+    container.addChild(troopBodyMovieClip)
+    container.addChild(regularAccessoriesMovieClip)
+
+    const graphicParams = {
+      container,
+      frameUpdaters,
+      selectionSprite,
     }
+
+    // if (type === REPRESENTATION_IDS.RAPTOR) {
+    //   graphicParams.movieClip.tint = 0xffff00
+    // }
 
     return new Unit(id, x, y, angle, graphicParams, type, MAP_UPDATE_ABILITY[type])
   }

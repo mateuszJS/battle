@@ -3,6 +3,7 @@ import { UniverseRepresentation } from '~/initGame'
 declare global {
   interface Window {
     world: PIXI.Container
+    smallPieces: PIXI.Container
     ui: PIXI.Container
     universeRepresentation: UniverseRepresentation
     app: PIXI.Application

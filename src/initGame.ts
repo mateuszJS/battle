@@ -13,12 +13,15 @@ import getSerializedInfoAboutWorld from './getSerializedInfoAboutWorld'
 import { createFactoryButtons } from './buttons/factory'
 import REPRESENTATION_IDS from '~/render/representationsIds'
 import debugController from '~/debug'
+import enhanceAnimatedSprites from '~/enhance-animated-sprites'
 
 export type UniverseRepresentation = {
   [id: number]: Factory | Unit | StrategicPoint
 }
 
 const initGame = () => {
+  enhanceAnimatedSprites()
+
   const mapSprite = createBackgroundTexture()
   getSortableLayer(mapSprite)
   EffectsFactory.initialize()

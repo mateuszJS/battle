@@ -12,10 +12,10 @@ class EffectsFactory {
   static createBoomEffect(x: number, y: number) {
     const movieClip = new PIXI.AnimatedSprite(EffectsFactory.boomEffectFrames)
     movieClip.animationSpeed = 0.55
-    movieClip.anchor.set(0.5)
     movieClip.x = x
     movieClip.y = y
     movieClip.loop = false
+    movieClip.anchor.set(0.5)
     movieClip.scale.set(2)
     movieClip.onComplete = function() {
       this.destroy()
@@ -27,10 +27,10 @@ class EffectsFactory {
   static createPortalEffect(x: number, y: number) {
     const movieClip = new PIXI.AnimatedSprite(EffectsFactory.portalEffectFrames)
     movieClip.animationSpeed = 0.4
-    movieClip.anchor.set(0.5, 1)
     movieClip.x = x
     movieClip.y = y
     movieClip.loop = false
+    movieClip.anchor.set(0.5 ,1)
 
     movieClip.onFrameChange = function() {
       if (this.currentFrame > 65) {
