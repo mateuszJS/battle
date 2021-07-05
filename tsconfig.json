@@ -11,13 +11,13 @@
     "baseUrl": "./",
     "paths": {
       "~/*": [
-        "./src/*"
+        "./visual/*"
       ],
       "Settings": [
-        "./src/modules/gameSettings"
+        "./visual/modules/gameSettings"
       ],
       "Consts": [
-        "./src/consts/consts.ts"
+        "./visual/consts/consts.ts"
       ]
     },
     "lib": [
@@ -26,6 +26,6 @@
     ]
   },
   "include": [
-    "src"
+    "visual",
   ]
 }

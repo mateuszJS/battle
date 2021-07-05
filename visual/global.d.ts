@@ -1,4 +1,6 @@
 import { UniverseRepresentation } from '~/initGame'
+import 'pixi-layers/dist/pixi-layers.d.ts'
+import 'pixi-projection/dist/pixi-projection.d.ts'
 
 declare global {
   interface Window {

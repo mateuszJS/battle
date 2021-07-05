@@ -8,12 +8,12 @@
       "module-resolver",
       {
         "root": [
-          "./src"
+          "./visual"
         ],
         "alias": {
-          "~": "./src",
-          "Settings": "./src/modules/gameSettings.ts",
-          "Consts": "./src/consts/consts.ts"
+          "~": "./visual",
+          "Settings": "./visual/modules/gameSettings.ts",
+          "Consts": "./visual/consts/consts.ts"
         }
       }
     ]

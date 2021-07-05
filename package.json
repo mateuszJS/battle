@@ -5,7 +5,8 @@
   "main": "webpack.config.js",
   "scripts": {
     "dev": "webpack-dev-server -d --hot --inline  --config webpack.dev.js",
-    "build": "webpack --display-optimization-bailout --config webpack.prod.js"
+    "build": "webpack --display-optimization-bailout --config webpack.prod.js",
+    "build-as": "asc -b logic/index.wasm -t logic/index.wat -0 logic/index.ts"
   },
   "bin": {
     "create-rust-webpack": ".bin/create-rust-webpack.js"
@@ -14,11 +15,13 @@
   "license": "ISC",
   "devDependencies": {
     "@babel/core": "^7.7.7",
-    "@babel/plugin-syntax-dynamic-import": "^7.7.4",
+    "@babel/plugin-syntax-dynamic-import": "^7.8.3",
     "@babel/preset-env": "^7.7.7",
     "@typescript-eslint/eslint-plugin": "^4.22.1",
     "@typescript-eslint/parser": "^4.22.1",
     "@wasm-tool/wasm-pack-plugin": "^0.4.2",
+    "as-loader": "^0.6.0",
+    "asc": "^2.0.2",
     "babel-loader": "^8.0.6",
     "babel-plugin-module-resolver": "^4.0.0",
     "copy-webpack-plugin": "^6.1.1",
@@ -42,7 +45,9 @@
     "webpack-merge": "^4.1.0"
   },
   "dependencies": {
+    "@assemblyscript/loader": "^0.19.5",
     "@pixi/filter-drop-shadow": "^3.1.1",
+    "assemblyscript": "^0.19.5",
     "debounce": "^1.2.0",
     "pixi-layers": "^0.2.2",
     "pixi-projection": "^0.3.13",
