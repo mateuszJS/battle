@@ -29,7 +29,6 @@ module.exports = {
 		rules: [
 			{
 				test: /\.(ts|js)$/,
-				exclude: [/node_modules/, /logic\/src/],
 				use: ['babel-loader', 'ts-loader']
 			},
 			{

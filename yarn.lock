@@ -7,11 +7,6 @@
   resolved "https://registry.yarnpkg.com/@assemblyscript/loader/-/loader-0.19.5.tgz#53daf87d828ae06c72776a34625e1c5b556a9a0d"
   integrity sha512-sGgi7C8Uvi8PlJ5XaOspAxeTGPM2QpmVoNpsBDgjhTV7+FyslN3BSgRWOarAOHFhhZ5oLO4jM0EuUobHw+V8KQ==
 
-"@assemblyscript/loader@~0.18.0", "@assemblyscript/loader@~0.18.7":
-  version "0.18.32"
-  resolved "https://registry.yarnpkg.com/@assemblyscript/loader/-/loader-0.18.32.tgz#2216fc7df235df247c95004457efd9c0a7da33ed"
-  integrity sha512-fq+nWvQuwASkTgchjMsnLyharobzPJIKx4KGoSlkS1ffrsnjabok2oOH7jAIFW4RMz3JXjHxMONbAmcxzyrcUw==
-
 "@babel/code-frame@7.12.11":
   version "7.12.11"
   resolved "https://registry.yarnpkg.com/@babel/code-frame/-/code-frame-7.12.11.tgz#f4ad435aa263db935b8f10f2c552d23fb716a63f"
@@ -1230,11 +1225,6 @@
   resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-7.0.6.tgz#f4c7ec43e81b319a9815115031709f26987891f0"
   integrity sha512-3c+yGKvVP5Y9TYBEibGNR+kLtijnj7mYrXRg+WpFb2X9xm04g/DXYkfg4hmzJQosc9snFNUPkbYIhu+KAm6jJw==
 
-"@types/json-schema@^7.0.6":
-  version "7.0.7"
-  resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-7.0.7.tgz#98a993516c859eb0d5c4c8f098317a9ea68db9ad"
-  integrity sha512-cxWFQVseBm6O9Gbw1IWb8r6OS4OhSt3hPZLkFApLjM8TEXROBuQGLAH2i2gZpcXdLBIrpXuTDhH7Vbm1iXmNGA==
-
 "@types/minimatch@*":
   version "3.0.3"
   resolved "https://registry.yarnpkg.com/@types/minimatch/-/minimatch-3.0.3.tgz#3dca0e3f33b200fc7d1139c0cd96c1268cadfd9d"
@@ -1314,15 +1304,6 @@
   dependencies:
     "@typescript-eslint/types" "4.22.1"
     eslint-visitor-keys "^2.0.0"
-
-"@wasm-tool/wasm-pack-plugin@^0.4.2":
-  version "0.4.2"
-  resolved "https://registry.yarnpkg.com/@wasm-tool/wasm-pack-plugin/-/wasm-pack-plugin-0.4.2.tgz#833a543df39e9ddb050b2d4fb57cba469d587979"
-  integrity sha512-ZvQ+KblhUXSViP//Lpa7CpNGf4hkfXLU70q9r2cxEJj/LFSIkwEqEoHmmN4WPMj4fWU7S4CFZwa/pUGxdbVqtQ==
-  dependencies:
-    chalk "^2.4.1"
-    command-exists "^1.2.7"
-    watchpack "^1.6.0"
 
 "@webassemblyjs/ast@1.9.0":
   version "1.9.0"
@@ -1553,16 +1534,6 @@ ajv@^6.1.0, ajv@^6.10.0, ajv@^6.10.2, ajv@^6.12.4:
     json-schema-traverse "^0.4.1"
     uri-js "^4.2.2"
 
-ajv@^6.12.5:
-  version "6.12.6"
-  resolved "https://registry.yarnpkg.com/ajv/-/ajv-6.12.6.tgz#baf5a62e802b07d977034586f8c3baf5adf26df4"
-  integrity sha512-j3fVLgvTo527anyYyJOGTYJbG+vnnQYvE0m5mmkc1TK+nxAppkCLMIL0aZ4dblVCNoGShhm+kzE4ZUykBoMg4g==
-  dependencies:
-    fast-deep-equal "^3.1.1"
-    fast-json-stable-stringify "^2.0.0"
-    json-schema-traverse "^0.4.1"
-    uri-js "^4.2.2"
-
 ajv@^8.0.1:
   version "8.2.0"
   resolved "https://registry.yarnpkg.com/ajv/-/ajv-8.2.0.tgz#c89d3380a784ce81b2085f48811c4c101df4c602"
@@ -1705,24 +1676,6 @@ arraybuffer.slice@0.0.6:
   resolved "https://registry.yarnpkg.com/arraybuffer.slice/-/arraybuffer.slice-0.0.6.tgz#f33b2159f0532a3f3107a272c0ccfbd1ad2979ca"
   integrity sha1-8zshWfBTKj8xB6JywMz70a0peco=
 
-as-bind@^0.6.0:
-  version "0.6.1"
-  resolved "https://registry.yarnpkg.com/as-bind/-/as-bind-0.6.1.tgz#07e753461028a9a0a568ffc27be36ecf8d855217"
-  integrity sha512-90s9PreIi9PQW0gFrKQr5d97f6a3rpqdrJTEgB5jdDPgl0SoEfmz8nq4oSUdmdB7Zv3wp3KPsvpJDfCygduHyQ==
-  dependencies:
-    "@assemblyscript/loader" "~0.18.7"
-    assemblyscript "~0.18.7"
-
-as-loader@^0.6.0:
-  version "0.6.0"
-  resolved "https://registry.yarnpkg.com/as-loader/-/as-loader-0.6.0.tgz#9cc33c3fcc2ed040270626dad429dfabe2dbe93d"
-  integrity sha512-olbAzXhfePueUnPyv5X4G1F7Yd3mT3w626N/+9txGQbdOe3G+fHkdeKZXwVr0p+NEk5JZE6oERaqQMPSFtjhag==
-  dependencies:
-    "@assemblyscript/loader" "~0.18.0"
-    as-bind "^0.6.0"
-    loader-utils "^2.0.0"
-    schema-utils "^3.0.0"
-
 asc@^2.0.2:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/asc/-/asc-2.0.2.tgz#7b152f0713741290ab26955edd78d18abe4cd38d"
@@ -1747,14 +1700,6 @@ assemblyscript@^0.19.5:
   integrity sha512-mAx7gcwjJI5OSu2RcOlugHFNxKt/rtWn3vyp46cN1+uXb7YSS//rgO044+KKwfxnGvoWj0ClsU0dNt5eWoXF7A==
   dependencies:
     binaryen "101.0.0-nightly.20210604"
-    long "^4.0.0"
-
-assemblyscript@~0.18.7:
-  version "0.18.32"
-  resolved "https://registry.yarnpkg.com/assemblyscript/-/assemblyscript-0.18.32.tgz#cbb76076bd4d9702f4baae0a2910c9755c8e4ecd"
-  integrity sha512-Py6zremwGhO3nSoI/VxyVUzTZfNhTjzNzFDaUdG4JhPJHeG+FzVlEoNCrw4bE5nPc7F+P2DJ8tZQCqIt15ceKw==
-  dependencies:
-    binaryen "100.0.0-nightly.20210413"
     long "^4.0.0"
 
 assert@^1.1.1:
@@ -1912,11 +1857,6 @@ binary-extensions@^2.0.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/binary-extensions/-/binary-extensions-2.1.0.tgz#30fa40c9e7fe07dbc895678cd287024dea241dd9"
   integrity sha512-1Yj8h9Q+QDF5FzhMs/c9+6UntbD5MkRfRwac8DoEm9ZfUBZ7tZ55YcGVAzEe4bXsdQHEk+s9S5wsOKVdZrw0tQ==
-
-binaryen@100.0.0-nightly.20210413:
-  version "100.0.0-nightly.20210413"
-  resolved "https://registry.yarnpkg.com/binaryen/-/binaryen-100.0.0-nightly.20210413.tgz#b7f2a5bb1f76b2d6f9c67486ca218714b3766790"
-  integrity sha512-EeGLIxQmJS0xnYl+SH34mNBqVMoixKd9nsE7S7z+CtS9A4eoWn3Qjav+XElgunUgXIHAI5yLnYT2TUGnLX2f1w==
 
 binaryen@101.0.0-nightly.20210604:
   version "101.0.0-nightly.20210604"
@@ -2370,11 +2310,6 @@ colorette@^1.2.2:
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/colorette/-/colorette-1.2.2.tgz#cbcc79d5e99caea2dbf10eb3a26fd8b3e6acfa94"
   integrity sha512-MKGMzyfeuutC/ZJ1cba9NqcNpfeqMUcYmyF1ZFY6/Cn7CNSAKx6a+s48sqLqyAiZuaP2TcqMhoo+dlwFnVxT9w==
-
-command-exists@^1.2.7:
-  version "1.2.9"
-  resolved "https://registry.yarnpkg.com/command-exists/-/command-exists-1.2.9.tgz#c50725af3808c8ab0260fd60b01fbfa25b954f69"
-  integrity sha512-LTQ/SGc+s0Xc0Fu5WaKnR0YiygZkm9eKFvyS+fRsU7/ZWFF8ykFM6Pc9aCVf1+xasOOZpO3BAVgVrKvsqKHV7w==
 
 commander@2.17.x:
   version "2.17.1"
@@ -5961,15 +5896,6 @@ schema-utils@^2.6.5, schema-utils@^2.7.1:
     ajv "^6.12.4"
     ajv-keywords "^3.5.2"
 
-schema-utils@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/schema-utils/-/schema-utils-3.0.0.tgz#67502f6aa2b66a2d4032b4279a2944978a0913ef"
-  integrity sha512-6D82/xSzO094ajanoOSbe4YvXWMfn2A//8Y1+MUqFAJul5Bs+yn36xbK9OtNDcRVSBJ9jjeoXftM6CfztsjOAA==
-  dependencies:
-    "@types/json-schema" "^7.0.6"
-    ajv "^6.12.5"
-    ajv-keywords "^3.5.2"
-
 select-hose@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/select-hose/-/select-hose-2.0.0.tgz#625d8658f865af43ec962bfc376a37359a4994ca"
@@ -6899,7 +6825,7 @@ watchpack-chokidar2@^2.0.0:
   dependencies:
     chokidar "^2.1.8"
 
-watchpack@^1.6.0, watchpack@^1.7.4:
+watchpack@^1.7.4:
   version "1.7.4"
   resolved "https://registry.yarnpkg.com/watchpack/-/watchpack-1.7.4.tgz#6e9da53b3c80bb2d6508188f5b200410866cd30b"
   integrity sha512-aWAgTW4MoSJzZPAicljkO1hsi1oKj/RRq/OJQh2PKI2UKL04c2Bs+MBOB+BBABHTXJpf9mCwHN7ANCvYsvY2sg==

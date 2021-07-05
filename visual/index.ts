@@ -1,12 +1,47 @@
-import { instantiate } from "@assemblyscript/loader";
-
-interface WasmModule {
-  add(x: number, y: number): number
-}
-
+import { instantiate } from "@assemblyscript/loader"
+import type * as ExportedWasmModule from './logic'
+import * as CONSTANTS from '../logic/constants'
+console.log('CONSTANTS', CONSTANTS);
 const setup = async () => {
-  const instance = await instantiate(fetch("/logic/index.wasm"));
-  console.log((instance.exports as unknown as WasmModule).add(1, 2));
+  const myModule = await instantiate<typeof ExportedWasmModule>(fetch("/logic-build/index.wasm"));
+  console.log(myModule.exports.add(1, 2));
+
+  const { sum, Int32Array_ID } = myModule.exports
+  const { __newArray } = myModule.exports
+
+  function doSum(values) {
+    const arrPtr = __newArray(Int32Array_ID, values)
+    return sum(arrPtr)
+  }
+
+  console.log(doSum([1, 2, 30]))
+
+  const { getRandomArray } = myModule.exports
+
+  /* READ ARRAY VIA COPY */
+  const { __getArray } = myModule.exports
+
+  function doGetRandomArray(len) {
+    const arrPtr = getRandomArray(len)
+    const values = __getArray(arrPtr)
+    return values
+  }
+
+  console.log(doGetRandomArray(10))
+
+
+  /* READ ARRAY VIA VIEW */
+  const { __getArrayView, __pin, __unpin } = myModule.exports
+
+  function doGetRandomArrayView(len) {
+    const arrPtr = __pin(getRandomArray(len)) // pin to avoid array being garbage collected
+    const view = __getArrayView(arrPtr)
+    return { ptr: arrPtr, view }
+  }
+
+  const randomArray = doGetRandomArrayView(10)
+  console.log('xxx', randomArray.view)
+  __unpin(randomArray.ptr) // unpin to allow for garbage collector to consume the array
 }
 
 setup();

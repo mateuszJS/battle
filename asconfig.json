@@ -1,0 +1,23 @@
+{
+  "targets": {
+    "debug": {
+      "binaryFile": "logic-build/index.wasm",
+      "textFile": "logic-build/index.wat",
+      "sourceMap": true,
+      "debug": true,
+      "tsdFile": "visual/logic.d.ts",
+      "exportRuntime": true
+    },
+    "release": {
+      "binaryFile": "logic-build/index.wasm",
+      "textFile": "logic-build/index.wat",
+      "sourceMap": true,
+      "optimizeLevel": 3,
+      "shrinkLevel": 0,
+      "converge": false,
+      "noAssert": false,
+      "exportRuntime": true
+    }
+  },
+  "options": {}
+}

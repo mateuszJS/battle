@@ -27,5 +27,6 @@
   },
   "include": [
     "visual",
+    "logic/constants.ts"
   ]
 }
