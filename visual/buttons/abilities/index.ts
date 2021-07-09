@@ -1,12 +1,12 @@
-import REPRESENTATION_IDS from '~/render/representationsIds'
+import { REPRESENTATION_SOLIDER, REPRESENTATION_RAPTOR } from '../../../logic/constants'
 import { Universe } from 'crate/pkg'
 import createNewIcon, { Ability, RepresentationId, ICON_HEIGHT } from './createIcon'
 
 const abilitiesIcons: {
   [key in RepresentationId]: Ability[]
 } = {
-  [REPRESENTATION_IDS.SOLIDER]: [],
-  [REPRESENTATION_IDS.RAPTOR]: [],
+  [REPRESENTATION_SOLIDER]: [],
+  [REPRESENTATION_RAPTOR]: [],
 }
 
 const updateAbilityIcon = (
@@ -46,8 +46,8 @@ const updateAbilitiesButtons = (
   const abilitiesData = universe.get_abilities_cool_downs(selectedSquadsIds, selectedAbility || 0)
 
   const abilitiesIndexes = {
-    [REPRESENTATION_IDS.SOLIDER]: 0,
-    [REPRESENTATION_IDS.RAPTOR]: 0,
+    [REPRESENTATION_SOLIDER]: 0,
+    [REPRESENTATION_RAPTOR]: 0,
   }
 
   for (let i = 0; i < abilitiesData.length; i += 5) {
@@ -78,7 +78,7 @@ const updateAbilitiesButtons = (
   }
 
   // hide rest of the icons
-  ;[REPRESENTATION_IDS.SOLIDER, REPRESENTATION_IDS.RAPTOR].forEach(squadType => {
+  ;[REPRESENTATION_SOLIDER, REPRESENTATION_RAPTOR].forEach(squadType => {
     const index = abilitiesIndexes[squadType]
     if (abilitiesIcons[squadType][index] && abilitiesIcons[squadType][index].container.visible) {
       // optimization, avoid loop if first icon is already hidden

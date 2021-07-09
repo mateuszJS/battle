@@ -1,23 +1,41 @@
 // import { alert } from "./utils";
 // import { foo, bar } from "./constants"
 
+import { Faction } from "./faction";
 
-var factions = 
+
+var factions: Array<Faction> = []
+
+export function initUniverse(
+  factionData: Array<f32>,
+): void {
+  for (let i = 0; i < factionData.length; i += 4) {
+    factions.push(new Faction(
+      factionData[i] as u32,
+      i == 0,
+      factionData[i + 1],
+      factionData[i + 2],
+      factionData[i + 3],
+    ))
+  }
+}
+
+export const Float32Array_ID = idof<Float32Array>()
 
 // export function add(a: i32, b: i32): i32 {
 //   return a + b + bar + foo
 // }
 
 
-// export function sum(arr: Int32Array): i32 {
-//   let sum = 0
-//   for (let i = 0, k = arr.length; i < k; ++i) {
-//     sum += unchecked(arr[i]) // unchecked -> index is 100% in array, do not make additional check
-//   }
-//   trace("HERE", 1, sum)
-//   return sum
-// }
-// export const Int32Array_ID = idof<Int32Array>()
+export function sum(arr: Int32Array): i32 {
+  let sum = 0
+  for (let i = 0, k = arr.length; i < k; ++i) {
+    sum += unchecked(arr[i]) // unchecked -> index is 100% in array, do not make additional check
+  }
+  trace("HERE", 1, sum)
+  return sum
+}
+export const Int32Array_ID = idof<Int32Array>()
 
 
 // export function getRandomArray(len: i32): Int32Array {

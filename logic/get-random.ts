@@ -1,10 +1,10 @@
-const LUT_LENGTH: usize = 256
+const LUT_LENGTH: i32 = 256
 var index = 0
 
-var lookUpTable = new Array<f32>(LUT_LENGTH)
+var lookUpTable = new StaticArray<f32>(LUT_LENGTH)
 
 for (let i = 0; i < LUT_LENGTH; ++i) {
-  lookUpTable[i] = Math.random()
+  lookUpTable[i] = Math.random() as f32
 }
 
 export function getRandom(): f32 {

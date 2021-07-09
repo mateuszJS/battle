@@ -1,7 +1,24 @@
 import EffectFactory from './EffectFactory'
 import type { FrameUpdaters } from './UnitFactory'
-import { ObjectType } from '~/render/representationsIds'
+import {
+  REPRESENTATION_FACTION_ID,
+  REPRESENTATION_ENEMY_FACTORY,
+  REPRESENTATION_SOLIDER,
+  REPRESENTATION_USER_FACTORY,
+  REPRESENTATION_BULLETS,
+  REPRESENTATION_RAPTOR,
+  REPRESENTATION_STRATEGIC_POINT,
+} from '../../logic/constants'
 import { UpdateAbilityCallback } from './UnitFactory'
+
+type ObjectType =
+  typeof REPRESENTATION_FACTION_ID |
+  typeof REPRESENTATION_ENEMY_FACTORY |
+  typeof REPRESENTATION_SOLIDER |
+  typeof REPRESENTATION_USER_FACTORY |
+  typeof REPRESENTATION_BULLETS |
+  typeof REPRESENTATION_RAPTOR |
+  typeof REPRESENTATION_STRATEGIC_POINT;
 
 type PixiUnitStuff = {
   container: PIXI.Container

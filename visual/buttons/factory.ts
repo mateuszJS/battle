@@ -1,10 +1,10 @@
-import REPRESENTATION_IDS from '~/render/representationsIds'
+import { REPRESENTATION_SOLIDER, REPRESENTATION_RAPTOR } from '../../logic/constants'
 
 const ICON_SIZE = 50
 
 const MAP_ID_TO_RESOURCE = {
-  [REPRESENTATION_IDS.SOLIDER]: 'assets/soliderRegularAvatar.png',
-  [REPRESENTATION_IDS.RAPTOR]: 'assets/soliderRegularAvatar.png',
+  [REPRESENTATION_SOLIDER]: 'assets/soliderRegularAvatar.png',
+  [REPRESENTATION_RAPTOR]: 'assets/soliderRegularAvatar.png',
 } as const
 
 type RepresentationId = keyof typeof MAP_ID_TO_RESOURCE
@@ -91,8 +91,8 @@ export const createFactoryButtons = (
   icons.productionListContainer.y = y + ICON_SIZE
   window.ui.addChild(icons.productionListContainer)
 
-  addItemToBuyList(REPRESENTATION_IDS.SOLIDER, createItemCallback)
-  addItemToBuyList(REPRESENTATION_IDS.RAPTOR, createItemCallback)
+  addItemToBuyList(REPRESENTATION_SOLIDER, createItemCallback)
+  addItemToBuyList(REPRESENTATION_RAPTOR, createItemCallback)
 }
 
 export const addItemToProductionLine = (index: number, type: number) => {

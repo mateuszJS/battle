@@ -1,4 +1,4 @@
-class Point {
+export class Point {
   x: f32
   y: f32
 }

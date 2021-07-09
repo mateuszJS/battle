@@ -1,6 +1,6 @@
-import { SpriteMaskFilter } from "pixi.js"
 import { MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS } from "./constants"
 import { getId } from "./get-id"
+import { Point } from "./point"
 import { getTrack, UNITS_OFFSET } from "./position-utils"
 import { SquadDetails, SquadType, SQUAD_DETAILS } from "./squad-details"
 import { Unit, UnitState } from "./unit"
@@ -48,7 +48,7 @@ export class Squad {
     this.weaponDetails = WEAPON_DETAILS.get(WeaponType.StandardRifle)
   }
 
-  updateCenter() {
+  updateCenter(): void {
     let sumX: f32 = 0
     let sumY: f32 = 0
 
@@ -61,11 +61,11 @@ export class Squad {
     this.centerPoint.y = sumY / this.members.length
   }
 
-  update() {
+  update(): void {
 
   }
 
-  keepCoherency() {
+  keepCoherency(): void {
     let coherencyNotKept = this.members.some(member => (
       Math.hypot(
         this.centerPoint.x - member.x,
@@ -90,19 +90,21 @@ export class Squad {
     }
   }
 
-  addMember(x: f32, y: f32, angle: f32, state: UnitState) {
-    this.members.push(new Unit(x, y, angle, state, this));
-
+  addMember(x: f32, y: f32, angle: f32, state: UnitState): Unit {
+    let newUnit = new Unit(x, y, angle, state, this)
+    this.members.push(newUnit);
     this.recalculateMembersPosition();
+    return newUnit
   }
 
-  recalculateMembersPosition() {
-    unchecked(UNITS_OFFSET[this.members.length]).forEach((position, index) => {
-      this.members[index].positionOffset = position;
-    })
+  recalculateMembersPosition(): void {
+    let positions = unchecked(UNITS_OFFSET[this.members.length - 1])
+    for (let i = 0; i < positions.length; i++) {
+      this.members[i].positionOffset = unchecked(positions[i])
+    }
   }
 
-  resetState() {
+  resetState(): void {
     // this.abilityTarget = null
     this.attackAim = null
     this.track = []
@@ -112,7 +114,7 @@ export class Squad {
     })
   }
 
-  setDestination(destination: Point) {
+  setDestination(destination: Point): void {
     this.track = getTrack(this.centerPoint, destination);
 
     this.members.forEach(unit => {
@@ -120,7 +122,7 @@ export class Squad {
     });
   }
 
-  taskSetDestination(destination: Point) {
+  taskSetDestination(destination: Point): void {
     if (this.isTakingNewTaskDisabled()) {
       this.taskTodo = {
         trackDestination: destination,
@@ -137,7 +139,7 @@ export class Squad {
     return this.isDuringKeepingCoherency
   }
 
-  restoreTaskTodo() {
+  restoreTaskTodo(): void {
     this.resetState()
 
     if (this.taskTodo.trackDestination) {
@@ -148,7 +150,7 @@ export class Squad {
     this.checkMembersCorrectness()
   }
 
-  checkMembersCorrectness() {
+  checkMembersCorrectness(): void {
     this.members.forEach(member => member.checkCorrectness())
   }
 }

@@ -14,11 +14,6 @@ declare global {
     debugAiMode: boolean
   }
 
-  interface Point {
-    x: number
-    y: number
-  }
-
   type ValueOf<T> = T[keyof T]
 
   interface Math {

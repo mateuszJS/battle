@@ -23,10 +23,13 @@
     "lib": [
       "es2019",
       "dom" // with that, window/document is undefined
+    ],
+    "types": [
+      "node"
     ]
   },
   "include": [
-    "visual",
-    "logic/constants.ts"
+    "visual"
+    // "logic/constants.ts"
   ]
 }

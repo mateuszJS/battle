@@ -1,10 +1,26 @@
-import { SpriteMaskFilter } from "pixi.js"
 import { getAngleDiff } from "./get-angle-diff"
 import { FLY_DECELERATION, FLY_MIN_SPEED, getFlyModes } from "./get-fly-modes"
 import { getId } from "./get-id"
 import { getInitialTrackIndex } from "./get-initial-track-index"
 import { getRandom } from "./get-random"
+import { Point } from "./point"
 import { Squad } from "./squad"
+
+
+// class Point {
+//   x: f32
+//   y: f32
+// }
+
+// export class Line {
+//   pointA: Point
+//   pointB: Point
+//   constructor() {
+//     this.pointA = { x: 0, y: 0 }
+//     this.pointB = { x: 1, y: 1 }
+//   }
+// }
+
 
 export enum UnitState {
   DIE,
@@ -24,7 +40,7 @@ export class Unit {
   private destination: Point
   private trackIndex: i8
   private timeToNextShoot: u16
-  private attackAim: null | Unit
+  private attackAim: Unit | null
   private hp: i16
   private gettingUpProgress: f32
   private weaponAngleDuringChasing: f32
@@ -37,11 +53,13 @@ export class Unit {
     public state: UnitState,
     private squad: Squad
   ) {
+    // let line = new Line()
+    // trace("msg", 1, line.pointA.x)
     this.id = getId() as f32
     this.positionOffset = { x: 0, y: 0 }
     this.modX = 0
     this.modY = 0
-    this.destination = { x, y }
+    this.destination = { x: x, y: y }
     this.trackIndex = -1
     this.timeToNextShoot = 0
     this.attackAim = null
@@ -50,7 +68,7 @@ export class Unit {
     this.weaponAngleDuringChasing = 0.0
   }
 
-  change_state_to_fly(angle: f32, strength: f32) {
+  change_state_to_fly(angle: f32, strength: f32): void {
     this.state = UnitState.FLY;
     this.angle = (angle + Math.PI) % (2.0 * Math.PI);
     let flyMods = getFlyModes(angle, this.x, this.y, strength);
@@ -58,7 +76,7 @@ export class Unit {
     this.modY = flyMods.y;
   }
 
-  updateFly() {
+  updateFly(): void {
     this.x += this.modX
     this.y += this.modY
 
@@ -70,7 +88,7 @@ export class Unit {
     }
   }
 
-  changeStateToGetup() {
+  changeStateToGetup(): void {
     if (this.hp <= 0.0) {
       this.changeStateToDie()
     } else {
@@ -79,7 +97,7 @@ export class Unit {
     }
   }
 
-  updateGetup() {
+  updateGetup(): void {
     this.gettingUpProgress += 0.01
     if (this.gettingUpProgress >= 1.0) {
       this.state = UnitState.IDLE
@@ -98,11 +116,11 @@ export class Unit {
     return this.state > 3
   }
 
-  changeStateToRun() {
+  changeStateToRun(): void {
     this.trackIndex = getInitialTrackIndex(0, this.x, this.y, this.squad)
   }
 
-  setDestination(destination: Point) {
+  setDestination(destination: Point): void {
     if (this.state != UnitState.RUN && this.state != UnitState.CHASING) {
       this.state = UnitState.RUN
     }
@@ -114,7 +132,7 @@ export class Unit {
     this.modX = -Math.cos(this.angle) * this.squad.squadDetails.movementSpeed
   }
 
-  goToCurrentPointOnTrack() {
+  goToCurrentPointOnTrack(): void {
     let currPoint = unchecked(this.squad.track[this.trackIndex])
     this.setDestination({
       x: currPoint.x + this.positionOffset.x,
@@ -122,7 +140,7 @@ export class Unit {
     });
   }
 
-  updateRun() {
+  updateRun(): void {
     let isTargetAchieved = Math.hypot(
       this.x - this.destination.x,
       this.y - this.destination.y,
@@ -146,7 +164,7 @@ export class Unit {
     }
   }
 
-  resetState() {
+  resetState(): void {
     // never call when is during using ability/keeping coherency
     this.trackIndex = -1
     this.attackAim = null
@@ -158,7 +176,7 @@ export class Unit {
     }
   }
 
-  checkCorrectness() {
+  checkCorrectness(): void {
     if (!this.isChangeStateAllowed()) return
 
     // this method always should be called after check correctness for squad (bc if enemy can be out of whole squad range in shooting)
@@ -178,7 +196,7 @@ export class Unit {
     }
   }
 
-  setNewAttackAimDuringRunning(squadToAttack: Squad) {
+  setNewAttackAimDuringRunning(squadToAttack: Squad): void {
     let availableEnemyUnits = squadToAttack.members.filter(member => {
       let angleFroUnitToEnemyMember = Math.atan2(member.x - this.x, this.y - member.y)
       let angleDiff = getAngleDiff(this.angle, angleFroUnitToEnemyMember)
@@ -204,7 +222,7 @@ export class Unit {
     }
   }
 
-  changeStateToShootDuringRunning(squadToAttack: Squad) {
+  changeStateToShootDuringRunning(squadToAttack: Squad): void {
     // check if unit can keep current aim
     if (this.attackAim != null) {
       let distance = Math.hypot(this.attackAim.x - this.x, this.attackAim.y - this.y)
@@ -221,7 +239,7 @@ export class Unit {
   }
 
 
-  changeStateToShoot(squadToAttack: Squad, isImportantAim: bool) {
+  changeStateToShoot(squadToAttack: Squad, isImportantAim: bool): void {
     // check if unit can keep current aim
     if (this.attackAim != null) {
       let distance = Math.hypot(this.attackAim.x - this.x, this.attackAim.y - this.y)
@@ -267,7 +285,7 @@ export class Unit {
   }
 
 
-  updateShoot() {
+  updateShoot(): void {
     if (this.timeToNextShoot == 0) {
       let weapon = this.squad.weaponDetails
       let scatter = weapon.scatter * 2.0 * (getRandom() - 0.5)
@@ -297,7 +315,7 @@ export class Unit {
     }
   }
 
-  update() {
+  update(): void {
     switch (this.state) {
       case UnitState.FLY:
         this.updateFly()
@@ -343,13 +361,13 @@ export class Unit {
     ]
   }
 
-  changeStateToDie() {
+  changeStateToDie(): void {
     this.state = UnitState.DIE;
     this.modX = 0.0;
     this.modY = 0.0;
   }
 
-  takeDamage(damage: u16) {
+  takeDamage(damage: u16): void {
     this.hp -= damage
   }
 }

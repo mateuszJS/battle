@@ -4,6 +4,10 @@ import createItem from './createItem'
 import blendColorBurn from './blendColorBurn'
 import hoverMesh from './hoverMesh'
 
+import { instantiate } from "@assemblyscript/loader"
+import type * as ExportedWasmModule from '~/logic'
+import { ASUtil } from '@assemblyscript/loader'
+
 const setup = () => {
   const backgroundTexture = PIXI.Texture.from('assets/pure_background_with_traced_images.jpg')
   const startBtnPrimaryTexture = PIXI.Texture.from('assets/start_btn.png')
@@ -20,13 +24,34 @@ const setup = () => {
   const handleResize = debounce(onResize, 500)
   window.addEventListener('resize', handleResize)
 
-  const onClickStart = () => {
+  const startGame = (wasmModule: ASUtil & typeof ExportedWasmModule) => {
     window.removeEventListener('resize', handleResize)
-    initGame()
+    initGame(wasmModule)
     menuContainer.visible = false
   }
 
-  let itemsToClear = []
+  let startWhenLoaded = false
+  let wasmModule: null | ASUtil & typeof ExportedWasmModule = null
+
+  const loadWasmModule = async () => {
+    const response = await instantiate<typeof ExportedWasmModule>(fetch("/logic-build/index.wasm"));
+    wasmModule = response.exports
+    if (startWhenLoaded) {
+      startGame(wasmModule)
+    }
+  }
+
+  loadWasmModule()
+
+  const onClickStart = () => {
+    if (wasmModule) {
+      startGame(wasmModule)
+    } else {
+      startWhenLoaded = true
+    }
+  }
+
+  let itemsToClear: PIXI.Mesh[] = []
 
   function onResize() {
     itemsToClear.forEach(item => menuContainer.removeChild(item))

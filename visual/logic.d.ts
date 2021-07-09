@@ -11,6 +11,8 @@ type usize = number;
 type f32 = number;
 type f64 = number;
 type bool = boolean | number;
+export function initUniverse(factionData: usize): void;
+export var Float32Array_ID: u32;
 export function sum(arr: usize): i32;
 export var Int32Array_ID: u32;
 export const memory: WebAssembly.Memory;

@@ -6,7 +6,7 @@ export enum SquadType {
 
 export class SquadDetails {
   representationId: f32
-  productionTime: u8
+  productionTime: u16
   numberOfMembers: u8
   maxHealth: u16
   movementSpeed: f32
