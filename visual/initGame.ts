@@ -36,7 +36,16 @@ const initGame = (module: ASUtil & typeof ExportedWasmModule) => {
   const serializedInfoAboutWorld = getSerializedInfoAboutWorld()
 
 
-  const { initUniverse, Float32Array_ID, __newArray } = module;
+  const {
+    initUniverse,
+    getUniverseRepresentation,
+    getFactoriesInitData,
+    __getFloat32ArrayView,
+    __pin,
+    __unpin,
+    Float32Array_ID,
+    __newArray,
+  } = module;
   const prt = __newArray(Float32Array_ID, serializedInfoAboutWorld.factions)
 
   const universe = initUniverse(
@@ -44,24 +53,27 @@ const initGame = (module: ASUtil & typeof ExportedWasmModule) => {
     // serializedInfoAboutWorld.obstacles,
     // serializedInfoAboutWorld.strategicPoints,
   )
+  const factoriesArrPtr = __pin(getFactoriesInitData()) 
+  const factoriesData = __getFloat32ArrayView(factoriesArrPtr)
+  for (let i = 0; i < factoriesData.length; i += 5) {
+    const factoryId = factoriesData[i + 1]
+    const factionId = factoriesData[i]
+    const factoryRepresentation = new Factory(
+      factoriesData[i + 2], // x
+      factoriesData[i + 3], // y
+      factoriesData[i + 4], // angle
+    )
+    universeRepresentation[factoryId] = factoryRepresentation
+  }
+  __unpin(factoriesArrPtr)
 
-  // const factoriesInitData = universe.get_factories_init_data()
-  // for (let i = 0; i < factoriesInitData.length; i += 5) {
-  //   const factoryId = factoriesInitData[i + 1]
-  //   const factionId = factoriesInitData[i]
-  //   const factoryRepresentation = new Factory(
-  //     factoriesInitData[i + 2], // x
-  //     factoriesInitData[i + 3], // y
-  //     factoriesInitData[i + 4], // angle
-  //   )
-  //   universeRepresentation[factoryId] = factoryRepresentation
 
-  //   if (factionId === USER_FACTION_ID) {
-  //     createFactoryButtons(factoriesInitData[i + 2], factoriesInitData[i + 3], type =>
-  //       universe.create_squad(type),
-  //     )
-  //   }
-  // }
+
+    // if (factionId === USER_FACTION_ID) {
+    //   createFactoryButtons(factoriesInitData[i + 2], factoriesInitData[i + 3], type =>
+    //     universe.create_squad(type),
+    //   )
+    // }
 
   // const strategicPointsInitData = universe.get_strategic_points_init_data()
   // for (let i = 0; i < strategicPointsInitData.length; i += 3) {
@@ -80,32 +92,38 @@ const initGame = (module: ASUtil & typeof ExportedWasmModule) => {
   // let nextIsRaptor = false
 
   // window.app.ticker.add((delta: number) => {
-  //   // gridDebug(universe)
-  //   debugController.update(universe)
+    // gridDebug(universe)
+    // debugController.update(universe)
 
-  //   if (window.debugAiMode) return
+    // if (window.debugAiMode) return
 
-  //   if (timeToCreateEnemy == 0) {
-  //     universe.create_enemy_squad(
-  //       nextIsRaptor ? REPRESENTATION_RAPTOR : REPRESENTATION_SOLIDER,
-  //     )
-  //     nextIsRaptor = !nextIsRaptor
+    // if (timeToCreateEnemy == 0) {
+    //   universe.create_enemy_squad(
+    //     nextIsRaptor ? REPRESENTATION_RAPTOR : REPRESENTATION_SOLIDER,
+    //   )
+    //   nextIsRaptor = !nextIsRaptor
 
-  //     timeToCreateEnemy = 1500
-  //   } else {
-  //     timeToCreateEnemy--
-  //   }
+    //   timeToCreateEnemy = 1500
+    // } else {
+    //   timeToCreateEnemy--
+    // }
 
-  //   mouseController.updateScenePosition()
+    // mouseController.updateScenePosition()
 
-  //   universe.update()
-  //   const universeData = universe.get_universe_data()
+    // universe.update()
 
-  //   render(
-  //     delta,
-  //     Array.from(universeData), // TODO: check how long does it take, and try with raw Float32Array
-  //     universeRepresentation,
-  //   )
+
+
+
+
+  const arrPtr = __pin(getUniverseRepresentation()) 
+  const universeData = __getFloat32ArrayView(arrPtr)
+  render(
+    0,
+    universeData as any as number[], // TODO: check how long does it take, and try with raw Float32Array
+    universeRepresentation,
+  )
+  __unpin(arrPtr)
   // })
 }
 

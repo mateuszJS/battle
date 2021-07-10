@@ -15,7 +15,7 @@ class ProductionItem {
 }
 
 export class Factory {
-  private id: f32
+  public id: f32
   private productionLine: Array<ProductionItem>
   private timeToCreate: u16
   private lastCreatedSquad: Squad | null
@@ -24,9 +24,9 @@ export class Factory {
   
   constructor(
     private factionId: u32,
-    private x: f32,
-    private y: f32,
-    private angle: f32,
+    public  x: f32,
+    public  y: f32,
+    public  angle: f32,
     private isOwnByUser: bool,
   ) {
     this.id = getId() as f32
@@ -110,14 +110,14 @@ export class Factory {
         this.id,
         progress,
       ]
-      this.productionLine.forEach(productionItem => {
-        results.push(productionItem.representationId)
-      })
+      for (let i = 0; i < this.productionLine.length; i++ ) {
+        results.push(this.productionLine[i].representationId)
+      }
       return results
     } else {
       return [
         REPRESENTATION_ENEMY_FACTORY,
-        this.id,
+        this.id, // why is it 4?!
         progress,
       ]
     }

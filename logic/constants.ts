@@ -1,7 +1,3 @@
-/* just for TS */
-type f32 = number
-type usize = number
-
 export const PRODUCTION_LINE_LENGTH: usize = 5
 export const NORMAL_SQUAD_RADIUS: f32 = 60
 export const MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS: f32 = NORMAL_SQUAD_RADIUS + 100

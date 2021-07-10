@@ -19,4 +19,8 @@ declare global {
   interface Math {
     clamp: (value: number, min: number, max: number) => number
   }
+
+  type f32 = number
+  type f64 = number
+  type usize = number
 }

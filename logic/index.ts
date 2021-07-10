@@ -7,9 +7,10 @@ import { Faction } from "./faction";
 var factions: Array<Faction> = []
 
 export function initUniverse(
-  factionData: Array<f32>,
+  factionData: Float32Array,
 ): void {
   for (let i = 0; i < factionData.length; i += 4) {
+    trace("input", 4, factionData[i], factionData[i + 1], factionData[i + 2], factionData[i + 3])
     factions.push(new Faction(
       factionData[i] as u32,
       i == 0,
@@ -18,6 +19,20 @@ export function initUniverse(
       factionData[i + 3],
     ))
   }
+}
+
+
+export function getFactoriesInitData(): Float32Array {
+  let result = new Float32Array(factions.length * 5)
+  for (let i = 0; i < factions.length; i++) {
+    let faction = factions[i]
+    result[i * 5 + 0] = faction.id as f32
+    result[i * 5 + 1] = faction.factory.id
+    result[i * 5 + 2] = faction.factory.x
+    result[i * 5 + 3] = faction.factory.y
+    result[i * 5 + 4] = faction.factory.angle
+  }
+  return result
 }
 
 export const Float32Array_ID = idof<Float32Array>()
@@ -36,6 +51,18 @@ export function sum(arr: Int32Array): i32 {
   return sum
 }
 export const Int32Array_ID = idof<Int32Array>()
+
+
+export function getUniverseRepresentation(): Float32Array {
+  let representation = factions.map<f32[]>(faction => faction.getRepresentation()).flat()
+  let result = new Float32Array(representation.length)
+  for (let i: i32 = 0; i < representation.length; i++) {
+    trace("", 1, representation[i]);
+    result[i] = representation[i]
+  }
+
+  return result
+}
 
 
 // export function getRandomArray(len: i32): Int32Array {

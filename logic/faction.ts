@@ -1,10 +1,11 @@
+import { REPRESENTATION_FACTION_ID } from "./constants"
 import { Factory } from "./factory"
 import { Squad } from "./squad"
 import { SquadType } from "./squad-details"
 import { UnitState } from "./unit"
 
 export class Faction {
-  private factory: Factory
+  public factory: Factory
   private resource: u32
   private squads: Squad[]
 
@@ -24,5 +25,17 @@ export class Faction {
 
   update(): void {
     this.factory.update()
+  }
+
+  getRepresentation(): Array<f32> {
+    let factionDetails = [
+      REPRESENTATION_FACTION_ID,
+      this.id as f32,
+    ];
+    
+    const factoryRepresentation = this.factory.getRepresentation()
+    return factionDetails.concat(factoryRepresentation)
+
+    // this.squads.forEach(squad => squad.getRepresentation())
   }
 }
