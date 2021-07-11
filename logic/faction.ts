@@ -24,7 +24,14 @@ export class Faction {
   }
 
   update(): void {
-    this.factory.update()
+    this.squads.forEach(squad => {
+      squad.update()
+    })
+    // first update factory, later squads, otherwise we will update new squad twice
+    let newCreatedSquad = this.factory.update()
+    if (newCreatedSquad) {
+      this.squads.push(newCreatedSquad)
+    }
   }
 
   getRepresentation(): Array<f32> {

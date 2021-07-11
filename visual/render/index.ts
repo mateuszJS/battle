@@ -6,6 +6,7 @@ import {
   REPRESENTATION_BULLETS,
   REPRESENTATION_RAPTOR,
   REPRESENTATION_STRATEGIC_POINT,
+  PRODUCTION_LINE_LENGTH,
 } from '../../logic/constants'
 
 import * as representationUpdaters from './representationUpdaters'
@@ -75,7 +76,7 @@ const render = (
       }
       case REPRESENTATION_USER_FACTORY: {
         const indexOfId = index + 1
-        const newIndexValue = indexOfId + 7
+        const newIndexValue = indexOfId + 2 + PRODUCTION_LINE_LENGTH
         const factoryId = universeData[indexOfId]
         const factory = universeRepresentation[factoryId]
         representationUpdaters.updateFactory(

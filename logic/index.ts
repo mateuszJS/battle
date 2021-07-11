@@ -2,6 +2,7 @@
 // import { foo, bar } from "./constants"
 
 import { Faction } from "./faction";
+import { MAP_SQUAD_REPRESENTATION_TO_TYPE } from "./squad-details";
 
 
 var factions: Array<Faction> = []
@@ -10,7 +11,6 @@ export function initUniverse(
   factionData: Float32Array,
 ): void {
   for (let i = 0; i < factionData.length; i += 4) {
-    trace("input", 4, factionData[i], factionData[i + 1], factionData[i + 2], factionData[i + 3])
     factions.push(new Faction(
       factionData[i] as u32,
       i == 0,
@@ -37,32 +37,28 @@ export function getFactoriesInitData(): Float32Array {
 
 export const Float32Array_ID = idof<Float32Array>()
 
-// export function add(a: i32, b: i32): i32 {
-//   return a + b + bar + foo
-// }
-
-
-export function sum(arr: Int32Array): i32 {
-  let sum = 0
-  for (let i = 0, k = arr.length; i < k; ++i) {
-    sum += unchecked(arr[i]) // unchecked -> index is 100% in array, do not make additional check
-  }
-  trace("HERE", 1, sum)
-  return sum
+function updateUniverse(): void {
+  factions.forEach(faction => {
+    faction.update()
+  })
 }
-export const Int32Array_ID = idof<Int32Array>()
-
 
 export function getUniverseRepresentation(): Float32Array {
+  updateUniverse()
+
   let representation = factions.map<f32[]>(faction => faction.getRepresentation()).flat()
   let result = new Float32Array(representation.length)
   for (let i: i32 = 0; i < representation.length; i++) {
-    trace("", 1, representation[i]);
     result[i] = representation[i]
   }
 
   return result
 }
+
+export function createSquad(squadType: f32): void {
+  unchecked(factions[0]).factory.addSquadDoProduction(MAP_SQUAD_REPRESENTATION_TO_TYPE.get(squadType))
+}
+
 
 
 // export function getRandomArray(len: i32): Int32Array {

@@ -1,4 +1,4 @@
-import { REPRESENTATION_ENEMY_FACTORY, REPRESENTATION_USER_FACTORY } from "./constants";
+import { PRODUCTION_LINE_LENGTH, REPRESENTATION_ENEMY_FACTORY, REPRESENTATION_USER_FACTORY } from "./constants";
 import { getId } from "./get-id";
 import { getRandom } from "./get-random";
 import { Squad } from "./squad";
@@ -37,19 +37,26 @@ export class Factory {
   }
 
   update(): Squad | null {
-    if (this.lastCreatedSquad != null) {
+    let lastCreatedSquad = this.lastCreatedSquad
+    if (lastCreatedSquad) {
+      lastCreatedSquad.update()
+
       if (this.timeToCreateAnotherMember == 0) {
         this.timeToCreateAnotherMember = TIME_BETWEEN_MEMBERS_PRODUCTION
         let position = this.getCreationPoint()
-        let newUnit = this.lastCreatedSquad.addMember(
+        let newUnit = lastCreatedSquad.addMember(
           unchecked(position[0]),
           unchecked(position[1]),
           unchecked(position[2]),
           UnitState.IDLE,
         )
+
+        let seedThrowingStrength = getRandom()
+        let throwingStrength: f32 = 8.0 + seedThrowingStrength * 15.0;
+        newUnit.changeStateToFly(this.angle, throwingStrength);
         // TODO: make newUnit fly
 
-        if (this.lastCreatedSquad.members.length == this.lastCreatedSquad.squadDetails.numberOfMembers) {
+        if (lastCreatedSquad.members.length == lastCreatedSquad.squadDetails.numberOfMembers) {
           this.lastCreatedSquad = null
         }
       } else {
@@ -57,7 +64,7 @@ export class Factory {
       }
     }
 
-    if (this.productionLine.length > 0) {
+    if (this.productionLine.length > 0 && this.lastCreatedSquad == null) {
       if (this.timeToCreate == 0) {
         if (this.productionLine.length > 1) {
           let nextSquadDetails = SQUAD_DETAILS.get(unchecked(this.productionLine[1].squadType))
@@ -96,7 +103,7 @@ export class Factory {
     let positionX = this.x + Math.sin(perpendicularAngle) * distance;
     let positionY = this.y - Math.cos(perpendicularAngle) * distance;
     let unitAngle = this.angle + seedDistance / 2.0;
-    return [positionX, positionY, unitAngle]
+    return [positionX as f32, positionY as f32, unitAngle]
   }
 
   getRepresentation(): Array<f32> {
@@ -104,22 +111,33 @@ export class Factory {
       ? this.timeToCreate / unchecked(this.productionLine[0]).totalTime
       : 0
 
+    let results: Array<f32>
+
     if (this.isOwnByUser) {
-      let results = [
+      results = [
         REPRESENTATION_USER_FACTORY,
         this.id,
         progress,
       ]
-      for (let i = 0; i < this.productionLine.length; i++ ) {
-        results.push(this.productionLine[i].representationId)
+      for (let i = 0; i < (PRODUCTION_LINE_LENGTH as i32); i++) {
+        if (i < this.productionLine.length - 1) {
+          results.push(unchecked(this.productionLine[i]).representationId)
+        } else {
+          results.push(0)
+        }
       }
-      return results
     } else {
-      return [
+      results = [
         REPRESENTATION_ENEMY_FACTORY,
         this.id, // why is it 4?!
         progress,
       ]
     }
+
+    let lastCreatedSquad = this.lastCreatedSquad
+    if (lastCreatedSquad != null) {
+      return results.concat(lastCreatedSquad.getRepresentation())
+    }
+    return results
   }
 }

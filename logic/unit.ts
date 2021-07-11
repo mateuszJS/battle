@@ -6,22 +6,6 @@ import { getRandom } from "./get-random"
 import { Point } from "./point"
 import { Squad } from "./squad"
 
-
-// class Point {
-//   x: f32
-//   y: f32
-// }
-
-// export class Line {
-//   pointA: Point
-//   pointB: Point
-//   constructor() {
-//     this.pointA = { x: 0, y: 0 }
-//     this.pointB = { x: 1, y: 1 }
-//   }
-// }
-
-
 export enum UnitState {
   DIE,
   FLY,
@@ -53,8 +37,6 @@ export class Unit {
     public state: UnitState,
     private squad: Squad
   ) {
-    // let line = new Line()
-    // trace("msg", 1, line.pointA.x)
     this.id = getId() as f32
     this.positionOffset = { x: 0, y: 0 }
     this.modX = 0
@@ -68,9 +50,9 @@ export class Unit {
     this.weaponAngleDuringChasing = 0.0
   }
 
-  change_state_to_fly(angle: f32, strength: f32): void {
+  changeStateToFly(angle: f32, strength: f32): void {
     this.state = UnitState.FLY;
-    this.angle = (angle + Math.PI) % (2.0 * Math.PI);
+    this.angle = (angle + Math.PI) % (2.0 * Math.PI) as f32;
     let flyMods = getFlyModes(angle, this.x, this.y, strength);
     this.modX = flyMods.x;
     this.modY = flyMods.y;
@@ -103,7 +85,7 @@ export class Unit {
       this.state = UnitState.IDLE
       if (this.trackIndex != -1) {
         this.trackIndex = getInitialTrackIndex(
-          Math.max(0, this.trackIndex - 1),
+          Math.max(0, this.trackIndex - 1) as i8,
           this.x,
           this.y,
           this.squad,
@@ -127,9 +109,9 @@ export class Unit {
 
     this.destination = destination
     // TODO: I'm not really sure about this atan2
-    this.angle = Math.atan2(destination.x - this.x, destination.y - this.y)
-    this.modX = Math.sin(this.angle) * this.squad.squadDetails.movementSpeed
-    this.modX = -Math.cos(this.angle) * this.squad.squadDetails.movementSpeed
+    this.angle = Math.atan2(destination.x - this.x, destination.y - this.y) as f32
+    this.modX = Math.sin(this.angle) * this.squad.squadDetails.movementSpeed as f32
+    this.modX = -Math.cos(this.angle) * this.squad.squadDetails.movementSpeed as f32
   }
 
   goToCurrentPointOnTrack(): void {
@@ -289,7 +271,7 @@ export class Unit {
     if (this.timeToNextShoot == 0) {
       let weapon = this.squad.weaponDetails
       let scatter = weapon.scatter * 2.0 * (getRandom() - 0.5)
-      let distance = 80 * weapon.scatter * getRandom()
+      let distance = 80.0 * weapon.scatter * getRandom()
 
       let angle = this.state == UnitState.SHOOT
         ? this.angle
@@ -338,7 +320,7 @@ export class Unit {
 
   getAdditionalRepresentationParam(): f32 {
     switch (this.state) {
-      case UnitState.FLY : return Math.hypot(this.modX, this.modY)
+      case UnitState.FLY : return Math.hypot(this.modX, this.modY) as f32
       case UnitState.GETUP: return this.gettingUpProgress
       case UnitState.SHOOT : return this.timeToNextShoot
       case UnitState.ABILITY: return 0 //Abilities::get_representation_state(self)

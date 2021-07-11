@@ -1,3 +1,5 @@
+import { Point } from "./point";
+
 export const FLY_MIN_SPEED: f32 = 0.035;
 export const FLY_DECELERATION: f32 = 0.95;
 const FLY_DISTANCE_PRECISION: f32 = 3.0;
@@ -36,7 +38,7 @@ export function getFlyModes(angle: f32, startX: f32, startY: f32, strength: f32)
 
   let factor = distance / allSpeedsSum;
   return {
-    x: Math.sin(angle) * strength * factor,
-    y: -Math.cos(angle) * strength * factor,
+    x: Math.sin(angle) * strength * factor as f32,
+    y: -Math.cos(angle) * strength * factor as f32,
   }
 }

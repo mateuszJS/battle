@@ -6,8 +6,8 @@ export class WeaponDetails {
   range: f32
   scatter: f32
   chanceForReload: f32
-  reloadTime: f32
-  shootTime: f32
+  reloadTime: u16
+  shootTime: u16
 }
 
 export var WEAPON_DETAILS = new Map<WeaponType,WeaponDetails>()

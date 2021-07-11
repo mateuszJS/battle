@@ -62,7 +62,9 @@ export class Squad {
   }
 
   update(): void {
-
+    this.members.forEach(member => {
+      member.update()
+    })
   }
 
   keepCoherency(): void {
@@ -152,5 +154,9 @@ export class Squad {
 
   checkMembersCorrectness(): void {
     this.members.forEach(member => member.checkCorrectness())
+  }
+
+  getRepresentation(): Array<f32> {
+    return this.members.map<Array<f32>>(unit => unit.getRepresentation()).flat()
   }
 }

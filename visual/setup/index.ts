@@ -21,7 +21,7 @@ const setup = () => {
   window.app.stage.addChild(menuContainer)
   menuContainer.addChild(background)
 
-  const handleResize = debounce(onResize, 500, {})
+  const handleResize = debounce(onResize, 500, undefined)
   window.addEventListener('resize', handleResize)
 
   const startGame = (wasmModule: ASUtil & typeof ExportedWasmModule) => {

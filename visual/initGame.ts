@@ -40,6 +40,7 @@ const initGame = (module: ASUtil & typeof ExportedWasmModule) => {
     initUniverse,
     getUniverseRepresentation,
     getFactoriesInitData,
+    createSquad,
     __getFloat32ArrayView,
     __pin,
     __unpin,
@@ -48,7 +49,7 @@ const initGame = (module: ASUtil & typeof ExportedWasmModule) => {
   } = module;
   const prt = __newArray(Float32Array_ID, serializedInfoAboutWorld.factions)
 
-  const universe = initUniverse(
+  initUniverse(
     prt,
     // serializedInfoAboutWorld.obstacles,
     // serializedInfoAboutWorld.strategicPoints,
@@ -64,16 +65,17 @@ const initGame = (module: ASUtil & typeof ExportedWasmModule) => {
       factoriesData[i + 4], // angle
     )
     universeRepresentation[factoryId] = factoryRepresentation
+
+    if (factionId === USER_FACTION_ID) {
+      createFactoryButtons(factoriesData[i + 2], factoriesData[i + 3], type => createSquad(type),
+      )
+    }
   }
   __unpin(factoriesArrPtr)
 
 
 
-    // if (factionId === USER_FACTION_ID) {
-    //   createFactoryButtons(factoriesInitData[i + 2], factoriesInitData[i + 3], type =>
-    //     universe.create_squad(type),
-    //   )
-    // }
+
 
   // const strategicPointsInitData = universe.get_strategic_points_init_data()
   // for (let i = 0; i < strategicPointsInitData.length; i += 3) {
@@ -85,13 +87,13 @@ const initGame = (module: ASUtil & typeof ExportedWasmModule) => {
   //   universeRepresentation[strategicPointId] = factoryRepresentation
   // }
 
-  // const mouseController = new initializeMouseController(universe, universeRepresentation)
+  // const mouseController = new initializeMouseController(universeRepresentation)
 
   // debugController.init()
   // let timeToCreateEnemy = 0
   // let nextIsRaptor = false
 
-  // window.app.ticker.add((delta: number) => {
+  window.app.ticker.add((delta: number) => {
     // gridDebug(universe)
     // debugController.update(universe)
 
@@ -110,21 +112,15 @@ const initGame = (module: ASUtil & typeof ExportedWasmModule) => {
 
     // mouseController.updateScenePosition()
 
-    // universe.update()
-
-
-
-
-
-  const arrPtr = __pin(getUniverseRepresentation()) 
-  const universeData = __getFloat32ArrayView(arrPtr)
-  render(
-    0,
-    universeData as any as number[], // TODO: check how long does it take, and try with raw Float32Array
-    universeRepresentation,
-  )
-  __unpin(arrPtr)
-  // })
+    const arrPtr = __pin(getUniverseRepresentation()) 
+    const universeData = __getFloat32ArrayView(arrPtr)
+    render(
+      0,
+      universeData as any as number[], // TODO: check how long does it take, and try with raw Float32Array
+      universeRepresentation,
+    )
+    __unpin(arrPtr)
+  })
 }
 
 export default initGame
