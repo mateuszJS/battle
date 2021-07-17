@@ -3,7 +3,6 @@ import { getId } from "./get-id";
 import { getRandom } from "./get-random";
 import { Squad } from "./squad";
 import { SquadType, SQUAD_DETAILS } from "./squad-details";
-import { UnitState } from "./unit";
 
 const FACTORY_WIDTH: f32 = 400.0;
 const TIME_BETWEEN_MEMBERS_PRODUCTION: u8 = 10
@@ -48,13 +47,11 @@ export class Factory {
           unchecked(position[0]),
           unchecked(position[1]),
           unchecked(position[2]),
-          UnitState.IDLE,
         )
 
         let seedThrowingStrength = getRandom()
-        let throwingStrength: f32 = 8.0 + seedThrowingStrength * 15.0;
+        let throwingStrength: f32 = 4.5 + seedThrowingStrength * 7.0;
         newUnit.changeStateToFly(this.angle, throwingStrength);
-        // TODO: make newUnit fly
 
         if (lastCreatedSquad.members.length == lastCreatedSquad.squadDetails.numberOfMembers) {
           this.lastCreatedSquad = null

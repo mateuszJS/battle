@@ -1,3 +1,4 @@
+import { UnitState } from "./constants"
 import { getAngleDiff } from "./get-angle-diff"
 import { FLY_DECELERATION, FLY_MIN_SPEED, getFlyModes } from "./get-fly-modes"
 import { getId } from "./get-id"
@@ -5,17 +6,6 @@ import { getInitialTrackIndex } from "./get-initial-track-index"
 import { getRandom } from "./get-random"
 import { Point } from "./point"
 import { Squad } from "./squad"
-
-export enum UnitState {
-  DIE,
-  FLY,
-  GETUP,
-  ABILITY,
-  IDLE,
-  SHOOT,
-  RUN,
-  CHASING,
-}
 
 export class Unit {
   private id: f32
@@ -29,12 +19,12 @@ export class Unit {
   private gettingUpProgress: f32
   private weaponAngleDuringChasing: f32
   public positionOffset: Point
+  public state: UnitState
 
   constructor(
     public x: f32,
     public y: f32,
     public angle: f32,
-    public state: UnitState,
     private squad: Squad
   ) {
     this.id = getId() as f32
@@ -48,6 +38,7 @@ export class Unit {
     this.hp = squad.squadDetails.maxHealth
     this.gettingUpProgress = 0.0
     this.weaponAngleDuringChasing = 0.0
+    this.state = UnitState.IDLE
   }
 
   changeStateToFly(angle: f32, strength: f32): void {

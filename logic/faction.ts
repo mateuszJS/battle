@@ -2,7 +2,6 @@ import { REPRESENTATION_FACTION_ID } from "./constants"
 import { Factory } from "./factory"
 import { Squad } from "./squad"
 import { SquadType } from "./squad-details"
-import { UnitState } from "./unit"
 
 export class Faction {
   public factory: Factory
@@ -20,7 +19,7 @@ export class Faction {
     this.resource = 0
     this.squads = []
     let portal = new Squad(id, SquadType.Portal)
-    portal.addMember(factoryX, factoryY, factoryAngle, UnitState.IDLE)
+    portal.addMember(factoryX, factoryY, factoryAngle)
   }
 
   update(): void {
@@ -41,7 +40,12 @@ export class Faction {
     ];
     
     const factoryRepresentation = this.factory.getRepresentation()
-    return factionDetails.concat(factoryRepresentation)
+    const squadsRepresentation = this.squads.map<Array<f32>>(
+      squad => squad.getRepresentation()
+    ).flat()
+    return factionDetails
+      .concat(factoryRepresentation)
+      .concat(squadsRepresentation)
 
     // this.squads.forEach(squad => squad.getRepresentation())
   }

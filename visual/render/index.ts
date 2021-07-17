@@ -20,7 +20,7 @@ import StrategicPoint from '~/representation/StrategicPoint'
 
 const render = (
   delta: number,
-  universeData: number[],
+  universeData: Float32Array,
   universeRepresentation: UniverseRepresentation,
 ) => {
   const universeLength = universeData.length

@@ -16,12 +16,24 @@ import debugController from '~/debug'
 import enhanceAnimatedSprites from '~/enhance-animated-sprites'
 import type * as ExportedWasmModule from './logic'
 import { ASUtil } from '@assemblyscript/loader'
+import initConvertArraysUtils from './initConvertArraysUtils'
 
 export type UniverseRepresentation = {
   [id: number]: Factory | Unit | StrategicPoint
 }
 
-const initGame = (module: ASUtil & typeof ExportedWasmModule) => {
+export type WasmModule = ASUtil & typeof ExportedWasmModule
+
+const initGame = (wasmModule: WasmModule) => {
+  const {
+    initUniverse,
+    getUniverseRepresentation,
+    getFactoriesInitData,
+    createSquad,
+  } = wasmModule;
+
+  initConvertArraysUtils(wasmModule)
+
   enhanceAnimatedSprites()
 
   const mapSprite = createBackgroundTexture()
@@ -35,47 +47,29 @@ const initGame = (module: ASUtil & typeof ExportedWasmModule) => {
 
   const serializedInfoAboutWorld = getSerializedInfoAboutWorld()
 
-
-  const {
-    initUniverse,
-    getUniverseRepresentation,
-    getFactoriesInitData,
-    createSquad,
-    __getFloat32ArrayView,
-    __pin,
-    __unpin,
-    Float32Array_ID,
-    __newArray,
-  } = module;
-  const prt = __newArray(Float32Array_ID, serializedInfoAboutWorld.factions)
-
   initUniverse(
-    prt,
+    window.getFloat32ArrayPointer(serializedInfoAboutWorld.factions),
     // serializedInfoAboutWorld.obstacles,
     // serializedInfoAboutWorld.strategicPoints,
   )
-  const factoriesArrPtr = __pin(getFactoriesInitData()) 
-  const factoriesData = __getFloat32ArrayView(factoriesArrPtr)
-  for (let i = 0; i < factoriesData.length; i += 5) {
-    const factoryId = factoriesData[i + 1]
-    const factionId = factoriesData[i]
-    const factoryRepresentation = new Factory(
-      factoriesData[i + 2], // x
-      factoriesData[i + 3], // y
-      factoriesData[i + 4], // angle
-    )
-    universeRepresentation[factoryId] = factoryRepresentation
 
-    if (factionId === USER_FACTION_ID) {
-      createFactoryButtons(factoriesData[i + 2], factoriesData[i + 3], type => createSquad(type),
+  window.useFloat32ArrayData(getFactoriesInitData(), (factoriesData) => {
+    for (let i = 0; i < factoriesData.length; i += 5) {
+      const factoryId = factoriesData[i + 1]
+      const factionId = factoriesData[i]
+      const factoryRepresentation = new Factory(
+        factoriesData[i + 2], // x
+        factoriesData[i + 3], // y
+        factoriesData[i + 4], // angle
       )
+      universeRepresentation[factoryId] = factoryRepresentation
+  
+      if (factionId === USER_FACTION_ID) {
+        createFactoryButtons(factoriesData[i + 2], factoriesData[i + 3], type => createSquad(type),
+        )
+      }
     }
-  }
-  __unpin(factoriesArrPtr)
-
-
-
-
+  })
 
   // const strategicPointsInitData = universe.get_strategic_points_init_data()
   // for (let i = 0; i < strategicPointsInitData.length; i += 3) {
@@ -87,7 +81,7 @@ const initGame = (module: ASUtil & typeof ExportedWasmModule) => {
   //   universeRepresentation[strategicPointId] = factoryRepresentation
   // }
 
-  // const mouseController = new initializeMouseController(universeRepresentation)
+  const mouseController = new initializeMouseController(wasmModule, universeRepresentation)
 
   // debugController.init()
   // let timeToCreateEnemy = 0
@@ -110,16 +104,14 @@ const initGame = (module: ASUtil & typeof ExportedWasmModule) => {
     //   timeToCreateEnemy--
     // }
 
-    // mouseController.updateScenePosition()
-
-    const arrPtr = __pin(getUniverseRepresentation()) 
-    const universeData = __getFloat32ArrayView(arrPtr)
-    render(
-      0,
-      universeData as any as number[], // TODO: check how long does it take, and try with raw Float32Array
-      universeRepresentation,
-    )
-    __unpin(arrPtr)
+    mouseController.updateScenePosition()
+    window.useFloat32ArrayData(getUniverseRepresentation(), (universeData) => {
+      render(
+        0,
+        universeData,
+        universeRepresentation,
+      )
+    })
   })
 }
 

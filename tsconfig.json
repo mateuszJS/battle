@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "es6",
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
     "module": "ESNext", // Pixi works with commonJS, but dynamic imports works with ESNext </3

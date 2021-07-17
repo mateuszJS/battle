@@ -9,3 +9,14 @@ export const REPRESENTATION_USER_FACTORY: f32 = 3.0
 export const REPRESENTATION_BULLETS: f32 = 4.0
 export const REPRESENTATION_RAPTOR: f32 = 5.0
 export const REPRESENTATION_STRATEGIC_POINT: f32 = 7.0
+
+export enum UnitState {
+  DIE,
+  FLY,
+  GETUP,
+  ABILITY,
+  IDLE,
+  SHOOT,
+  RUN,
+  CHASING,
+}

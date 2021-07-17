@@ -7,6 +7,10 @@ import { MAP_SQUAD_REPRESENTATION_TO_TYPE } from "./squad-details";
 
 var factions: Array<Faction> = []
 
+
+export const Float32Array_ID = idof<Float32Array>()
+export const Uint32Array_ID = idof<Uint32Array>()
+
 export function initUniverse(
   factionData: Float32Array,
 ): void {
@@ -35,8 +39,6 @@ export function getFactoriesInitData(): Float32Array {
   return result
 }
 
-export const Float32Array_ID = idof<Float32Array>()
-
 function updateUniverse(): void {
   factions.forEach(faction => {
     faction.update()
@@ -59,47 +61,26 @@ export function createSquad(squadType: f32): void {
   unchecked(factions[0]).factory.addSquadDoProduction(MAP_SQUAD_REPRESENTATION_TO_TYPE.get(squadType))
 }
 
+export function moveUnits(squadsIds: Uint32Array, x: f32, y: f32): Uint32Array {
+  return new Uint32Array(0)
+}
 
+export function getSelectedUnitsIds(x1: f32, y1: f32, x2: f32, y2: f32): Uint32Array {
+  return new Uint32Array(0)
+}
 
-// export function getRandomArray(len: i32): Int32Array {
-//   const arr = new Int32Array(len)
-//   // fill with random values
-//   return arr
+export function useAbility(squadsIds: Uint32Array, abilityType: u8, x: f32, y: f32): void {
+}
+
+export function getAbilitiesCoolDowns(squadsIds: Uint32Array, abilityType: u8): Float32Array {
+  return new Float32Array(0)
+}
+
+// function toTypedArray<T, TyArr>(arr: Array<T>): TyArr {
+//   let len = arr.length;
+//   let result = instantiate<TyArr>(len);
+//   memory.copy(result.dataStart, arr.dataStart, len);
+//   return result;
 // }
 
-/*
-  Two ways how to store objects
-
-  var a = new Map<string,string>()
-  a.set("prop", "hello world")
-
-
-  class A {
-    constructor(public prop: string) {}
-  }
-  var a = new A("hello world")
-
-
-
-
-  class MyClass {
-    propOne: i32;
-    propTwo: i32;
-  }
-
-  var myInstance: MyClass = { propOne: 2, propTwo: 3 };
-  Objects created via literals can have methods and default property values, but may not have a constructor.
-*/
-
-
-/*
-  Checking reference
-
-  var a = "hello"
-  var b = a
-  var c = "h" + a.substring(1)
-
-  if (a === b) { true }
-  if (a === c) { false }
-  if (a == c) { true }
-*/
+// const typedf32arr = toTypedArray<f32, Float32Array>(arrf32);

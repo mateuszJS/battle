@@ -1,5 +1,4 @@
-import { Universe } from '../../crate/pkg/index'
-import { UniverseRepresentation } from '~/initGame'
+import { UniverseRepresentation, WasmModule } from '~/initGame'
 import SelectionController from './SelectionController'
 import getCameraPositionModificators from './getCameraPositionModificators'
 import { MAP_WIDTH, MAP_HEIGHT } from 'Consts'
@@ -19,14 +18,14 @@ class MouseController {
     minCameraY: number
   }
 
-  constructor(universe: Universe, universeRepresentation: UniverseRepresentation) {
+  constructor(wasmModule: WasmModule, universeRepresentation: UniverseRepresentation) {
     this.modX = 0
     this.modY = 0
     this.sceneX = 0
     this.sceneY = 0
     this.mouseX = 0
     this.mouseY = 0
-    this.selectionController = new SelectionController(universe, universeRepresentation)
+    this.selectionController = new SelectionController(wasmModule, universeRepresentation)
     this.updateCameraBoundaries()
     window.app.stage.interactive = true
     window.app.stage.on('mousedown', this.onMouseDown)

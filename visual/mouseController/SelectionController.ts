@@ -1,6 +1,5 @@
 import { HALF_UNIT_HEIGHT } from 'Consts'
-import { Universe } from '../../crate/pkg/index'
-import { UniverseRepresentation } from '~/initGame'
+import { UniverseRepresentation, WasmModule } from '~/initGame'
 import Unit from '~/representation/Unit'
 import Factory from '~/representation/Factory'
 import updateAbilitiesButtons from '~/buttons/abilities'
@@ -10,14 +9,14 @@ import StrategicPoint from '~/representation/StrategicPoint'
 class SelectionController {
   private startPoint: null | Point
   private selectionRectangle: PIXI.Graphics
-  private universe: Universe
+  private wasmModule: WasmModule
   private universeRepresentation: UniverseRepresentation
   private selectedUnits: Unit[]
   private selectedSquads: Uint32Array
   private selectedAbilityType: RepresentationId | null
 
-  constructor(universe: Universe, universeRepresentation: UniverseRepresentation) {
-    this.universe = universe
+  constructor(wasmModule: WasmModule, universeRepresentation: UniverseRepresentation) {
+    this.wasmModule = wasmModule
     this.universeRepresentation = universeRepresentation
     this.selectedUnits = []
     this.selectedSquads = new Uint32Array()
@@ -37,36 +36,48 @@ class SelectionController {
     // tracksDebug(tracks)
     if (this.selectedSquads.length === 0) return
 
-    const selectedEnemyUnitsIds = this.universe.move_units(this.selectedSquads, x, y)
+    const selectedEnemyUnitsIdsPoint = this.wasmModule.moveUnits(
+      window.getUint32ArrayPointer(this.selectedSquads),
+      x,
+      y,
+    )
 
-    if (selectedEnemyUnitsIds.length === 0) return
+    window.useUint32ArrayData(selectedEnemyUnitsIdsPoint, selectedEnemyUnitsIds => {
+      if (selectedEnemyUnitsIds.length === 0) return
 
-    selectedEnemyUnitsIds.forEach(id => {
-      const unit = this.universeRepresentation[id] as Unit | Factory | StrategicPoint
-      unit.select()
-    })
-
-    setTimeout(() => {
       selectedEnemyUnitsIds.forEach(id => {
         const unit = this.universeRepresentation[id] as Unit | Factory | StrategicPoint
-        if (unit) {
-          unit.deselect()
-        }
+        unit.select()
       })
-    }, 2000)
+
+      setTimeout(() => {
+        selectedEnemyUnitsIds.forEach(id => {
+          const unit = this.universeRepresentation[id] as Unit | Factory | StrategicPoint
+          if (unit) {
+            unit.deselect()
+          }
+        })
+      }, 2000)
+    })
   }
 
   private selectUnits(x1: number, x2: number, y1: number, y2: number) {
-    const result = this.universe.get_selected_units_ids(x1, x2, y1, y2)
-    if (result.length === 1) {
-      // there is only divider "0"
-      this.selectedSquads = new Uint32Array()
-      return
-    }
-    const indexOfDivider = result.indexOf(0) // 0 -> divides between squads ids and units ids
-    const unitsIds = result.subarray(0, indexOfDivider)
-    const squadsIds = result.subarray(indexOfDivider + 1)
-    this.selectedSquads = squadsIds
+    let unitsIds;
+
+    window.useUint32ArrayData(
+      this.wasmModule.getSelectedUnitsIds(x1, x2, y1, y2),
+      (result) => {
+        if (result.length === 1) {
+          // there is only divider "0"
+          this.selectedSquads = new Uint32Array()
+          return
+        }
+        const indexOfDivider = result.indexOf(0) // 0 -> divides between squads ids and units ids
+        unitsIds = result.subarray(0, indexOfDivider)
+        const squadsIds = result.subarray(indexOfDivider + 1)
+        this.selectedSquads = squadsIds
+      }
+    )
 
     const iconsPayload: number[][] = []
     let collectedUnits: number[] = []
@@ -100,7 +111,12 @@ class SelectionController {
 
   public startSelection(point: Point) {
     if (this.selectedAbilityType) {
-      this.universe.use_ability(this.selectedSquads, this.selectedAbilityType, point.x, point.y)
+      this.wasmModule.useAbility(
+        window.getUint32ArrayPointer(this.selectedSquads),
+        this.selectedAbilityType,
+        point.x,
+        point.y,
+      )
       this.deselectAbility()
       return
     }
@@ -117,7 +133,7 @@ class SelectionController {
   public updateSelection({ x, y }: Point) {
     updateAbilitiesButtons(
       this.selectedSquads,
-      this.universe,
+      this.wasmModule,
       this.selectedAbilityType,
       this.selectAbility,
     )

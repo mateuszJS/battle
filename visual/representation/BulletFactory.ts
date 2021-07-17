@@ -98,11 +98,12 @@ class Bullet {
   public modY: number
   public update: VoidFunction
 
-  constructor(type: bulletType, x: number, y: number, [angle, speed, lifetime]: number[]) {
+  constructor(type: bulletType, x: number, y: number, bulletDetails: Float32Array) {
+    // bulletDetails = [angle, speed, lifetime]
     const sprite = new PIXI.Sprite()
     sprite.x = x
     sprite.y = y
-    sprite.angle = (angle * 180) / Math.PI
+    sprite.angle = (bulletDetails[0] * 180) / Math.PI
     sprite.addChild(MAP_TYPE_TO_GRAPHIC_CONSTRUCTOR[type]())
 
     if (type === STANDARD_RIFLE) {
@@ -112,11 +113,11 @@ class Bullet {
     }
 
     this.sprite = sprite
-    this.lifetime = lifetime
+    this.lifetime = bulletDetails[2]
     this.type = type
-    this.modX = Math.sin(angle) * speed
-    this.modY = -Math.cos(angle) * speed
-    this.update = MAP_TYPE_TO_UPDATE_FUNC[type](this, x, y, angle, speed, lifetime)
+    this.modX = Math.sin(bulletDetails[0]) * bulletDetails[1]
+    this.modY = -Math.cos(bulletDetails[0]) * bulletDetails[1]
+    this.update = MAP_TYPE_TO_UPDATE_FUNC[type](this, x, y, bulletDetails[0], bulletDetails[1], bulletDetails[2])
   }
 }
 
@@ -138,7 +139,7 @@ class BulletFactory {
     }
   }
 
-  static create(bulletsData: number[], universeRepresentation: UniverseRepresentation) {
+  static create(bulletsData: Float32Array, universeRepresentation: UniverseRepresentation) {
     for (let i = 0; i < bulletsData.length; i += 5) {
       const type = bulletsData[i] as bulletType
       const unitId = bulletsData[i + 1]

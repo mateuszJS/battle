@@ -10,6 +10,7 @@ import {
   REPRESENTATION_STRATEGIC_POINT,
 } from '../../logic/constants'
 import { UpdateAbilityCallback } from './UnitFactory'
+import { UnitState } from '../../logic/constants'
 
 type ObjectType =
   typeof REPRESENTATION_FACTION_ID |
@@ -24,18 +25,6 @@ type PixiUnitStuff = {
   container: PIXI.Container
   frameUpdaters: FrameUpdaters
   selectionSprite: PIXI.Sprite
-}
-
-enum State {
-  CHASING = 9,
-  ABILITY = 8,
-  FLY = 7,
-  RUN = 6,
-
-  SHOOT = 5,
-  IDLE = 4,
-  GETUP = 3,
-  DIE = 0,
 }
 
 class Unit {
@@ -81,42 +70,42 @@ class Unit {
     this.graphics.addChild(this.indicator)
   }
 
-  update(state: State, x: number, y: number, angle: number, firstStateParam: number) {
+  update(state: UnitState, x: number, y: number, angle: number, firstStateParam: number) {
     this.graphics.x = x
     this.graphics.y = y
 
     switch (state) {
-      case State.ABILITY:
+      case UnitState.ABILITY:
         this.updateAbility(x, y, angle, firstStateParam)
         break
 
-      case State.IDLE: {
+      case UnitState.IDLE: {
         this.frameUpdaters.goToIdle(angle)
         break
       }
-      case State.SHOOT: {
+      case UnitState.SHOOT: {
         this.frameUpdaters.goToShoot(angle, firstStateParam)
         break
       }
-      case State.RUN: {
+      case UnitState.RUN: {
         this.frameUpdaters.goToRun(angle)
         break
       }
-      case State.FLY: {
+      case UnitState.FLY: {
         this.frameUpdaters.goToFly(angle, firstStateParam)
         break
       }
-      case State.GETUP: {
+      case UnitState.GETUP: {
         this.frameUpdaters.goToGetUp(angle, firstStateParam)
         break
       }
-      case State.DIE: {
+      case UnitState.DIE: {
         this.deselect()
         this.frameUpdaters.goToDie(angle, this.id)
         break
       }
-      case State.CHASING: {
-        this.frameUpdaters.goToChasing(angle) // there is additional parma from rust, but for solider we don't use it
+      case UnitState.CHASING: {
+        this.frameUpdaters.goToChasing(angle)
       }
     }
   }

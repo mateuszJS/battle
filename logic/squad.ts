@@ -3,7 +3,7 @@ import { getId } from "./get-id"
 import { Point } from "./point"
 import { getTrack, UNITS_OFFSET } from "./position-utils"
 import { SquadDetails, SquadType, SQUAD_DETAILS } from "./squad-details"
-import { Unit, UnitState } from "./unit"
+import { Unit } from "./unit"
 import { WeaponDetails, WeaponType, WEAPON_DETAILS } from "./weapon-details"
 
 class TaskTodo {
@@ -92,8 +92,8 @@ export class Squad {
     }
   }
 
-  addMember(x: f32, y: f32, angle: f32, state: UnitState): Unit {
-    let newUnit = new Unit(x, y, angle, state, this)
+  addMember(x: f32, y: f32, angle: f32): Unit {
+    let newUnit = new Unit(x, y, angle, this)
     this.members.push(newUnit);
     this.recalculateMembersPosition();
     return newUnit
