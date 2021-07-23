@@ -1,12 +1,12 @@
 import debounce from 'debounce'
-import initGame from '~/initGame'
 import createItem from './createItem'
 import blendColorBurn from './blendColorBurn'
 import hoverMesh from './hoverMesh'
+import mapCreator from '../map-creator'
 
 import { instantiate } from "@assemblyscript/loader"
 import type * as ExportedWasmModule from '~/logic'
-import { ASUtil } from '@assemblyscript/loader'
+import { WasmModule } from '~/initGame'
 
 const setup = () => {
   const backgroundTexture = PIXI.Texture.from('assets/pure_background_with_traced_images.jpg')
@@ -24,14 +24,14 @@ const setup = () => {
   const handleResize = debounce(onResize, 500, undefined)
   window.addEventListener('resize', handleResize)
 
-  const startGame = (wasmModule: ASUtil & typeof ExportedWasmModule) => {
+  const startGame = (wasmModule: WasmModule) => {
     window.removeEventListener('resize', handleResize)
-    initGame(wasmModule)
+    mapCreator(wasmModule)
     menuContainer.visible = false
   }
 
   let startWhenLoaded = false
-  let wasmModule: null | ASUtil & typeof ExportedWasmModule = null
+  let wasmModule: null | WasmModule = null
 
   const loadWasmModule = async () => {
     const response = await instantiate<typeof ExportedWasmModule>(fetch("/logic-build/index.wasm"));

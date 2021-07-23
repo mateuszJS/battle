@@ -51,4 +51,8 @@ export default [
   'assets/units/troop-regular-accessories/regular-accessories-getup.json',
   'assets/units/troop-regular-accessories/regular-accessories-shoot.json',
   'assets/units/troop-regular-accessories/regular-accessories-chasing.json',
+  'assets/bridge/adornment.json',
+  'assets/bridge/boundary-stick.json',
+  'assets/bridge/track-side.jpg',
+  'assets/bridge/track-surface.jpg',
 ]
