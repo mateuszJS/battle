@@ -55,4 +55,5 @@ export default [
   'assets/bridge/boundary-stick.json',
   'assets/bridge/track-side.jpg',
   'assets/bridge/track-surface.jpg',
+  'assets/bridge/node-platform.png',
 ]
