@@ -18,6 +18,7 @@ import type * as ExportedWasmModule from './logic'
 import { ASUtil } from '@assemblyscript/loader'
 import initConvertArraysUtils from './initConvertArraysUtils'
 import drawBridge from './draw-bridge'
+import drawNode from './draw-node'
 
 export type UniverseRepresentation = {
   [id: number]: Factory | Unit | StrategicPoint
@@ -112,32 +113,14 @@ const initGame = (
     }
     const angle = Math.atan2(pointA.x - pointB.x, pointB.y - pointA.y) + Math.PI / 2
 
-    drawBridge([
-      // { x: 1200, y: 1000 },
-      // { x: 200, y: 500 },
-      // { x: 380, y: 400 },
-      // { x: 1450, y: 800 },
-  
-      { x: mouseX + Math.sin(angle) * 100 * 2, y: mouseY - Math.cos(angle) * 35 * 2 },
-      { x: pointB.x + Math.sin(angle) * 100 * 2, y: pointB.y - Math.cos(angle) * 35 * 2 },
-      { x: pointB.x + Math.sin(angle) * -100 * 2, y: pointB.y - Math.cos(angle) * -35 * 2  },
-      { x: mouseX + Math.sin(angle) * -100 * 2, y: mouseY - Math.cos(angle) * -35 * 2 },
+    // drawBridge([
+    //   { x: mouseX + Math.sin(angle) * 100 * 2, y: mouseY - Math.cos(angle) * 35 * 2 },
+    //   { x: pointB.x + Math.sin(angle) * 100 * 2, y: pointB.y - Math.cos(angle) * 35 * 2 },
+    //   { x: pointB.x + Math.sin(angle) * -100 * 2, y: pointB.y - Math.cos(angle) * -35 * 2  },
+    //   { x: mouseX + Math.sin(angle) * -100 * 2, y: mouseY - Math.cos(angle) * -35 * 2 },
+    // ])
 
-      // { x: mouseX + Math.sin(angle) * 100, y: mouseY - Math.cos(angle) * 35 },
-      // { x: pointB.x + Math.sin(angle) * 100, y: pointB.y - Math.cos(angle) * 35 },
-      // { x: pointB.x + Math.sin(angle) * -100, y: pointB.y - Math.cos(angle) * -35  },
-      // { x: mouseX + Math.sin(angle) * -100, y: mouseY - Math.cos(angle) * -35 },
-  
-      // { x: 0, y: 500 },
-      // { x: 1000, y: 0 },
-      // { x: 1250, y: 100 },
-      // { x: 180, y: 600 },
-    
-      // { x: 200, y: 1000 },
-      // { x: 1200, y: 500 },
-      // { x: 1450, y: 600 },
-      // { x: 380, y: 1100 },
-    ])
+    drawNode(600, 600, [false, true, false, false], 600)
 
     // gridDebug(universe)
     // debugController.update(universe)
