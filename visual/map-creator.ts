@@ -1,8 +1,7 @@
 import initGame, { WasmModule } from '~/initGame'
+import { MAP_HEIGHT, MAP_WIDTH, NODE_RADIUS } from '../logic/constants'
 
-const trackSideTexture = PIXI.Texture.from('assets/bridge/track-side.jpg')
-const trackSurfaceTexture = PIXI.Texture.from('assets/bridge/track-surface.jpg')
-const nodePlatformTexture = PIXI.Texture.from('assets/bridge/node-platform.png')
+const scale = (window.innerWidth * 0.7) / MAP_WIDTH
 
 let activeElement = null
 let isJoiner = true
@@ -12,40 +11,16 @@ const connectionsContainer = new PIXI.Graphics()
 const activeConnectionContainer = new PIXI.Graphics()
 const nodesWrapper = new PIXI.Container()
 const mapCreatorWrapper = new PIXI.Container()
-let previewWrapper
 
 let nodes: PIXI.Graphics[] = []
-const nodePlatformSize = 100
+const nodePlatformSize = NODE_RADIUS * scale * 2
 const mapDetails = {
   x: nodePlatformSize,
   y: 50,
-  width: 500,
-  height: 800
+  width: MAP_WIDTH * scale,
+  height: MAP_HEIGHT * scale
 }
 const portalSize = 30
-
-const updatePreview = () => {
-  if (previewWrapper) {
-    previewWrapper.parent.removeChild(previewWrapper)
-  }
-
-  previewWrapper = new PIXI.Container()
-  const background = new PIXI.Graphics()
-  background.beginFill(0x333333)
-  background.drawRect(0, 0, mapDetails.width, mapDetails.height)
-  background.endFill()
-  previewWrapper.addChild(background)
-  mapCreatorWrapper.addChild(previewWrapper)
-  previewWrapper.x = mapDetails.x * 2 + mapDetails.width
-  previewWrapper.y = mapDetails.y
-  nodes.forEach(node => {
-    const sprite = new PIXI.Sprite(nodePlatformTexture)
-    sprite.x = node.x
-    sprite.y = node.y
-    sprite.scale.set(nodePlatformSize / nodePlatformTexture.width)
-    previewWrapper.addChild(sprite)
-  })
-}
 
 const onDragStart = (event) => {
   activeElement = event.currentTarget
@@ -100,7 +75,6 @@ const getHoveredJoiner = (x: number, y: number): PIXI.Graphics => {
 }
 
 const onDragEnd = (event) => {
-  updatePreview()
   if (isJoiner) {
     activeConnectionContainer.clear();
     const hoveredJoiner = getHoveredJoiner(event.data.global.x, event.data.global.y)
@@ -256,7 +230,8 @@ const mapCreator = (wasmModule: WasmModule) => {
   createStartBtn(() => {
     const result = []
     nodes.forEach(node => {
-
+      node.x = (node.x - mapDetails.x) / scale
+      node.y = (node.y - mapDetails.y) / scale
       // result.push({
         // x: node.x,
         // y: node.y,

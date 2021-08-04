@@ -2,8 +2,9 @@
 // import { foo, bar } from "./constants"
 
 import { Faction } from "./faction";
+import { getObstacles, storeObstacles } from "./obstacles-manager";
+import { Point } from "./point";
 import { MAP_SQUAD_REPRESENTATION_TO_TYPE } from "./squad-details";
-
 
 var factions: Array<Faction> = []
 
@@ -13,6 +14,7 @@ export const Uint32Array_ID = idof<Uint32Array>()
 
 export function initUniverse(
   factionData: Float32Array,
+  obstacles: Float32Array,
 ): void {
   for (let i = 0; i < factionData.length; i += 4) {
     factions.push(new Faction(
@@ -23,8 +25,37 @@ export function initUniverse(
       factionData[i + 3],
     ))
   }
+
+  storeObstacles(obstacles)
 }
 
+export function debugObstacles(): Float32Array {
+  let data = getObstacles().map<f32[]>(obstacle => (
+    obstacle.map<f32[]>((point, index, array) => (
+      index !== array.length - 1 ? [point.x, point.y] : [point.x, point.y, -1.0]
+    )).flat()
+  )).flat()
+  let flattenData = data
+  trace("data.length", 1, flattenData.length)
+  let result = new Float32Array(flattenData.length)
+  trace("result.length", 1, result.length)
+  for (let i = 0; i < flattenData.length; i++) {
+    let item = flattenData[i]
+    result[i] = item
+  }
+  return result
+  //   .iter()
+  //   .flat_map(|obstacle_points_list| {
+  //     let mut result = obstacle_points_list
+  //       .iter()
+  //       .flat_map(|point| vec![point.x, point.y])
+  //       .collect::<Vec<f32>>();
+  //     result.push(-1.0);
+  //     result
+  //   })
+  //   .collect::<Vec<f32>>();
+  // js_sys::Float32Array::from(&result[..])
+}
 
 export function getFactoriesInitData(): Float32Array {
   let result = new Float32Array(factions.length * 5)

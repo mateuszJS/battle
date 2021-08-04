@@ -2,622 +2,622 @@
   "frames": {
     "track_railing_00.png": {
       "frame": {
-        "x": 1,
-        "y": 1,
-        "w": 67,
-        "h": 64
+        "x": 28,
+        "y": 44,
+        "w": 15,
+        "h": 40
       },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 67,
-        "h": 64
+        "w": 15,
+        "h": 40
       },
       "sourceSize": {
-        "w": 67,
-        "h": 64
+        "w": 15,
+        "h": 40
       }
     },
     "track_railing_01.png": {
       "frame": {
-        "x": 1,
-        "y": 67,
-        "w": 67,
-        "h": 64
+        "x": 34,
+        "y": 86,
+        "w": 15,
+        "h": 40
       },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 67,
-        "h": 64
+        "w": 15,
+        "h": 40
       },
       "sourceSize": {
-        "w": 67,
-        "h": 64
+        "w": 15,
+        "h": 40
       }
     },
     "track_railing_02.png": {
       "frame": {
-        "x": 1,
-        "y": 133,
-        "w": 67,
-        "h": 64
+        "x": 38,
+        "y": 1,
+        "w": 15,
+        "h": 40
       },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 67,
-        "h": 64
+        "w": 15,
+        "h": 40
       },
       "sourceSize": {
-        "w": 67,
-        "h": 64
+        "w": 15,
+        "h": 40
       }
     },
     "track_railing_03.png": {
       "frame": {
-        "x": 1,
-        "y": 859,
-        "w": 67,
-        "h": 63
+        "x": 18,
+        "y": 88,
+        "w": 14,
+        "h": 38
       },
       "rotated": false,
-      "trimmed": true,
+      "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
-        "y": 1,
-        "w": 67,
-        "h": 63
+        "y": 0,
+        "w": 14,
+        "h": 38
       },
       "sourceSize": {
-        "w": 67,
-        "h": 64
+        "w": 14,
+        "h": 38
       }
     },
     "track_railing_04.png": {
       "frame": {
-        "x": 1,
-        "y": 924,
-        "w": 67,
-        "h": 63
+        "x": 78,
+        "y": 43,
+        "w": 13,
+        "h": 38
       },
       "rotated": false,
-      "trimmed": true,
+      "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
-        "y": 1,
-        "w": 67,
-        "h": 63
+        "y": 0,
+        "w": 13,
+        "h": 38
       },
       "sourceSize": {
-        "w": 67,
-        "h": 64
+        "w": 13,
+        "h": 38
       }
     },
     "track_railing_05.png": {
       "frame": {
-        "x": 1,
-        "y": 1054,
-        "w": 67,
-        "h": 62
+        "x": 68,
+        "y": 85,
+        "w": 14,
+        "h": 38
       },
       "rotated": false,
-      "trimmed": true,
+      "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
-        "y": 2,
-        "w": 67,
-        "h": 62
+        "y": 0,
+        "w": 14,
+        "h": 38
       },
       "sourceSize": {
-        "w": 67,
-        "h": 64
+        "w": 14,
+        "h": 38
       }
     },
     "track_railing_06.png": {
       "frame": {
         "x": 1,
-        "y": 1246,
-        "w": 67,
-        "h": 61
+        "y": 89,
+        "w": 15,
+        "h": 37
       },
       "rotated": false,
-      "trimmed": true,
+      "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
-        "y": 3,
-        "w": 67,
-        "h": 61
+        "y": 0,
+        "w": 15,
+        "h": 37
       },
       "sourceSize": {
-        "w": 67,
-        "h": 64
+        "w": 15,
+        "h": 37
       }
     },
     "track_railing_07.png": {
       "frame": {
-        "x": 1,
-        "y": 1372,
-        "w": 67,
-        "h": 60
+        "x": 93,
+        "y": 41,
+        "w": 15,
+        "h": 37
       },
       "rotated": false,
-      "trimmed": true,
+      "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
-        "y": 4,
-        "w": 67,
-        "h": 60
+        "y": 0,
+        "w": 15,
+        "h": 37
       },
       "sourceSize": {
-        "w": 67,
-        "h": 64
+        "w": 15,
+        "h": 37
       }
     },
     "track_railing_08.png": {
       "frame": {
-        "x": 1,
-        "y": 1434,
-        "w": 67,
-        "h": 60
+        "x": 110,
+        "y": 74,
+        "w": 14,
+        "h": 36
       },
-      "rotated": false,
-      "trimmed": true,
+      "rotated": true,
+      "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
-        "y": 4,
-        "w": 67,
-        "h": 60
+        "y": 0,
+        "w": 14,
+        "h": 36
       },
       "sourceSize": {
-        "w": 67,
-        "h": 64
+        "w": 14,
+        "h": 36
       }
     },
     "track_railing_09.png": {
       "frame": {
-        "x": 1,
-        "y": 1558,
-        "w": 67,
-        "h": 59
+        "x": 110,
+        "y": 90,
+        "w": 14,
+        "h": 36
       },
       "rotated": false,
-      "trimmed": true,
+      "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
-        "y": 5,
-        "w": 67,
-        "h": 59
+        "y": 0,
+        "w": 14,
+        "h": 36
       },
       "sourceSize": {
-        "w": 67,
-        "h": 64
+        "w": 14,
+        "h": 36
       }
     },
     "track_railing_10.png": {
       "frame": {
-        "x": 1,
-        "y": 1680,
-        "w": 67,
-        "h": 58
+        "x": 119,
+        "y": 1,
+        "w": 12,
+        "h": 35
       },
-      "rotated": false,
-      "trimmed": true,
+      "rotated": true,
+      "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
-        "y": 6,
-        "w": 67,
-        "h": 58
+        "y": 0,
+        "w": 12,
+        "h": 35
       },
       "sourceSize": {
-        "w": 67,
-        "h": 64
+        "w": 12,
+        "h": 35
       }
     },
     "track_railing_11.png": {
       "frame": {
-        "x": 1,
-        "y": 1740,
-        "w": 67,
-        "h": 58
+        "x": 119,
+        "y": 28,
+        "w": 10,
+        "h": 35
       },
-      "rotated": false,
-      "trimmed": true,
+      "rotated": true,
+      "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
-        "y": 6,
-        "w": 67,
-        "h": 58
+        "y": 0,
+        "w": 10,
+        "h": 35
       },
       "sourceSize": {
-        "w": 67,
-        "h": 64
+        "w": 10,
+        "h": 35
       }
     },
     "track_railing_12.png": {
       "frame": {
-        "x": 1,
-        "y": 1800,
-        "w": 67,
-        "h": 58
+        "x": 99,
+        "y": 80,
+        "w": 9,
+        "h": 35
       },
       "rotated": false,
-      "trimmed": true,
+      "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
-        "y": 6,
-        "w": 67,
-        "h": 58
+        "y": 0,
+        "w": 9,
+        "h": 35
       },
       "sourceSize": {
-        "w": 67,
-        "h": 64
+        "w": 9,
+        "h": 35
       }
     },
     "track_railing_13.png": {
       "frame": {
-        "x": 1,
-        "y": 1860,
-        "w": 67,
-        "h": 58
+        "x": 119,
+        "y": 15,
+        "w": 11,
+        "h": 35
       },
-      "rotated": false,
-      "trimmed": true,
+      "rotated": true,
+      "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
-        "y": 6,
-        "w": 67,
-        "h": 58
+        "y": 0,
+        "w": 11,
+        "h": 35
       },
       "sourceSize": {
-        "w": 67,
-        "h": 64
+        "w": 11,
+        "h": 35
       }
     },
     "track_railing_14.png": {
       "frame": {
-        "x": 1,
-        "y": 1920,
-        "w": 67,
-        "h": 58
+        "x": 142,
+        "y": 90,
+        "w": 12,
+        "h": 36
       },
       "rotated": false,
-      "trimmed": true,
+      "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
-        "y": 6,
-        "w": 67,
-        "h": 58
+        "y": 0,
+        "w": 12,
+        "h": 36
       },
       "sourceSize": {
-        "w": 67,
-        "h": 64
+        "w": 12,
+        "h": 36
       }
     },
     "track_railing_15.png": {
       "frame": {
-        "x": 1,
-        "y": 1619,
-        "w": 67,
-        "h": 59
+        "x": 126,
+        "y": 90,
+        "w": 14,
+        "h": 36
       },
       "rotated": false,
-      "trimmed": true,
+      "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
-        "y": 5,
-        "w": 67,
-        "h": 59
+        "y": 0,
+        "w": 14,
+        "h": 36
       },
       "sourceSize": {
-        "w": 67,
-        "h": 64
+        "w": 14,
+        "h": 36
       }
     },
     "track_railing_16.png": {
       "frame": {
-        "x": 1,
-        "y": 1496,
-        "w": 67,
-        "h": 60
+        "x": 110,
+        "y": 57,
+        "w": 15,
+        "h": 36
       },
-      "rotated": false,
-      "trimmed": true,
+      "rotated": true,
+      "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
-        "y": 4,
-        "w": 67,
-        "h": 60
+        "y": 0,
+        "w": 15,
+        "h": 36
       },
       "sourceSize": {
-        "w": 67,
-        "h": 64
+        "w": 15,
+        "h": 36
       }
     },
     "track_railing_17.png": {
       "frame": {
-        "x": 1,
-        "y": 1309,
-        "w": 67,
-        "h": 61
+        "x": 102,
+        "y": 1,
+        "w": 15,
+        "h": 37
       },
       "rotated": false,
-      "trimmed": true,
+      "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
-        "y": 3,
-        "w": 67,
-        "h": 61
+        "y": 0,
+        "w": 15,
+        "h": 37
       },
       "sourceSize": {
-        "w": 67,
-        "h": 64
+        "w": 15,
+        "h": 37
       }
     },
     "track_railing_18.png": {
       "frame": {
-        "x": 1,
-        "y": 1118,
-        "w": 67,
-        "h": 62
+        "x": 110,
+        "y": 40,
+        "w": 15,
+        "h": 37
       },
-      "rotated": false,
-      "trimmed": true,
+      "rotated": true,
+      "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
-        "y": 2,
-        "w": 67,
-        "h": 62
+        "y": 0,
+        "w": 15,
+        "h": 37
       },
       "sourceSize": {
-        "w": 67,
-        "h": 64
+        "w": 15,
+        "h": 37
       }
     },
     "track_railing_19.png": {
       "frame": {
-        "x": 1,
-        "y": 1182,
-        "w": 67,
-        "h": 62
+        "x": 87,
+        "y": 1,
+        "w": 13,
+        "h": 38
       },
       "rotated": false,
-      "trimmed": true,
+      "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
-        "y": 2,
-        "w": 67,
-        "h": 62
+        "y": 0,
+        "w": 13,
+        "h": 38
       },
       "sourceSize": {
-        "w": 67,
-        "h": 64
+        "w": 13,
+        "h": 38
       }
     },
     "track_railing_20.png": {
       "frame": {
-        "x": 1,
-        "y": 989,
-        "w": 67,
-        "h": 63
+        "x": 84,
+        "y": 83,
+        "w": 13,
+        "h": 38
       },
       "rotated": false,
-      "trimmed": true,
+      "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
-        "y": 1,
-        "w": 67,
-        "h": 63
+        "y": 0,
+        "w": 13,
+        "h": 38
       },
       "sourceSize": {
-        "w": 67,
-        "h": 64
+        "w": 13,
+        "h": 38
       }
     },
     "track_railing_21.png": {
       "frame": {
-        "x": 1,
-        "y": 199,
-        "w": 67,
-        "h": 64
+        "x": 45,
+        "y": 43,
+        "w": 15,
+        "h": 40
       },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 67,
-        "h": 64
+        "w": 15,
+        "h": 40
       },
       "sourceSize": {
-        "w": 67,
-        "h": 64
+        "w": 15,
+        "h": 40
       }
     },
     "track_railing_22.png": {
       "frame": {
-        "x": 1,
-        "y": 265,
-        "w": 67,
-        "h": 64
+        "x": 55,
+        "y": 1,
+        "w": 15,
+        "h": 40
       },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 67,
-        "h": 64
+        "w": 15,
+        "h": 40
       },
       "sourceSize": {
-        "w": 67,
-        "h": 64
+        "w": 15,
+        "h": 40
       }
     },
     "track_railing_23.png": {
       "frame": {
-        "x": 1,
-        "y": 331,
-        "w": 67,
-        "h": 64
+        "x": 51,
+        "y": 85,
+        "w": 15,
+        "h": 40
       },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 67,
-        "h": 64
+        "w": 15,
+        "h": 40
       },
       "sourceSize": {
-        "w": 67,
-        "h": 64
+        "w": 15,
+        "h": 40
       }
     },
     "track_railing_24.png": {
       "frame": {
-        "x": 1,
-        "y": 397,
-        "w": 67,
-        "h": 64
+        "x": 62,
+        "y": 43,
+        "w": 14,
+        "h": 40
       },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 67,
-        "h": 64
+        "w": 14,
+        "h": 40
       },
       "sourceSize": {
-        "w": 67,
-        "h": 64
+        "w": 14,
+        "h": 40
       }
     },
     "track_railing_25.png": {
       "frame": {
         "x": 1,
-        "y": 463,
-        "w": 67,
-        "h": 64
+        "y": 1,
+        "w": 13,
+        "h": 42
       },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 67,
-        "h": 64
+        "w": 13,
+        "h": 42
       },
       "sourceSize": {
-        "w": 67,
-        "h": 64
+        "w": 13,
+        "h": 42
       }
     },
     "track_railing_26.png": {
       "frame": {
-        "x": 1,
-        "y": 529,
-        "w": 67,
-        "h": 64
+        "x": 15,
+        "y": 45,
+        "w": 11,
+        "h": 41
       },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 67,
-        "h": 64
+        "w": 11,
+        "h": 41
       },
       "sourceSize": {
-        "w": 67,
-        "h": 64
+        "w": 11,
+        "h": 41
       }
     },
     "track_railing_27.png": {
       "frame": {
-        "x": 1,
-        "y": 595,
-        "w": 67,
-        "h": 64
+        "x": 16,
+        "y": 1,
+        "w": 9,
+        "h": 41
       },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 67,
-        "h": 64
+        "w": 9,
+        "h": 41
       },
       "sourceSize": {
-        "w": 67,
-        "h": 64
+        "w": 9,
+        "h": 41
       }
     },
     "track_railing_28.png": {
       "frame": {
-        "x": 1,
-        "y": 661,
-        "w": 67,
-        "h": 64
+        "x": 27,
+        "y": 1,
+        "w": 9,
+        "h": 41
       },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 67,
-        "h": 64
+        "w": 9,
+        "h": 41
       },
       "sourceSize": {
-        "w": 67,
-        "h": 64
+        "w": 9,
+        "h": 41
       }
     },
     "track_railing_29.png": {
       "frame": {
         "x": 1,
-        "y": 727,
-        "w": 67,
-        "h": 64
+        "y": 45,
+        "w": 12,
+        "h": 42
       },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 67,
-        "h": 64
+        "w": 12,
+        "h": 42
       },
       "sourceSize": {
-        "w": 67,
-        "h": 64
+        "w": 12,
+        "h": 42
       }
     },
     "track_railing_30.png": {
       "frame": {
-        "x": 1,
-        "y": 793,
-        "w": 67,
-        "h": 64
+        "x": 72,
+        "y": 1,
+        "w": 13,
+        "h": 40
       },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 67,
-        "h": 64
+        "w": 13,
+        "h": 40
       },
       "sourceSize": {
-        "w": 67,
-        "h": 64
+        "w": 13,
+        "h": 40
       }
     }
   },
@@ -627,10 +627,10 @@
     "image": "boundary-stick.png",
     "format": "RGBA8888",
     "size": {
-      "w": 69,
-      "h": 1979
+      "w": 155,
+      "h": 127
     },
     "scale": "1",
-    "smartupdate": "$TexturePacker:SmartUpdate:6a9e1674228cb7c326ac4c1b782f63fa:5a16c7457cff332e4001f07912297a46:a2009f0891a04bbbee44670d6a42d9da$"
+    "smartupdate": "$TexturePacker:SmartUpdate:4aedc001a66712b42a34b7d8e6343a85:5a16c7457cff332e4001f07912297a46:a2009f0891a04bbbee44670d6a42d9da$"
   }
 }

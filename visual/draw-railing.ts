@@ -39,8 +39,7 @@ const drawRailingLine = (
   let endIndex = withEdgeSticks ? numberOfRailings : numberOfRailings - 1;
   for (let i = startIndex; i <= endIndex; i ++) {
     const railingSprite = new PIXI.Sprite(PIXI.Texture.from(`track_railing_${index}.png`))
-    railingSprite.scale.set(0.5)
-    railingSprite.anchor.set(0.87, 0.87)
+    railingSprite.anchor.set(0.5, 0.95)
     railingSprite.x = startPoint.x + i * modX + railingOffsetX
     railingSprite.y = startPoint.y + i * modY + railingOffsetY
     container.addChild(railingSprite)

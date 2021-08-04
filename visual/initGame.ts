@@ -11,7 +11,7 @@ import StrategicPoint from '~/representation/StrategicPoint'
 import initializeMouseController from './mouseController'
 import getSerializedInfoAboutWorld from './getSerializedInfoAboutWorld'
 import { createFactoryButtons } from './buttons/factory'
-import { REPRESENTATION_SOLIDER, REPRESENTATION_RAPTOR } from '../logic/constants'
+import { REPRESENTATION_SOLIDER, REPRESENTATION_RAPTOR, MAP_WIDTH, MAP_HEIGHT} from '../logic/constants'
 import debugController from '~/debug'
 import enhanceAnimatedSprites from '~/enhance-animated-sprites'
 import type * as ExportedWasmModule from './logic'
@@ -19,12 +19,35 @@ import { ASUtil } from '@assemblyscript/loader'
 import initConvertArraysUtils from './initConvertArraysUtils'
 import drawBridge from './draw-bridge'
 import drawNode from './draw-node'
+import { startDebug } from './debug/obstacles'
 
 export type UniverseRepresentation = {
   [id: number]: Factory | Unit | StrategicPoint
 }
 
 export type WasmModule = ASUtil & typeof ExportedWasmModule
+
+window.convertLogicCoordToVisual = (x: number, y: number): [number, number] => {
+  const angle = Math.atan2(x, MAP_HEIGHT - y) - 0.65
+  const distance = Math.hypot(x, MAP_HEIGHT - y)
+  return [
+    Math.sin(angle) * distance,
+    (-Math.cos(angle) * distance + MAP_HEIGHT) * 0.52,
+  ]
+}
+
+const bridgeAngle = 53.6 * Math.PI / 180
+const diagonallyAngle = 37 * Math.PI / 180
+let tempAngle = - bridgeAngle / 2
+const radius = 600 * 0.483
+const geom = Array.from({ length: 8 }, (_, index) => {
+  tempAngle += index % 2 === 0 ? bridgeAngle : diagonallyAngle
+  return {
+    x: Math.sin(tempAngle) * radius,
+    y: -Math.cos(tempAngle) * radius,
+    angle: tempAngle,
+  }
+})
 
 const initGame = (
   wasmModule: WasmModule,
@@ -53,8 +76,19 @@ const initGame = (
 
   const serializedInfoAboutWorld = getSerializedInfoAboutWorld()
 
+  const serializedObstacles = new Float32Array(
+    nodes.map(graphic => {
+      const points = geom.map(point => [
+        point.x + graphic.x,
+        point.y + graphic.y,
+      ]).flat()
+      return [...points, -1]
+    }).flat().slice(0, -1) // remove last -1
+  )
+  console.log('serializedObstacles', serializedObstacles);
   initUniverse(
     window.getFloat32ArrayPointer(serializedInfoAboutWorld.factions),
+    window.getFloat32ArrayPointer(serializedObstacles),
     // serializedInfoAboutWorld.obstacles,
     // serializedInfoAboutWorld.strategicPoints,
   )
@@ -100,7 +134,7 @@ const initGame = (
   // let timeToCreateEnemy = 0
   // let nextIsRaptor = false
 
-
+  startDebug(wasmModule)
 
   window.app.ticker.add((delta: number) => {
     const pointA = {
@@ -120,7 +154,8 @@ const initGame = (
     //   { x: mouseX + Math.sin(angle) * -100 * 2, y: mouseY - Math.cos(angle) * -35 * 2 },
     // ])
 
-    drawNode(600, 600, [false, true, false, false], 600)
+    const node = drawNode(600, 600, [false, true, false, false], 600)
+    window.world.addChild(node.graphic)
 
     // gridDebug(universe)
     // debugController.update(universe)
@@ -137,7 +172,6 @@ const initGame = (
     // } else {
     //   timeToCreateEnemy--
     // }
-
     mouseController.updateScenePosition()
     window.useFloat32ArrayData(getUniverseRepresentation(), (universeData) => {
       render(

@@ -21,3 +21,9 @@ export enum UnitState {
   RUN,
   CHASING,
 }
+
+export const MAP_WIDTH: f32 = 2700
+export const MAP_HEIGHT: f32 = 2100
+export const NODE_RADIUS: f32 = 300
+
+export const OBSTACLES_DIVIDER: f32 = -1.0
