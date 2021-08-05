@@ -20,16 +20,10 @@ class MouseController {
   private mouseX: number
   private mouseY: number
   private selectionController: SelectionController
-  private boundaries: {
-    maxCameraX: number
-    maxCameraY: number
-    minCameraX: number
-    minCameraY: number
-  }
-  private getMinY: (x: number) => number
-  private getMaxY: (x: number) => number
-  private minX: number
-  private maxX: number
+  private getTopBoundary: (x: number) => number
+  private getBottomBoundary: (x: number) => number
+  private rightBoundary: number
+  private leftBoundary: number
 
   constructor(wasmModule: WasmModule, universeRepresentation: UniverseRepresentation) {
     this.modX = 0
@@ -53,38 +47,32 @@ class MouseController {
     const rightBottomCorner = window.convertLogicCoordToVisual(MAP_WIDTH, MAP_HEIGHT)
     const leftBottomCorner = window.convertLogicCoordToVisual(0, MAP_HEIGHT)
 
-    const getLeftBottomY = getCalcYFunc(leftTopCorner, leftBottomCorner)
-    const getRightBottomY = getCalcYFunc(rightBottomCorner, leftBottomCorner)
-    const getLeftTopY = getCalcYFunc(leftTopCorner, rightTopCorner)
-    const getRightTopY = getCalcYFunc(rightBottomCorner, rightTopCorner)
 
-    this.getMinY = (x: number) => {
-      if (x < rightTopCorner[0]) {
+    const getRightBottomY = getCalcYFunc([-leftTopCorner[0], -leftTopCorner[1]], [-leftBottomCorner[0], -leftBottomCorner[1]])
+    const getLeftBottomY = getCalcYFunc([-rightBottomCorner[0], -rightBottomCorner[1]], [-leftBottomCorner[0], -leftBottomCorner[1]])
+    const getRightTopY = getCalcYFunc([-leftTopCorner[0], -leftTopCorner[1]], [-rightTopCorner[0], -rightTopCorner[1]])
+    const getLeftTopY = getCalcYFunc([-rightBottomCorner[0], -rightBottomCorner[1]], [-rightTopCorner[0], -rightTopCorner[1]])
+
+
+    this.getTopBoundary = (x: number) => {
+      if (x < -rightTopCorner[0]) {
         return getLeftTopY(x)
       }
       return getRightTopY(x)
     }
 
-    this.getMaxY = (x: number) => {
+    this.getBottomBoundary = (x: number) => { // working correctly
       if (x < leftBottomCorner[0]) {
         return getLeftBottomY(x)
       }
       return getRightBottomY(x)
     }
-    this.minX = leftTopCorner[0]
-    this.maxX = rightBottomCorner[0]
-
+    this.rightBoundary = -rightBottomCorner[0]
+    this.leftBoundary = -leftTopCorner[0]
     this.updateCameraBoundaries()
   }
 
   private updateCameraBoundaries = () => {
-    this.boundaries = {
-      maxCameraX: 0,
-      maxCameraY: 0,
-      minCameraX: -(MAP_WIDTH - window.innerWidth),
-      minCameraY: -(MAP_HEIGHT - window.innerHeight),
-    }
-    // console.log('updateCameraBoundaries')
     this.updateScenePosition()
     window.app.renderer.resize(window.innerWidth, window.innerHeight)
   }
@@ -124,26 +112,23 @@ class MouseController {
   }
 
   public updateScenePosition() {
+    const minusSpaceX = 0 // window.innerWidth / 2 - 100
+    const minusSpaceY = 0 // window.innerHeight / 2 - 100
     const x = Math.clamp(
       this.sceneX + this.modX,
-      this.minX,
-      this.maxX,
+      this.rightBoundary + minusSpaceX,
+      this.leftBoundary - minusSpaceY,
     )
 
     this.sceneX = x
     this.sceneY = Math.clamp(
-      x,
-      this.getMinY(x),
-      this.getMaxY(x),
+      this.sceneY + this.modY,
+      this.getBottomBoundary(x) + minusSpaceY,
+      this.getTopBoundary(x) - minusSpaceY,
     )
-    // this.sceneY = Math.clamp(
-    //   this.sceneY + this.modY,
-    //   this.boundaries.minCameraY,
-    //   this.boundaries.maxCameraY,
-    // )
 
-    window.app.stage.x = this.sceneX
-    window.app.stage.y = this.sceneY
+    window.app.stage.x = this.sceneX + window.innerWidth / 2
+    window.app.stage.y = this.sceneY + window.innerHeight / 2
 
     this.selectionController.updateSelection(this.absoluteMousePosition)
   }
