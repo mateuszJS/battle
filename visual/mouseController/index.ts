@@ -41,38 +41,77 @@ class MouseController {
     window.app.view.addEventListener('mousemove', this.onMouseMove)
     window.app.view.addEventListener('mouseleave', this.onMouseLeave)
     window.addEventListener('resize', this.updateCameraBoundaries)
+    this.updateCameraBoundaries()
+  }
+
+  private updateCameraBoundaries = () => {
+    const offsetX = (window.innerWidth / 2) - 100
+    const offsetY = (window.innerHeight / 2) - 100
 
     const leftTopCorner = window.convertLogicCoordToVisual(0, 0)
     const rightTopCorner = window.convertLogicCoordToVisual(MAP_WIDTH, 0)
     const rightBottomCorner = window.convertLogicCoordToVisual(MAP_WIDTH, MAP_HEIGHT)
     const leftBottomCorner = window.convertLogicCoordToVisual(0, MAP_HEIGHT)
 
+    const centerX = (
+      leftTopCorner[0] +
+      rightTopCorner[0] +
+      rightBottomCorner[0] +
+      leftBottomCorner[0]
+    ) / 4
+    const centerY = (
+      leftTopCorner[1] +
+      rightTopCorner[1] +
+      rightBottomCorner[1] +
+      leftBottomCorner[1]
+    ) / 4
+    
+    const fromLeftTopAngle = Math.atan2(centerX - leftTopCorner[0], leftTopCorner[1] - centerY)
+    const leftTopPoint = {
+      x: leftTopCorner[0] + Math.sin(fromLeftTopAngle) * offsetX,
+      y: leftTopCorner[1] - Math.cos(fromLeftTopAngle) * offsetY,
+    }
 
-    const getRightBottomY = getCalcYFunc([-leftTopCorner[0], -leftTopCorner[1]], [-leftBottomCorner[0], -leftBottomCorner[1]])
-    const getLeftBottomY = getCalcYFunc([-rightBottomCorner[0], -rightBottomCorner[1]], [-leftBottomCorner[0], -leftBottomCorner[1]])
-    const getRightTopY = getCalcYFunc([-leftTopCorner[0], -leftTopCorner[1]], [-rightTopCorner[0], -rightTopCorner[1]])
-    const getLeftTopY = getCalcYFunc([-rightBottomCorner[0], -rightBottomCorner[1]], [-rightTopCorner[0], -rightTopCorner[1]])
+    const fromRightTopAngle = Math.atan2(centerX - rightTopCorner[0], rightTopCorner[1] - centerY)
+    const rightTopPoint = {
+      x: rightTopCorner[0] + Math.sin(fromRightTopAngle) * offsetX,
+      y: rightTopCorner[1] - Math.cos(fromRightTopAngle) * offsetY,
+    }
+
+    const fromLeftBottomAngle = Math.atan2(centerX - leftBottomCorner[0], leftBottomCorner[1] - centerY)
+    const leftBottomPoint = {
+      x: leftBottomCorner[0] + Math.sin(fromLeftBottomAngle) * offsetX,
+      y: leftBottomCorner[1] - Math.cos(fromLeftBottomAngle) * offsetY,
+    }
+  
+    const fromRightBottomAngle = Math.atan2(centerX - rightBottomCorner[0], rightBottomCorner[1] - centerY)
+    const rightBottomPoint = {
+      x: rightBottomCorner[0] + Math.sin(fromRightBottomAngle) * offsetX,
+      y: rightBottomCorner[1] - Math.cos(fromRightBottomAngle) * offsetY,
+    }
+  
+    const getRightBottomY = getCalcYFunc([-leftTopPoint.x, -leftTopPoint.y], [-leftBottomPoint.x, -leftBottomPoint.y])
+    const getLeftBottomY = getCalcYFunc([-rightBottomPoint.x, -rightBottomPoint.y], [-leftBottomPoint.x, -leftBottomPoint.y])
+    const getRightTopY = getCalcYFunc([-leftTopPoint.x, -leftTopPoint.y], [-rightTopPoint.x, -rightTopPoint.y])
+    const getLeftTopY = getCalcYFunc([-rightBottomPoint.x, -rightBottomPoint.y], [-rightTopPoint.x, -rightTopPoint.y])
 
 
     this.getTopBoundary = (x: number) => {
-      if (x < -rightTopCorner[0]) {
+      if (x < -rightTopPoint.x) {
         return getLeftTopY(x)
       }
       return getRightTopY(x)
     }
 
     this.getBottomBoundary = (x: number) => { // working correctly
-      if (x < leftBottomCorner[0]) {
+      if (x < -leftBottomPoint.x) {
         return getLeftBottomY(x)
       }
       return getRightBottomY(x)
     }
-    this.rightBoundary = -rightBottomCorner[0]
-    this.leftBoundary = -leftTopCorner[0]
-    this.updateCameraBoundaries()
-  }
+    this.rightBoundary = -rightBottomPoint.x
+    this.leftBoundary = -leftTopPoint.x
 
-  private updateCameraBoundaries = () => {
     this.updateScenePosition()
     window.app.renderer.resize(window.innerWidth, window.innerHeight)
   }
@@ -112,19 +151,17 @@ class MouseController {
   }
 
   public updateScenePosition() {
-    const minusSpaceX = 0 // window.innerWidth / 2 - 100
-    const minusSpaceY = 0 // window.innerHeight / 2 - 100
     const x = Math.clamp(
       this.sceneX + this.modX,
-      this.rightBoundary + minusSpaceX,
-      this.leftBoundary - minusSpaceY,
+      this.rightBoundary,
+      this.leftBoundary,
     )
 
     this.sceneX = x
     this.sceneY = Math.clamp(
       this.sceneY + this.modY,
-      this.getBottomBoundary(x) + minusSpaceY,
-      this.getTopBoundary(x) - minusSpaceY,
+      this.getBottomBoundary(x),
+      this.getTopBoundary(x),
     )
 
     window.app.stage.x = this.sceneX + window.innerWidth / 2
