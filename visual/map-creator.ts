@@ -216,7 +216,7 @@ const createStartBtn = (onClick) => {
   text.x = 20;
   text.y = 20;
   button.addChild(text)
-  button.x = mapDetails.y * 2 + mapDetails.height
+  button.x = mapDetails.x + mapDetails.width
   button.interactive = true
   button.buttonMode = true
   button.on('click', onClick)
