@@ -128,8 +128,8 @@ class MouseController {
 
   private get absoluteMousePosition() {
     return {
-      x: this.mouseX - this.sceneX,
-      y: this.mouseY - this.sceneY,
+      x: this.mouseX - this.sceneX - window.innerWidth / 2,
+      y: this.mouseY - this.sceneY - window.innerHeight / 2,
     }
   }
 
