@@ -1,6 +1,6 @@
 import { UniverseRepresentation, WasmModule } from '~/initGame'
 import SelectionController from './SelectionController'
-import getCameraPositionModificators from './getCameraPositionModificators'
+import getCameraPositionModificators from './get-camera-position-modificators'
 import { MAP_WIDTH, MAP_HEIGHT } from '../../logic/constants'
 
 const getCalcYFunc = (
@@ -24,8 +24,9 @@ class MouseController {
   private getBottomBoundary: (x: number) => number
   private rightBoundary: number
   private leftBoundary: number
+  private mapPoints: Point[]
 
-  constructor(wasmModule: WasmModule, universeRepresentation: UniverseRepresentation) {
+  constructor(wasmModule: WasmModule, universeRepresentation: UniverseRepresentation, mapPoints: Point[]) {
     this.modX = 0
     this.modY = 0
     this.sceneX = 0
@@ -33,6 +34,7 @@ class MouseController {
     this.mouseX = 0
     this.mouseY = 0
     this.selectionController = new SelectionController(wasmModule, universeRepresentation)
+    this.mapPoints = mapPoints
     
     window.app.stage.interactive = true
     window.app.stage.on('mousedown', this.onMouseDown)
@@ -47,53 +49,48 @@ class MouseController {
   private updateCameraBoundaries = () => {
     const offsetX = (window.innerWidth / 2) - 100
     const offsetY = (window.innerHeight / 2) - 100
-
-    const leftTopCorner = window.convertLogicCoordToVisual(0, 0)
-    const rightTopCorner = window.convertLogicCoordToVisual(MAP_WIDTH, 0)
-    const rightBottomCorner = window.convertLogicCoordToVisual(MAP_WIDTH, MAP_HEIGHT)
-    const leftBottomCorner = window.convertLogicCoordToVisual(0, MAP_HEIGHT)
     
     const leftTopPoint = {
-      x: leftTopCorner[0] + offsetX,
-      y: leftTopCorner[1],
+      x: -(this.mapPoints[0].x + offsetX),
+      y: -this.mapPoints[0].y,
     }
 
     const rightTopPoint = {
-      x: rightTopCorner[0],
-      y: rightTopCorner[1] + offsetY,
+      x: -this.mapPoints[1].x,
+      y: -(this.mapPoints[1].y + offsetY),
+    }
+
+    const rightBottomPoint = {
+      x: -(this.mapPoints[2].x - offsetX),
+      y: -this.mapPoints[2].y,
     }
 
     const leftBottomPoint = {
-      x: leftBottomCorner[0],
-      y: leftBottomCorner[1] - offsetY,
+      x: -this.mapPoints[3].x,
+      y: -(this.mapPoints[3].y - offsetY),
     }
-  
-    const rightBottomPoint = {
-      x: rightBottomCorner[0] - offsetX,
-      y: rightBottomCorner[1],
-    }
-  
-    const getRightBottomY = getCalcYFunc([-leftTopPoint.x, -leftTopPoint.y], [-leftBottomPoint.x, -leftBottomPoint.y])
-    const getLeftBottomY = getCalcYFunc([-rightBottomPoint.x, -rightBottomPoint.y], [-leftBottomPoint.x, -leftBottomPoint.y])
-    const getRightTopY = getCalcYFunc([-leftTopPoint.x, -leftTopPoint.y], [-rightTopPoint.x, -rightTopPoint.y])
-    const getLeftTopY = getCalcYFunc([-rightBottomPoint.x, -rightBottomPoint.y], [-rightTopPoint.x, -rightTopPoint.y])
+
+    const getRightBottomY = getCalcYFunc([leftTopPoint.x, leftTopPoint.y], [leftBottomPoint.x, leftBottomPoint.y])
+    const getLeftBottomY = getCalcYFunc([rightBottomPoint.x, rightBottomPoint.y], [leftBottomPoint.x, leftBottomPoint.y])
+    const getRightTopY = getCalcYFunc([leftTopPoint.x, leftTopPoint.y], [rightTopPoint.x, rightTopPoint.y])
+    const getLeftTopY = getCalcYFunc([rightBottomPoint.x, rightBottomPoint.y], [rightTopPoint.x, rightTopPoint.y])
 
 
     this.getTopBoundary = (x: number) => {
-      if (x < -rightTopPoint.x) {
+      if (x < rightTopPoint.x) {
         return getLeftTopY(x)
       }
       return getRightTopY(x)
     }
 
     this.getBottomBoundary = (x: number) => {
-      if (x < -leftBottomPoint.x) {
+      if (x < leftBottomPoint.x) {
         return getLeftBottomY(x)
       }
       return getRightBottomY(x)
     }
-    this.rightBoundary = -rightBottomPoint.x
-    this.leftBoundary = -leftTopPoint.x
+    this.rightBoundary = rightBottomPoint.x
+    this.leftBoundary = leftTopPoint.x
 
     this.updateScenePosition()
     window.app.renderer.resize(window.innerWidth, window.innerHeight)

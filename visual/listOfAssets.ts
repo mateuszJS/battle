@@ -22,8 +22,7 @@ export default [
   'assets/gate/gate.json',
   'assets/Fire.png',
   'assets/smoke.png',
-  'assets/quarted_of_map.jpg',
-  'assets/map_center.png',
+
   // 'assets/warriorAssaultAvatar.png',
   // 'assets/warriorRegularAvatar.png',
   'assets/soliderLaserAvatar.png',

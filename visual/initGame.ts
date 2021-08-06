@@ -49,6 +49,20 @@ const geom = Array.from({ length: 8 }, (_, index) => {
   }
 })
 
+const getMapPoints = () => {
+  const leftTopCorner = window.convertLogicCoordToVisual(0, 0)
+  const rightTopCorner = window.convertLogicCoordToVisual(MAP_WIDTH, 0)
+  const rightBottomCorner = window.convertLogicCoordToVisual(MAP_WIDTH, MAP_HEIGHT)
+  const leftBottomCorner = window.convertLogicCoordToVisual(0, MAP_HEIGHT)
+
+  return [
+    { x: leftTopCorner[0], y: leftTopCorner[1] },
+    { x: rightTopCorner[0], y: rightTopCorner[1] },
+    { x: rightBottomCorner[0], y: rightBottomCorner[1] },
+    { x: leftBottomCorner[0], y: leftBottomCorner[1] },
+  ]
+}
+
 const initGame = (
   wasmModule: WasmModule,
   nodes: PIXI.Graphics[],
@@ -65,7 +79,9 @@ const initGame = (
 
   enhanceAnimatedSprites()
 
-  const mapSprite = createBackgroundTexture()
+  const mapPoints = getMapPoints()
+
+  const mapSprite = createBackgroundTexture(mapPoints)
   getSortableLayer(mapSprite)
   EffectsFactory.initialize()
 
@@ -121,7 +137,7 @@ const initGame = (
   //   universeRepresentation[strategicPointId] = factoryRepresentation
   // }
 
-  const mouseController = new initializeMouseController(wasmModule, universeRepresentation)
+  const mouseController = new initializeMouseController(wasmModule, universeRepresentation, mapPoints)
 
   let mouseX = 0
   let mouseY = 0
