@@ -85,10 +85,12 @@ const initGame = (
       return [...points, -1]
     }).flat().slice(0, -1) // remove last -1
   )
-  console.log('serializedObstacles', serializedObstacles);
+
   initUniverse(
     window.getFloat32ArrayPointer(serializedFactions),
     window.getFloat32ArrayPointer(serializedObstacles),
+    mapWidth,
+    mapHeight,
     // serializedInfoAboutWorld.obstacles,
     // serializedInfoAboutWorld.strategicPoints,
   )

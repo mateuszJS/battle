@@ -6,6 +6,7 @@ import { getInitialTrackIndex } from "./get-initial-track-index"
 import { getRandom } from "./get-random"
 import { Point } from "./point"
 import { Squad } from "./squad"
+import convertLogicCoordsToVisual from "./convert-logic-coords-to-visual";
 
 export class Unit {
   private id: f32
@@ -323,11 +324,12 @@ export class Unit {
   }
 
   getRepresentation(): Array<f32> {
+    const unitPos = convertLogicCoordsToVisual(this.x, this.y)
     return [
       this.squad.squadDetails.representationId,
       this.id,
-      this.x,
-      this.y,
+      unitPos.x,
+      unitPos.y,
       this.angle,
       this.state as f32,
       this.getAdditionalRepresentationParam(),

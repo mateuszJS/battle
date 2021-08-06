@@ -5,9 +5,11 @@ import { Faction } from "./faction";
 import { getObstacles, storeObstacles } from "./obstacles-manager";
 import { Point } from "./point";
 import { MAP_SQUAD_REPRESENTATION_TO_TYPE } from "./squad-details";
+import convertLogicCoordsToVisual from "./convert-logic-coords-to-visual";
 
 var factions: Array<Faction> = []
-
+export var mapWidthGlob: f32 = 0
+export var mapHeightGlob: f32 = 0
 
 export const Float32Array_ID = idof<Float32Array>()
 export const Uint32Array_ID = idof<Uint32Array>()
@@ -15,6 +17,8 @@ export const Uint32Array_ID = idof<Uint32Array>()
 export function initUniverse(
   factionData: Float32Array,
   obstacles: Float32Array,
+  mapWidth: f32,
+  mapHeight: f32,
 ): void {
   for (let i = 0; i < factionData.length; i += 4) {
     factions.push(new Faction(
@@ -27,6 +31,9 @@ export function initUniverse(
   }
 
   storeObstacles(obstacles)
+
+  mapWidthGlob = mapWidth
+  mapHeightGlob = mapHeight
 }
 
 export function debugObstacles(): Float32Array {
@@ -61,10 +68,11 @@ export function getFactoriesInitData(): Float32Array {
   let result = new Float32Array(factions.length * 5)
   for (let i = 0; i < factions.length; i++) {
     let faction = factions[i]
+    const factoryPos = convertLogicCoordsToVisual(faction.factory.x, faction.factory.y)
     result[i * 5 + 0] = faction.id as f32
     result[i * 5 + 1] = faction.factory.id
-    result[i * 5 + 2] = faction.factory.x
-    result[i * 5 + 3] = faction.factory.y
+    result[i * 5 + 2] = factoryPos.x
+    result[i * 5 + 3] = factoryPos.y
     result[i * 5 + 4] = faction.factory.angle
   }
   return result
