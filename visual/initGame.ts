@@ -9,17 +9,18 @@ import { Universe } from '../crate/pkg/index'
 import Factory from '~/representation/Factory'
 import StrategicPoint from '~/representation/StrategicPoint'
 import initializeMouseController from './mouseController'
-import getSerializedInfoAboutWorld from './getSerializedInfoAboutWorld'
 import { createFactoryButtons } from './buttons/factory'
-import { REPRESENTATION_SOLIDER, REPRESENTATION_RAPTOR, MAP_WIDTH, MAP_HEIGHT} from '../logic/constants'
+import { REPRESENTATION_SOLIDER, REPRESENTATION_RAPTOR } from '../logic/constants'
 import debugController from '~/debug'
-import enhanceAnimatedSprites from '~/enhance-animated-sprites'
 import type * as ExportedWasmModule from './logic'
 import { ASUtil } from '@assemblyscript/loader'
-import initConvertArraysUtils from './initConvertArraysUtils'
 import drawBridge from './draw-bridge'
 import drawNode from './draw-node'
 import { startDebug } from './debug/obstacles'
+import initConvertArraysUtils from '~/attachUtils/init-convert-arrays-utils'
+import enhanceAnimatedSprites from '~/attachUtils/enhance-animated-sprites'
+import attachMethodToConvertLogicCoordsToVisual from '~/attachUtils/attach-method-covert-logic-coords-to-visual'
+import nodePlatformCoords from '~/consts/node-platform-coords'
 
 export type UniverseRepresentation = {
   [id: number]: Factory | Unit | StrategicPoint
@@ -27,33 +28,11 @@ export type UniverseRepresentation = {
 
 export type WasmModule = ASUtil & typeof ExportedWasmModule
 
-window.convertLogicCoordToVisual = (x: number, y: number): [number, number] => {
-  const angle = Math.atan2(x, MAP_HEIGHT - y) - 0.65
-  const distance = Math.hypot(x, MAP_HEIGHT - y)
-  return [
-    Math.sin(angle) * distance,
-    (-Math.cos(angle) * distance + MAP_HEIGHT) * 0.52,
-  ]
-}
-
-const bridgeAngle = 53.6 * Math.PI / 180
-const diagonallyAngle = 37 * Math.PI / 180
-let tempAngle = - bridgeAngle / 2
-const radius = 600 * 0.483
-const geom = Array.from({ length: 8 }, (_, index) => {
-  tempAngle += index % 2 === 0 ? bridgeAngle : diagonallyAngle
-  return {
-    x: Math.sin(tempAngle) * radius,
-    y: -Math.cos(tempAngle) * radius,
-    angle: tempAngle,
-  }
-})
-
-const getMapPoints = () => {
+const getMapPoints = (mapWidth, mapHeight) => {
   const leftTopCorner = window.convertLogicCoordToVisual(0, 0)
-  const rightTopCorner = window.convertLogicCoordToVisual(MAP_WIDTH, 0)
-  const rightBottomCorner = window.convertLogicCoordToVisual(MAP_WIDTH, MAP_HEIGHT)
-  const leftBottomCorner = window.convertLogicCoordToVisual(0, MAP_HEIGHT)
+  const rightTopCorner = window.convertLogicCoordToVisual(mapWidth, 0)
+  const rightBottomCorner = window.convertLogicCoordToVisual(mapWidth, mapHeight)
+  const leftBottomCorner = window.convertLogicCoordToVisual(0, mapHeight)
 
   return [
     { x: leftTopCorner[0], y: leftTopCorner[1] },
@@ -67,6 +46,9 @@ const initGame = (
   wasmModule: WasmModule,
   nodes: PIXI.Graphics[],
   connections: Array<[PIXI.Graphics, PIXI.Graphics]>,
+  portals: PIXI.Graphics[],
+  mapWidth: number,
+  mapHeight: number,
 ) => {
   const {
     initUniverse,
@@ -76,11 +58,9 @@ const initGame = (
   } = wasmModule;
 
   initConvertArraysUtils(wasmModule)
-
   enhanceAnimatedSprites()
-
-  const mapPoints = getMapPoints()
-
+  attachMethodToConvertLogicCoordsToVisual(mapHeight)
+  const mapPoints = getMapPoints(mapWidth, mapHeight)
   const mapSprite = createBackgroundTexture(mapPoints)
   getSortableLayer(mapSprite)
   EffectsFactory.initialize()
@@ -90,11 +70,15 @@ const initGame = (
   const universeRepresentation: UniverseRepresentation = {}
   window.universeRepresentation = universeRepresentation // used to remove unit
 
-  const serializedInfoAboutWorld = getSerializedInfoAboutWorld()
+  const serializedFactions = new Float32Array(
+    portals.map((graphic, index) => 
+      [USER_FACTION_ID + index, graphic.x, graphic.y, 0]
+    ).flat()
+  )
 
   const serializedObstacles = new Float32Array(
     nodes.map(graphic => {
-      const points = geom.map(point => [
+      const points = nodePlatformCoords.map(point => [
         point.x + graphic.x,
         point.y + graphic.y,
       ]).flat()
@@ -103,7 +87,7 @@ const initGame = (
   )
   console.log('serializedObstacles', serializedObstacles);
   initUniverse(
-    window.getFloat32ArrayPointer(serializedInfoAboutWorld.factions),
+    window.getFloat32ArrayPointer(serializedFactions),
     window.getFloat32ArrayPointer(serializedObstacles),
     // serializedInfoAboutWorld.obstacles,
     // serializedInfoAboutWorld.strategicPoints,

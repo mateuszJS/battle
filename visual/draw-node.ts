@@ -1,23 +1,8 @@
 import drawRailingLine from './draw-railing'
+import nodePlatformCoords from '~/consts/node-platform-coords'
 
 const nodePlatformTexture = PIXI.Texture.from('assets/node-platform.png')
-
 let container = null
-
-const bridgeAngle = 53.6 * Math.PI / 180
-const diagonallyAngle = 37 * Math.PI / 180
-
-let tempAngle = - bridgeAngle / 2 - 0.65 // -25.5 * Math.PI / 180
-const geom = Array.from({ length: 8 }, (_, index) => {
-  tempAngle += index % 2 === 0 ? bridgeAngle : diagonallyAngle
-
-  return {
-    x: Math.sin(tempAngle),
-    y: -Math.cos(tempAngle),
-    angle: tempAngle,
-  }
-})
-
 const DEFAULT_NODE_PLATFORM_TEXTURE_WIDTH = 600
 
 const drawNode = (
@@ -40,24 +25,20 @@ const drawNode = (
   container.addChild(nodePlatform)
   window.world.addChild(container)
 
-  const points = []
   const pixels = new PIXI.Graphics()
   const radius = width * 0.483
   const yOffset = width * 0.375
-  geom.forEach((point, index) => {
+  nodePlatformCoords.forEach((point, index) => {
 
     pixels.beginFill(index === 0 ? 0x00ff00 : 0xff0000)
     const pointX = point.x * radius + x
     const pointY = point.y * 0.52 * radius + y - yOffset
     pixels.drawRect(pointX - 5, pointY - 5, 10, 10)
-    // points.push({
-    //   x: point.x * ,
-    //   y: pointX,
-    // })
-    const nextGeom = geom[(index + 1) % geom.length]
+
+    const nextCoord = nodePlatformCoords[(index + 1) % nodePlatformCoords.length]
     
-    const sinMean = (Math.sin(point.angle) + Math.sin(nextGeom.angle)) / 2
-    const cosMean = (Math.cos(point.angle) + Math.cos(nextGeom.angle)) / 2
+    const sinMean = (Math.sin(point.angle) + Math.sin(nextCoord.angle)) / 2
+    const cosMean = (Math.cos(point.angle) + Math.cos(nextCoord.angle)) / 2
     const angleMean = Math.atan2(sinMean, cosMean)
     const isBridgeIndex = (index - 1) / 2
     if (isBridgesList[isBridgeIndex]) return
@@ -67,8 +48,8 @@ const drawNode = (
         y: pointY,
       },
       {
-        x: nextGeom.x * radius + x,
-        y: nextGeom.y * 0.52 * radius + y - yOffset,
+        x: nextCoord.x * radius + x,
+        y: nextCoord.y * 0.52 * radius + y - yOffset,
       },
       angleMean + Math.PI,
       index % 2 === 0,

@@ -1,7 +1,10 @@
 import initGame, { WasmModule } from '~/initGame'
-import { MAP_HEIGHT, MAP_WIDTH, NODE_RADIUS } from '../logic/constants'
+import { MAP_HEIGHT, MAP_WIDTH } from '../logic/constants'
+import nodePlatformCoords from '~/consts/node-platform-coords'
 
-const scale = (window.innerWidth * 0.7) / MAP_WIDTH
+const scaleX = (window.innerWidth * 0.7) / MAP_WIDTH
+const scaleY = (window.innerHeight * 0.9) / MAP_HEIGHT
+const scale = Math.min(scaleX, scaleY)
 
 let activeElement = null
 let isJoiner = true
@@ -10,12 +13,14 @@ let connections: Array<[PIXI.Graphics, PIXI.Graphics]> = []
 const connectionsContainer = new PIXI.Graphics()
 const activeConnectionContainer = new PIXI.Graphics()
 const nodesWrapper = new PIXI.Container()
+const portalsWrapper = new PIXI.Container()
 const mapCreatorWrapper = new PIXI.Container()
 
 let nodes: PIXI.Graphics[] = []
-const nodePlatformSize = NODE_RADIUS * scale * 2
+let portals: PIXI.Graphics[] = []
+
 const mapDetails = {
-  x: nodePlatformSize,
+  x: 100,
   y: 50,
   width: MAP_WIDTH * scale,
   height: MAP_HEIGHT * scale
@@ -109,7 +114,7 @@ const onDragMove = (event)  => {
     if (isJoiner) {
       updateActiveConnection(event.data.global.x, event.data.global.y)
     } else {
-      activeElement.position.set(...getSafePosition(event.data.global.x, event.data.global.y, nodePlatformSize / 2))
+      activeElement.position.set(...getSafePosition(event.data.global.x, event.data.global.y, activeElement.width / 2))
       drawConnections()
     }
   }
@@ -144,16 +149,18 @@ const onPointerDownJoiner = (event) => {
 const getNodeVisual = (disableJoinerEvent = false) => {
   const newNode = new PIXI.Graphics()
   newNode.beginFill(0xff0000)
-  newNode.drawRect(-nodePlatformSize / 2, -nodePlatformSize / 2, nodePlatformSize, nodePlatformSize)
-  newNode.endFill()
+  nodePlatformCoords.forEach((coord, index) => {
+    newNode[index === 0 ? 'moveTo' : 'lineTo'](coord.x * scale, coord.y * scale)
+  })
+  newNode.closePath()
 
   for (let i = 0; i < 4; i++) {
     const joiner = new PIXI.Graphics()
     joiner.beginFill(0x00ff00)
     joiner.drawCircle(0, 0, 5)
     joiner.endFill()
-    joiner.x = Math.sin(i / 4 * Math.PI * 2) * nodePlatformSize / 2
-    joiner.y = -Math.cos(i / 4 * Math.PI * 2) * nodePlatformSize / 2
+    joiner.x = Math.sin(i / 4 * Math.PI * 2) * newNode.width / 2
+    joiner.y = -Math.cos(i / 4 * Math.PI * 2) * newNode.height / 2
 
     if (!disableJoinerEvent) {
       joiner.interactive = true
@@ -165,6 +172,13 @@ const getNodeVisual = (disableJoinerEvent = false) => {
   return newNode
 }
 
+const getPortalVisual = () => {
+  const newPortal = new PIXI.Graphics()
+  newPortal.beginFill(0x9900ff)
+  newPortal.drawCircle(0, 0, 20)
+  return newPortal
+}
+
 const createBackground = () => {
   const background = new PIXI.Graphics()
   background.beginFill(0x333333)
@@ -172,6 +186,7 @@ const createBackground = () => {
   background.endFill()
   mapCreatorWrapper.addChild(background)
   mapCreatorWrapper.addChild(nodesWrapper)
+  mapCreatorWrapper.addChild(portalsWrapper)
   mapCreatorWrapper.addChild(connectionsContainer)
   mapCreatorWrapper.addChild(activeConnectionContainer)
 
@@ -180,11 +195,13 @@ const createBackground = () => {
 }
 
 const createToolbar = () => {
+  /* ADD PLATFORM BUTTON */
   const newNodeIcon = getNodeVisual(true)
   nodesWrapper.addChild(newNodeIcon)
   newNodeIcon.interactive = true
-  newNodeIcon.x = nodePlatformSize / 2
-  newNodeIcon.y = mapDetails.y + nodePlatformSize / 2
+  newNodeIcon.scale.set(mapDetails.x / newNodeIcon.width)
+  newNodeIcon.x = newNodeIcon.width / 2
+  newNodeIcon.y = mapDetails.y + newNodeIcon.width / 2
   newNodeIcon
     .on('pointerdown', (event) => {
       const newNode = getNodeVisual()
@@ -199,10 +216,38 @@ const createToolbar = () => {
       activeElement = newNode
       offset.x = 0
       offset.y = 0
-      activeElement.position.set(...getSafePosition(event.data.global.x, event.data.global.y, nodePlatformSize / 2))
+      activeElement.position.set(...getSafePosition(event.data.global.x, event.data.global.y, newNodeIcon.width / 2))
 
       nodesWrapper.addChild(newNode)
       nodes.push(newNode)
+    })
+
+  /* ADD PORTAL BUTTON */
+  const newPortalIcon = getPortalVisual()
+  nodesWrapper.addChild(newPortalIcon)
+  newPortalIcon.interactive = true
+  newPortalIcon.scale.set(mapDetails.x / newPortalIcon.width)
+  newPortalIcon.x = newPortalIcon.width / 2
+  console.log(newPortalIcon.width / 2)
+  newPortalIcon.y = mapDetails.y + newPortalIcon.width / 2 + newNodeIcon.height
+  newPortalIcon
+    .on('pointerdown', (event) => {
+      const newNode = getPortalVisual()
+      newNode.interactive = true
+
+      newNode
+      .on('pointerdown', onDragStart)
+      .on('pointerup', onDragEnd)
+      .on('pointerupoutside', onDragEnd)
+
+      isJoiner = false
+      activeElement = newNode
+      offset.x = 0
+      offset.y = 0
+      activeElement.position.set(...getSafePosition(event.data.global.x, event.data.global.y, newPortalIcon.width / 2))
+
+      portalsWrapper.addChild(newNode)
+      portals.push(newNode)
     })
 }
 
@@ -228,23 +273,15 @@ const mapCreator = (wasmModule: WasmModule) => {
   createBackground()
   createToolbar()
   createStartBtn(() => {
-    const result = []
     nodes.forEach(node => {
       node.x = (node.x - mapDetails.x) / scale
       node.y = (node.y - mapDetails.y) / scale
-      // result.push({
-        // x: node.x,
-        // y: node.y,
-      //   connections: node.children.map(joiner => {
-      //     const connection = connections.find((connection) => joiner === connection[0])
-      //     if (connection) {
-      //       connection[1]
-      //     }
-      //     return null
-      //   })
-      // })
     })
-    initGame(wasmModule, nodes, connections)
+    portals.forEach(portal => {
+      portal.x = (portal.x - mapDetails.x) / scale
+      portal.y = (portal.y - mapDetails.y) / scale
+    })
+    initGame(wasmModule, nodes, connections, portals, MAP_WIDTH, MAP_HEIGHT)
   })
   window.app.stage.addChild(mapCreatorWrapper)
 }
