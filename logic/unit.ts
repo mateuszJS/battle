@@ -1,4 +1,4 @@
-import { UnitState } from "./constants"
+import { MAP_SKEW_ANGLE, UnitState } from "./constants"
 import { getAngleDiff } from "./get-angle-diff"
 import { FLY_DECELERATION, FLY_MIN_SPEED, getFlyModes } from "./get-fly-modes"
 import { getId } from "./get-id"
@@ -330,7 +330,7 @@ export class Unit {
       this.id,
       unitPos.x,
       unitPos.y,
-      this.angle,
+      this.angle + MAP_SKEW_ANGLE,
       this.state as f32,
       this.getAdditionalRepresentationParam(),
     ]

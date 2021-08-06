@@ -27,5 +27,5 @@ export const MAP_HEIGHT: f32 = 4500
 
 export const OBSTACLES_DIVIDER: f32 = -1.0
 
-export const MAP_SKEW_ANGLE = -0.65
-export const MAP_VERTICAL_MOD = 0.52
+export const MAP_SKEW_ANGLE: f32 = -0.65
+export const MAP_VERTICAL_MOD: f32 = 0.52
