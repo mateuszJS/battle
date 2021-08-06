@@ -6,10 +6,13 @@ import { getObstacles, storeObstacles } from "./obstacles-manager";
 import { Point } from "./point";
 import { MAP_SQUAD_REPRESENTATION_TO_TYPE } from "./squad-details";
 import convertLogicCoordsToVisual from "./convert-logic-coords-to-visual";
+import { initializeGrid, fillGrid, debugGridNumbers } from "./squads-grid-manager";
+import { UPDATE_SQUAD_CENTER_PERIOD } from "./constants";
 
-var factions: Array<Faction> = []
+var factions: Faction[] = []
 export var mapWidthGlob: f32 = 0
 export var mapHeightGlob: f32 = 0
+var time: usize = 0
 
 export const Float32Array_ID = idof<Float32Array>()
 export const Uint32Array_ID = idof<Uint32Array>()
@@ -34,6 +37,8 @@ export function initUniverse(
 
   mapWidthGlob = mapWidth
   mapHeightGlob = mapHeight
+
+  initializeGrid(mapWidth, mapHeight)
 }
 
 export function debugObstacles(): Float32Array {
@@ -79,9 +84,24 @@ export function getFactoriesInitData(): Float32Array {
 }
 
 function updateUniverse(): void {
+  time = (time + 1) % 1000
+  if (time % UPDATE_SQUAD_CENTER_PERIOD == 0) {
+    fillGrid(factions)
+  }
+  
   factions.forEach(faction => {
     faction.update()
   })
+}
+
+export function debugGrid(): Float32Array {
+  const gridData = debugGridNumbers()
+  const result = new Float32Array(gridData.length)
+  for(let i = 0; i < gridData.length; i++) {
+    result[i] = gridData[i]
+  }
+
+  return result
 }
 
 export function getUniverseRepresentation(): Float32Array {

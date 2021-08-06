@@ -5,8 +5,8 @@ import { SquadType } from "./squad-details"
 
 export class Faction {
   public factory: Factory
+  public squads: Squad[]
   private resource: u32
-  private squads: Squad[]
 
   constructor(
     public id: u32,
