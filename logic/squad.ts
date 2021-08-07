@@ -49,16 +49,14 @@ export class Squad {
   }
 
   updateCenter(): void {
-    let sumX: f32 = 0
-    let sumY: f32 = 0
+    const sum = this.members.reduce((acc, member) => ({
+      x: acc.x + member.x,
+      y: acc.y + member.y,
+    }), { x: 0, y: 0 } as Point)
 
-    this.members.forEach(member => {
-      sumX += member.x
-      sumY += member.y
-    })
-
-    this.centerPoint.x = sumX / this.members.length
-    this.centerPoint.y = sumY / this.members.length
+    const len = this.members.length as f32
+    this.centerPoint.x = sum.x / len
+    this.centerPoint.y = sum.y / len
   }
 
   update(): void {

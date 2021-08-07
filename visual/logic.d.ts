@@ -18,6 +18,7 @@ export var Uint32Array_ID: u32;
 export function initUniverse(factionData: usize, obstacles: usize, mapWidth: f32, mapHeight: f32): void;
 export function debugObstacles(): usize;
 export function getFactoriesInitData(): usize;
+export function debugGrid(): usize;
 export function getUniverseRepresentation(): usize;
 export function createSquad(squadType: f32): void;
 export function moveUnits(squadsIds: usize, x: f32, y: f32): usize;

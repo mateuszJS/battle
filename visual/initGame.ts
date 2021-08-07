@@ -17,6 +17,7 @@ import { ASUtil } from '@assemblyscript/loader'
 import drawBridge from './draw-bridge'
 import drawNode from './draw-node'
 import { startDebug } from './debug/obstacles'
+import { startDebug as startDebugGrid } from './debug/grid'
 import initConvertArraysUtils from '~/attachUtils/init-convert-arrays-utils'
 import enhanceAnimatedSprites from '~/attachUtils/enhance-animated-sprites'
 import attachMethodToConvertLogicCoordsToVisual from '~/attachUtils/attach-method-covert-logic-coords-to-visual'
@@ -55,6 +56,7 @@ const initGame = (
     getUniverseRepresentation,
     getFactoriesInitData,
     createSquad,
+    debugGrid,
   } = wasmModule;
 
   initConvertArraysUtils(wasmModule)
@@ -137,8 +139,10 @@ const initGame = (
   // let nextIsRaptor = false
 
   startDebug(wasmModule)
+  
 
   window.app.ticker.add((delta: number) => {
+    startDebugGrid(wasmModule)
     const pointA = {
       x: mouseX,
       y: mouseY,
