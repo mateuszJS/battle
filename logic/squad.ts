@@ -55,6 +55,7 @@ export class Squad {
     }), { x: 0, y: 0 } as Point)
 
     const len = this.members.length as f32
+
     this.centerPoint.x = sum.x / len
     this.centerPoint.y = sum.y / len
   }

@@ -55,13 +55,12 @@ export class Factory {
 
         if (lastCreatedSquad.members.length == lastCreatedSquad.squadDetails.numberOfMembers) {
           this.lastCreatedSquad = null
+          return lastCreatedSquad
         }
       } else {
         this.timeToCreateAnotherMember --
       }
-    }
-
-    if (this.productionLine.length > 0 && this.lastCreatedSquad == null) {
+    } else if (this.productionLine.length > 0) {
       if (this.timeToCreate == 0) {
         if (this.productionLine.length > 1) {
           let nextSquadDetails = SQUAD_DETAILS.get(unchecked(this.productionLine[1].squadType))
@@ -71,8 +70,6 @@ export class Factory {
           this.factionId,
           this.productionLine.shift().squadType
         )
-
-        return this.lastCreatedSquad
       } else {
         this.timeToCreate --
       }
