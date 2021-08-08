@@ -6,6 +6,8 @@ import updateAbilitiesButtons from '~/buttons/abilities'
 import { RepresentationId } from '~/buttons/abilities/createIcon'
 import StrategicPoint from '~/representation/StrategicPoint'
 
+let debugContainer = null
+
 class SelectionController {
   private startPoint: null | Point
   private selectionRectangle: PIXI.Graphics
@@ -61,11 +63,26 @@ class SelectionController {
     })
   }
 
-  private selectUnits(x1: number, x2: number, y1: number, y2: number) {
+  private selectUnits(x1: number, y1: number, x2: number, y2: number) {
     let unitsIds;
 
+    window.useFloat32ArrayData(
+      this.wasmModule.debugSelecting(x1, y1, x2, y2),
+      (data) => {
+        if (!debugContainer) {
+          debugContainer = new PIXI.Graphics()
+          window.ui.addChild(debugContainer)
+        }
+        debugContainer.clear()
+        debugContainer.beginFill(0xff0000)
+        console.log(data)
+        for (let i = 0; i < data.length; i += 2) {
+          debugContainer.drawRect(data[i] - 15, data[i + 1] - 15, 30, 30)
+        }
+      },
+    )
     window.useUint32ArrayData(
-      this.wasmModule.getSelectedUnitsIds(x1, x2, y1, y2),
+      this.wasmModule.getSelectedUnitsIds(x1, y1, x2, y2),
       (result) => {
         if (result.length === 1) {
           // there is only divider "0"
@@ -131,22 +148,26 @@ class SelectionController {
   }
 
   public updateSelection({ x, y }: Point) {
-    updateAbilitiesButtons(
-      this.selectedSquads,
-      this.wasmModule,
-      this.selectedAbilityType,
-      this.selectAbility,
-    )
+    // updateAbilitiesButtons(
+    //   this.selectedSquads,
+    //   this.wasmModule,
+    //   this.selectedAbilityType,
+    //   this.selectAbility,
+    // )
 
     if (!this.startPoint) return
 
     this.clearSelection()
 
     this.selectUnits(
-      Math.min(this.startPoint.x, x),
-      Math.max(this.startPoint.x, x),
-      Math.min(this.startPoint.y, y),
-      Math.max(this.startPoint.y, y),
+      this.startPoint.x,
+      this.startPoint.y,
+      x,
+      y,
+      // Math.min(this.startPoint.x, x),
+      // Math.max(this.startPoint.x, x),
+      // Math.min(this.startPoint.y, y),
+      // Math.max(this.startPoint.y, y),
     )
     window.ui.interactiveChildren = false
     this.selectionRectangle.clear()

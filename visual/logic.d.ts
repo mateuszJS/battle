@@ -23,6 +23,7 @@ export function getUniverseRepresentation(): usize;
 export function createSquad(squadType: f32): void;
 export function moveUnits(squadsIds: usize, x: f32, y: f32): usize;
 export function getSelectedUnitsIds(x1: f32, y1: f32, x2: f32, y2: f32): usize;
+export function debugSelecting(x1: f32, y1: f32, x2: f32, y2: f32): usize;
 export function useAbility(squadsIds: usize, abilityType: u8, x: f32, y: f32): void;
 export function getAbilitiesCoolDowns(squadsIds: usize, abilityType: u8): usize;
 export const memory: WebAssembly.Memory;

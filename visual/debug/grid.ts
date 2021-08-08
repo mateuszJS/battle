@@ -19,8 +19,6 @@ export const startDebug = (wasmModule: WasmModule) => {
   }
   window.useFloat32ArrayData(wasmModule.debugGrid(), (gridData) => {
     const indexOfDivider = gridData.indexOf(-1)
-    console.log('gridData', gridData);
-    console.log('indexOfDivider', indexOfDivider);
 
     const lines = gridData.slice(0, indexOfDivider)
     

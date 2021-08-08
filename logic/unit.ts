@@ -6,7 +6,7 @@ import { getInitialTrackIndex } from "./get-initial-track-index"
 import { getRandom } from "./get-random"
 import { Point } from "./point"
 import { Squad } from "./squad"
-import convertLogicCoordsToVisual from "./convert-logic-coords-to-visual";
+import { convertLogicCoordsToVisual } from "./convert-coords-between-logic-and-visual";
 
 export class Unit {
   private id: f32

@@ -5,8 +5,8 @@ import { Faction } from "./faction";
 import { getObstacles, storeObstacles } from "./obstacles-manager";
 import { Point } from "./point";
 import { MAP_SQUAD_REPRESENTATION_TO_TYPE } from "./squad-details";
-import convertLogicCoordsToVisual from "./convert-logic-coords-to-visual";
-import { initializeGrid, fillGrid, debugGridNumbers } from "./squads-grid-manager";
+import { convertLogicCoordsToVisual, convertVisualCoordsToLogic } from "./convert-coords-between-logic-and-visual";
+import { initializeGrid, fillGrid, debugGridNumbers, traceLine } from "./grid-manager";
 import { UPDATE_SQUAD_CENTER_PERIOD } from "./constants";
 
 var factions: Faction[] = []
@@ -125,7 +125,30 @@ export function moveUnits(squadsIds: Uint32Array, x: f32, y: f32): Uint32Array {
 }
 
 export function getSelectedUnitsIds(x1: f32, y1: f32, x2: f32, y2: f32): Uint32Array {
+  const leftTopCorner = convertVisualCoordsToLogic(x1, y1)
+  const rightTopCorner = convertVisualCoordsToLogic(x2, y1)
+  const rightBottomCorner = convertVisualCoordsToLogic(x2, y2)
+  const leftBottomCorner = convertVisualCoordsToLogic(x1, y2)
+
   return new Uint32Array(0)
+}
+
+export function debugSelecting(x1: f32, y1: f32, x2: f32, y2: f32): Float32Array {
+  const leftTopCorner = convertVisualCoordsToLogic(x1, y1)
+  const rightTopCorner = convertVisualCoordsToLogic(x2, y1)
+  const rightBottomCorner = convertVisualCoordsToLogic(x2, y2)
+  const leftBottomCorner = convertVisualCoordsToLogic(x1, y2)
+
+  const data = traceLine(leftTopCorner, rightBottomCorner).map<f32[]>(point => [
+    point.x,
+    point.y
+  ]).flat()
+
+  let result = new Float32Array(data.length)
+  for (let i: i32 = 0; i < data.length; i++) {
+    result[i] = data[i]
+  }
+  return result
 }
 
 export function useAbility(squadsIds: Uint32Array, abilityType: u8, x: f32, y: f32): void {
