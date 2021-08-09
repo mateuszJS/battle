@@ -97,8 +97,8 @@ export function traceLine(startPoint: Point, endPoint: Point): Point[] {
   }
 
   //Moving direction (cells)
-  const stepX = (direction.x >= 0) ? 1 : -1;
-  const stepY = (direction.y >= 0) ? 1 : -1;
+  const stepX: f32 = (direction.x >= 0) ? 1 : -1;
+  const stepY: f32 = (direction.y >= 0) ? 1 : -1;
 
   //Normalize vector
   const hypot = Math.hypot(direction.x, direction.y) as f32
@@ -108,8 +108,8 @@ export function traceLine(startPoint: Point, endPoint: Point): Point[] {
   }
 
   //Distance to the nearest square side
-  const nearX = (stepX >= 0) ? (startCell.x + 1) / gridMapScaleX - startPoint.x : startPoint.x - (startCell.x / gridMapScaleX)
-  const nearY = (stepY >= 0) ? (startCell.y + 1) / gridMapScaleY - startPoint.y : startPoint.y - (startCell.y / gridMapScaleY)
+  const nearX = (stepX > 0) ? (startCell.x + 1) / gridMapScaleX - startPoint.x : startPoint.x - (startCell.x / gridMapScaleX)
+  const nearY = (stepY > 0) ? (startCell.y + 1) / gridMapScaleY - startPoint.y : startPoint.y - (startCell.y / gridMapScaleY)
 
   //How far along the ray we must move to cross the first vertical (ray_step_to_vside) / or horizontal (ray_step_to_hside) grid line
   let ray_step_to_vside: f32 = (normDirection.x != 0) ? nearX / normDirection.x : (Infinity as f32)
@@ -123,29 +123,78 @@ export function traceLine(startPoint: Point, endPoint: Point): Point[] {
   let cells: Point[] = []
   cells.push(startCell)
 
-  let currentCell = startCell
+  let x = startCell.x
+  let y = startCell.y
 
   const grid_bound_x: usize = Math.abs(lastCell.x - startCell.x) as usize
   const grid_bound_y: usize = Math.abs(lastCell.y - startCell.y) as usize
 
   let counter: usize = 0
-
   while (counter != (grid_bound_x + grid_bound_y)) {
-    if ((Math.abs(ray_step_to_vside) as f32) < (Math.abs(ray_step_to_hside) as f32)) {
-      ray_step_to_vside = ray_step_to_vside + dx //to the next vertical grid line
-      currentCell.x = currentCell.x + (stepX as f32)
+    if (Math.abs(ray_step_to_vside) < Math.abs(ray_step_to_hside)) {
+      ray_step_to_vside += dx //to the next vertical grid line
+      x += stepX
     } else {
-      ray_step_to_hside = ray_step_to_hside + dy//to the next horizontal grid line
-      currentCell.y = currentCell.y + (stepY as f32)
+      ray_step_to_hside += dy//to the next horizontal grid line
+      y += stepY
     }
     ++counter
 
-    const convertedPoint = convertLogicCoordsToVisual(
-      currentCell.x / gridMapScaleX + (1/(2 * gridMapScaleX)),
-      currentCell.y / gridMapScaleY + (1/(2 * gridMapScaleY)),
-    )
-    cells.push(convertedPoint)
+    cells.push({
+      x: x,
+      y: y,
+    })
   }
 
   return cells
+}
+
+
+export function pickCells(points: Point[]): Point[] {
+  let maxY = -Infinity
+  for (let i = 0; i < points.length; i++) {
+    let point = points[i]
+    if (maxY < point.y) {
+      maxY = point.y
+    }
+  }
+
+  const edgeLengths = Math.ceil(maxY) as i32
+  let startEdge = new Array<i32>(edgeLengths).fill(-1)
+  let endEdge = new Array<i32>(edgeLengths).fill(-1)
+
+  for (let i = 0; i < points.length; i++) {
+    const results = traceLine(points[i], points[(i + 1) % points.length])
+    for (let j = 0; j < results.length; j++) {
+      let currentCell = results[j]
+      
+      const index = currentCell.y as i32
+      if (startEdge[index] == -1 || startEdge[index] > (currentCell.x as i32)) {
+        startEdge[index] = currentCell.x as i32
+      }
+      if (endEdge[index] == -1 || endEdge[index] < (currentCell.x as i32)) {
+        endEdge[index] =  currentCell.x as i32
+      }
+    }
+  }
+
+  let selectedCells: Point[] = []
+  for (let i = 0; i < edgeLengths; i++) {
+    const start = startEdge[i]
+    if (start === -1) continue
+
+    const end = endEdge[i]
+    for (let x = start; x <= end; x++) {
+      selectedCells.push({
+        x: x as f32,
+        y: i as f32,
+      })
+    }
+  }
+  return selectedCells.map<Point>(point => (
+    convertLogicCoordsToVisual(
+      point.x / gridMapScaleX + (1/(2 * gridMapScaleX)),
+      point.y / gridMapScaleY + (1/(2 * gridMapScaleY)),
+    )
+  ));
 }

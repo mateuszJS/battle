@@ -6,7 +6,7 @@ import { getObstacles, storeObstacles } from "./obstacles-manager";
 import { Point } from "./point";
 import { MAP_SQUAD_REPRESENTATION_TO_TYPE } from "./squad-details";
 import { convertLogicCoordsToVisual, convertVisualCoordsToLogic } from "./convert-coords-between-logic-and-visual";
-import { initializeGrid, fillGrid, debugGridNumbers, traceLine } from "./grid-manager";
+import { initializeGrid, fillGrid, debugGridNumbers, traceLine, pickCells } from "./grid-manager";
 import { UPDATE_SQUAD_CENTER_PERIOD } from "./constants";
 
 var factions: Faction[] = []
@@ -48,9 +48,9 @@ export function debugObstacles(): Float32Array {
     )).flat()
   )).flat()
   let flattenData = data
-  trace("data.length", 1, flattenData.length)
+
   let result = new Float32Array(flattenData.length)
-  trace("result.length", 1, result.length)
+
   for (let i = 0; i < flattenData.length; i++) {
     let item = flattenData[i]
     result[i] = item
@@ -139,10 +139,16 @@ export function debugSelecting(x1: f32, y1: f32, x2: f32, y2: f32): Float32Array
   const rightBottomCorner = convertVisualCoordsToLogic(x2, y2)
   const leftBottomCorner = convertVisualCoordsToLogic(x1, y2)
 
-  const data = traceLine(leftTopCorner, rightBottomCorner).map<f32[]>(point => [
-    point.x,
-    point.y
-  ]).flat()
+  const data = pickCells([
+    leftTopCorner,
+    rightTopCorner,
+    rightBottomCorner,
+    leftBottomCorner,
+  ]).map<f32[]>(point => [point.x, point.y]).flat()
+  // const data = traceLine(leftTopCorner, rightBottomCorner).map<f32[]>(point => [
+  //   point.x,
+  //   point.y
+  // ]).flat()
 
   let result = new Float32Array(data.length)
   for (let i: i32 = 0; i < data.length; i++) {
