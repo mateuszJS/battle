@@ -152,11 +152,12 @@ export function traceLine(startPoint: Point, endPoint: Point): Point[] {
 
 export function pickCells(points: Point[]): Point[] {
   let maxY = -Infinity
+  let minY = Infinity
   for (let i = 0; i < points.length; i++) {
     let point = points[i]
-    if (maxY < point.y) {
-      maxY = point.y
-    }
+    if (minY > point.y) minY = point.y
+    if (maxY < point.y) maxY = point.y
+    
   }
 
   const edgeLengths = Math.ceil(maxY) as i32
@@ -179,7 +180,7 @@ export function pickCells(points: Point[]): Point[] {
   }
 
   let selectedCells: Point[] = []
-  for (let i = 0; i < edgeLengths; i++) {
+  for (let i = Math.floor(minY); i < edgeLengths; i++) {
     const start = startEdge[i]
     if (start === -1) continue
 
