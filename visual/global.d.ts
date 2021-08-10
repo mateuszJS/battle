@@ -29,4 +29,5 @@ declare global {
   type f32 = number
   type f64 = number
   type usize = number
+  type u32 = number
 }

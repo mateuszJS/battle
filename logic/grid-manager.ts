@@ -1,8 +1,10 @@
+import { mapHeightGlob, mapWidthGlob } from ".";
 import { convertLogicCoordsToVisual } from "./convert-coords-between-logic-and-visual";
 import { Faction } from "./faction";
 import { Point } from "./point";
 import { Squad } from "./squad";
 
+const EMPTY_GRID_INDEX = -100
 const GRID_CELL: f32 = 300
 const GRID_MAP_SCALE: f32 = 1 / GRID_CELL
 var gridMapWidth: i32 = 0
@@ -149,53 +151,123 @@ export function traceLine(startPoint: Point, endPoint: Point): Point[] {
   return cells
 }
 
+export function getSquads(points: Point[]): Squad[] {
+  const cellIndexes = pickCells(points)
+  return cellIndexes.map<Squad[]>(cellIndex => {
+    const gridCell = grid[cellIndex]
+    if (gridCell) {
+      return gridCell
+    }
+    return []
+  }).flat()
+}
 
-export function pickCells(points: Point[]): Point[] {
-  let maxY = -Infinity
-  let minY = Infinity
+export function pickCellsDebug(points: Point[]): Point[] {
+  let fMaxY: f32 = -Infinity
+  let fMinY: f32 = Infinity
   for (let i = 0; i < points.length; i++) {
-    let point = points[i]
-    if (minY > point.y) minY = point.y
-    if (maxY < point.y) maxY = point.y
+    let point = pointToGridFnc(points[i])
+    if (fMinY > point.y) fMinY = point.y
+    if (fMaxY < point.y) fMaxY = point.y
     
   }
+  const minY = Math.floor(fMinY) as i32
+  const maxY = Math.ceil(fMaxY) as i32
+  const length = maxY - minY + 1
 
-  const edgeLengths = Math.ceil(maxY) as i32
-  let startEdge = new Array<i32>(edgeLengths).fill(-1)
-  let endEdge = new Array<i32>(edgeLengths).fill(-1)
-
+  let startEdge = new Array<i32>(length).fill(EMPTY_GRID_INDEX)
+  let endEdge = new Array<i32>(length).fill(EMPTY_GRID_INDEX)
+  
   for (let i = 0; i < points.length; i++) {
     const results = traceLine(points[i], points[(i + 1) % points.length])
     for (let j = 0; j < results.length; j++) {
-      let currentCell = results[j]
-      
-      const index = currentCell.y as i32
-      if (startEdge[index] == -1 || startEdge[index] > (currentCell.x as i32)) {
-        startEdge[index] = currentCell.x as i32
-      }
-      if (endEdge[index] == -1 || endEdge[index] < (currentCell.x as i32)) {
-        endEdge[index] =  currentCell.x as i32
+      const currentCell = results[j]
+      const cellY = currentCell.y as i32 - minY
+      const cellX = currentCell.x as i32
+      if (startEdge[cellY] == EMPTY_GRID_INDEX) {
+        startEdge[cellY] = cellX
+        endEdge[cellY] = cellX
+      } else {
+        if (startEdge[cellY] > cellX) {
+          startEdge[cellY] = cellX
+        }
+        if (endEdge[cellY] < cellX) {
+          endEdge[cellY] =  cellX
+        }
       }
     }
   }
 
-  let selectedCells: Point[] = []
-  for (let i = Math.floor(minY); i < edgeLengths; i++) {
-    const start = startEdge[i]
-    if (start === -1) continue
-
+  let cells: Point[] = []
+  for (let i = 0; i < length; i++) {
+    // if (startEdge[i] === EMPTY_GRID_INDEX) continue // seems like it's not needed anymore
     const end = endEdge[i]
-    for (let x = start; x <= end; x++) {
-      selectedCells.push({
-        x: x as f32,
-        y: i as f32,
-      })
+    for (let x = startEdge[i]; x <= end; x++) {
+      const y = i + minY
+      if (x >= 0 && x < gridMapWidth && y >= 0 && y < gridMapHeight) {
+        cells.push({
+          x: x as f32,
+          y: y as f32,
+        })
+      }
     }
   }
-  return selectedCells.map<Point>(point => (
+
+  return cells.map<Point>(point => (
     convertLogicCoordsToVisual(
       point.x / gridMapScaleX + (1/(2 * gridMapScaleX)),
       point.y / gridMapScaleY + (1/(2 * gridMapScaleY)),
     )
   ));
+}
+
+function pickCells(points: Point[]): i32[] {
+  let fMaxY: f32 = -Infinity
+  let fMinY: f32 = Infinity
+  for (let i = 0; i < points.length; i++) {
+    let point = pointToGridFnc(points[i])
+    if (fMinY > point.y) fMinY = point.y
+    if (fMaxY < point.y) fMaxY = point.y
+    
+  }
+  const minY = Math.floor(fMinY) as i32
+  const maxY = Math.ceil(fMaxY) as i32
+  const length = maxY - minY + 1
+
+  let startEdge = new Array<i32>(length).fill(EMPTY_GRID_INDEX)
+  let endEdge = new Array<i32>(length).fill(EMPTY_GRID_INDEX)
+  
+  for (let i = 0; i < points.length; i++) {
+    const results = traceLine(points[i], points[(i + 1) % points.length])
+    for (let j = 0; j < results.length; j++) {
+      const currentCell = results[j]
+      const cellY = currentCell.y as i32 - minY
+      const cellX = currentCell.x as i32
+      if (startEdge[cellY] == EMPTY_GRID_INDEX) {
+        startEdge[cellY] = cellX
+        endEdge[cellY] = cellX
+      } else {
+        if (startEdge[cellY] > cellX) {
+          startEdge[cellY] = cellX
+        }
+        if (endEdge[cellY] < cellX) {
+          endEdge[cellY] =  cellX
+        }
+      }
+    }
+  }
+
+  let selectedIndexes: i32[] = []
+  for (let i = 0; i < length; i++) {
+    // if (startEdge[i] === EMPTY_GRID_INDEX) continue // seems like it's not needed anymore
+    const end = endEdge[i]
+    for (let x = startEdge[i]; x <= end; x++) {
+      const y = i + minY
+      if (x >= 0 && x < gridMapWidth && y >= 0 && y < gridMapHeight) {
+        selectedIndexes.push(y * gridMapWidth + x)
+      }
+    }
+  }
+
+  return selectedIndexes
 }

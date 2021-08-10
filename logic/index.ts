@@ -6,8 +6,8 @@ import { getObstacles, storeObstacles } from "./obstacles-manager";
 import { Point } from "./point";
 import { MAP_SQUAD_REPRESENTATION_TO_TYPE } from "./squad-details";
 import { convertLogicCoordsToVisual, convertVisualCoordsToLogic } from "./convert-coords-between-logic-and-visual";
-import { initializeGrid, fillGrid, debugGridNumbers, traceLine, pickCells } from "./grid-manager";
-import { UPDATE_SQUAD_CENTER_PERIOD } from "./constants";
+import { initializeGrid, fillGrid, debugGridNumbers, traceLine, pickCellsDebug, getSquads } from "./grid-manager";
+import { UINT_DATA_SETS_DIVIDER, UPDATE_SQUAD_CENTER_PERIOD, USER_FACTION_ID } from "./constants";
 
 var factions: Faction[] = []
 export var mapWidthGlob: f32 = 0
@@ -130,7 +130,35 @@ export function getSelectedUnitsIds(x1: f32, y1: f32, x2: f32, y2: f32): Uint32A
   const rightBottomCorner = convertVisualCoordsToLogic(x2, y2)
   const leftBottomCorner = convertVisualCoordsToLogic(x1, y2)
 
-  return new Uint32Array(0)
+  const squads = getSquads([
+    leftTopCorner,
+    rightTopCorner,
+    rightBottomCorner,
+    leftBottomCorner,
+  ])
+
+  const selectedOurSquads = squads.filter(squad => {
+    return squad.factionId == USER_FACTION_ID
+    if (squad.factionId == USER_FACTION_ID) {
+      return squad.members.some(unit => 
+        unit.x > leftTopCorner.x &&
+        unit.x < rightBottomCorner.x &&
+        unit.y > leftTopCorner.y &&
+        unit.y < rightBottomCorner.y
+      )
+    }
+    return false
+  })
+
+  const squadsIds = selectedOurSquads.map<u32>(squad => squad.id)
+  const unitsIds = selectedOurSquads.map<u32[]>(squad => squad.members.map<u32>(unit => unit.id as u32)).flat()
+  const concatedData = unitsIds.concat([UINT_DATA_SETS_DIVIDER]).concat(squadsIds)
+
+  let result = new Uint32Array(concatedData.length)
+  for (let i: i32 = 0; i < concatedData.length; i++) {
+    result[i] = concatedData[i]
+  }
+  return result
 }
 
 export function debugSelecting(x1: f32, y1: f32, x2: f32, y2: f32): Float32Array {
@@ -139,16 +167,13 @@ export function debugSelecting(x1: f32, y1: f32, x2: f32, y2: f32): Float32Array
   const rightBottomCorner = convertVisualCoordsToLogic(x2, y2)
   const leftBottomCorner = convertVisualCoordsToLogic(x1, y2)
 
-  const data = pickCells([
+  const data = pickCellsDebug([
     leftTopCorner,
     rightTopCorner,
     rightBottomCorner,
     leftBottomCorner,
-  ]).map<f32[]>(point => [point.x, point.y]).flat()
-  // const data = traceLine(leftTopCorner, rightBottomCorner).map<f32[]>(point => [
-  //   point.x,
-  //   point.y
-  // ]).flat()
+  ]).map<f32[]>(point => [point.x, point.y]).flat();
+
 
   let result = new Float32Array(data.length)
   for (let i: i32 = 0; i < data.length; i++) {

@@ -5,6 +5,7 @@ import Factory from '~/representation/Factory'
 import updateAbilitiesButtons from '~/buttons/abilities'
 import { RepresentationId } from '~/buttons/abilities/createIcon'
 import StrategicPoint from '~/representation/StrategicPoint'
+import { UINT_DATA_SETS_DIVIDER } from '../../logic/constants'
 
 let debugContainer = null
 
@@ -64,56 +65,57 @@ class SelectionController {
   }
 
   private selectUnits(x1: number, y1: number, x2: number, y2: number) {
-    let unitsIds;
-
-    window.useFloat32ArrayData(
-      this.wasmModule.debugSelecting(x1, y1, x2, y2),
-      (data) => {
-        if (!debugContainer) {
-          debugContainer = new PIXI.Graphics()
-          window.ui.addChild(debugContainer)
-        }
-        debugContainer.clear()
-        debugContainer.beginFill(0xff0000)
-        console.log(data)
-        for (let i = 0; i < data.length; i += 2) {
-          debugContainer.drawRect(data[i] - 15, data[i + 1] - 15, 30, 30)
-        }
-      },
-    )
+    // window.useFloat32ArrayData(
+    //   this.wasmModule.debugSelecting(x1, y1, x2, y2),
+    //   (data) => {
+    //     if (!debugContainer) {
+    //       debugContainer = new PIXI.Graphics()
+    //       window.ui.addChild(debugContainer)
+    //     }
+    //     debugContainer.clear()
+    //     debugContainer.beginFill(0xff0000)
+    //     // console.log(data)
+    //     for (let i = 0; i < data.length; i += 2) {
+    //       debugContainer.drawRect(data[i] - 15, data[i + 1] - 15, 30, 30)
+    //     }
+    //   },
+    // )
     window.useUint32ArrayData(
       this.wasmModule.getSelectedUnitsIds(x1, y1, x2, y2),
       (result) => {
         if (result.length === 1) {
-          // there is only divider "0"
+          // there is only divider UINT_DATA_SETS_DIVIDER
           this.selectedSquads = new Uint32Array()
           return
         }
-        const indexOfDivider = result.indexOf(0) // 0 -> divides between squads ids and units ids
-        unitsIds = result.subarray(0, indexOfDivider)
+        const indexOfDivider = result.indexOf(UINT_DATA_SETS_DIVIDER) // 0 -> divides between squads ids and units ids
+        console.log(indexOfDivider)
+        const unitsIds = result.subarray(0, indexOfDivider)
         const squadsIds = result.subarray(indexOfDivider + 1)
         this.selectedSquads = squadsIds
+
+        const iconsPayload: number[][] = []
+        let collectedUnits: number[] = []
+    
+        unitsIds.forEach(id => {
+          if (id === 1) {
+            // 1 -> divider between each squad
+            iconsPayload.push(collectedUnits)
+            collectedUnits = []
+            return
+          }
+          const unit = this.universeRepresentation[id] as Unit
+          if (unit) {
+            // update wasn't called yet, with new unit
+            unit.select()
+          }
+          this.selectedUnits.push(unit)
+          collectedUnits.push(id)
+        })
       }
     )
 
-    const iconsPayload: number[][] = []
-    let collectedUnits: number[] = []
 
-    unitsIds.forEach(id => {
-      if (id === 1) {
-        // 1 -> divider between each squad
-        iconsPayload.push(collectedUnits)
-        collectedUnits = []
-        return
-      }
-      const unit = this.universeRepresentation[id] as Unit
-      if (unit) {
-        // update wasn't called yet, with new unit
-        unit.select()
-      }
-      this.selectedUnits.push(unit)
-      collectedUnits.push(id)
-    })
   }
 
   private deselectAbility() {

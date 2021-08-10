@@ -31,3 +31,6 @@ export const MAP_SKEW_ANGLE: f32 = -0.65
 export const MAP_VERTICAL_MOD: f32 = 0.52
 
 export const UPDATE_SQUAD_CENTER_PERIOD: usize = 15
+
+export const USER_FACTION_ID: u32 = 0;
+export const UINT_DATA_SETS_DIVIDER: u32 = 0

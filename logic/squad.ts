@@ -13,7 +13,7 @@ class TaskTodo {
 }
 
 export class Squad {
-  private id: u32
+  public id: u32
   private abilityCoolDown: u16
   private isDuringKeepingCoherency: bool
   private taskTodo: TaskTodo

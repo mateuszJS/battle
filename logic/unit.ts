@@ -9,7 +9,7 @@ import { Squad } from "./squad"
 import { convertLogicCoordsToVisual } from "./convert-coords-between-logic-and-visual";
 
 export class Unit {
-  private id: f32
+  public id: f32
   private modX: f32
   private modY: f32
   private destination: Point
