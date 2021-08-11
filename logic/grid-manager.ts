@@ -1,7 +1,7 @@
 import { mapHeightGlob, mapWidthGlob } from ".";
 import { convertLogicCoordsToVisual } from "./convert-coords-between-logic-and-visual";
 import { Faction } from "./faction";
-import { Point } from "./point";
+import { Point } from "./geom-types";
 import { Squad } from "./squad";
 
 const EMPTY_GRID_INDEX = -100
@@ -153,13 +153,16 @@ export function traceLine(startPoint: Point, endPoint: Point): Point[] {
 
 export function getSquads(points: Point[]): Squad[] {
   const cellIndexes = pickCells(points)
-  return cellIndexes.map<Squad[]>(cellIndex => {
-    const gridCell = grid[cellIndex]
+  let result: Squad[] = []
+
+  for (let i = 0; i < cellIndexes.length; i++) {
+    const gridCell = grid[cellIndexes[i]]
     if (gridCell) {
-      return gridCell
+      result = result.concat(gridCell)
     }
-    return []
-  }).flat()
+  }
+
+  return result
 }
 
 export function pickCellsDebug(points: Point[]): Point[] {
@@ -171,9 +174,9 @@ export function pickCellsDebug(points: Point[]): Point[] {
     if (fMaxY < point.y) fMaxY = point.y
     
   }
-  const minY = Math.floor(fMinY) as i32
+  let minY = Math.floor(fMinY) as i32
   const maxY = Math.ceil(fMaxY) as i32
-  const length = maxY - minY + 1
+  let length = maxY - minY + 1
 
   let startEdge = new Array<i32>(length).fill(EMPTY_GRID_INDEX)
   let endEdge = new Array<i32>(length).fill(EMPTY_GRID_INDEX)
@@ -199,10 +202,26 @@ export function pickCellsDebug(points: Point[]): Point[] {
   }
 
   let cells: Point[] = []
-  for (let i = 0; i < length; i++) {
+  /* ========BEGIN - add 1 y to the bottom and to the top========= */
+  if (minY > 0) {
+    startEdge.unshift(startEdge[0])
+    endEdge.unshift(endEdge[0])
+    minY --
+    length ++
+  }
+  if (length - 1 + minY < gridMapHeight - 1) {
+    startEdge.push(startEdge[startEdge.length - 1])
+    endEdge.push(endEdge[endEdge.length - 1])
+    length ++
+  }
+  /* ========END - add 1 y to the bottom and to the top========= */
+  for (let i = 0; i < length; i++) { 
     // if (startEdge[i] === EMPTY_GRID_INDEX) continue // seems like it's not needed anymore
-    const end = endEdge[i]
-    for (let x = startEdge[i]; x <= end; x++) {
+    // const start = startEdge[i]
+    // const end = endEdge[i]
+    const start = Math.max(startEdge[i] - 1, 0) // add x - 1
+    const end = Math.min(endEdge[i] + 1, gridMapWidth - 1) // add x + 1
+    for (let x = start; x <= end; x++) {
       const y = i + minY
       if (x >= 0 && x < gridMapWidth && y >= 0 && y < gridMapHeight) {
         cells.push({
@@ -230,9 +249,9 @@ function pickCells(points: Point[]): i32[] {
     if (fMaxY < point.y) fMaxY = point.y
     
   }
-  const minY = Math.floor(fMinY) as i32
+  let minY = Math.floor(fMinY) as i32
   const maxY = Math.ceil(fMaxY) as i32
-  const length = maxY - minY + 1
+  let length = maxY - minY + 1
 
   let startEdge = new Array<i32>(length).fill(EMPTY_GRID_INDEX)
   let endEdge = new Array<i32>(length).fill(EMPTY_GRID_INDEX)
@@ -258,10 +277,26 @@ function pickCells(points: Point[]): i32[] {
   }
 
   let selectedIndexes: i32[] = []
-  for (let i = 0; i < length; i++) {
+  /* ========BEGIN - add 1 y to the bottom and to the top========= */
+  if (minY > 0) {
+    startEdge.unshift(startEdge[0])
+    endEdge.unshift(endEdge[0])
+    minY --
+    length ++
+  }
+  if (length - 1 + minY < gridMapHeight - 1) {
+    startEdge.push(startEdge[startEdge.length - 1])
+    endEdge.push(endEdge[endEdge.length - 1])
+    length ++
+  }
+
+  for (let i = 0; i < length; i++) { 
     // if (startEdge[i] === EMPTY_GRID_INDEX) continue // seems like it's not needed anymore
-    const end = endEdge[i]
-    for (let x = startEdge[i]; x <= end; x++) {
+    // const start = startEdge[i]
+    // const end = endEdge[i]
+    const start = Math.max(startEdge[i] - 1, 0) as i32 // add x - 1
+    const end = Math.min(endEdge[i] + 1, gridMapWidth - 1) as i32 // add x + 1
+    for (let x = start; x <= end; x++) {
       const y = i + minY
       if (x >= 0 && x < gridMapWidth && y >= 0 && y < gridMapHeight) {
         selectedIndexes.push(y * gridMapWidth + x)

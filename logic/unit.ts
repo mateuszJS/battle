@@ -4,7 +4,7 @@ import { FLY_DECELERATION, FLY_MIN_SPEED, getFlyModes } from "./get-fly-modes"
 import { getId } from "./get-id"
 import { getInitialTrackIndex } from "./get-initial-track-index"
 import { getRandom } from "./get-random"
-import { Point } from "./point"
+import { Point } from "./geom-types"
 import { Squad } from "./squad"
 import { convertLogicCoordsToVisual } from "./convert-coords-between-logic-and-visual";
 

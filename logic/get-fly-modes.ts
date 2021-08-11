@@ -1,4 +1,4 @@
-import { Point } from "./point";
+import { Point } from "./geom-types";
 
 export const FLY_MIN_SPEED: f32 = 0.035;
 export const FLY_DECELERATION: f32 = 0.97;

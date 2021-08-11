@@ -3,11 +3,13 @@
 
 import { Faction } from "./faction";
 import { getObstacles, storeObstacles } from "./obstacles-manager";
-import { Point } from "./point";
+import { Line, Point } from "./geom-types";
 import { MAP_SQUAD_REPRESENTATION_TO_TYPE } from "./squad-details";
 import { convertLogicCoordsToVisual, convertVisualCoordsToLogic } from "./convert-coords-between-logic-and-visual";
 import { initializeGrid, fillGrid, debugGridNumbers, traceLine, pickCellsDebug, getSquads } from "./grid-manager";
 import { UINT_DATA_SETS_DIVIDER, UPDATE_SQUAD_CENTER_PERIOD, USER_FACTION_ID } from "./constants";
+import { isPointInPolygon } from "./geom-utils";
+import { Squad } from "./squad";
 
 var factions: Faction[] = []
 export var mapWidthGlob: f32 = 0
@@ -129,27 +131,42 @@ export function getSelectedUnitsIds(x1: f32, y1: f32, x2: f32, y2: f32): Uint32A
   const rightTopCorner = convertVisualCoordsToLogic(x2, y1)
   const rightBottomCorner = convertVisualCoordsToLogic(x2, y2)
   const leftBottomCorner = convertVisualCoordsToLogic(x1, y2)
-
-  const squads = getSquads([
+  const points = [
     leftTopCorner,
     rightTopCorner,
     rightBottomCorner,
     leftBottomCorner,
-  ])
+  ]
+  const squads = getSquads(points)
+  const selectedOurSquads: Squad[] = []
 
-  const selectedOurSquads = squads.filter(squad => {
-    return squad.factionId == USER_FACTION_ID
+  let lines = points.map<Line>((point, index, allPoints) => ({
+    p1: point,
+    p2: allPoints[(index + 1) % allPoints.length],
+  }))
+
+  for (let i = 0; i < squads.length; i++) {
+    const squad = squads[i]
     if (squad.factionId == USER_FACTION_ID) {
-      return squad.members.some(unit => 
-        unit.x > leftTopCorner.x &&
-        unit.x < rightBottomCorner.x &&
-        unit.y > leftTopCorner.y &&
-        unit.y < rightBottomCorner.y
-      )
+      let isInside = false
+      for (let j = 0; j < squad.members.length; j++) {
+        const member = squad.members[j]
+        if (
+          isPointInPolygon(
+            { x: member.x, y: member.y },
+            lines,
+            )
+        ) {
+          isInside = true
+          break
+        }
+      }
+      if (isInside) {
+        selectedOurSquads.push(squad)
+      }
     }
-    return false
-  })
-
+  }
+  // trace("4")
   const squadsIds = selectedOurSquads.map<u32>(squad => squad.id)
   const unitsIds = selectedOurSquads.map<u32[]>(squad => squad.members.map<u32>(unit => unit.id as u32)).flat()
   const concatedData = unitsIds.concat([UINT_DATA_SETS_DIVIDER]).concat(squadsIds)

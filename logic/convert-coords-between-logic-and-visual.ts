@@ -1,6 +1,6 @@
 import { MAP_SKEW_ANGLE, MAP_VERTICAL_MOD } from './constants'
 import { mapHeightGlob } from '.'
-import { Point } from './point'
+import { Point } from './geom-types'
 
 export function convertLogicCoordsToVisual(x: number, y: number): Point {
   const angle = Math.atan2(x, mapHeightGlob - y) + MAP_SKEW_ANGLE

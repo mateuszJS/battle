@@ -1,6 +1,6 @@
 import { OBSTACLES_DIVIDER } from "./constants";
 import { getId } from "./get-id";
-import { Point } from "./point";
+import { Point } from "./geom-types";
 
 class ObstaclePoint extends Point {
   id: u32

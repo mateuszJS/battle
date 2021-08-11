@@ -9,6 +9,8 @@ import { UINT_DATA_SETS_DIVIDER } from '../../logic/constants'
 
 let debugContainer = null
 
+const SELECTION_THROTTLE = 10
+
 class SelectionController {
   private startPoint: null | Point
   private selectionRectangle: PIXI.Graphics
@@ -17,6 +19,7 @@ class SelectionController {
   private selectedUnits: Unit[]
   private selectedSquads: Uint32Array
   private selectedAbilityType: RepresentationId | null
+  private selectionTimer: number
 
   constructor(wasmModule: WasmModule, universeRepresentation: UniverseRepresentation) {
     this.wasmModule = wasmModule
@@ -27,6 +30,7 @@ class SelectionController {
     this.selectionRectangle = new PIXI.Graphics()
     window.ui.addChild(this.selectionRectangle)
     this.selectedAbilityType = null
+    this.selectionTimer = 0
   }
 
   public consumeSelection({ x, y }: Point) {
@@ -80,6 +84,7 @@ class SelectionController {
     //     }
     //   },
     // )
+
     window.useUint32ArrayData(
       this.wasmModule.getSelectedUnitsIds(x1, y1, x2, y2),
       (result) => {
@@ -89,7 +94,6 @@ class SelectionController {
           return
         }
         const indexOfDivider = result.indexOf(UINT_DATA_SETS_DIVIDER) // 0 -> divides between squads ids and units ids
-        console.log(indexOfDivider)
         const unitsIds = result.subarray(0, indexOfDivider)
         const squadsIds = result.subarray(indexOfDivider + 1)
         this.selectedSquads = squadsIds
@@ -158,19 +162,24 @@ class SelectionController {
     // )
 
     if (!this.startPoint) return
+    
+    if (++this.selectionTimer < SELECTION_THROTTLE) {
+      return
+    } else {
+      this.clearSelection()
+      this.selectUnits(
+        this.startPoint.x,
+        this.startPoint.y,
+        x,
+        y,
+        // Math.min(this.startPoint.x, x),
+        // Math.max(this.startPoint.x, x),
+        // Math.min(this.startPoint.y, y),
+        // Math.max(this.startPoint.y, y),
+      )
+      this.selectionTimer = 0
+    }
 
-    this.clearSelection()
-
-    this.selectUnits(
-      this.startPoint.x,
-      this.startPoint.y,
-      x,
-      y,
-      // Math.min(this.startPoint.x, x),
-      // Math.max(this.startPoint.x, x),
-      // Math.min(this.startPoint.y, y),
-      // Math.max(this.startPoint.y, y),
-    )
     window.ui.interactiveChildren = false
     this.selectionRectangle.clear()
     this.selectionRectangle.lineStyle(2, 0x00ff00, 1)
@@ -190,10 +199,11 @@ class SelectionController {
     window.ui.interactiveChildren = true
     this.selectionRectangle.clear()
     if (this.selectedUnits.length === 0) {
+      // click on unit
       this.selectUnits(
         this.startPoint.x - 30,
-        this.startPoint.x + 30,
         this.startPoint.y - 30 + HALF_UNIT_HEIGHT,
+        this.startPoint.x + 30,
         this.startPoint.y + 30 + HALF_UNIT_HEIGHT,
       )
     }

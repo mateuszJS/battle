@@ -1,6 +1,6 @@
 import { MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS } from "./constants"
 import { getId } from "./get-id"
-import { Point } from "./point"
+import { Point } from "./geom-types"
 import { getTrack, UNITS_OFFSET } from "./position-utils"
 import { SquadDetails, SquadType, SQUAD_DETAILS } from "./squad-details"
 import { Unit } from "./unit"

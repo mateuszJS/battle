@@ -1,4 +1,4 @@
-import { Point } from "./point"
+import { Point } from "./geom-types"
 
 export function getTrack(source: Point, destination: Point): Array<Point> {
   return [source, destination]
