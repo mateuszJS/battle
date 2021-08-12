@@ -27,11 +27,11 @@ export function fillGrid(factions: Faction[]): void {
     faction.squads.forEach(squad => {
       squad.updateCenter()
       const index = getIndexFromRealPosition(squad.centerPoint.x, squad.centerPoint.y)
-      const array = grid[index]
+      const array = unchecked(grid[index])
       if (array) {
         array.push(squad)
       } else {
-        grid[index] = [squad]
+        unchecked(grid[index] = [squad])
       }
     })
   })
@@ -156,7 +156,7 @@ export function getSquads(points: Point[]): Squad[] {
   let result: Squad[] = []
 
   for (let i = 0; i < cellIndexes.length; i++) {
-    const gridCell = grid[cellIndexes[i]]
+    const gridCell = unchecked(grid[cellIndexes[i]])
     if (gridCell) {
       result = result.concat(gridCell)
     }
@@ -169,7 +169,7 @@ export function pickCellsDebug(points: Point[]): Point[] {
   let fMaxY: f32 = -Infinity
   let fMinY: f32 = Infinity
   for (let i = 0; i < points.length; i++) {
-    let point = pointToGridFnc(points[i])
+    let point = pointToGridFnc(unchecked(points[i]))
     if (fMinY > point.y) fMinY = point.y
     if (fMaxY < point.y) fMaxY = point.y
     
@@ -182,20 +182,23 @@ export function pickCellsDebug(points: Point[]): Point[] {
   let endEdge = new Array<i32>(length).fill(EMPTY_GRID_INDEX)
   
   for (let i = 0; i < points.length; i++) {
-    const results = traceLine(points[i], points[(i + 1) % points.length])
+    const results = traceLine(
+      unchecked(points[i]),
+      unchecked(points[(i + 1) % points.length]),
+    )
     for (let j = 0; j < results.length; j++) {
-      const currentCell = results[j]
+      const currentCell = unchecked(results[j])
       const cellY = currentCell.y as i32 - minY
       const cellX = currentCell.x as i32
-      if (startEdge[cellY] == EMPTY_GRID_INDEX) {
-        startEdge[cellY] = cellX
-        endEdge[cellY] = cellX
+      if (unchecked(startEdge[cellY]) == EMPTY_GRID_INDEX) {
+        unchecked(startEdge[cellY] = cellX)
+        unchecked(endEdge[cellY] = cellX)
       } else {
-        if (startEdge[cellY] > cellX) {
-          startEdge[cellY] = cellX
+        if (unchecked(startEdge[cellY]) > cellX) {
+          unchecked(startEdge[cellY] = cellX)
         }
         if (endEdge[cellY] < cellX) {
-          endEdge[cellY] =  cellX
+          unchecked(endEdge[cellY] =  cellX)
         }
       }
     }
@@ -204,14 +207,14 @@ export function pickCellsDebug(points: Point[]): Point[] {
   let cells: Point[] = []
   /* ========BEGIN - add 1 y to the bottom and to the top========= */
   if (minY > 0) {
-    startEdge.unshift(startEdge[0])
-    endEdge.unshift(endEdge[0])
+    startEdge.unshift(unchecked(startEdge[0]))
+    endEdge.unshift(unchecked(endEdge[0]))
     minY --
     length ++
   }
   if (length - 1 + minY < gridMapHeight - 1) {
-    startEdge.push(startEdge[startEdge.length - 1])
-    endEdge.push(endEdge[endEdge.length - 1])
+    startEdge.push(unchecked(startEdge[startEdge.length - 1]))
+    endEdge.push(unchecked(endEdge[endEdge.length - 1]))
     length ++
   }
   /* ========END - add 1 y to the bottom and to the top========= */
@@ -219,8 +222,8 @@ export function pickCellsDebug(points: Point[]): Point[] {
     // if (startEdge[i] === EMPTY_GRID_INDEX) continue // seems like it's not needed anymore
     // const start = startEdge[i]
     // const end = endEdge[i]
-    const start = Math.max(startEdge[i] - 1, 0) // add x - 1
-    const end = Math.min(endEdge[i] + 1, gridMapWidth - 1) // add x + 1
+    const start = Math.max(unchecked(startEdge[i]) - 1, 0) // add x - 1
+    const end = Math.min(unchecked(endEdge[i]) + 1, gridMapWidth - 1) // add x + 1
     for (let x = start; x <= end; x++) {
       const y = i + minY
       if (x >= 0 && x < gridMapWidth && y >= 0 && y < gridMapHeight) {
@@ -244,7 +247,7 @@ function pickCells(points: Point[]): i32[] {
   let fMaxY: f32 = -Infinity
   let fMinY: f32 = Infinity
   for (let i = 0; i < points.length; i++) {
-    let point = pointToGridFnc(points[i])
+    let point = pointToGridFnc(unchecked(points[i]))
     if (fMinY > point.y) fMinY = point.y
     if (fMaxY < point.y) fMaxY = point.y
     
@@ -257,20 +260,23 @@ function pickCells(points: Point[]): i32[] {
   let endEdge = new Array<i32>(length).fill(EMPTY_GRID_INDEX)
   
   for (let i = 0; i < points.length; i++) {
-    const results = traceLine(points[i], points[(i + 1) % points.length])
+    const results = traceLine(
+      unchecked(points[i]),
+      unchecked(points[(i + 1) % points.length]),
+    )
     for (let j = 0; j < results.length; j++) {
-      const currentCell = results[j]
+      const currentCell = unchecked(results[j])
       const cellY = currentCell.y as i32 - minY
       const cellX = currentCell.x as i32
-      if (startEdge[cellY] == EMPTY_GRID_INDEX) {
-        startEdge[cellY] = cellX
-        endEdge[cellY] = cellX
+      if (unchecked(startEdge[cellY]) == EMPTY_GRID_INDEX) {
+        unchecked(startEdge[cellY] = cellX)
+        unchecked(endEdge[cellY] = cellX)
       } else {
-        if (startEdge[cellY] > cellX) {
-          startEdge[cellY] = cellX
+        if (unchecked(startEdge[cellY]) > cellX) {
+          unchecked(startEdge[cellY] = cellX)
         }
-        if (endEdge[cellY] < cellX) {
-          endEdge[cellY] =  cellX
+        if (unchecked(endEdge[cellY]) < cellX) {
+          unchecked(endEdge[cellY] =  cellX)
         }
       }
     }
@@ -279,14 +285,14 @@ function pickCells(points: Point[]): i32[] {
   let selectedIndexes: i32[] = []
   /* ========BEGIN - add 1 y to the bottom and to the top========= */
   if (minY > 0) {
-    startEdge.unshift(startEdge[0])
-    endEdge.unshift(endEdge[0])
+    startEdge.unshift(unchecked(startEdge[0]))
+    endEdge.unshift(unchecked(endEdge[0]))
     minY --
     length ++
   }
   if (length - 1 + minY < gridMapHeight - 1) {
-    startEdge.push(startEdge[startEdge.length - 1])
-    endEdge.push(endEdge[endEdge.length - 1])
+    startEdge.push(unchecked(startEdge[startEdge.length - 1]))
+    endEdge.push(unchecked(endEdge[endEdge.length - 1]))
     length ++
   }
 
@@ -294,8 +300,8 @@ function pickCells(points: Point[]): i32[] {
     // if (startEdge[i] === EMPTY_GRID_INDEX) continue // seems like it's not needed anymore
     // const start = startEdge[i]
     // const end = endEdge[i]
-    const start = Math.max(startEdge[i] - 1, 0) as i32 // add x - 1
-    const end = Math.min(endEdge[i] + 1, gridMapWidth - 1) as i32 // add x + 1
+    const start = Math.max(unchecked(startEdge[i]) - 1, 0) as i32 // add x - 1
+    const end = Math.min(unchecked(endEdge[i]) + 1, gridMapWidth - 1) as i32 // add x + 1
     for (let x = start; x <= end; x++) {
       const y = i + minY
       if (x >= 0 && x < gridMapWidth && y >= 0 && y < gridMapHeight) {

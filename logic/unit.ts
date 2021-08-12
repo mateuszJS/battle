@@ -182,7 +182,7 @@ export class Unit {
   setNewAttackAimDuringRunning(squadToAttack: Squad): void {
     let availableEnemyUnits: Unit[] = []
     for (let i = 0; i < squadToAttack.members.length; i++) {
-      const member = squadToAttack.members[i]
+      const member = unchecked(squadToAttack.members[i])
       let angleFroUnitToEnemyMember = Math.atan2(member.x - this.x, this.y - member.y) as f32
       let angleDiff = getAngleDiff(this.angle, angleFroUnitToEnemyMember)
       if (Math.abs(angleDiff) < this.squad.squadDetails.maxChasingShootAngle) {

@@ -93,7 +93,7 @@ function updateUniverse(): void {
 
   if (time % CHECK_SQUADS_CORRECTNESS_PERIOD == 0) {
     for (let i = 0; i < factions.length; i++) {
-      const faction = factions[i]
+      const faction = unchecked(factions[i])
       faction.checkSquadsCorrectness()
     }
   }
@@ -119,7 +119,7 @@ export function getUniverseRepresentation(): Float32Array {
   let representation = factions.map<f32[]>(faction => faction.getRepresentation()).flat()
   let result = new Float32Array(representation.length)
   for (let i: i32 = 0; i < representation.length; i++) {
-    result[i] = representation[i]
+    unchecked(result[i] = representation[i])
   }
 
   return result
@@ -131,7 +131,7 @@ export function createSquad(squadType: f32): void {
 
 export function moveUnits(squadsIds: Uint32Array, x: f32, y: f32): Uint32Array {
   const userFactionIndex = factions.findIndex(faction => faction.id == USER_FACTION_ID)
-  factions[userFactionIndex].taskAddDestination(squadsIds, convertVisualCoordsToLogic(x, y))
+  unchecked(factions[userFactionIndex]).taskAddDestination(squadsIds, convertVisualCoordsToLogic(x, y))
 
   return new Uint32Array(0)
 }
@@ -152,15 +152,15 @@ export function getSelectedUnitsIds(x1: f32, y1: f32, x2: f32, y2: f32): Uint32A
 
   let lines = points.map<Line>((point, index, allPoints) => ({
     p1: point,
-    p2: allPoints[(index + 1) % allPoints.length],
+    p2: unchecked(allPoints[(index + 1) % allPoints.length]),
   }))
 
   for (let i = 0; i < squads.length; i++) {
-    const squad = squads[i]
+    const squad = unchecked(squads[i])
     if (squad.factionId == USER_FACTION_ID) {
       let isInside = false
       for (let j = 0; j < squad.members.length; j++) {
-        const member = squad.members[j]
+        const member = unchecked(squad.members[j])
         if (
           isPointInPolygon(
             { x: member.x, y: member.y },
@@ -183,7 +183,7 @@ export function getSelectedUnitsIds(x1: f32, y1: f32, x2: f32, y2: f32): Uint32A
 
   let result = new Uint32Array(concatedData.length)
   for (let i = 0; i < concatedData.length; i++) {
-    result[i] = concatedData[i]
+    unchecked(result[i] = concatedData[i])
   }
   return result
 }

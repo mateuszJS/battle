@@ -101,7 +101,7 @@ export class Squad {
   recalculateMembersPosition(): void {
     let positions = unchecked(UNITS_OFFSET[this.members.length - 1])
     for (let i = 0; i < positions.length; i++) {
-      this.members[i].positionOffset = unchecked(positions[i])
+      unchecked(this.members[i]).positionOffset = unchecked(positions[i])
     }
   }
 
@@ -153,7 +153,7 @@ export class Squad {
 
   checkMembersCorrectness(): void {
     for (let i = 0; i < this.members.length; i++) {
-      this.members[i].checkCorrectness()
+      unchecked(this.members[i].checkCorrectness())
     }
   }
 

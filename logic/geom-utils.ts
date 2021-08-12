@@ -53,7 +53,7 @@ export function isPointInPolygon(p2: Point, lines: Line[]): bool {
   let number_of_intersections: usize = 0
 
   for (let i = 0; i < lines.length; i++) {
-    if (checkIntersection(line_with_point, lines[i])) {
+    if (checkIntersection(line_with_point, unchecked(lines[i]))) {
       number_of_intersections ++
     }
   }

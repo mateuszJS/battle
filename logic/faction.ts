@@ -53,7 +53,7 @@ export class Faction {
 
   taskAddDestination(squadsIds: Uint32Array, destination: Point): void {
     for (let i = 0; i < this.squads.length; i++) {
-      const squad = this.squads[i]
+      const squad = unchecked(this.squads[i])
       if (squadsIds.includes(squad.id)) {
         squad.taskSetDestination(destination)
       }
@@ -72,7 +72,7 @@ export class Faction {
 
   checkSquadsCorrectness(): void {
     for (let i = 0; i < this.squads.length; i++) {
-      this.squads[i].checkMembersCorrectness()
+      unchecked(this.squads[i].checkMembersCorrectness())
     }
   }
 }
