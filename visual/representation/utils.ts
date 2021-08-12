@@ -5,9 +5,11 @@ const getFormattedNumber = (value: number) => {
   return new Array(5 - stringifiedValue.length).join('0') + stringifiedValue
 }
 
+const MATH_PI_2 = 2 * Math.PI
+
 const getAngleOffsetInFrames = (angle: number, numberOfSides: number) => {
-  const singleAngleSlice = (2 * Math.PI) / numberOfSides
-  const safeAngle = (angle + Math.PI + singleAngleSlice / 2) % (2 * Math.PI)
+  const singleAngleSlice = MATH_PI_2 / numberOfSides
+  const safeAngle = (angle + Math.PI + singleAngleSlice / 2) % MATH_PI_2
   return Math.floor(safeAngle / singleAngleSlice)
 }
 

@@ -31,6 +31,10 @@ export const MAP_SKEW_ANGLE: f32 = -0.65
 export const MAP_VERTICAL_MOD: f32 = 0.52
 
 export const UPDATE_SQUAD_CENTER_PERIOD: usize = 15
+export const CHECK_SQUADS_CORRECTNESS_PERIOD: usize = 2 * UPDATE_SQUAD_CENTER_PERIOD
 
 export const USER_FACTION_ID: u32 = 0;
 export const UINT_DATA_SETS_DIVIDER: u32 = 0
+
+export const MATH_PI: f32 = Math.PI as f32
+export const MATH_PI_2: f32 = 2 * MATH_PI

@@ -96,7 +96,8 @@ class SelectionController {
         const indexOfDivider = result.indexOf(UINT_DATA_SETS_DIVIDER) // 0 -> divides between squads ids and units ids
         const unitsIds = result.subarray(0, indexOfDivider)
         const squadsIds = result.subarray(indexOfDivider + 1)
-        this.selectedSquads = squadsIds
+        this.selectedSquads = squadsIds.slice() // because wasm memory will be collected by Garbage collector
+        // so we should make a copy
 
         const iconsPayload: number[][] = []
         let collectedUnits: number[] = []

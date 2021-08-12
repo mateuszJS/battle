@@ -7,7 +7,7 @@ import { Line, Point } from "./geom-types";
 import { MAP_SQUAD_REPRESENTATION_TO_TYPE } from "./squad-details";
 import { convertLogicCoordsToVisual, convertVisualCoordsToLogic } from "./convert-coords-between-logic-and-visual";
 import { initializeGrid, fillGrid, debugGridNumbers, traceLine, pickCellsDebug, getSquads } from "./grid-manager";
-import { UINT_DATA_SETS_DIVIDER, UPDATE_SQUAD_CENTER_PERIOD, USER_FACTION_ID } from "./constants";
+import { CHECK_SQUADS_CORRECTNESS_PERIOD, UINT_DATA_SETS_DIVIDER, UPDATE_SQUAD_CENTER_PERIOD, USER_FACTION_ID } from "./constants";
 import { isPointInPolygon } from "./geom-utils";
 import { Squad } from "./squad";
 
@@ -90,6 +90,13 @@ function updateUniverse(): void {
   if (time % UPDATE_SQUAD_CENTER_PERIOD == 0) {
     fillGrid(factions)
   }
+
+  if (time % CHECK_SQUADS_CORRECTNESS_PERIOD == 0) {
+    for (let i = 0; i < factions.length; i++) {
+      const faction = factions[i]
+      faction.checkSquadsCorrectness()
+    }
+  }
   
   factions.forEach(faction => {
     faction.update()
@@ -123,6 +130,9 @@ export function createSquad(squadType: f32): void {
 }
 
 export function moveUnits(squadsIds: Uint32Array, x: f32, y: f32): Uint32Array {
+  const userFactionIndex = factions.findIndex(faction => faction.id == USER_FACTION_ID)
+  factions[userFactionIndex].taskAddDestination(squadsIds, convertVisualCoordsToLogic(x, y))
+
   return new Uint32Array(0)
 }
 
@@ -166,13 +176,13 @@ export function getSelectedUnitsIds(x1: f32, y1: f32, x2: f32, y2: f32): Uint32A
       }
     }
   }
-  // trace("4")
+ 
   const squadsIds = selectedOurSquads.map<u32>(squad => squad.id)
   const unitsIds = selectedOurSquads.map<u32[]>(squad => squad.members.map<u32>(unit => unit.id as u32)).flat()
   const concatedData = unitsIds.concat([UINT_DATA_SETS_DIVIDER]).concat(squadsIds)
 
   let result = new Uint32Array(concatedData.length)
-  for (let i: i32 = 0; i < concatedData.length; i++) {
+  for (let i = 0; i < concatedData.length; i++) {
     result[i] = concatedData[i]
   }
   return result

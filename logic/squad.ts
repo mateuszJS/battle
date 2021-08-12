@@ -152,7 +152,9 @@ export class Squad {
   }
 
   checkMembersCorrectness(): void {
-    this.members.forEach(member => member.checkCorrectness())
+    for (let i = 0; i < this.members.length; i++) {
+      this.members[i].checkCorrectness()
+    }
   }
 
   getRepresentation(): Array<f32> {

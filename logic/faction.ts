@@ -1,5 +1,6 @@
 import { REPRESENTATION_FACTION_ID } from "./constants"
 import { Factory } from "./factory"
+import { Point } from "./geom-types"
 import { Squad } from "./squad"
 import { SquadType } from "./squad-details"
 
@@ -48,5 +49,30 @@ export class Faction {
       .concat(squadsRepresentation)
 
     // this.squads.forEach(squad => squad.getRepresentation())
+  }
+
+  taskAddDestination(squadsIds: Uint32Array, destination: Point): void {
+    for (let i = 0; i < this.squads.length; i++) {
+      const squad = this.squads[i]
+      if (squadsIds.includes(squad.id)) {
+        squad.taskSetDestination(destination)
+      }
+    }
+
+    // let position = PositionUtils::get_squads_positions(squads_ids.len(), target_x, target_y);
+    // let mut index = 0;
+    // self.squads.iter_mut().for_each(|ref_cell_squad| {
+    //   let mut squad = ref_cell_squad.borrow_mut();
+    //   if squads_ids.contains(&squad.id) {
+    //     squad.task_add_target(position[index], false);
+    //     index += 1;
+    //   }
+    // });
+  }
+
+  checkSquadsCorrectness(): void {
+    for (let i = 0; i < this.squads.length; i++) {
+      this.squads[i].checkMembersCorrectness()
+    }
   }
 }

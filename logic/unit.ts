@@ -1,4 +1,4 @@
-import { MAP_SKEW_ANGLE, UnitState } from "./constants"
+import { MAP_SKEW_ANGLE, MATH_PI, MATH_PI_2, UnitState } from "./constants"
 import { getAngleDiff } from "./get-angle-diff"
 import { FLY_DECELERATION, FLY_MIN_SPEED, getFlyModes } from "./get-fly-modes"
 import { getId } from "./get-id"
@@ -21,13 +21,21 @@ export class Unit {
   private weaponAngleDuringChasing: f32
   public positionOffset: Point
   public state: UnitState
+  public x: f32
+  public y: f32
+  private angle: f32
+  public squad: Squad
 
   constructor(
-    public x: f32,
-    public y: f32,
-    public angle: f32,
-    private squad: Squad
+    x: f32,
+    y: f32,
+    angle: f32,
+    squad: Squad
   ) {
+    this.x = x
+    this.y = y
+    this.angle = angle
+    this.squad = squad
     this.id = getId() as f32
     this.positionOffset = { x: 0, y: 0 }
     this.modX = 0
@@ -44,7 +52,7 @@ export class Unit {
 
   changeStateToFly(angle: f32, strength: f32): void {
     this.state = UnitState.FLY;
-    this.angle = (angle + Math.PI) % (2.0 * Math.PI) as f32;
+    this.angle = (angle + MATH_PI) % MATH_PI_2
     let flyMods = getFlyModes(angle, this.x, this.y, strength);
     this.modX = flyMods.x;
     this.modY = flyMods.y;
@@ -101,9 +109,9 @@ export class Unit {
 
     this.destination = destination
     // TODO: I'm not really sure about this atan2
-    this.angle = Math.atan2(destination.x - this.x, destination.y - this.y) as f32
+    this.setAngle(destination.x, destination.y)
     this.modX = Math.sin(this.angle) * this.squad.squadDetails.movementSpeed as f32
-    this.modX = -Math.cos(this.angle) * this.squad.squadDetails.movementSpeed as f32
+    this.modY = -Math.cos(this.angle) * this.squad.squadDetails.movementSpeed as f32
   }
 
   goToCurrentPointOnTrack(): void {
@@ -152,45 +160,50 @@ export class Unit {
 
   checkCorrectness(): void {
     if (!this.isChangeStateAllowed()) return
-
+    const secondaryAttackAim = this.squad.secondaryAttackAim
+    const squadAttackAim = this.squad.attackAim
     // this method always should be called after check correctness for squad (bc if enemy can be out of whole squad range in shooting)
     if (this.trackIndex != -1) {
       if (this.state != UnitState.RUN && this.state != UnitState.CHASING) {
         this.goToCurrentPointOnTrack()
       }
-      if (this.squad.secondaryAttackAim != null) {
-        this.changeStateToShootDuringRunning(this.squad.secondaryAttackAim)
+      if (secondaryAttackAim != null) {
+        this.changeStateToShootDuringRunning(secondaryAttackAim)
       }
-    } else if (this.squad.attackAim != null) {
-      this.changeStateToShoot(this.squad.attackAim, true)
-    } else if (this.squad.secondaryAttackAim != null) {
-      this.changeStateToShoot(this.squad.secondaryAttackAim, false)
+    } else if (squadAttackAim != null) {
+      this.changeStateToShoot(squadAttackAim, true)
+    } else if (secondaryAttackAim != null) {
+      this.changeStateToShoot(secondaryAttackAim, false)
     } else {
       this.state = UnitState.IDLE
     }
   }
 
   setNewAttackAimDuringRunning(squadToAttack: Squad): void {
-    let availableEnemyUnits = squadToAttack.members.filter(member => {
-      let angleFroUnitToEnemyMember = Math.atan2(member.x - this.x, this.y - member.y)
+    let availableEnemyUnits: Unit[] = []
+    for (let i = 0; i < squadToAttack.members.length; i++) {
+      const member = squadToAttack.members[i]
+      let angleFroUnitToEnemyMember = Math.atan2(member.x - this.x, this.y - member.y) as f32
       let angleDiff = getAngleDiff(this.angle, angleFroUnitToEnemyMember)
-      return Math.abs(angleDiff) < this.squad.squadDetails.maxChasingShootAngle
-    })
+      if (Math.abs(angleDiff) < this.squad.squadDetails.maxChasingShootAngle) {
+        availableEnemyUnits.push(member)
+      }
+    }
 
     let minDistance = Infinity
-    let closestEnemyIndex = -1
+    let closestEnemy: Unit | null = null
     for (let i = 0; i < availableEnemyUnits.length; i++) {
       let enemyUnit = unchecked(availableEnemyUnits[i])
       let distance = Math.hypot(enemyUnit.x - this.x, enemyUnit.y - this.y)
       if (distance < minDistance) {
-        closestEnemyIndex = i
+        closestEnemy = enemyUnit
         minDistance = distance
       }
     }
     // TODO: what in case if still enemy is out of weapon range???
-    if (closestEnemyIndex != -1 && minDistance < this.squad.weaponDetails.range) {
-      this.attackAim = unchecked(availableEnemyUnits[closestEnemyIndex])
-      this.weaponAngleDuringChasing = Math.atan2(this.attackAim.x - this.x, this.y - this.attackAim.y)
+    if (closestEnemy && minDistance < this.squad.weaponDetails.range) {
+      this.attackAim = closestEnemy
+      this.weaponAngleDuringChasing = Math.atan2(closestEnemy.x - this.x, this.y - closestEnemy.y) as f32
     } else {
       this.attackAim = null
     }
@@ -198,10 +211,11 @@ export class Unit {
 
   changeStateToShootDuringRunning(squadToAttack: Squad): void {
     // check if unit can keep current aim
-    if (this.attackAim != null) {
-      let distance = Math.hypot(this.attackAim.x - this.x, this.attackAim.y - this.y)
+    const attackAim = this.attackAim 
+    if (attackAim != null) {
+      let distance = Math.hypot(attackAim.x - this.x, attackAim.y - this.y) as f32
       if (distance <= this.squad.weaponDetails.range) {
-        let angleFromUnitToAim = Math.atan2(this.attackAim.x - this.x, this.y - this.attackAim.y);
+        let angleFromUnitToAim = Math.atan2(attackAim.x - this.x, this.y - attackAim.y) as f32
         if (getAngleDiff(this.angle, angleFromUnitToAim) < this.squad.squadDetails.maxChasingShootAngle) {
           this.weaponAngleDuringChasing = angleFromUnitToAim;
           return // it's okay, don't have to find an aim
@@ -212,14 +226,19 @@ export class Unit {
     this.setNewAttackAimDuringRunning(squadToAttack);
   }
 
+  setAngle(destinationX: f32, destinationY: f32): void {
+    this.angle = (Math.atan2(destinationX - this.x, this.y - destinationY) as f32 + MATH_PI_2) % MATH_PI_2
+  }
+
 
   changeStateToShoot(squadToAttack: Squad, isImportantAim: bool): void {
     // check if unit can keep current aim
-    if (this.attackAim != null) {
-      let distance = Math.hypot(this.attackAim.x - this.x, this.attackAim.y - this.y)
+    const attackAim = this.attackAim
+    if (attackAim != null) {
+      let distance = Math.hypot(attackAim.x - this.x, attackAim.y - this.y)
       if (distance <= this.squad.weaponDetails.range) {
         this.state = UnitState.SHOOT // if changed from RUN -> IDLE and still has secondary aim from run
-        this.angle = Math.atan2(this.attackAim.x - this.x, this.y - this.attackAim.y);
+        this.setAngle(attackAim.x, attackAim.y)
         return // it's okay, don't have to find an aim
       }
     }
@@ -238,19 +257,19 @@ export class Unit {
 
     if (closestEnemyUnitIndex != -1 && minDistance < this.squad.weaponDetails.range) {
       let enemyUnit = unchecked(squadToAttack.members[closestEnemyUnitIndex])
-      this.angle = Math.atan2(enemyUnit.x - this.x, this.y - enemyUnit.y)
+      this.setAngle(enemyUnit.x, enemyUnit.y)
       this.state = UnitState.SHOOT
       this.attackAim = enemyUnit
     } else if (isImportantAim) {
       let enemyUnit = unchecked(squadToAttack.members[closestEnemyUnitIndex])
       let angle = Math.atan2(this.x - enemyUnit.x, enemyUnit.y - this.y)
       let distanceToEnemy = this.squad.weaponDetails.range - this.squad.squadDetails.movementSpeed
-      this.trackIndex = this.squad.track.length - 1;
+      this.trackIndex = this.squad.track.length - 1 as u8;
       if (enemyUnit.state != UnitState.RUN && enemyUnit.state != UnitState.CHASING) {
         // if the enemy is running, then the faction's hunters should handle it
         this.setDestination({
-          x: Math.sin(angle) * distanceToEnemy + enemyUnit.x,
-          y: -Math.cos(angle) * distanceToEnemy + enemyUnit.y,
+          x: Math.sin(angle) * distanceToEnemy + enemyUnit.x as f32,
+          y: -Math.cos(angle) * distanceToEnemy + enemyUnit.y as f32,
         });
       }
     } else {
