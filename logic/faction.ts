@@ -1,6 +1,7 @@
 import { REPRESENTATION_FACTION_ID } from "./constants"
 import { Factory } from "./factory"
 import { Point } from "./geom-types"
+import { getSquadPositions } from "./hex-positions"
 import { Squad } from "./squad"
 import { SquadType } from "./squad-details"
 
@@ -52,10 +53,11 @@ export class Faction {
   }
 
   taskAddDestination(squadsIds: Uint32Array, destination: Point): void {
+    const positions = getSquadPositions(squadsIds.length, destination.x, destination.y)
     for (let i = 0; i < this.squads.length; i++) {
       const squad = unchecked(this.squads[i])
       if (squadsIds.includes(squad.id)) {
-        squad.taskSetDestination(destination)
+        squad.taskSetDestination(unchecked(positions[i]))
       }
     }
 
