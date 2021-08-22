@@ -104,7 +104,7 @@ export function getSquadPositions(
   x: f32,
   y: f32,
 ): Point[] {
-  let multiple_radius: i16 = 0
+  let multiple_radius: i32 = 0
   // let last_visited_result_point_index: i32 = -1
   let results: Point[] = [{ x, y }]
 
@@ -121,13 +121,14 @@ export function getSquadPositions(
 
     const hexes = HEX_POSITIONS[multiple_radius]
     // let positions: Point[] = []
+
     for (let i = 0; i < hexes.length; i++) {
       results.push({
         x: hexes[i].x + x,
         y: hexes[i].y + y,
       })
     }
-    multiple_radius = (multiple_radius + 1) % (HEX_POSITIONS.length as i16)
+    multiple_radius = (multiple_radius + 1) % HEX_POSITIONS.length
     // CalcPositions::get_hex_circle_position(
     //   number_of_needed_position - results.length,
     //   center.x,

@@ -38,3 +38,9 @@ export const UINT_DATA_SETS_DIVIDER: u32 = 0
 
 export const MATH_PI: f32 = Math.PI as f32
 export const MATH_PI_2: f32 = 2 * MATH_PI
+
+
+export const OBSTACLES_CELL_SIZE: f32 = 20
+export const UNIT_INSIDE_OBSTACLE: u8 = 0;
+export const SQUAD_INSIDE_OBSTACLE: u8 = 1;
+export const IS_NOT_IN_OBSTACLE: u8 = 2;

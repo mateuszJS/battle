@@ -1,4 +1,5 @@
 import { Point } from "./geom-types";
+import { getIsPointInsideAnyObstacle } from "./obstacles-manager";
 
 export const FLY_MIN_SPEED: f32 = 0.035;
 export const FLY_DECELERATION: f32 = 0.97;
@@ -27,13 +28,13 @@ export function getFlyModes(angle: f32, startX: f32, startY: f32, strength: f32)
   let distance_portion = allSpeedsSum / FLY_DISTANCE_PRECISION
 
   while (distance > 0.01) {
-    let x = (Math.sin(angle) * distance + startX)
-    let y = (-Math.cos(angle) * distance + startY)
-    // if CalcPositions::get_is_point_inside_any_obstacle((x, y), false) {
-    //   distance -= distance_portion;
-    // } else {
-      break;
-    // }
+    let x = (Math.sin(angle) * distance + startX) as f32
+    let y = (-Math.cos(angle) * distance + startY) as f32
+    if (getIsPointInsideAnyObstacle(x, y, false)) {
+      distance -= distance_portion;
+    } else {
+      break
+    }
   }
 
   let factor = distance / allSpeedsSum;

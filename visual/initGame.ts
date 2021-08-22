@@ -17,10 +17,12 @@ import drawBridge from './draw-bridge'
 import drawNode from './draw-node'
 import { startDebug } from './debug/obstacles'
 import { startDebug as startDebugGrid } from './debug/grid'
+import { startDebug as startDebugObstaclesMap } from './debug/obstaclesMap'
 import initConvertArraysUtils from '~/attachUtils/init-convert-arrays-utils'
 import enhanceAnimatedSprites from '~/attachUtils/enhance-animated-sprites'
 import attachMethodToConvertLogicCoordsToVisual from '~/attachUtils/attach-method-covert-logic-coords-to-visual'
 import nodePlatformCoords from '~/consts/node-platform-coords'
+import { ConnectionNode, NodeDetails } from './map-creator'
 
 export type UniverseRepresentation = {
   [id: number]: Factory | Unit | StrategicPoint
@@ -28,7 +30,7 @@ export type UniverseRepresentation = {
 
 export type WasmModule = ASUtil & typeof ExportedWasmModule
 
-const getMapPoints = (mapWidth, mapHeight) => {
+const getMapPoints = (mapWidth: number, mapHeight: number) => {
   const leftTopCorner = window.convertLogicCoordToVisual(0, 0)
   const rightTopCorner = window.convertLogicCoordToVisual(mapWidth, 0)
   const rightBottomCorner = window.convertLogicCoordToVisual(mapWidth, mapHeight)
@@ -42,10 +44,126 @@ const getMapPoints = (mapWidth, mapHeight) => {
   ]
 }
 
+const collectNextPoints = (
+  nodes: NodeDetails[],
+  connections: [ConnectionNode, ConnectionNode][],
+  lastVisitedPoint: ConnectionNode,
+): Point[] => {
+  // debugger;
+  const allNodeConnections = connections
+    .filter(connection => (
+      [connection[0].node, connection[1].node].includes(lastVisitedPoint.node)
+    ))
+
+  const collectedPoints: Point[] = []
+  let startJoinIndex = lastVisitedPoint.joinIndex // (lastVisitedPoint.joinIndex + 1) % 4
+
+  for (let i = 0; i < 4; i++) {
+
+    collectedPoints.push({
+      x: lastVisitedPoint.node.x + nodePlatformCoords[startJoinIndex * 2].x,
+      y: lastVisitedPoint.node.y + nodePlatformCoords[startJoinIndex * 2].y,
+    })
+    lastVisitedPoint.node.visited[startJoinIndex * 2] = true
+
+    let connection: ConnectionNode | null = null
+    for (let j = 0; j < allNodeConnections.length; j++) {
+      const conn = allNodeConnections[j]
+      const isFirstNode = lastVisitedPoint.node === conn[0].node && startJoinIndex === conn[0].joinIndex
+      const isSecondNode = lastVisitedPoint.node === conn[1].node && startJoinIndex === conn[1].joinIndex
+      if (isFirstNode) { connection = conn[1] }
+      if (isSecondNode) { connection = conn[0] }
+      if (connection) { break }
+    }
+
+    if (connection) {
+      collectedPoints.push({
+        x: connection.node.x + nodePlatformCoords[connection.joinIndex * 2 + 1].x,
+        y: connection.node.y + nodePlatformCoords[connection.joinIndex * 2 + 1].y,
+      })
+      connection.node.visited[connection.joinIndex * 2 + 1] = true
+
+      const nextJoinIndex = (connection.joinIndex + 1) % 4
+      if (connection.node.visited[nextJoinIndex * 2]) {
+        return collectedPoints
+      }
+
+      return [
+        ...collectedPoints,
+        ...collectNextPoints(
+          nodes,
+          connections,
+          // startingPoint,
+          {
+            node: connection.node,
+            joinIndex: nextJoinIndex,
+          },
+        ),
+      ]
+    }
+    collectedPoints.push({
+      x: lastVisitedPoint.node.x + nodePlatformCoords[startJoinIndex * 2 + 1].x,
+      y: lastVisitedPoint.node.y + nodePlatformCoords[startJoinIndex * 2 + 1].y,
+    })
+    lastVisitedPoint.node.visited[startJoinIndex * 2 + 1] = true
+    startJoinIndex = (startJoinIndex + 1) % 4
+
+    if (lastVisitedPoint.node.visited[startJoinIndex * 2]) {
+      return collectedPoints
+    }
+  }
+
+  return collectedPoints
+}
+
+const getSerializedObstacles = (
+  nodes: NodeDetails[],
+  connections: [ConnectionNode, ConnectionNode][],
+) => {
+  let nodeWithMinY = nodes[0]
+  nodes.forEach(node => {
+    if (node.y < nodeWithMinY.y) {
+      nodeWithMinY = node
+    }
+  })
+
+
+  let startingNode: ConnectionNode = { node: nodeWithMinY, joinIndex: 0 }
+  let results: Array<Point | null> = []
+
+  do {
+    results = [
+      ...results,
+      ...collectNextPoints(nodes, connections, startingNode),
+      null,
+    ]
+    startingNode = null
+    for (let j = 0; j < nodes.length; j++) {
+      const node = nodes[j]
+      for (let i = 0; i < node.visited.length; i+= 2) {
+        if (!node.visited[i]) {
+          startingNode = { node, joinIndex: i / 2 }
+          break;
+        }
+      }
+    }
+  } while(!!startingNode)
+
+
+  return new Float32Array(
+    results.map(point => {
+      if (point === null) {
+        return [-1]
+      }
+      return [point.x, point.y]
+    }).flat()
+  )
+}
+
 const initGame = (
   wasmModule: WasmModule,
-  nodes: PIXI.Graphics[],
-  connections: Array<[PIXI.Graphics, PIXI.Graphics]>,
+  nodes: NodeDetails[],
+  connections: [ConnectionNode, ConnectionNode][],
   portals: PIXI.Graphics[],
   mapWidth: number,
   mapHeight: number,
@@ -77,15 +195,7 @@ const initGame = (
     ).flat()
   )
 
-  const serializedObstacles = new Float32Array(
-    nodes.map(graphic => {
-      const points = nodePlatformCoords.map(point => [
-        point.x + graphic.x,
-        point.y + graphic.y,
-      ]).flat()
-      return [...points, -1]
-    }).flat().slice(0, -1) // remove last -1
-  )
+  const serializedObstacles = getSerializedObstacles(nodes, connections)
 
   initUniverse(
     window.getFloat32ArrayPointer(serializedFactions),
@@ -138,6 +248,7 @@ const initGame = (
   // let nextIsRaptor = false
 
   startDebug(wasmModule)
+  startDebugObstaclesMap(wasmModule)
   
 
   window.app.ticker.add((delta: number) => {

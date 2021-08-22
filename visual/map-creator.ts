@@ -16,8 +16,21 @@ const nodesWrapper = new PIXI.Container()
 const portalsWrapper = new PIXI.Container()
 const mapCreatorWrapper = new PIXI.Container()
 
-let nodes: PIXI.Graphics[] = []
+let nodes: PIXI.Container[] = []
 let portals: PIXI.Graphics[] = []
+
+export interface NodeDetails {
+  id: number
+  x: number
+  y: number
+  visited: boolean[]
+}
+
+export interface ConnectionNode {
+  node: NodeDetails
+  joinIndex: number
+}
+
 
 const mapDetails = {
   x: 100,
@@ -95,7 +108,7 @@ const onDragEnd = (event) => {
   event.stopPropagation()
 }
 
-const updateActiveConnection = (x, y) => {
+const updateActiveConnection = (x: number, y: number) => {
   activeConnectionContainer.clear()
   activeConnectionContainer.lineStyle(5, 0x7700ff, 1)
   activeConnectionContainer.moveTo(offset.x,offset.y)
@@ -268,20 +281,40 @@ const createStartBtn = (onClick) => {
   mapCreatorWrapper.addChild(button)
 }
 
+const getJoinIndex = (join: PIXI.Graphics) => {
+  const angle = Math.atan2(join.x , -join.y)
+  if (join.y < -1) return 0
+  if (join.x > 1) return 1
+  if (join.y > 1) return 2
+
+  return 3
+}
 
 const mapCreator = (wasmModule: WasmModule) => {
   createBackground()
   createToolbar()
   createStartBtn(() => {
-    nodes.forEach(node => {
-      node.x = (node.x - mapDetails.x) / scale
-      node.y = (node.y - mapDetails.y) / scale
-    })
+    let id = 0;
+    const serializedNodes: NodeDetails[] = nodes.map(node => ({
+      id: id++,
+      x: (node.x - mapDetails.x) / scale,
+      y: (node.y - mapDetails.y) / scale,
+      visited: new Array(8).fill(false),
+    }))
     portals.forEach(portal => {
       portal.x = (portal.x - mapDetails.x) / scale
       portal.y = (portal.y - mapDetails.y) / scale
     })
-    initGame(wasmModule, nodes, connections, portals, MAP_WIDTH, MAP_HEIGHT)
+    const serializedConnections: [ConnectionNode, ConnectionNode][] = connections.map(([join1, join2]) => {
+      const join1Node = nodes.indexOf(join1.parent)
+      const join2Node = nodes.indexOf(join2.parent)
+      return [
+        { node: serializedNodes[join1Node], joinIndex: getJoinIndex(join1) },
+        { node: serializedNodes[join2Node], joinIndex: getJoinIndex(join2) },
+      ]
+    })
+
+    initGame(wasmModule, serializedNodes, serializedConnections, portals, MAP_WIDTH, MAP_HEIGHT)
   })
   window.app.stage.addChild(mapCreatorWrapper)
 }

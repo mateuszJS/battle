@@ -2,7 +2,7 @@
 // import { foo, bar } from "./constants"
 
 import { Faction } from "./faction";
-import { getObstacles, storeObstacles } from "./obstacles-manager";
+import { calculateObstaclesMap, obstacles, obstaclesMap, storeObstacles } from "./obstacles-manager";
 import { Line, Point } from "./geom-types";
 import { MAP_SQUAD_REPRESENTATION_TO_TYPE } from "./squad-details";
 import { convertLogicCoordsToVisual, convertVisualCoordsToLogic } from "./convert-coords-between-logic-and-visual";
@@ -44,7 +44,7 @@ export function initUniverse(
 }
 
 export function debugObstacles(): Float32Array {
-  let data = getObstacles().map<f32[]>(obstacle => (
+  let data = obstacles.map<f32[]>(obstacle => (
     obstacle.map<f32[]>((point, index, array) => (
       index !== array.length - 1 ? [point.x, point.y] : [point.x, point.y, -1.0]
     )).flat()
@@ -214,6 +214,15 @@ export function useAbility(squadsIds: Uint32Array, abilityType: u8, x: f32, y: f
 
 export function getAbilitiesCoolDowns(squadsIds: Uint32Array, abilityType: u8): Float32Array {
   return new Float32Array(0)
+}
+
+export function debugObstaclesMap(): Uint32Array {
+  calculateObstaclesMap()
+  let result = new Uint32Array(obstaclesMap.length)
+  for (let i = 0 ; i < obstaclesMap.length; i++) {
+    result[i] = obstaclesMap[i] as u32
+  }
+  return result
 }
 
 // function toTypedArray<T, TyArr>(arr: Array<T>): TyArr {

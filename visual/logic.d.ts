@@ -26,6 +26,7 @@ export function getSelectedUnitsIds(x1: f32, y1: f32, x2: f32, y2: f32): usize;
 export function debugSelecting(x1: f32, y1: f32, x2: f32, y2: f32): usize;
 export function useAbility(squadsIds: usize, abilityType: u8, x: f32, y: f32): void;
 export function getAbilitiesCoolDowns(squadsIds: usize, abilityType: u8): usize;
+export function debugObstaclesMap(): usize;
 export const memory: WebAssembly.Memory;
 export function __new(size: usize, id: u32): usize;
 export function __pin(ptr: usize): usize;

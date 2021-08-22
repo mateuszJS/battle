@@ -54,10 +54,12 @@ export class Faction {
 
   taskAddDestination(squadsIds: Uint32Array, destination: Point): void {
     const positions = getSquadPositions(squadsIds.length, destination.x, destination.y)
+    let positionIndex = 0
     for (let i = 0; i < this.squads.length; i++) {
       const squad = unchecked(this.squads[i])
       if (squadsIds.includes(squad.id)) {
-        squad.taskSetDestination(unchecked(positions[i]))
+        squad.taskSetDestination(unchecked(positions[positionIndex]))
+        positionIndex ++
       }
     }
 
