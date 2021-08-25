@@ -42,13 +42,11 @@ export function checkIntersection(l1: Line, l2: Line): bool {
   }
 }
 
-const p1: Point = {
-  x: -1.0, // point.x // previously was -1.0, but gives random number when lines go though points
-  y: -1.0,
-}
-
 export function isPointInPolygon(p2: Point, lines: Line[]): bool {
-  const line_with_point: Line = { p1: p1, p2: p2 }
+  const line_with_point: Line = {
+    p1: { x: p2.x, y: -1.0 },
+    p2,
+  }
 
   let number_of_intersections: usize = 0
 

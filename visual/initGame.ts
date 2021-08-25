@@ -9,7 +9,7 @@ import Factory from '~/representation/Factory'
 import StrategicPoint from '~/representation/StrategicPoint'
 import initializeMouseController from './mouseController'
 import { createFactoryButtons } from './buttons/factory'
-import { REPRESENTATION_SOLIDER, REPRESENTATION_RAPTOR, USER_FACTION_ID } from '../logic/constants'
+import { REPRESENTATION_SOLIDER, REPRESENTATION_RAPTOR, USER_FACTION_ID, MAP_HEIGHT, MAP_WIDTH } from '../logic/constants'
 import debugController from '~/debug'
 import type * as ExportedWasmModule from './logic'
 import { ASUtil } from '@assemblyscript/loader'
@@ -49,7 +49,6 @@ const collectNextPoints = (
   connections: [ConnectionNode, ConnectionNode][],
   lastVisitedPoint: ConnectionNode,
 ): Point[] => {
-  // debugger;
   const allNodeConnections = connections
     .filter(connection => (
       [connection[0].node, connection[1].node].includes(lastVisitedPoint.node)
@@ -129,7 +128,15 @@ const getSerializedObstacles = (
 
 
   let startingNode: ConnectionNode = { node: nodeWithMinY, joinIndex: 0 }
-  let results: Array<Point | null> = []
+  let results: Array<Point | null> = [
+    { x: nodeWithMinY.x + nodePlatformCoords[0].x - 1, y: nodeWithMinY.y + nodePlatformCoords[0].y },
+    { x: nodeWithMinY.x + nodePlatformCoords[0].x - 1, y: 0 },
+    { x: 0, y: 0 },
+    { x: 0, y: MAP_HEIGHT },
+    { x: MAP_WIDTH, y: MAP_HEIGHT },
+    { x: MAP_WIDTH, y: 0 },
+    { x: nodeWithMinY.x + nodePlatformCoords[0].x, y: 0 },
+  ]
 
   do {
     results = [
