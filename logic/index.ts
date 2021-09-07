@@ -2,12 +2,12 @@
 // import { foo, bar } from "./constants"
 
 import { Faction } from "./faction";
-import { calculateObstaclesMap, obstacles, obstaclesMap, storeObstacles } from "./obstacles-manager";
+import { obstacles, obstaclesMap, storeObstacles, trackLines } from "./obstacles-manager";
 import { Line, Point } from "./geom-types";
 import { MAP_SQUAD_REPRESENTATION_TO_TYPE } from "./squad-details";
 import { convertLogicCoordsToVisual, convertVisualCoordsToLogic } from "./convert-coords-between-logic-and-visual";
 import { initializeGrid, fillGrid, debugGridNumbers, traceLine, pickCellsDebug, getSquads } from "./grid-manager";
-import { CHECK_SQUADS_CORRECTNESS_PERIOD, UINT_DATA_SETS_DIVIDER, UPDATE_SQUAD_CENTER_PERIOD, USER_FACTION_ID } from "./constants";
+import { CHECK_SQUADS_CORRECTNESS_PERIOD, OBSTACLES_CELL_SIZE, UINT_DATA_SETS_DIVIDER, UPDATE_SQUAD_CENTER_PERIOD, USER_FACTION_ID } from "./constants";
 import { isPointInPolygon } from "./geom-utils";
 import { Squad } from "./squad";
 
@@ -37,6 +37,8 @@ export function initUniverse(
 
   storeObstacles(obstacles)
 
+  // testTracer()
+
   mapWidthGlob = mapWidth
   mapHeightGlob = mapHeight
 
@@ -44,11 +46,15 @@ export function initUniverse(
 }
 
 export function debugObstacles(): Float32Array {
-  let data = obstacles.map<f32[]>(obstacle => (
-    obstacle.map<f32[]>((point, index, array) => (
-      index !== array.length - 1 ? [point.x, point.y] : [point.x, point.y, -1.0]
-    )).flat()
-  )).flat()
+  let data = trackLines.map<f32[]>(line => {
+    trace("line", 4, line.p1.x * OBSTACLES_CELL_SIZE, line.p1.y * OBSTACLES_CELL_SIZE, line.p2.x * OBSTACLES_CELL_SIZE, line.p2.y * OBSTACLES_CELL_SIZE)
+    return [line.p1.x * OBSTACLES_CELL_SIZE, line.p1.y * OBSTACLES_CELL_SIZE, line.p2.x * OBSTACLES_CELL_SIZE, line.p2.y * OBSTACLES_CELL_SIZE, -1.0]
+  }).flat()
+  // let data = obstacles.map<f32[]>(obstacle => (
+  //   obstacle.map<f32[]>((point, index, array) => (
+  //     index !== array.length - 1 ? [point.x, point.y] : [point.x, point.y, -1.0]
+  //   )).flat()
+  // )).flat()
   let flattenData = data
 
   let result = new Float32Array(flattenData.length)
@@ -217,7 +223,6 @@ export function getAbilitiesCoolDowns(squadsIds: Uint32Array, abilityType: u8): 
 }
 
 export function debugObstaclesMap(): Uint32Array {
-  calculateObstaclesMap()
   let result = new Uint32Array(obstaclesMap.length)
   for (let i = 0 ; i < obstaclesMap.length; i++) {
     result[i] = obstaclesMap[i] as u32

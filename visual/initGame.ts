@@ -254,12 +254,12 @@ const initGame = (
   // let timeToCreateEnemy = 0
   // let nextIsRaptor = false
 
-  startDebug(wasmModule)
   startDebugObstaclesMap(wasmModule)
+  startDebug(wasmModule)
   
 
   window.app.ticker.add((delta: number) => {
-    startDebugGrid(wasmModule)
+    // startDebugGrid(wasmModule)
     const pointA = {
       x: mouseX,
       y: mouseY,

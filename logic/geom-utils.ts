@@ -1,4 +1,5 @@
 import { Line, Point } from "./geom-types";
+import { ObstacleLine, ObstaclePoint } from "./obstacles-manager";
 
 function direction(a: Point, b: Point, c: Point): u8 {
   const by = b.y
@@ -18,7 +19,7 @@ function direction(a: Point, b: Point, c: Point): u8 {
   }
 }
 
-export function checkIntersection(l1: Line, l2: Line): bool {
+export function checkIntersection<T extends Line>(l1: T, l2: T): bool {
   const dir1 = direction(l1.p1, l1.p2, l2.p1)
   const dir2 = direction(l1.p1, l1.p2, l2.p2)
   const dir3 = direction(l2.p1, l2.p2, l1.p1)
@@ -43,7 +44,7 @@ export function checkIntersection(l1: Line, l2: Line): bool {
 }
 
 export function isPointInPolygon(p2: Point, lines: Line[]): bool {
-  const line_with_point: Line = {
+  const lineWithPoint: Line = {
     p1: { x: p2.x, y: -1.0 },
     p2,
   }
@@ -51,7 +52,24 @@ export function isPointInPolygon(p2: Point, lines: Line[]): bool {
   let number_of_intersections: usize = 0
 
   for (let i = 0; i < lines.length; i++) {
-    if (checkIntersection(line_with_point, unchecked(lines[i]))) {
+    if (checkIntersection(lineWithPoint, unchecked(lines[i]))) {
+      number_of_intersections ++
+    }
+  }
+
+  return number_of_intersections % 2 == 1
+}
+
+export function isObstaclePointInPolygon(p2: ObstaclePoint, lines: ObstacleLine[]): bool {
+  const lineWithPoint: ObstacleLine = {
+    p1: { id: 0, x: p2.x, y: -1.0 },
+    p2,
+  }
+
+  let number_of_intersections: usize = 0
+
+  for (let i = 0; i < lines.length; i++) {
+    if (checkIntersection(lineWithPoint, unchecked(lines[i]))) {
       number_of_intersections ++
     }
   }
