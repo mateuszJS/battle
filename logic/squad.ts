@@ -6,7 +6,7 @@ import { SquadDetails, SquadType, SQUAD_DETAILS } from "./squad-details"
 import { Unit } from "./unit"
 import { WeaponDetails, WeaponType, WEAPON_DETAILS } from "./weapon-details"
 import { getTrack } from "./track-manager"
-import { ObstaclePoint } from "./obstacles-manager"
+import { UniquePoint } from "./geom-types"
 
 class TaskTodo {
   trackDestination: Point | null
@@ -23,7 +23,7 @@ export class Squad {
   public members: Array<Unit>
   public attackAim: Squad | null
   public secondaryAttackAim: Squad | null
-  public track: Array<ObstaclePoint>
+  public track: Array<UniquePoint>
   public centerPoint: Point
   public squadDetails: SquadDetails
   public weaponDetails: WeaponDetails

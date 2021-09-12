@@ -1,5 +1,7 @@
 import drawRailingLine from './draw-railing'
-import nodePlatformCoords from '~/consts/node-platform-coords'
+import getNodePlatformCoords from '~/consts/get-platform-coords'
+
+const platformCoords = getNodePlatformCoords()
 
 const nodePlatformTexture = PIXI.Texture.from('assets/node-platform.png')
 let container = null
@@ -28,14 +30,14 @@ const drawNode = (
   const pixels = new PIXI.Graphics()
   const radius = width * 0.483
   const yOffset = width * 0.375
-  nodePlatformCoords.forEach((point, index) => {
+  platformCoords.forEach((point, index) => {
 
     pixels.beginFill(index === 0 ? 0x00ff00 : 0xff0000)
     const pointX = point.x * radius + x
     const pointY = point.y * 0.52 * radius + y - yOffset
     pixels.drawRect(pointX - 5, pointY - 5, 10, 10)
 
-    const nextCoord = nodePlatformCoords[(index + 1) % nodePlatformCoords.length]
+    const nextCoord = platformCoords[(index + 1) % platformCoords.length]
     
     const sinMean = (Math.sin(point.angle) + Math.sin(nextCoord.angle)) / 2
     const cosMean = (Math.cos(point.angle) + Math.cos(nextCoord.angle)) / 2

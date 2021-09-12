@@ -1,26 +1,32 @@
-import { Point } from "./geom-types"
+import { OBSTACLES_DIVIDER } from "./constants"
+import { Line, Point } from "./geom-types"
 import { checkIntersection } from "./geom-utils"
-import { ObstacleLine, obstacleLines, ObstaclePoint, obstaclePoints, permanentObstaclesGraph } from "./obstacles-manager"
+import { getId } from "./get-id"
+import { UniqueLine, UniquePoint } from "./geom-types"
 
-export function getTrack(startPoint: Point, endPoint: Point): ObstaclePoint[] {
-  const obstacleStartPoint: ObstaclePoint = {
+export var innerTrackPoints: UniquePoint[] = []
+export var outerTrackLines: Line[] = [] // exported just because of debugging
+export var permanentObstaclesGraph: Map<u32, UniquePoint[]> = new Map()
+
+export function getTrack(startPoint: Point, endPoint: Point): UniquePoint[] {
+  const obstacleStartPoint: UniquePoint = {
     id: 0,
     x: startPoint.x,
     y: startPoint.y,
   }
-  const obstacleEndPoint: ObstaclePoint = {
+  const obstacleEndPoint: UniquePoint = {
     id: 1,
     x: endPoint.x,
     y: endPoint.y,
   }
   // ------------START checking intersection-------------------
-  let direct_connection_line: ObstacleLine =  {
+  let direct_connection_line: UniqueLine =  {
     p1: obstacleStartPoint,
     p2: obstacleEndPoint,
   }
   let is_possible_direct_connection = true
-  for (let i = 0; i < obstacleLines.length; i++) {
-    if (checkIntersection(direct_connection_line, obstacleLines[i])) {
+  for (let i = 0; i < outerTrackLines.length; i++) {
+    if (checkIntersection(direct_connection_line, outerTrackLines[i])) {
       is_possible_direct_connection = false
       break
     }
@@ -38,22 +44,18 @@ export function getTrack(startPoint: Point, endPoint: Point): ObstaclePoint[] {
   )
 }
 
-function addNewPointToGraph(graph: Map<u32, ObstaclePoint[]>, point: ObstaclePoint, isStart: bool): void {
-  for (let i = 0; i < obstaclePoints.length; i++) {
-    const obstaclePoint = obstaclePoints[i]
-    const newLine: ObstacleLine = {
+function addNewPointToGraph(graph: Map<u32, UniquePoint[]>, point: UniquePoint, isStart: bool): void {
+  for (let i = 0; i < innerTrackPoints.length; i++) {
+    const innerTrackPoint = innerTrackPoints[i]
+    const newLine: UniqueLine = {
       p1: point,
-      p2: obstaclePoint,
+      p2: innerTrackPoint,
     }
 
     let isIntersect = false
-    for (let j = 0; j < obstacleLines.length; j++) {
-      const obstacleLine = obstacleLines[j]
-      if (
-        obstacleLine.p1.id != obstaclePoint.id
-        && obstacleLine.p2.id != obstaclePoint.id
-        && checkIntersection(newLine, obstacleLine)
-      ) {
+    for (let j = 0; j < outerTrackLines.length; j++) {
+      const obstacleLine = outerTrackLines[j]
+      if (checkIntersection(newLine, obstacleLine)) {
         isIntersect = true
         break
       }
@@ -61,8 +63,8 @@ function addNewPointToGraph(graph: Map<u32, ObstaclePoint[]>, point: ObstaclePoi
 
     // ------------end checking intersection-------------------
     if (!isIntersect) {
-      const key = isStart ? point.id : obstaclePoint.id
-      const newPoint = isStart ? obstaclePoint : point
+      const key = isStart ? point.id : innerTrackPoint.id
+      const newPoint = isStart ? innerTrackPoint : point
       if (graph.has(key)) {
         graph.get(key).push(newPoint)
       } else {
@@ -72,8 +74,8 @@ function addNewPointToGraph(graph: Map<u32, ObstaclePoint[]>, point: ObstaclePoi
   }
 }
 
-function getComplicatedTrack(startPoint: ObstaclePoint, endPoint: ObstaclePoint): ObstaclePoint[] {
-  let graph: Map<u32, ObstaclePoint[]> = new Map()
+function getComplicatedTrack(startPoint: UniquePoint, endPoint: UniquePoint): UniquePoint[] {
+  let graph: Map<u32, UniquePoint[]> = new Map()
   const permanentObstaclesGraphKeys = permanentObstaclesGraph.keys()
   for (let i = 0; i < permanentObstaclesGraphKeys.length; i++) {
     const key = permanentObstaclesGraphKeys[i]
@@ -86,14 +88,9 @@ function getComplicatedTrack(startPoint: ObstaclePoint, endPoint: ObstaclePoint)
   return shortestPathAStart(graph, startPoint, endPoint)
 }
 
-
-
-
-
-
 class QueueItem {
-  point: ObstaclePoint
-  path: ObstaclePoint[]
+  point: UniquePoint
+  path: UniquePoint[]
   current_length: f32
   heuristic: f32
 }
@@ -114,10 +111,10 @@ function getSortedIndex(list: QueueItem[], value: f32): i32 {
 }
 
 function shortestPathAStart(
-  graph: Map<u32, ObstaclePoint[]>,
-  sourceNode: ObstaclePoint,
-  destinationNode: ObstaclePoint,
-): ObstaclePoint[] {
+  graph: Map<u32, UniquePoint[]>,
+  sourceNode: UniquePoint,
+  destinationNode: UniquePoint,
+): UniquePoint[] {
   let queue: QueueItem[] = [{
     point: sourceNode,
     path: [sourceNode],
@@ -125,7 +122,7 @@ function shortestPathAStart(
     heuristic: 0.0,
   }];
   let visited: u32[] = []
-  let fullPath: ObstaclePoint[] = []
+  let fullPath: UniquePoint[] = []
 
   while (queue.length > 0) {
     let currentNode = queue.pop()
@@ -168,4 +165,158 @@ function shortestPathAStart(
 
   }
   return fullPath
+}
+
+function insertLinesToGraph(
+  graph: Map<u32, UniquePoint[]>,
+  pointA: UniquePoint,
+  pointB: UniquePoint,
+): void {
+  if (graph.has(pointA.id)) {
+    graph.get(pointA.id).push(pointB)
+  } else {
+    graph.set(pointA.id, [pointB])
+  }
+}
+
+function getConnectedPoints(data: Float32Array): Point[][] {
+  let obstacleIndex: i32 = 0
+  let i: i32 = 0;
+  let result: Point[][] = [[]]
+
+  //====================CREATE POINTS FOR OBSTACLES=========================
+  while (i < data.length) {
+    if (data[i] == OBSTACLES_DIVIDER) {
+      result.push([])
+      obstacleIndex ++
+      i ++
+    } else {
+      result[obstacleIndex].push({
+        x: data[i],
+        y: data[i + 1],
+      })
+      i += 2
+    }
+  }
+
+  return result
+}
+
+function getInnerUniquePoints(data: Float32Array): UniquePoint[] {
+  let i: i32 = 0
+  let result: UniquePoint[] = []
+
+  while (i < data.length) {
+    const point: UniquePoint = {
+      id: getId(),
+      x: unchecked(data[i]),
+      y: unchecked(data[i + 1]),
+    }
+    result.push(point)
+    i += 2
+  }
+
+  return result
+}
+
+function getConnectedLines(data: Point[][]): Line[] {
+  let result: Line[] = []
+
+  for (let i = 0; i < data.length; i++) {
+    const obstacle = data[i]
+    for (let j = 0; j < obstacle.length; j++) {
+      result.push({
+        p1: obstacle[j],
+        p2: obstacle[(j + 1) % obstacle.length],
+      })
+    }
+  }
+
+  return result
+}
+
+function getConnectedUniqueLines(data: UniquePoint[][]): UniqueLine[] {
+  let result: UniqueLine[] = []
+
+  for (let i = 0; i < data.length; i++) {
+    const obstacle = data[i]
+    for (let j = 0; j < obstacle.length; j++) {
+      result.push({
+        p1: obstacle[j],
+        p2: obstacle[(j + 1) % obstacle.length],
+      })
+    }
+  }
+
+  return result
+}
+
+export function createPermanentTrackGraph(
+  trackOuter: Float32Array,
+  trackInner: Float32Array,
+  bridgeSecondToLastPointIndex: i32,
+): void {
+  innerTrackPoints = getInnerUniquePoints(trackInner)
+  const pointsOuter = getConnectedPoints(trackOuter)
+  outerTrackLines = getConnectedLines(pointsOuter)
+
+  /*========GO OVER ALL POINTS ONLY IN iObstacle TO CONNECTED THEM===========*/
+  for (let m = 0; m < innerTrackPoints.length; m++) {
+    let startN = m + 1
+    if (m <= bridgeSecondToLastPointIndex && m % 2 == 0) {
+      startN += 1 // to avoid connecting two bridge sites (on the same node),
+      // it will be never used in any track
+    }
+    for (let n = startN; n < innerTrackPoints.length; n++) {
+      let isIntersect = false
+      const newLine: UniqueLine = {
+        p1: innerTrackPoints[m],
+        p2: innerTrackPoints[n],
+      }
+      for (let p = 0; p < outerTrackLines.length; p++) {
+        if (checkIntersection(newLine, outerTrackLines[p])) {
+          isIntersect = true
+          break
+        }
+      }
+
+      if (!isIntersect) {
+        insertLinesToGraph(permanentObstaclesGraph, newLine.p1, newLine.p2)
+        insertLinesToGraph(permanentObstaclesGraph, newLine.p2, newLine.p1)
+      }
+    }
+  }
+
+  // for (let i = 0; i < innerTrackPoints.length; i++) {
+  //   const iObstacle = innerTrackPoints[i]
+    // for (let j = i + 1; j < pointsInner.length; j++) {
+    //   const jObstacle = pointsInner[j]
+
+    //   for (let m = 0; m < iObstacle.length; m++) {
+    //     for (let n = 0; n < jObstacle.length; n++) {
+
+    //       const mPoint = iObstacle[m]
+    //       const nPoint = jObstacle[n]
+    //       const newLine: UniqueLine = {
+    //         p1: mPoint,
+    //         p2: nPoint,
+    //       }
+
+    //       let isIntersect = false
+    //       for (let p = 0; p < outerTrackLines.length; p++) {
+    //         if (checkIntersection(newLine, outerTrackLines[p])) {
+    //           isIntersect = true
+    //           break
+    //         }
+    //       }
+
+    //       if (!isIntersect) {
+    //         permanentObstaclesGraph.get(mPoint.id).push(nPoint)
+    //         permanentObstaclesGraph.get(nPoint.id).push(mPoint)
+    //       }
+
+    //     }
+    //   }
+    // }
+  // }
 }

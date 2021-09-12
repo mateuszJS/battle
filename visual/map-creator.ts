@@ -1,7 +1,8 @@
 import initGame, { WasmModule } from '~/initGame'
 import { MAP_HEIGHT, MAP_WIDTH } from '../logic/constants'
-import nodePlatformCoords from '~/consts/node-platform-coords'
+import getPlatformCoords from '~/consts/get-platform-coords'
 
+const platformCoords = getPlatformCoords()
 const scaleX = (window.innerWidth * 0.7) / MAP_WIDTH
 const scaleY = (window.innerHeight * 0.9) / MAP_HEIGHT
 const scale = Math.min(scaleX, scaleY)
@@ -31,6 +32,10 @@ export interface ConnectionNode {
   joinIndex: number
 }
 
+export interface SerializedMapInfo {
+  nodes: NodeDetails[]
+  connections: [ConnectionNode, ConnectionNode][]
+}
 
 const mapDetails = {
   x: 100,
@@ -162,7 +167,7 @@ const onPointerDownJoiner = (event) => {
 const getNodeVisual = (disableJoinerEvent = false) => {
   const newNode = new PIXI.Graphics()
   newNode.beginFill(0xff0000)
-  nodePlatformCoords.forEach((coord, index) => {
+  platformCoords.forEach((coord, index) => {
     newNode[index === 0 ? 'moveTo' : 'lineTo'](coord.x * scale, coord.y * scale)
   })
   newNode.closePath()
@@ -290,31 +295,44 @@ const getJoinIndex = (join: PIXI.Graphics) => {
   return 3
 }
 
+const getSerializedMapInfo = (): SerializedMapInfo => {
+  let id = 0;
+  const serializedNodes: NodeDetails[] = nodes.map(node => ({
+    id: id++,
+    x: (node.x - mapDetails.x) / scale,
+    y: (node.y - mapDetails.y) / scale,
+    visited: new Array(8).fill(false),
+  }))
+  portals.forEach(portal => {
+    portal.x = (portal.x - mapDetails.x) / scale
+    portal.y = (portal.y - mapDetails.y) / scale
+  })
+  const serializedConnections: [ConnectionNode, ConnectionNode][] = connections.map(([join1, join2]) => {
+    const join1Node = nodes.indexOf(join1.parent)
+    const join2Node = nodes.indexOf(join2.parent)
+    return [
+      { node: serializedNodes[join1Node], joinIndex: getJoinIndex(join1) },
+      { node: serializedNodes[join2Node], joinIndex: getJoinIndex(join2) },
+    ]
+  })
+
+  return {
+    nodes: serializedNodes,
+    connections: serializedConnections,
+  }
+}
+
 const mapCreator = (wasmModule: WasmModule) => {
   createBackground()
   createToolbar()
   createStartBtn(() => {
-    let id = 0;
-    const serializedNodes: NodeDetails[] = nodes.map(node => ({
-      id: id++,
-      x: (node.x - mapDetails.x) / scale,
-      y: (node.y - mapDetails.y) / scale,
-      visited: new Array(8).fill(false),
-    }))
-    portals.forEach(portal => {
-      portal.x = (portal.x - mapDetails.x) / scale
-      portal.y = (portal.y - mapDetails.y) / scale
-    })
-    const serializedConnections: [ConnectionNode, ConnectionNode][] = connections.map(([join1, join2]) => {
-      const join1Node = nodes.indexOf(join1.parent)
-      const join2Node = nodes.indexOf(join2.parent)
-      return [
-        { node: serializedNodes[join1Node], joinIndex: getJoinIndex(join1) },
-        { node: serializedNodes[join2Node], joinIndex: getJoinIndex(join2) },
-      ]
-    })
-
-    initGame(wasmModule, serializedNodes, serializedConnections, portals, MAP_WIDTH, MAP_HEIGHT)
+    initGame(
+      wasmModule,
+      Array.from({ length: 3 }, () => getSerializedMapInfo()),
+      portals,
+      MAP_WIDTH,
+      MAP_HEIGHT,
+    )
   })
   window.app.stage.addChild(mapCreatorWrapper)
 }

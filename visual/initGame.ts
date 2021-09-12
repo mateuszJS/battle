@@ -9,20 +9,21 @@ import Factory from '~/representation/Factory'
 import StrategicPoint from '~/representation/StrategicPoint'
 import initializeMouseController from './mouseController'
 import { createFactoryButtons } from './buttons/factory'
-import { REPRESENTATION_SOLIDER, REPRESENTATION_RAPTOR, USER_FACTION_ID, MAP_HEIGHT, MAP_WIDTH } from '../logic/constants'
+import { REPRESENTATION_SOLIDER, REPRESENTATION_RAPTOR, USER_FACTION_ID, MAP_HEIGHT, MAP_WIDTH, NORMAL_SQUAD_RADIUS } from '../logic/constants'
 import debugController from '~/debug'
 import type * as ExportedWasmModule from './logic'
 import { ASUtil } from '@assemblyscript/loader'
 import drawBridge from './draw-bridge'
 import drawNode from './draw-node'
-import { startDebug } from './debug/obstacles'
+import { startDebug as debugObstacles } from './debug/obstacles'
+import { startDebug as debugInnerTrack } from './debug/innerTrack'
 import { startDebug as startDebugGrid } from './debug/grid'
-import { startDebug as startDebugObstaclesMap } from './debug/obstaclesMap'
+// import { startDebug as startDebugObstaclesMap } from './debug/obstaclesMap'
 import initConvertArraysUtils from '~/attachUtils/init-convert-arrays-utils'
 import enhanceAnimatedSprites from '~/attachUtils/enhance-animated-sprites'
 import attachMethodToConvertLogicCoordsToVisual from '~/attachUtils/attach-method-covert-logic-coords-to-visual'
-import nodePlatformCoords from '~/consts/node-platform-coords'
-import { ConnectionNode, NodeDetails } from './map-creator'
+import getCoords from '~/consts/get-platform-coords'
+import { ConnectionNode, NodeDetails, SerializedMapInfo } from './map-creator'
 
 export type UniverseRepresentation = {
   [id: number]: Factory | Unit | StrategicPoint
@@ -48,6 +49,7 @@ const collectNextPoints = (
   nodes: NodeDetails[],
   connections: [ConnectionNode, ConnectionNode][],
   lastVisitedPoint: ConnectionNode,
+  platformCoords: Point[]
 ): Point[] => {
   const allNodeConnections = connections
     .filter(connection => (
@@ -60,8 +62,8 @@ const collectNextPoints = (
   for (let i = 0; i < 4; i++) {
 
     collectedPoints.push({
-      x: lastVisitedPoint.node.x + nodePlatformCoords[startJoinIndex * 2].x,
-      y: lastVisitedPoint.node.y + nodePlatformCoords[startJoinIndex * 2].y,
+      x: lastVisitedPoint.node.x + platformCoords[startJoinIndex * 2].x,
+      y: lastVisitedPoint.node.y + platformCoords[startJoinIndex * 2].y,
     })
     lastVisitedPoint.node.visited[startJoinIndex * 2] = true
 
@@ -77,8 +79,8 @@ const collectNextPoints = (
 
     if (connection) {
       collectedPoints.push({
-        x: connection.node.x + nodePlatformCoords[connection.joinIndex * 2 + 1].x,
-        y: connection.node.y + nodePlatformCoords[connection.joinIndex * 2 + 1].y,
+        x: connection.node.x + platformCoords[connection.joinIndex * 2 + 1].x,
+        y: connection.node.y + platformCoords[connection.joinIndex * 2 + 1].y,
       })
       connection.node.visited[connection.joinIndex * 2 + 1] = true
 
@@ -97,12 +99,13 @@ const collectNextPoints = (
             node: connection.node,
             joinIndex: nextJoinIndex,
           },
+          platformCoords,
         ),
       ]
     }
     collectedPoints.push({
-      x: lastVisitedPoint.node.x + nodePlatformCoords[startJoinIndex * 2 + 1].x,
-      y: lastVisitedPoint.node.y + nodePlatformCoords[startJoinIndex * 2 + 1].y,
+      x: lastVisitedPoint.node.x + platformCoords[startJoinIndex * 2 + 1].x,
+      y: lastVisitedPoint.node.y + platformCoords[startJoinIndex * 2 + 1].y,
     })
     lastVisitedPoint.node.visited[startJoinIndex * 2 + 1] = true
     startJoinIndex = (startJoinIndex + 1) % 4
@@ -118,6 +121,7 @@ const collectNextPoints = (
 const getSerializedObstacles = (
   nodes: NodeDetails[],
   connections: [ConnectionNode, ConnectionNode][],
+  platformCoords: Point[],
 ) => {
   let nodeWithMinY = nodes[0]
   nodes.forEach(node => {
@@ -128,20 +132,12 @@ const getSerializedObstacles = (
 
 
   let startingNode: ConnectionNode = { node: nodeWithMinY, joinIndex: 0 }
-  let results: Array<Point | null> = [
-    { x: nodeWithMinY.x + nodePlatformCoords[0].x - 1, y: nodeWithMinY.y + nodePlatformCoords[0].y },
-    { x: nodeWithMinY.x + nodePlatformCoords[0].x - 1, y: 0 },
-    { x: 0, y: 0 },
-    { x: 0, y: MAP_HEIGHT },
-    { x: MAP_WIDTH, y: MAP_HEIGHT },
-    { x: MAP_WIDTH, y: 0 },
-    { x: nodeWithMinY.x + nodePlatformCoords[0].x, y: 0 },
-  ]
+  let results: Array<Point | null> = []
 
   do {
     results = [
       ...results,
-      ...collectNextPoints(nodes, connections, startingNode),
+      ...collectNextPoints(nodes, connections, startingNode, platformCoords),
       null,
     ]
     startingNode = null
@@ -158,7 +154,9 @@ const getSerializedObstacles = (
 
 
   return new Float32Array(
-    results.map(point => {
+    results.slice(0, -1)
+     // remove last -1
+    .map(point => {
       if (point === null) {
         return [-1]
       }
@@ -167,10 +165,31 @@ const getSerializedObstacles = (
   )
 }
 
+const getBridgesInnerTrack = (connections, coords): Point[] => (
+  connections.map(([nodeA, nodeB]) => [
+    {
+      x: coords[nodeA.joinIndex * 2].x + nodeA.node.x,
+      y: coords[nodeA.joinIndex * 2].y + nodeA.node.y,
+    },
+    {
+      x: coords[nodeA.joinIndex * 2 + 1].x + nodeA.node.x,
+      y: coords[nodeA.joinIndex * 2 + 1].y + nodeA.node.y,
+    },
+    {
+      x: coords[nodeB.joinIndex * 2].x + nodeB.node.x,
+      y: coords[nodeB.joinIndex * 2].y + nodeB.node.y,
+    },
+    {
+      x: coords[nodeB.joinIndex * 2 + 1].x + nodeB.node.x,
+      y: coords[nodeB.joinIndex * 2 + 1].y + nodeB.node.y,
+    },
+  ]).flat()
+)
+
+
 const initGame = (
   wasmModule: WasmModule,
-  nodes: NodeDetails[],
-  connections: [ConnectionNode, ConnectionNode][],
+  serializedMapInfo: SerializedMapInfo[],
   portals: PIXI.Graphics[],
   mapWidth: number,
   mapHeight: number,
@@ -202,11 +221,18 @@ const initGame = (
     ).flat()
   )
 
-  const serializedObstacles = getSerializedObstacles(nodes, connections)
-
+  const serializedObstacles = getSerializedObstacles(serializedMapInfo[0].nodes, serializedMapInfo[0].connections, getCoords())
+  const serializedTrackOuter = getSerializedObstacles(serializedMapInfo[1].nodes, serializedMapInfo[1].connections, getCoords(NORMAL_SQUAD_RADIUS - 5))
+  const bridgesInnerTrack = getBridgesInnerTrack(serializedMapInfo[2].connections, getCoords(NORMAL_SQUAD_RADIUS, 0.1))
+  const serializedTrackInner = new Float32Array(
+    bridgesInnerTrack.map(point => [point.x, point.y]).flat()
+  )
   initUniverse(
     window.getFloat32ArrayPointer(serializedFactions),
     window.getFloat32ArrayPointer(serializedObstacles),
+    window.getFloat32ArrayPointer(serializedTrackOuter),
+    window.getFloat32ArrayPointer(serializedTrackInner),
+    bridgesInnerTrack.length - 1,
     mapWidth,
     mapHeight,
     // serializedInfoAboutWorld.obstacles,
@@ -254,8 +280,9 @@ const initGame = (
   // let timeToCreateEnemy = 0
   // let nextIsRaptor = false
 
-  startDebugObstaclesMap(wasmModule)
-  startDebug(wasmModule)
+  // startDebugObstaclesMap(wasmModule)
+  debugObstacles(wasmModule)
+  debugInnerTrack(wasmModule)
   
 
   window.app.ticker.add((delta: number) => {
@@ -277,8 +304,8 @@ const initGame = (
     //   { x: mouseX + Math.sin(angle) * -100 * 2, y: mouseY - Math.cos(angle) * -35 * 2 },
     // ])
 
-    const node = drawNode(600, 600, [false, true, false, false], 600)
-    window.world.addChild(node.graphic)
+    // const node = drawNode(600, 600, [false, true, false, false], 600)
+    // window.world.addChild(node.graphic)
 
     // gridDebug(universe)
     // debugController.update(universe)

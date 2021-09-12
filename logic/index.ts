@@ -2,14 +2,15 @@
 // import { foo, bar } from "./constants"
 
 import { Faction } from "./faction";
-import { obstacles, obstaclesMap, storeObstacles, trackLines } from "./obstacles-manager";
-import { Line, Point } from "./geom-types";
+import { storeObstacles } from "./obstacles-manager";
+import { Line, UniquePoint } from "./geom-types";
 import { MAP_SQUAD_REPRESENTATION_TO_TYPE } from "./squad-details";
 import { convertLogicCoordsToVisual, convertVisualCoordsToLogic } from "./convert-coords-between-logic-and-visual";
 import { initializeGrid, fillGrid, debugGridNumbers, traceLine, pickCellsDebug, getSquads } from "./grid-manager";
 import { CHECK_SQUADS_CORRECTNESS_PERIOD, OBSTACLES_CELL_SIZE, UINT_DATA_SETS_DIVIDER, UPDATE_SQUAD_CENTER_PERIOD, USER_FACTION_ID } from "./constants";
 import { isPointInPolygon } from "./geom-utils";
 import { Squad } from "./squad";
+import { createPermanentTrackGraph, innerTrackPoints, outerTrackLines, permanentObstaclesGraph } from "./track-manager";
 
 var factions: Faction[] = []
 export var mapWidthGlob: f32 = 0
@@ -22,6 +23,9 @@ export const Uint32Array_ID = idof<Uint32Array>()
 export function initUniverse(
   factionData: Float32Array,
   obstacles: Float32Array,
+  trackOuter: Float32Array,
+  trackInner: Float32Array,
+  bridgeSecondToLastPointIndex: i32,
   mapWidth: f32,
   mapHeight: f32,
 ): void {
@@ -36,7 +40,7 @@ export function initUniverse(
   }
 
   storeObstacles(obstacles)
-
+  createPermanentTrackGraph(trackOuter, trackInner, bridgeSecondToLastPointIndex)
   // testTracer()
 
   mapWidthGlob = mapWidth
@@ -45,36 +49,57 @@ export function initUniverse(
   initializeGrid(mapWidth, mapHeight)
 }
 
+function getPointCoordsById(id: i32): UniquePoint {
+  for (let i = 0; i < innerTrackPoints.length; i++) {
+    if (innerTrackPoints[i].id == id) {
+      return innerTrackPoints[i]
+    }
+  }
+
+  return {
+    id: 0,
+    x: 0,
+    y: 0,
+  }
+}
+
 export function debugObstacles(): Float32Array {
-  let data = trackLines.map<f32[]>(line => {
-    trace("line", 4, line.p1.x * OBSTACLES_CELL_SIZE, line.p1.y * OBSTACLES_CELL_SIZE, line.p2.x * OBSTACLES_CELL_SIZE, line.p2.y * OBSTACLES_CELL_SIZE)
-    return [line.p1.x * OBSTACLES_CELL_SIZE, line.p1.y * OBSTACLES_CELL_SIZE, line.p2.x * OBSTACLES_CELL_SIZE, line.p2.y * OBSTACLES_CELL_SIZE, -1.0]
-  }).flat()
-  // let data = obstacles.map<f32[]>(obstacle => (
-  //   obstacle.map<f32[]>((point, index, array) => (
-  //     index !== array.length - 1 ? [point.x, point.y] : [point.x, point.y, -1.0]
-  //   )).flat()
-  // )).flat()
-  let flattenData = data
+  let data = outerTrackLines.map<f32[]>(line => [line.p1.x, line.p1.y, line.p2.x, line.p2.y, -1.0]).flat()
+  let result = new Float32Array(data.length)
 
-  let result = new Float32Array(flattenData.length)
-
-  for (let i = 0; i < flattenData.length; i++) {
-    let item = flattenData[i]
+  for (let i = 0; i < data.length; i++) {
+    let item = data[i]
     result[i] = item
   }
   return result
-  //   .iter()
-  //   .flat_map(|obstacle_points_list| {
-  //     let mut result = obstacle_points_list
-  //       .iter()
-  //       .flat_map(|point| vec![point.x, point.y])
-  //       .collect::<Vec<f32>>();
-  //     result.push(-1.0);
-  //     result
-  //   })
-  //   .collect::<Vec<f32>>();
-  // js_sys::Float32Array::from(&result[..])
+}
+
+export function debugInnerTrack(): Float32Array {
+  let data: f32[] = []
+
+  const keys = permanentObstaclesGraph.keys()
+  for (let i = 0; i < keys.length; i++) {
+    const point = getPointCoordsById(keys[i])
+    const connectedPoints = permanentObstaclesGraph.get(keys[i])
+
+    for (let j = 0; j < connectedPoints.length; j++) {
+      data = data.concat([
+        point.x,
+        point.y,
+        connectedPoints[j].x,
+        connectedPoints[j].y,
+        -1,
+      ])
+    }
+  }
+
+  let result = new Float32Array(data.length)
+
+  for (let i = 0; i < data.length; i++) {
+    let item = data[i]
+    result[i] = item
+  }
+  return result
 }
 
 export function getFactoriesInitData(): Float32Array {
@@ -222,13 +247,13 @@ export function getAbilitiesCoolDowns(squadsIds: Uint32Array, abilityType: u8): 
   return new Float32Array(0)
 }
 
-export function debugObstaclesMap(): Uint32Array {
-  let result = new Uint32Array(obstaclesMap.length)
-  for (let i = 0 ; i < obstaclesMap.length; i++) {
-    result[i] = obstaclesMap[i] as u32
-  }
-  return result
-}
+// export function debugObstaclesMap(): Uint32Array {
+//   let result = new Uint32Array(obstaclesMap.length)
+//   for (let i = 0 ; i < obstaclesMap.length; i++) {
+//     result[i] = obstaclesMap[i] as u32
+//   }
+//   return result
+// }
 
 // function toTypedArray<T, TyArr>(arr: Array<T>): TyArr {
 //   let len = arr.length;
