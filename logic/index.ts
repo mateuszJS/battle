@@ -10,7 +10,7 @@ import { initializeGrid, fillGrid, debugGridNumbers, traceLine, pickCellsDebug, 
 import { CHECK_SQUADS_CORRECTNESS_PERIOD, OBSTACLES_CELL_SIZE, UINT_DATA_SETS_DIVIDER, UPDATE_SQUAD_CENTER_PERIOD, USER_FACTION_ID } from "./constants";
 import { isPointInPolygon } from "./geom-utils";
 import { Squad } from "./squad";
-import { createPermanentTrackGraph, innerTrackPoints, outerTrackLines, permanentObstaclesGraph } from "./track-manager";
+import { createPermanentTrackGraph, trackPoints, blockingTrackLines, permanentObstaclesGraph } from "./track-manager";
 
 var factions: Faction[] = []
 export var mapWidthGlob: f32 = 0
@@ -23,8 +23,8 @@ export const Uint32Array_ID = idof<Uint32Array>()
 export function initUniverse(
   factionData: Float32Array,
   obstacles: Float32Array,
-  trackOuter: Float32Array,
-  trackInner: Float32Array,
+  blockingTrackPoints: Float32Array,
+  rawTrackPoints: Float32Array,
   bridgeSecondToLastPointIndex: i32,
   mapWidth: f32,
   mapHeight: f32,
@@ -40,7 +40,7 @@ export function initUniverse(
   }
 
   storeObstacles(obstacles)
-  createPermanentTrackGraph(trackOuter, trackInner, bridgeSecondToLastPointIndex)
+  createPermanentTrackGraph(blockingTrackPoints, rawTrackPoints, bridgeSecondToLastPointIndex)
   // testTracer()
 
   mapWidthGlob = mapWidth
@@ -50,9 +50,9 @@ export function initUniverse(
 }
 
 function getPointCoordsById(id: i32): UniquePoint {
-  for (let i = 0; i < innerTrackPoints.length; i++) {
-    if (innerTrackPoints[i].id == id) {
-      return innerTrackPoints[i]
+  for (let i = 0; i < trackPoints.length; i++) {
+    if (trackPoints[i].id == id) {
+      return trackPoints[i]
     }
   }
 
@@ -63,8 +63,19 @@ function getPointCoordsById(id: i32): UniquePoint {
   }
 }
 
-export function debugObstacles(): Float32Array {
-  let data = outerTrackLines.map<f32[]>(line => [line.p1.x, line.p1.y, line.p2.x, line.p2.y, -1.0]).flat()
+// export function debugObstacles(): Float32Array {
+//   let data = blockingTrackLines.map<f32[]>(line => [line.p1.x, line.p1.y, line.p2.x, line.p2.y, -1.0]).flat()
+//   let result = new Float32Array(data.length)
+
+//   for (let i = 0; i < data.length; i++) {
+//     let item = data[i]
+//     result[i] = item
+//   }
+//   return result
+// }
+
+export function debugOuterTrack(): Float32Array {
+  let data = blockingTrackLines.map<f32[]>(line => [line.p1.x, line.p1.y, line.p2.x, line.p2.y, -1.0]).flat()
   let result = new Float32Array(data.length)
 
   for (let i = 0; i < data.length; i++) {

@@ -1,4 +1,3 @@
-
 const getCoords = (offsetDistance: number = 0, offsetAngle: number = 0) => {
   const bridgeAngle = 53.6 * Math.PI / 180 - offsetAngle
   const diagonallyAngle = 37 * Math.PI / 180 + offsetAngle

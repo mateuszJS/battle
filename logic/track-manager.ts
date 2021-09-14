@@ -4,8 +4,8 @@ import { checkIntersection } from "./geom-utils"
 import { getId } from "./get-id"
 import { UniqueLine, UniquePoint } from "./geom-types"
 
-export var innerTrackPoints: UniquePoint[] = []
-export var outerTrackLines: Line[] = [] // exported just because of debugging
+export var trackPoints: UniquePoint[] = []
+export var blockingTrackLines: Line[] = [] // exported just because of debugging
 export var permanentObstaclesGraph: Map<u32, UniquePoint[]> = new Map()
 
 export function getTrack(startPoint: Point, endPoint: Point): UniquePoint[] {
@@ -25,8 +25,8 @@ export function getTrack(startPoint: Point, endPoint: Point): UniquePoint[] {
     p2: obstacleEndPoint,
   }
   let is_possible_direct_connection = true
-  for (let i = 0; i < outerTrackLines.length; i++) {
-    if (checkIntersection(direct_connection_line, outerTrackLines[i])) {
+  for (let i = 0; i < blockingTrackLines.length; i++) {
+    if (checkIntersection(direct_connection_line, blockingTrackLines[i])) {
       is_possible_direct_connection = false
       break
     }
@@ -45,16 +45,16 @@ export function getTrack(startPoint: Point, endPoint: Point): UniquePoint[] {
 }
 
 function addNewPointToGraph(graph: Map<u32, UniquePoint[]>, point: UniquePoint, isStart: bool): void {
-  for (let i = 0; i < innerTrackPoints.length; i++) {
-    const innerTrackPoint = innerTrackPoints[i]
+  for (let i = 0; i < trackPoints.length; i++) {
+    const innerTrackPoint = trackPoints[i]
     const newLine: UniqueLine = {
       p1: point,
       p2: innerTrackPoint,
     }
 
     let isIntersect = false
-    for (let j = 0; j < outerTrackLines.length; j++) {
-      const obstacleLine = outerTrackLines[j]
+    for (let j = 0; j < blockingTrackLines.length; j++) {
+      const obstacleLine = blockingTrackLines[j]
       if (checkIntersection(newLine, obstacleLine)) {
         isIntersect = true
         break
@@ -252,29 +252,29 @@ function getConnectedUniqueLines(data: UniquePoint[][]): UniqueLine[] {
 }
 
 export function createPermanentTrackGraph(
-  trackOuter: Float32Array,
-  trackInner: Float32Array,
+  blockingTrackPoints: Float32Array,
+  rawTrackPoints: Float32Array,
   bridgeSecondToLastPointIndex: i32,
 ): void {
-  innerTrackPoints = getInnerUniquePoints(trackInner)
-  const pointsOuter = getConnectedPoints(trackOuter)
-  outerTrackLines = getConnectedLines(pointsOuter)
+  trackPoints = getInnerUniquePoints(rawTrackPoints)
+  const pointsOuter = getConnectedPoints(blockingTrackPoints)
+  blockingTrackLines = getConnectedLines(pointsOuter)
 
   /*========GO OVER ALL POINTS ONLY IN iObstacle TO CONNECTED THEM===========*/
-  for (let m = 0; m < innerTrackPoints.length; m++) {
+  for (let m = 0; m < trackPoints.length; m++) {
     let startN = m + 1
     if (m <= bridgeSecondToLastPointIndex && m % 2 == 0) {
       startN += 1 // to avoid connecting two bridge sites (on the same node),
       // it will be never used in any track
     }
-    for (let n = startN; n < innerTrackPoints.length; n++) {
+    for (let n = startN; n < trackPoints.length; n++) {
       let isIntersect = false
       const newLine: UniqueLine = {
-        p1: innerTrackPoints[m],
-        p2: innerTrackPoints[n],
+        p1: trackPoints[m],
+        p2: trackPoints[n],
       }
-      for (let p = 0; p < outerTrackLines.length; p++) {
-        if (checkIntersection(newLine, outerTrackLines[p])) {
+      for (let p = 0; p < blockingTrackLines.length; p++) {
+        if (checkIntersection(newLine, blockingTrackLines[p])) {
           isIntersect = true
           break
         }
@@ -287,8 +287,8 @@ export function createPermanentTrackGraph(
     }
   }
 
-  // for (let i = 0; i < innerTrackPoints.length; i++) {
-  //   const iObstacle = innerTrackPoints[i]
+  // for (let i = 0; i < trackPoints.length; i++) {
+  //   const iObstacle = trackPoints[i]
     // for (let j = i + 1; j < pointsInner.length; j++) {
     //   const jObstacle = pointsInner[j]
 
@@ -303,8 +303,8 @@ export function createPermanentTrackGraph(
     //       }
 
     //       let isIntersect = false
-    //       for (let p = 0; p < outerTrackLines.length; p++) {
-    //         if (checkIntersection(newLine, outerTrackLines[p])) {
+    //       for (let p = 0; p < blockingTrackLines.length; p++) {
+    //         if (checkIntersection(newLine, blockingTrackLines[p])) {
     //           isIntersect = true
     //           break
     //         }

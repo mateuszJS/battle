@@ -32,9 +32,14 @@ export interface ConnectionNode {
   joinIndex: number
 }
 
+export interface AdvancePoint extends Point {
+  angle: number
+}
+
 export interface SerializedMapInfo {
   nodes: NodeDetails[]
   connections: [ConnectionNode, ConnectionNode][]
+  portals: AdvancePoint[]
 }
 
 const mapDetails = {
@@ -303,10 +308,7 @@ const getSerializedMapInfo = (): SerializedMapInfo => {
     y: (node.y - mapDetails.y) / scale,
     visited: new Array(8).fill(false),
   }))
-  portals.forEach(portal => {
-    portal.x = (portal.x - mapDetails.x) / scale
-    portal.y = (portal.y - mapDetails.y) / scale
-  })
+
   const serializedConnections: [ConnectionNode, ConnectionNode][] = connections.map(([join1, join2]) => {
     const join1Node = nodes.indexOf(join1.parent)
     const join2Node = nodes.indexOf(join2.parent)
@@ -316,9 +318,16 @@ const getSerializedMapInfo = (): SerializedMapInfo => {
     ]
   })
 
+  const serializedPortal = portals.map(portal => ({
+    angle: 0,
+    x: (portal.x - mapDetails.x) / scale,
+    y: (portal.y - mapDetails.y) / scale,
+  }))
+
   return {
     nodes: serializedNodes,
     connections: serializedConnections,
+    portals: serializedPortal,
   }
 }
 
@@ -328,7 +337,7 @@ const mapCreator = (wasmModule: WasmModule) => {
   createStartBtn(() => {
     initGame(
       wasmModule,
-      Array.from({ length: 3 }, () => getSerializedMapInfo()),
+      getSerializedMapInfo(),
       portals,
       MAP_WIDTH,
       MAP_HEIGHT,
