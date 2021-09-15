@@ -118,8 +118,10 @@ export class Squad {
   }
 
   setDestination(destination: Point): void {
+    trace("before setDestination", 2, destination.x, destination.y)
+    // 1346.0924072265625, 1326.694580078125
     this.track = getTrack(this.centerPoint, destination);
-
+    trace("this.track.length", 1, this.track.length)
     this.members.forEach(unit => {
       unit.changeStateToRun();
     });

@@ -43,6 +43,18 @@ export function checkIntersection<T extends Line, K extends Line>(l1: T, l2: K):
   }
 }
 
+export function isPointInPolygonLine(line: Line, lines: Line[]): bool {
+  let number_of_intersections: usize = 0
+
+  for (let i = 0; i < lines.length; i++) {
+    if (checkIntersection(line, unchecked(lines[i]))) {
+      number_of_intersections ++
+    }
+  }
+  trace("number_of_intersections", 1, number_of_intersections)
+  return number_of_intersections % 2 == 1
+}
+
 export function isPointInPolygon(p2: Point, lines: Line[]): bool {
   const lineWithPoint: Line = {
     p1: { x: p2.x, y: -1.0 },
