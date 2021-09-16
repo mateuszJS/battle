@@ -2,7 +2,7 @@
 // import { foo, bar } from "./constants"
 
 import { Faction } from "./faction";
-import { storeObstacles } from "./obstacles-manager";
+import { outerBoundaries, storeBoundaries } from "./obstacles-manager";
 import { Line, UniquePoint } from "./geom-types";
 import { MAP_SQUAD_REPRESENTATION_TO_TYPE } from "./squad-details";
 import { convertLogicCoordsToVisual, convertVisualCoordsToLogic } from "./convert-coords-between-logic-and-visual";
@@ -39,7 +39,7 @@ export function initUniverse(
     ))
   }
 
-  storeObstacles(obstacles)
+  storeBoundaries(obstacles, blockingTrackPoints)
   createPermanentTrackGraph(blockingTrackPoints, rawTrackPoints, bridgeSecondToLastPointIndex)
   // testTracer()
 
@@ -63,16 +63,20 @@ function getPointCoordsById(id: i32): UniquePoint {
   }
 }
 
-// export function debugObstacles(): Float32Array {
-//   let data = blockingTrackLines.map<f32[]>(line => [line.p1.x, line.p1.y, line.p2.x, line.p2.y, -1.0]).flat()
-//   let result = new Float32Array(data.length)
+export function debugObstacles(): Float32Array {
+  let data = outerBoundaries.map<f32[]>(linesList => {
+    if (!linesList) return [-2]
+    if (linesList.length === 0) return [-3]
+    return linesList.map<f32[]>(line => [line.p1.x, line.p1.y, line.p2.x, line.p2.y]).flat().concat([-1])
+  }).flat()
+  let result = new Float32Array(data.length)
 
-//   for (let i = 0; i < data.length; i++) {
-//     let item = data[i]
-//     result[i] = item
-//   }
-//   return result
-// }
+  for (let i = 0; i < data.length; i++) {
+    let item = data[i]
+    result[i] = item
+  }
+  return result
+}
 
 export function debugOuterTrack(): Float32Array {
   let data = blockingTrackLines.map<f32[]>(line => [line.p1.x, line.p1.y, line.p2.x, line.p2.y, -1.0]).flat()

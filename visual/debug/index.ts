@@ -2,7 +2,6 @@ import * as anglesDebug from './angles'
 import * as tracksDebug from './tracks'
 import * as obstaclesDebug from './obstacles'
 import * as gridDebug from './grid'
-import * as obstaclesMapDebug from './obstaclesMap'
 import * as enemySecondaryAimDebug from './enemySecondaryAim'
 import * as getPointsInRectangleDebug from './getPointsInRectangle'
 import * as gridLineDebug from './gridLine'
@@ -24,7 +23,6 @@ const debugController = {
   tracksDebug,
   obstaclesDebug,
   gridDebug,
-  obstaclesMapDebug,
   enemySecondaryAimDebug,
   getPointsInRectangleDebug,
   gridLineDebug,

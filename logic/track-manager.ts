@@ -54,8 +54,8 @@ function addNewPointToGraph(graph: Map<u32, UniquePoint[]>, point: UniquePoint, 
 
     let isIntersect = false
     for (let j = 0; j < blockingTrackLines.length; j++) {
-      const obstacleLine = blockingTrackLines[j]
-      if (checkIntersection(newLine, obstacleLine)) {
+      const blockingLine = blockingTrackLines[j]
+      if (checkIntersection(newLine, blockingLine)) {
         isIntersect = true
         break
       }

@@ -51,7 +51,7 @@ export function isPointInPolygonLine(line: Line, lines: Line[]): bool {
       number_of_intersections ++
     }
   }
-  trace("number_of_intersections", 1, number_of_intersections)
+
   return number_of_intersections % 2 == 1
 }
 

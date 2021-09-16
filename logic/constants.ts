@@ -41,6 +41,3 @@ export const MATH_PI_2: f32 = 2 * MATH_PI
 
 
 export const OBSTACLES_CELL_SIZE: f32 = 300
-export const UNIT_INSIDE_OBSTACLE: u8 = 0;
-export const SQUAD_INSIDE_OBSTACLE: u8 = 1;
-export const IS_NOT_IN_OBSTACLE: u8 = 2;

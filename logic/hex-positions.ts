@@ -1,3 +1,4 @@
+import { MAP_HEIGHT, MAP_WIDTH } from "./constants"
 import { Point } from "./geom-types"
 import { getIsPointAvailable } from "./obstacles-manager"
 
@@ -155,20 +156,20 @@ export function getSquadPositions(
 ): Point[] {
   let points: Point[] = []
 
-  // centerX = 1346.0924072265625
-  // centerY = 1326.694580078125
-
   for (let i = 0; i < HEX_POSITIONS.length; i++) {
     const positionsList = HEX_POSITIONS[i]
     for (let j = 0; j < positionsList.length; j++) {
       const position = positionsList[j]
-      trace("positions", 2, position.x, position.y)
-      if (getIsPointAvailable(position.x + centerX, position.y + centerY, true)) {
-        trace("available position")
-        points.push({
-          x: position.x + centerX,
-          y: position.y + centerY,
-        })
+      const x = position.x + centerX
+      const y = position.y + centerY
+      if (
+        x > 0
+        && x < MAP_WIDTH
+        && y > 0
+        && y < MAP_HEIGHT
+        && getIsPointAvailable(position.x + centerX, position.y + centerY, true)
+      ) {
+        points.push({ x, y })
       }
 
       if (points.length == number_of_needed_position) {

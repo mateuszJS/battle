@@ -15,15 +15,12 @@ export const startDebug = (wasmModule: WasmModule) => {
   
     graph.clear()
     graph.beginFill(0x000000, 0)
-    graph.lineStyle(3, 0xffffff, 0.3)
+    graph.lineStyle(3, 0xffff00, 0.3)
     graph.moveTo(...window.convertLogicCoordToVisual(result[0], result[1]))
   
     while (i < result.length) {
       if (result[i] === -1) {
         graph.closePath()
-  
-        graph.beginFill(0x000000, 0)
-        graph.lineStyle(3, 0x00ff00, 0.45)
         graph.moveTo(...window.convertLogicCoordToVisual(result[i + 1], result[i + 2]))
         i += 3
       } else {
@@ -31,11 +28,6 @@ export const startDebug = (wasmModule: WasmModule) => {
         i += 2
       }
     }
-    graph.lineStyle(3, 0xff0000, 0.5)
-    graph.moveTo(...window.convertLogicCoordToVisual(0, 0))
-    graph.lineTo(...window.convertLogicCoordToVisual(MAP_WIDTH, 0))
-    graph.lineTo(...window.convertLogicCoordToVisual(MAP_WIDTH, MAP_HEIGHT))
-    graph.lineTo(...window.convertLogicCoordToVisual(0, MAP_HEIGHT))
     graph.closePath()
   })
 }

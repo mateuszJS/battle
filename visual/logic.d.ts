@@ -16,6 +16,7 @@ export var mapHeightGlob: f32;
 export var Float32Array_ID: u32;
 export var Uint32Array_ID: u32;
 export function initUniverse(factionData: usize, obstacles: usize, blockingTrackPoints: usize, rawTrackPoints: usize, bridgeSecondToLastPointIndex: i32, mapWidth: f32, mapHeight: f32): void;
+export function debugObstacles(): usize;
 export function debugOuterTrack(): usize;
 export function debugInnerTrack(): usize;
 export function getFactoriesInitData(): usize;
