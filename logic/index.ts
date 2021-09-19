@@ -29,7 +29,10 @@ export function initUniverse(
   mapWidth: f32,
   mapHeight: f32,
 ): void {
+  trace("wasm init world", 1, factionData.length as f32)
   for (let i = 0; i < factionData.length; i += 4) {
+    trace("i", 1, i)
+    trace("i", 1, factionData[i])
     factions.push(new Faction(
       factionData[i] as u32,
       i == 0,

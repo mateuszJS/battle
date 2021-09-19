@@ -19,7 +19,7 @@
     "@babel/preset-env": "^7.7.7",
     "@typescript-eslint/eslint-plugin": "^4.22.1",
     "@typescript-eslint/parser": "^4.22.1",
-    "assemblyscript": "^0.19.5",
+    "assemblyscript": "^0.19.16",
     "babel-loader": "^8.0.6",
     "babel-plugin-module-resolver": "^4.0.0",
     "copy-webpack-plugin": "^6.1.1",
@@ -43,7 +43,7 @@
     "webpack-merge": "^4.1.0"
   },
   "dependencies": {
-    "@assemblyscript/loader": "^0.19.5",
+    "@assemblyscript/loader": "^0.19.16",
     "@babel/runtime": "^7.14.6",
     "@pixi/filter-drop-shadow": "^3.1.1",
     "debounce": "^1.2.0",

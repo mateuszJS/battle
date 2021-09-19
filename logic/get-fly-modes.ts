@@ -16,7 +16,21 @@ export function getFlyModes(angle: f32, startX: f32, startY: f32, strength: f32)
 
   // to calculate all_speeds_sum we are using geometric sequence
   // all_speeds_sum = strength * (1 - 0.95.powi(time)) / (1 - 0.95)
-  let allSpeedsSum = strength * (1.0 - Math.pow(FLY_DECELERATION, time)) / (1.0 - FLY_DECELERATION)
+
+
+  let poweredFlyDeceleration = FLY_DECELERATION
+  time--
+  while (time > 0) {
+    poweredFlyDeceleration *= FLY_DECELERATION
+    time--
+  }
+  let allSpeedsSum = strength * (1.0 - poweredFlyDeceleration) / (1.0 - FLY_DECELERATION)
+  // below is the original line, but Math.pow is causing an issue
+  // Math.pow in -O3 add lookup table in static segment.
+  // This means heap base offset will change.
+  // If you works with raw memory I highly recommend use __heap_base builtin constant as starting point
+  // But it shouldn't be our case, we are not reading/writing into raw memory.
+  // let allSpeedsSum = strength * (1.0 - Math.pow(FLY_DECELERATION, time)) / (1.0 - FLY_DECELERATION)
 
   // average_speed = all_speeds_sum / time
   // distance = average_speed * time

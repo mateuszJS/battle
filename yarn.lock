@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@assemblyscript/loader@^0.19.5":
-  version "0.19.5"
-  resolved "https://registry.yarnpkg.com/@assemblyscript/loader/-/loader-0.19.5.tgz#53daf87d828ae06c72776a34625e1c5b556a9a0d"
-  integrity sha512-sGgi7C8Uvi8PlJ5XaOspAxeTGPM2QpmVoNpsBDgjhTV7+FyslN3BSgRWOarAOHFhhZ5oLO4jM0EuUobHw+V8KQ==
+"@assemblyscript/loader@^0.19.16":
+  version "0.19.16"
+  resolved "https://registry.yarnpkg.com/@assemblyscript/loader/-/loader-0.19.16.tgz#481063138724deef314dc0930714eebf39117683"
+  integrity sha512-Skp0eLY3oP2YfAxaHq4IpsUZQOpllkBB0dNDrhck42mGQTimAJ6KegXMuFVa9PIP6gw3bDlCs2iIegfGnXiuFg==
 
 "@babel/code-frame@7.12.11":
   version "7.12.11"
@@ -1848,12 +1848,12 @@ asn1.js@^5.2.0:
     minimalistic-assert "^1.0.0"
     safer-buffer "^2.1.0"
 
-assemblyscript@^0.19.5:
-  version "0.19.5"
-  resolved "https://registry.yarnpkg.com/assemblyscript/-/assemblyscript-0.19.5.tgz#12f5976c41f6b866dd0d1aad5275dcd358a5d82f"
-  integrity sha512-mAx7gcwjJI5OSu2RcOlugHFNxKt/rtWn3vyp46cN1+uXb7YSS//rgO044+KKwfxnGvoWj0ClsU0dNt5eWoXF7A==
+assemblyscript@^0.19.16:
+  version "0.19.16"
+  resolved "https://registry.yarnpkg.com/assemblyscript/-/assemblyscript-0.19.16.tgz#fc06c9892755775e8e31a59249fbc361fd49e1d1"
+  integrity sha512-AMNdwcat+EEsxjkVQ5vOE/lDbXBvy1swQKAuMG2Ken+DZufZH7wKHIAVKR5liteW/jLL3T971l1MN+onP/bixA==
   dependencies:
-    binaryen "101.0.0-nightly.20210604"
+    binaryen "101.0.0-nightly.20210904"
     long "^4.0.0"
 
 assert@^1.1.1:
@@ -2029,10 +2029,10 @@ binary-extensions@^2.0.0:
   resolved "https://registry.yarnpkg.com/binary-extensions/-/binary-extensions-2.1.0.tgz#30fa40c9e7fe07dbc895678cd287024dea241dd9"
   integrity sha512-1Yj8h9Q+QDF5FzhMs/c9+6UntbD5MkRfRwac8DoEm9ZfUBZ7tZ55YcGVAzEe4bXsdQHEk+s9S5wsOKVdZrw0tQ==
 
-binaryen@101.0.0-nightly.20210604:
-  version "101.0.0-nightly.20210604"
-  resolved "https://registry.yarnpkg.com/binaryen/-/binaryen-101.0.0-nightly.20210604.tgz#3498a0a0c1108f3386b15ca79f1608425057db9e"
-  integrity sha512-aTgX1JDN8m3tTFK8g9hazJcEOdQl7mK4yVfElkKAh7q+TRUCaea4a2SMLr1z2xZL7s9N4lkrvrBblxRuEPvxWQ==
+binaryen@101.0.0-nightly.20210904:
+  version "101.0.0-nightly.20210904"
+  resolved "https://registry.yarnpkg.com/binaryen/-/binaryen-101.0.0-nightly.20210904.tgz#58a7990d6d64b16567f376a1fe47d8aea6698b14"
+  integrity sha512-2AvJhErttuoMvgNcYPPpPy7C12PSvDdtZWtEeX/Otm/Vtf4ePvBpT3UIA00hGAh8HNaGr+dzFNstxTUvjNwZTg==
 
 bindings@^1.5.0:
   version "1.5.0"
