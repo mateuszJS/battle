@@ -39,14 +39,13 @@ const render = (
       }
       case REPRESENTATION_ENEMY_FACTORY: {
         const indexOfId = index + 1
-        const newIndexValue = indexOfId + 3
         const factoryId = universeData[indexOfId]
         const factory = universeRepresentation[factoryId]
         representationUpdaters.updateFactory(
           factory as Factory,
-          universeData.slice(indexOfId + 1, newIndexValue),
+          universeData[indexOfId + 1], // progress
         )
-        index = newIndexValue
+        index = indexOfId + 2
         break
       }
       case REPRESENTATION_SOLIDER: {
@@ -81,7 +80,8 @@ const render = (
         const factory = universeRepresentation[factoryId]
         representationUpdaters.updateFactory(
           factory as Factory,
-          universeData.slice(indexOfId + 1, newIndexValue),
+          universeData[indexOfId + 1],
+          universeData.slice(indexOfId + 2, newIndexValue),
         )
         index = newIndexValue
         break

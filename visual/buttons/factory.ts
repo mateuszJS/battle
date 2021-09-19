@@ -40,7 +40,6 @@ const addNewIcon = (
   representationId: RepresentationId,
   onClick?: VoidFunction,
 ) => {
-  console.log(representationId, MAP_ID_TO_RESOURCE, MAP_ID_TO_RESOURCE[representationId])
   // assets/soliderRegularAvatar.png
   const icon = new PIXI.Sprite(PIXI.Texture.from(MAP_ID_TO_RESOURCE[representationId]))
   icon.x = x

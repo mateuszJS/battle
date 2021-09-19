@@ -49,17 +49,17 @@ class SelectionController {
       y,
     )
 
-    window.useUint32ArrayData(selectedEnemyUnitsIdsPoint, selectedEnemyUnitsIds => {
+    window.useFloat32ArrayData(selectedEnemyUnitsIdsPoint, selectedEnemyUnitsIds => {
       if (selectedEnemyUnitsIds.length === 0) return
-
-      selectedEnemyUnitsIds.forEach(id => {
-        const unit = this.universeRepresentation[id] as Unit | Factory | StrategicPoint
+      const selectedEnemyUnits = Array.from(selectedEnemyUnitsIds).map(id => (
+        this.universeRepresentation[id] as Unit | Factory | StrategicPoint
+      ))
+      selectedEnemyUnits.forEach(unit => {
         unit.select()
       })
 
       setTimeout(() => {
-        selectedEnemyUnitsIds.forEach(id => {
-          const unit = this.universeRepresentation[id] as Unit | Factory | StrategicPoint
+        selectedEnemyUnits.forEach(unit => {
           if (unit) {
             unit.deselect()
           }

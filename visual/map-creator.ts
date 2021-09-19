@@ -251,7 +251,7 @@ const createToolbar = () => {
   newPortalIcon.interactive = true
   newPortalIcon.scale.set(mapDetails.x / newPortalIcon.width)
   newPortalIcon.x = newPortalIcon.width / 2
-  console.log(newPortalIcon.width / 2)
+
   newPortalIcon.y = mapDetails.y + newPortalIcon.width / 2 + newNodeIcon.height
   newPortalIcon
     .on('pointerdown', (event) => {

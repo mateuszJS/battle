@@ -154,7 +154,7 @@ export const startDebug = (universe: Universe) => {
       ])
 
       const result = universe.test_ai(new Float32Array(input))
-      console.log(result)
+
       let index = 0 // do not care about first -2
       while (index < result.length) {
         // ai.ts?fd3c:123 Float32Array(5) [-2, -1, 615, 399, -3]
@@ -164,7 +164,7 @@ export const startDebug = (universe: Universe) => {
         const squadsIdsAndEnemiesIdsAndRest = result.slice(index + 4)
         const ourSquadsIdsEndIndex = squadsIdsAndEnemiesIdsAndRest.findIndex(value => value === -3)
         const ourSquadsIds = squadsIdsAndEnemiesIdsAndRest.slice(0, ourSquadsIdsEndIndex)
-        console.log(isAttack, planX, planY, ourSquadsIds)
+
         if (!ourSquadsIds.length) {
           index = index + 5
           continue

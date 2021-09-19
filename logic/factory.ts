@@ -105,14 +105,13 @@ export class Factory {
       ? this.timeToCreate / unchecked(this.productionLine[0]).totalTime
       : 0
 
-    let results: Array<f32>
+    let results: f32[] = [
+      this.isOwnByUser ? REPRESENTATION_USER_FACTORY : REPRESENTATION_ENEMY_FACTORY,
+      this.id,
+      progress,
+    ]
 
     if (this.isOwnByUser) {
-      results = [
-        REPRESENTATION_USER_FACTORY,
-        this.id,
-        progress,
-      ]
       for (let i = 0; i < (PRODUCTION_LINE_LENGTH as i32); i++) {
         if (i < this.productionLine.length - 1) {
           results.push(unchecked(this.productionLine[i]).representationId)
@@ -120,16 +119,11 @@ export class Factory {
           results.push(0)
         }
       }
-    } else {
-      results = [
-        REPRESENTATION_ENEMY_FACTORY,
-        this.id, // why is it 4?!
-        progress,
-      ]
     }
 
     let lastCreatedSquad = this.lastCreatedSquad
     if (lastCreatedSquad != null) {
+      // it's returned from factory getRepresentation but it's actually representation of the squad
       return results.concat(lastCreatedSquad.getRepresentation())
     }
     return results

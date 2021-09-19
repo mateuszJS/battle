@@ -14,7 +14,6 @@ export const startDebug = (wasmModule: WasmModule) => {
     let i = 0
     let cellIndex = 0
 
-    console.log(result)
     while (i < result.length) {
       if ([-2, -3].includes(result[i])) {
         const x = (cellIndex % Math.ceil(MAP_WIDTH / OBSTACLES_CELL_SIZE)) * OBSTACLES_CELL_SIZE

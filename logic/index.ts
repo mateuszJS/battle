@@ -4,7 +4,7 @@
 import { Faction } from "./faction";
 import { outerBoundaries, storeBoundaries } from "./obstacles-manager";
 import { Line, UniquePoint } from "./geom-types";
-import { MAP_SQUAD_REPRESENTATION_TO_TYPE } from "./squad-details";
+import { MAP_SQUAD_REPRESENTATION_TO_TYPE, SquadType } from "./squad-details";
 import { convertLogicCoordsToVisual, convertVisualCoordsToLogic } from "./convert-coords-between-logic-and-visual";
 import { initializeGrid, fillGrid, debugGridNumbers, traceLine, pickCellsDebug, getSquads } from "./grid-manager";
 import { CHECK_SQUADS_CORRECTNESS_PERIOD, OBSTACLES_CELL_SIZE, UINT_DATA_SETS_DIVIDER, UPDATE_SQUAD_CENTER_PERIOD, USER_FACTION_ID } from "./constants";
@@ -19,6 +19,8 @@ var time: usize = 0
 
 export const Float32Array_ID = idof<Float32Array>()
 export const Uint32Array_ID = idof<Uint32Array>()
+
+var wasEnemyCreated = false
 
 export function initUniverse(
   factionData: Float32Array,
@@ -150,6 +152,12 @@ function updateUniverse(): void {
   factions.forEach(faction => {
     faction.update()
   })
+
+  /*==========DEBUGGING STUFF===============*/
+  if (!wasEnemyCreated && factions.length > 1) {
+    wasEnemyCreated = true
+    factions[1].factory.addSquadDoProduction(SquadType.Squad)
+  }
 }
 
 export function debugGrid(): Float32Array {
@@ -178,11 +186,33 @@ export function createSquad(squadType: f32): void {
   unchecked(factions[0]).factory.addSquadDoProduction(MAP_SQUAD_REPRESENTATION_TO_TYPE.get(squadType))
 }
 
-export function moveUnits(squadsIds: Uint32Array, x: f32, y: f32): Uint32Array {
-  const userFactionIndex = factions.findIndex(faction => faction.id == USER_FACTION_ID)
-  unchecked(factions[userFactionIndex]).taskAddDestination(squadsIds, convertVisualCoordsToLogic(x, y))
+export function moveUnits(squadsIds: Uint32Array, x: f32, y: f32): Float32Array {
+  const logicCoords = convertVisualCoordsToLogic(x, y)
 
-  return new Uint32Array(0)
+  const allSquadsAround = getSquads([logicCoords])
+  for (let i = 0; i < allSquadsAround.length; i++) {
+    const squad = unchecked(allSquadsAround[i])
+
+    if (squad.factionId == USER_FACTION_ID) continue
+
+    const unitRadius = squad.squadDetails.unitRadius
+    for (let j = 0; j < squad.members.length; j++) {
+      const unit = unchecked(squad.members[j])
+      const distance = Math.hypot(unit.x - logicCoords.x, unit.y - logicCoords.y)
+      if (distance < unitRadius) {
+        const enemyUnitsIds = new Float32Array(squad.members.length)
+        for (let k = 0; k < squad.members.length; k++) {
+          unchecked(enemyUnitsIds[k] = squad.members[k].id)
+        }
+        return enemyUnitsIds
+      }
+    }
+  }
+
+  const userFactionIndex = factions.findIndex(faction => faction.id == USER_FACTION_ID)
+  unchecked(factions[userFactionIndex]).taskAddDestination(squadsIds, logicCoords)
+
+  return new Float32Array(0)
 }
 
 export function getSelectedUnitsIds(x1: f32, y1: f32, x2: f32, y2: f32): Uint32Array {

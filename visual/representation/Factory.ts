@@ -120,7 +120,7 @@ class Factory {
     }
   }
 
-  updateProductionLine(progress: number, data: number[]) {
+  updateProductionLine(progress: number, data: Float32Array) {
     for (let i = 0; i < data.length; i++) {
       if (data[i]) {
         addItemToProductionLine(i, data[i])

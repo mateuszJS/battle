@@ -40,7 +40,7 @@ const getSerializedWorldInfo = (
       point => point === null ? -1 : [point.x, point.y]
     ).flat()
   )
-    console.log('serializedFactions', serializedFactions, serializedObstacles, serializedTrackOuter, serializedTrackInner)
+
   return {
     factions: window.getFloat32ArrayPointer(serializedFactions),
     obstacles: window.getFloat32ArrayPointer(serializedObstacles),
