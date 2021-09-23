@@ -10,7 +10,7 @@ export function getFlyModes(angle: f32, startX: f32, startY: f32, strength: f32)
     Math.log(FLY_MIN_SPEED / strength) / Math.log(FLY_DECELERATION)
   )
 
-  if (time <= 0.01) { // should be EPSILON instead of 0.01
+  if (time <= f32.EPSILON) { // should be EPSILON instead of 0.01
     return { x: 0.0, y: 0.0 } // to avoid dividing by zero let factor = distance / all_speeds_sum;
   }
 

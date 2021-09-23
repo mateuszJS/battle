@@ -1,0 +1,64 @@
+import { MATH_PI, NORMAL_SQUAD_RADIUS } from "./constants";
+import { Point } from "./geom-types";
+import { SquadType, SQUAD_DETAILS } from "./squad-details";
+import { MAX_POSSIBLE_WEAPON_RANGE } from "./weapon-details";
+
+export const DISTANCE_BETWEEN_ATTACKERS: f32 = 2 * (NORMAL_SQUAD_RADIUS + SQUAD_DETAILS.get(SquadType.Squad).unitRadius)
+const NUMBER_OF_RANGE_BREAKPOINTS: i32 = Math.ceil(MAX_POSSIBLE_WEAPON_RANGE / DISTANCE_BETWEEN_ATTACKERS) as i32
+export var PRECALCULATED_ATTACKERS_POSITIONS: Point[][] = []
+
+function sortAttackerPositions(points: Point[], maxDistance: f32): void {
+  let done = false
+  while (!done) {
+    done = true
+    for (let i = 1; i < points.length; i += 1) {
+      const pointA = points[i - 1]
+      const pointB = points[i]
+      const a_x = Math.sin(pointA.x) * pointA.y
+      const a_y = Math.cos(-pointA.x) * pointA.y
+      const b_x = Math.sin(pointB.x) * pointB.y
+      const b_y = Math.cos(-pointB.x) * pointB.y
+      const a_dis = Math.hypot(a_x, a_y + maxDistance) // a_y - (-ATTACKERS_DISTANCE)
+      const b_dis = Math.hypot(b_x, b_y + maxDistance)
+
+      if (a_dis < b_dis) {
+        done = false;
+        let tmp = points[i - 1]
+        points[i - 1] = points[i]
+        points[i] = tmp
+      }
+    }
+  }
+}
+
+for (let i = 1; i <= NUMBER_OF_RANGE_BREAKPOINTS; i++) {
+  const max_distance = i as f32 * DISTANCE_BETWEEN_ATTACKERS
+  let distance = max_distance
+  let positions: Point[] = []
+
+  while (distance > DISTANCE_BETWEEN_ATTACKERS) {
+    let diff_angle =
+      Math.acos(
+        1.0 - (
+          (DISTANCE_BETWEEN_ATTACKERS * DISTANCE_BETWEEN_ATTACKERS) / (2.0 * (distance * distance))
+        )
+      ) as f32
+    let multiple_by: f32 = 0
+
+    while (Math.abs(multiple_by * diff_angle) < MATH_PI - diff_angle / 2.0) {
+      let angle = multiple_by * diff_angle
+      positions.push({ x: angle, y: distance });
+
+      if (multiple_by > 0) {
+        multiple_by = -multiple_by;
+      } else {
+        multiple_by = 1.0 - multiple_by;
+      }
+    }
+    distance -= DISTANCE_BETWEEN_ATTACKERS;
+  }
+
+  sortAttackerPositions(positions, max_distance)
+
+  PRECALCULATED_ATTACKERS_POSITIONS.push(positions)
+}

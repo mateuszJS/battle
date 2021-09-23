@@ -117,11 +117,15 @@ export function getMap(data: Float32Array): Array<Line[] | null> {
 }
 
 export function getIsPointAvailable(x: f32, y: f32, isSquad: bool): bool {
+  if (x < 0 || x >= MAP_WIDTH || y < 0 || y >= MAP_HEIGHT) {
+    return false
+  }
+
   const boundaries = isSquad ? innerBoundaries : outerBoundaries
   const cellX = x / OBSTACLES_CELL_SIZE as i32
   const index = Math.floor(y / OBSTACLES_CELL_SIZE) * (OBSTACLES_MAP_WIDTH as f32) + cellX as i32
 
-  const linesList = boundaries[index] // Index out of range
+  const linesList = boundaries[index]
 
   if (!linesList) return true
   if (linesList.length == 0) return false

@@ -198,8 +198,9 @@ export function moveUnits(squadsIds: Uint32Array, x: f32, y: f32): Float32Array 
     const unitRadius = squad.squadDetails.unitRadius
     for (let j = 0; j < squad.members.length; j++) {
       const unit = unchecked(squad.members[j])
-      const distance = Math.hypot(unit.x - logicCoords.x, unit.y - logicCoords.y)
+      const distance = Math.hypot(unit.x - logicCoords.x, unit.y - unitRadius - logicCoords.y)
       if (distance < unitRadius) {
+        factions[0].taskAddEnemy(squadsIds, squad)
         const enemyUnitsIds = new Float32Array(squad.members.length)
         for (let k = 0; k < squad.members.length; k++) {
           unchecked(enemyUnitsIds[k] = squad.members[k].id)

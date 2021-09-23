@@ -1,7 +1,7 @@
 import { REPRESENTATION_FACTION_ID } from "./constants"
 import { Factory } from "./factory"
 import { Point } from "./geom-types"
-import { getSquadPositions } from "./hex-positions"
+import { getSquadPositions, setAggressorPositions } from "./hex-positions"
 import { Squad } from "./squad"
 import { SquadType } from "./squad-details"
 
@@ -59,7 +59,7 @@ export class Faction {
     for (let i = 0; i < this.squads.length; i++) {
       const squad = unchecked(this.squads[i])
       if (squadsIds.includes(squad.id)) {
-        squad.taskSetDestination(unchecked(positions[positionIndex]))
+        squad.setTask(unchecked(positions[positionIndex]), null)
         positionIndex ++
       }
     }
@@ -73,6 +73,17 @@ export class Faction {
     //     index += 1;
     //   }
     // });
+  }
+
+  taskAddEnemy(squadsIds: Uint32Array, enemySquad: Squad): void {
+    let attackers: Squad[] = []
+    for (let i = 0; i < this.squads.length; i++) {
+      const squad = unchecked(this.squads[i])
+      if (squadsIds.includes(squad.id)) {
+        attackers.push(squad)
+      }
+    }
+    setAggressorPositions(attackers, enemySquad.centerPoint)
   }
 
   checkSquadsCorrectness(): void {

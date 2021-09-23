@@ -86,7 +86,7 @@ export class Squad {
             attackAim: this.attackAim,
         }
       }
-      this.setDestination(this.centerPoint)
+      this.setTask(this.centerPoint, null)
     } else if (this.isDuringKeepingCoherency) {
       this.isDuringKeepingCoherency = false
       this.restoreTaskTodo()
@@ -117,27 +117,32 @@ export class Squad {
     })
   }
 
-  setDestination(destination: Point): void {
-    trace("before setDestination", 2, destination.x, destination.y)
-    // 1346.0924072265625, 1326.694580078125
-    this.track = getTrack(this.centerPoint, destination);
-    trace("this.track.length", 1, this.track.length)
-    this.members.forEach(unit => {
-      unit.changeStateToRun();
-    });
-  }
-
-  taskSetDestination(destination: Point): void {
+  setTask(destination: Point | null, enemyToAttack: Squad | null/*, ability: Ability | null*/): void {
     if (this.isTakingNewTaskDisabled()) {
       this.taskTodo = {
         trackDestination: destination,
-        attackAim: null,
+        attackAim: enemyToAttack,
       }
       return
     }
 
     this.resetState()
-    this.setDestination(destination)
+
+    if (destination) {
+      this.track = getTrack(this.centerPoint, destination);
+      this.members.forEach(unit => {
+        unit.changeStateToRun();
+      });
+    }
+
+    if (enemyToAttack) {
+      this.attackAim = enemyToAttack
+    }
+
+    /* if(ability) {
+      this.ability ==
+    }
+    */
   }
 
   isTakingNewTaskDisabled(): bool {
@@ -148,9 +153,8 @@ export class Squad {
     this.resetState()
 
     if (this.taskTodo.trackDestination) {
-      this.setDestination(this.taskTodo.trackDestination)
+      this.setTask(this.taskTodo.trackDestination, this.taskTodo.attackAim)
     }
-    this.attackAim = this.taskTodo.attackAim
 
     this.checkMembersCorrectness()
   }

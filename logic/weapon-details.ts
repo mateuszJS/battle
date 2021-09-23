@@ -19,3 +19,7 @@ WEAPON_DETAILS.set(WeaponType.StandardRifle, {
   reloadTime: 30,
   shootTime: 5,
 })
+
+export var MAX_POSSIBLE_WEAPON_RANGE: f32 = WEAPON_DETAILS.values().reduce((acc, weaponDetails) => (
+  Math.max(weaponDetails.range, acc) as f32
+), 0 as f32)
