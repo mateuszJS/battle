@@ -2,7 +2,6 @@ import getMyInfluenceAndTension from './getMyInfluenceAndTension'
 import getInfluenceAndVulnerabilityMap from './getInfluenceAndVulnerabilityMap'
 import testOnePixelShader from './testOnePixelShader'
 import {
-  USER_FACTION_ID,
   MAP_WIDTH,
   MAP_HEIGHT,
   INFLUENCE_MAP_WIDTH,
@@ -10,6 +9,7 @@ import {
   INFLUENCE_MAP_SCALE_X,
   INFLUENCE_MAP_SCALE_Y,
 } from 'Consts'
+import { USER_FACTION_ID } from '../../logic/constants'
 import { Universe } from '../../crate/pkg/index'
 
 let container: PIXI.Container

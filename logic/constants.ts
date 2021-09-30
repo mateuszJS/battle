@@ -36,8 +36,8 @@ export const CHECK_SQUADS_CORRECTNESS_PERIOD: usize = 2 * UPDATE_SQUAD_CENTER_PE
 export const USER_FACTION_ID: u32 = 0;
 export const UINT_DATA_SETS_DIVIDER: u32 = 0
 
-export const MATH_PI: f32 = Math.PI as f32
-export const MATH_PI_2: f32 = 2 * MATH_PI
+export const MATH_PI_HALF: f32 = Math.PI / 2 as f32
+export const MATH_PI_2: f32 = Math.PI * 2 as f32
 
 
 export const OBSTACLES_CELL_SIZE: f32 = 300

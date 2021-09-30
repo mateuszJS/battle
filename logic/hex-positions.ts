@@ -1,5 +1,5 @@
 import { DISTANCE_BETWEEN_ATTACKERS, PRECALCULATED_ATTACKERS_POSITIONS } from "./attacker-positions"
-import { MAP_HEIGHT, MAP_WIDTH, MATH_PI, NORMAL_SQUAD_RADIUS } from "./constants"
+import { MAP_HEIGHT, MAP_WIDTH, NORMAL_SQUAD_RADIUS } from "./constants"
 import { Point } from "./geom-types"
 import { getIsPointAvailable } from "./obstacles-manager"
 import { Squad } from "./squad"
@@ -224,12 +224,12 @@ function addSquadToDividedGroup(dividedGroups: Squad[][], squad: Squad): void {
     const dividedSquadsGroup = dividedGroups[i]
     for (let j = 0; j < dividedSquadsGroup.length; j++) {
       const dividedSquad = dividedSquadsGroup[j]
-      const distance = Math.hypot(
+      const distance = Mathf.hypot(
         squad.centerPoint.x - dividedSquad.centerPoint.x,
         squad.centerPoint.y - dividedSquad.centerPoint.y,
       )
       if (distance < THRESHOLD_SQUADS_IN_ONE_GROUP) {
-        const isSameRange = Math.abs(squad.weaponDetails.range - dividedSquad.weaponDetails.range) < f32.EPSILON
+        const isSameRange = Mathf.abs(squad.weaponDetails.range - dividedSquad.weaponDetails.range) < f32.EPSILON
         if (isSameRange) {
           dividedSquadsGroup.push(squad) // close to the existing group
           return
@@ -246,10 +246,11 @@ function getSquadsCenter(squads: Squad[]): Point {
     x: acc.x + squad.centerPoint.x,
     y: acc.y + squad.centerPoint.y,
   }), { x: 0, y: 0 } as Point)
+  const length = squads.length as f32
 
   return {
-    x: sumPoint.x / (squads.length as f32),
-    y: sumPoint.y / (squads.length as f32),
+    x: sumPoint.x / length,
+    y: sumPoint.y / length,
   }
 }
 
@@ -264,11 +265,11 @@ function calc_attackers_positions(
   const precalculated_positions_number = precalculated_positions.length
   let result: Point[] = []
   let position_index = 0;
-  const angle_from_target = Math.atan2(source.x - target.x, target.y - source.y)
+  const angle_from_target = Mathf.atan2(source.x - target.x, target.y - source.y)
   while (result.length < needed_positions) {
     const precalculatedPoint = unchecked(precalculated_positions[position_index])
-    const x = Math.sin(angle_from_target + precalculatedPoint.x) * precalculatedPoint.y + target.x as f32
-    const y = -Math.cos(angle_from_target + precalculatedPoint.x) * precalculatedPoint.y + target.y as f32
+    const x = Mathf.sin(angle_from_target + precalculatedPoint.x) * precalculatedPoint.y + target.x
+    const y = -Mathf.cos(angle_from_target + precalculatedPoint.x) * precalculatedPoint.y + target.y
     
     if (getIsPointAvailable(x, y, true)) {
       result.push({ x, y });
@@ -310,7 +311,7 @@ export function setAggressorPositions(squads: Squad[], target: Point): void {
     const squadsOutOfRange: Squad[] = []
     for (let i = 0; i < squads.length; i++) {
       const squad = squads[i]
-      const distance = Math.hypot(squad.centerPoint.x - target.x, squad.centerPoint.y - target.y)
+      const distance = Mathf.hypot(squad.centerPoint.x - target.x, squad.centerPoint.y - target.y)
       if (squad.weaponDetails.range - NORMAL_SQUAD_RADIUS < distance) {
         squadsOutOfRange.push(squad)
       }

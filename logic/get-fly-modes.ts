@@ -6,8 +6,8 @@ export const FLY_DECELERATION: f32 = 0.97;
 const FLY_DISTANCE_PRECISION: f32 = 3.0;
 
 export function getFlyModes(angle: f32, startX: f32, startY: f32, strength: f32): Point {
-  let time = Math.ceil(
-    Math.log(FLY_MIN_SPEED / strength) / Math.log(FLY_DECELERATION)
+  let time = Mathf.ceil(
+    Mathf.log(FLY_MIN_SPEED / strength) / Mathf.log(FLY_DECELERATION)
   )
 
   if (time <= f32.EPSILON) { // should be EPSILON instead of 0.01
@@ -42,8 +42,8 @@ export function getFlyModes(angle: f32, startX: f32, startY: f32, strength: f32)
   let distance_portion = allSpeedsSum / FLY_DISTANCE_PRECISION
 
   while (distance > 0.01) {
-    let x = (Math.sin(angle) * distance + startX) as f32
-    let y = (-Math.cos(angle) * distance + startY) as f32
+    let x = (Mathf.sin(angle) * distance + startX)
+    let y = (-Mathf.cos(angle) * distance + startY)
     if (getIsPointAvailable(x, y, false)) {
       break
     } else {
@@ -53,7 +53,7 @@ export function getFlyModes(angle: f32, startX: f32, startY: f32, strength: f32)
 
   let factor = distance / allSpeedsSum;
   return {
-    x: Math.sin(angle) * strength * factor as f32,
-    y: -Math.cos(angle) * strength * factor as f32,
+    x: Mathf.sin(angle) * strength * factor,
+    y: -Mathf.cos(angle) * strength * factor,
   }
 }

@@ -21,5 +21,5 @@ WEAPON_DETAILS.set(WeaponType.StandardRifle, {
 })
 
 export var MAX_POSSIBLE_WEAPON_RANGE: f32 = WEAPON_DETAILS.values().reduce((acc, weaponDetails) => (
-  Math.max(weaponDetails.range, acc) as f32
+  Mathf.max(weaponDetails.range, acc)
 ), 0 as f32)

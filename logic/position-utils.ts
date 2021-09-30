@@ -1,4 +1,3 @@
-import { MATH_PI_2, NORMAL_SQUAD_RADIUS } from "./constants"
 import { Point } from "./geom-types"
 
 export const UNITS_OFFSET: StaticArray<StaticArray<Point>> = [

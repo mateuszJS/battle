@@ -1,4 +1,4 @@
-import { PRODUCTION_LINE_LENGTH, REPRESENTATION_ENEMY_FACTORY, REPRESENTATION_USER_FACTORY } from "./constants";
+import { MATH_PI_HALF, PRODUCTION_LINE_LENGTH, REPRESENTATION_ENEMY_FACTORY, REPRESENTATION_USER_FACTORY } from "./constants";
 import { getId } from "./get-id";
 import { getRandom } from "./get-random";
 import { Squad } from "./squad";
@@ -19,10 +19,9 @@ export class Factory {
   private timeToCreate: u16
   private lastCreatedSquad: Squad | null
   private timeToCreateAnotherMember: u8
-  
-  
+
   constructor(
-    private factionId: u32,
+    private factionId: i32,
     public  x: f32,
     public  y: f32,
     public  angle: f32,
@@ -91,13 +90,13 @@ export class Factory {
   }
 
   getCreationPoint(): Array<f32> {
-    let seedDistance = getRandom() - 0.5;
-    let distance = seedDistance * FACTORY_WIDTH;
-    let perpendicularAngle = this.angle + Math.PI / 2.0;
-    let positionX = this.x + Math.sin(perpendicularAngle) * distance;
-    let positionY = this.y - Math.cos(perpendicularAngle) * distance;
-    let unitAngle = this.angle + seedDistance / 2.0;
-    return [positionX as f32, positionY as f32, unitAngle]
+    let seedDistance = getRandom() - 0.5
+    let distance = seedDistance * FACTORY_WIDTH
+    let perpendicularAngle = this.angle + MATH_PI_HALF
+    let positionX = this.x + Mathf.sin(perpendicularAngle) * distance
+    let positionY = this.y - Mathf.cos(perpendicularAngle) * distance
+    let unitAngle = this.angle + seedDistance / 2
+    return [positionX, positionY, unitAngle]
   }
 
   getRepresentation(): Array<f32> {

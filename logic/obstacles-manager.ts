@@ -2,9 +2,9 @@ import { MAP_HEIGHT, MAP_WIDTH, OBSTACLES_CELL_SIZE, OBSTACLES_DIVIDER } from ".
 import { Line, Point } from "./geom-types";
 import { checkIntersection, isObstaclePointInPolygon, isPointInPolygon, isPointInPolygonLine } from "./geom-utils";
 
-const OBSTACLES_MAP_WIDTH: i32 = Math.ceil(MAP_WIDTH / OBSTACLES_CELL_SIZE) as i32
+const OBSTACLES_MAP_WIDTH: i32 = Mathf.ceil(MAP_WIDTH / OBSTACLES_CELL_SIZE) as i32
 const OBSTACLES_MAP_WIDTH_HALF: i32 = OBSTACLES_MAP_WIDTH / 2 as i32
-const OBSTACLES_MAP_HEIGHT: i32 = Math.ceil(MAP_HEIGHT / OBSTACLES_CELL_SIZE) as i32
+const OBSTACLES_MAP_HEIGHT: i32 = Mathf.ceil(MAP_HEIGHT / OBSTACLES_CELL_SIZE) as i32
 export var outerBoundaries: Array<Line[] | null> = new Array(OBSTACLES_MAP_WIDTH * OBSTACLES_MAP_HEIGHT);
 var innerBoundaries: Array<Line[] | null> = new Array(OBSTACLES_MAP_WIDTH * OBSTACLES_MAP_HEIGHT);
 // null -> available position
@@ -123,7 +123,7 @@ export function getIsPointAvailable(x: f32, y: f32, isSquad: bool): bool {
 
   const boundaries = isSquad ? innerBoundaries : outerBoundaries
   const cellX = x / OBSTACLES_CELL_SIZE as i32
-  const index = Math.floor(y / OBSTACLES_CELL_SIZE) * (OBSTACLES_MAP_WIDTH as f32) + cellX as i32
+  const index = (y / OBSTACLES_CELL_SIZE as i32) * OBSTACLES_MAP_WIDTH + cellX
 
   const linesList = boundaries[index]
 

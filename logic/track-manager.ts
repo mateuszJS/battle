@@ -146,9 +146,9 @@ function shortestPathAStart(
       const neighbor = neighbors[i]
       if (visited.includes(neighbor.id)) continue
 
-      const dist_to_neighbor = Math.hypot(neighbor.x - currentNode.point.x, neighbor.y - currentNode.point.y) as f32
+      const dist_to_neighbor = Mathf.hypot(neighbor.x - currentNode.point.x, neighbor.y - currentNode.point.y)
       const current_length = currentNode.current_length + dist_to_neighbor;
-      const heuristic = current_length + Math.hypot(neighbor.x - destinationNode.x, neighbor.y - destinationNode.y) as f32;
+      const heuristic = current_length + Mathf.hypot(neighbor.x - destinationNode.x, neighbor.y - destinationNode.y)
       const index = getSortedIndex(queue, heuristic);
       let path = currentNode.path.slice(0)
       path.push(neighbor);

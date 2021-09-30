@@ -3,11 +3,11 @@
 
 import { Faction } from "./faction";
 import { outerBoundaries, storeBoundaries } from "./obstacles-manager";
-import { Line, UniquePoint } from "./geom-types";
+import { Line, Point, UniquePoint } from "./geom-types";
 import { MAP_SQUAD_REPRESENTATION_TO_TYPE, SquadType } from "./squad-details";
 import { convertLogicCoordsToVisual, convertVisualCoordsToLogic } from "./convert-coords-between-logic-and-visual";
-import { initializeGrid, fillGrid, debugGridNumbers, traceLine, pickCellsDebug, getSquads } from "./grid-manager";
-import { CHECK_SQUADS_CORRECTNESS_PERIOD, OBSTACLES_CELL_SIZE, UINT_DATA_SETS_DIVIDER, UPDATE_SQUAD_CENTER_PERIOD, USER_FACTION_ID } from "./constants";
+import { initializeGrid, fillGrid, debugGridNumbers, traceLine, pickCellsDebug, getSquadsFromGrid } from "./grid-manager";
+import { CHECK_SQUADS_CORRECTNESS_PERIOD, OBSTACLES_CELL_SIZE, UINT_DATA_SETS_DIVIDER, UPDATE_SQUAD_CENTER_PERIOD } from "./constants";
 import { isPointInPolygon } from "./geom-utils";
 import { Squad } from "./squad";
 import { createPermanentTrackGraph, trackPoints, blockingTrackLines, permanentObstaclesGraph } from "./track-manager";
@@ -21,6 +21,7 @@ export const Float32Array_ID = idof<Float32Array>()
 export const Uint32Array_ID = idof<Uint32Array>()
 
 var wasEnemyCreated = false
+var userFaction = new Faction(0, true, 0, 0, 0)
 
 export function initUniverse(
   factionData: Float32Array,
@@ -31,17 +32,19 @@ export function initUniverse(
   mapWidth: f32,
   mapHeight: f32,
 ): void {
-  trace("wasm init world", 1, factionData.length as f32)
   for (let i = 0; i < factionData.length; i += 4) {
-    trace("i", 1, i)
-    trace("i", 1, factionData[i])
-    factions.push(new Faction(
+    const isUser = i == 0
+    const faction = new Faction(
       factionData[i] as u32,
-      i == 0,
+      isUser,
       factionData[i + 1],
       factionData[i + 2],
       factionData[i + 3],
-    ))
+    )
+    if (isUser) {
+      userFaction = faction
+    }
+    factions.push(faction)
   }
 
   storeBoundaries(obstacles, blockingTrackPoints)
@@ -183,37 +186,72 @@ export function getUniverseRepresentation(): Float32Array {
 }
 
 export function createSquad(squadType: f32): void {
-  unchecked(factions[0]).factory.addSquadDoProduction(MAP_SQUAD_REPRESENTATION_TO_TYPE.get(squadType))
+  userFaction.factory.addSquadDoProduction(MAP_SQUAD_REPRESENTATION_TO_TYPE.get(squadType))
 }
 
-export function moveUnits(squadsIds: Uint32Array, x: f32, y: f32): Float32Array {
-  const logicCoords = convertVisualCoordsToLogic(x, y)
+function getAttackedEnemy(target: Point): Squad | null {
+  const allSquadsAround = getSquadsFromGrid([target])
 
-  const allSquadsAround = getSquads([logicCoords])
   for (let i = 0; i < allSquadsAround.length; i++) {
     const squad = unchecked(allSquadsAround[i])
 
-    if (squad.factionId == USER_FACTION_ID) continue
+    if (squad.factionId == userFaction.id) continue
 
     const unitRadius = squad.squadDetails.unitRadius
     for (let j = 0; j < squad.members.length; j++) {
       const unit = unchecked(squad.members[j])
-      const distance = Math.hypot(unit.x - logicCoords.x, unit.y - unitRadius - logicCoords.y)
+      const distance = Mathf.hypot(unit.x - target.x, unit.y - unitRadius - target.y)
       if (distance < unitRadius) {
-        factions[0].taskAddEnemy(squadsIds, squad)
-        const enemyUnitsIds = new Float32Array(squad.members.length)
-        for (let k = 0; k < squad.members.length; k++) {
-          unchecked(enemyUnitsIds[k] = squad.members[k].id)
-        }
-        return enemyUnitsIds
+        return squad
       }
     }
   }
 
-  const userFactionIndex = factions.findIndex(faction => faction.id == USER_FACTION_ID)
-  unchecked(factions[userFactionIndex]).taskAddDestination(squadsIds, logicCoords)
+  return null
+}
 
-  return new Float32Array(0)
+export function moveUnits(squadsIds: Uint32Array, x: f32, y: f32): Float32Array {
+  const logicCoords = convertVisualCoordsToLogic(x, y)
+  const enemySquad = getAttackedEnemy(logicCoords)
+  let result: f32[] = []
+
+  if (enemySquad) {
+    userFaction.taskAddEnemy(squadsIds, enemySquad)
+    for (let k = 0; k < enemySquad.members.length; k++) {
+      result.push(unchecked(enemySquad.members[k].id))
+    }
+  } else {
+    userFaction.taskAddDestination(squadsIds, logicCoords)
+  }
+
+  result.push(UINT_DATA_SETS_DIVIDER as f32)
+
+  for (let i = 0; i < userFaction.squads.length; i++) {
+    const squad = userFaction.squads[i]
+    if (squadsIds.includes(squad.id)) {
+      const destinationLogic = squad.track.length > 0
+        ? squad.track[squad.track.length - 1]
+        : squad.centerPoint
+      const destinationVisual = convertLogicCoordsToVisual(destinationLogic.x, destinationLogic.y)
+      result.push(destinationVisual.x)
+      result.push(destinationVisual.y)
+    }
+  }
+
+  let serializedResult = new Float32Array(result.length)
+  for (let i: i32 = 0; i < result.length; i++) {
+    serializedResult[i] = result[i]
+  }
+  return serializedResult
+
+  // return attackers.map<f32[]>(attacker => {
+  //   const destination: Point = attacker.track.length > 0
+  //     ? attacker.track[attacker.track.length - 1]
+  //     : attacker.centerPoint
+  //   return [destination.x, destination.y]
+  // }).flat()
+
+  // return new Float32Array(0)
 }
 
 export function getSelectedUnitsIds(x1: f32, y1: f32, x2: f32, y2: f32): Uint32Array {
@@ -227,7 +265,7 @@ export function getSelectedUnitsIds(x1: f32, y1: f32, x2: f32, y2: f32): Uint32A
     rightBottomCorner,
     leftBottomCorner,
   ]
-  const squads = getSquads(points)
+  const squads = getSquadsFromGrid(points)
   const selectedOurSquads: Squad[] = []
 
   let lines = points.map<Line>((point, index, allPoints) => ({
@@ -237,7 +275,7 @@ export function getSelectedUnitsIds(x1: f32, y1: f32, x2: f32, y2: f32): Uint32A
 
   for (let i = 0; i < squads.length; i++) {
     const squad = unchecked(squads[i])
-    if (squad.factionId == USER_FACTION_ID) {
+    if (squad.factionId == userFaction.id) {
       let isInside = false
       for (let j = 0; j < squad.members.length; j++) {
         const member = unchecked(squad.members[j])
@@ -245,7 +283,7 @@ export function getSelectedUnitsIds(x1: f32, y1: f32, x2: f32, y2: f32): Uint32A
           isPointInPolygon(
             { x: member.x, y: member.y },
             lines,
-            )
+          )
         ) {
           isInside = true
           break

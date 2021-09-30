@@ -6,6 +6,7 @@ import updateAbilitiesButtons from '~/buttons/abilities'
 import { RepresentationId } from '~/buttons/abilities/createIcon'
 import StrategicPoint from '~/representation/StrategicPoint'
 import { UINT_DATA_SETS_DIVIDER } from '../../logic/constants'
+import { getFrames } from '~/representation/utils'
 
 let debugContainer = null
 
@@ -14,12 +15,14 @@ const SELECTION_THROTTLE = 10
 class SelectionController {
   private startPoint: null | Point
   private selectionRectangle: PIXI.Graphics
+  private indicatorsContainer: PIXI.Container
   private wasmModule: WasmModule
   private universeRepresentation: UniverseRepresentation
   private selectedUnits: Unit[]
   private selectedSquads: Uint32Array
   private selectedAbilityType: RepresentationId | null
   private selectionTimer: number
+  private indicatorPositionFrames: PIXI.Texture[]
 
   constructor(wasmModule: WasmModule, universeRepresentation: UniverseRepresentation) {
     this.wasmModule = wasmModule
@@ -29,8 +32,11 @@ class SelectionController {
     this.startPoint = null
     this.selectionRectangle = new PIXI.Graphics()
     window.ui.addChild(this.selectionRectangle)
+    this.indicatorsContainer = new PIXI.Container()
+    window.ui.addChild(this.indicatorsContainer)
     this.selectedAbilityType = null
     this.selectionTimer = 0
+    this.indicatorPositionFrames = getFrames(7, (id: string) => `fireEffect_${id[3]}.png`)
   }
 
   public consumeSelection({ x, y }: Point) {
@@ -43,28 +49,38 @@ class SelectionController {
     // tracksDebug(tracks)
     if (this.selectedSquads.length === 0) return
 
-    const selectedEnemyUnitsIdsPoint = this.wasmModule.moveUnits(
+    const moveUnitsResultPoiner = this.wasmModule.moveUnits(
       window.getUint32ArrayPointer(this.selectedSquads),
       x,
       y,
     )
+    
+    window.useFloat32ArrayData(moveUnitsResultPoiner, moveUnitsResult => {
+      const indexOfDivider = moveUnitsResult.indexOf(UINT_DATA_SETS_DIVIDER) // 0 -> divides between squads ids and units ids
+      const enemyUnitIds = moveUnitsResult.subarray(0, indexOfDivider)
+      const positions = moveUnitsResult.subarray(indexOfDivider + 1)
+      // so we should make a copy
 
-    window.useFloat32ArrayData(selectedEnemyUnitsIdsPoint, selectedEnemyUnitsIds => {
-      if (selectedEnemyUnitsIds.length === 0) return
-      const selectedEnemyUnits = Array.from(selectedEnemyUnitsIds).map(id => (
-        this.universeRepresentation[id] as Unit | Factory | StrategicPoint
-      ))
-      selectedEnemyUnits.forEach(unit => {
-        unit.select()
-      })
-
-      setTimeout(() => {
+      if (enemyUnitIds.length > 0) {
+        const selectedEnemyUnits = Array.from(enemyUnitIds).map(id => (
+          this.universeRepresentation[id] as Unit | Factory | StrategicPoint
+        ))
         selectedEnemyUnits.forEach(unit => {
-          if (unit) {
-            unit.deselect()
-          }
+          unit.select()
         })
-      }, 2000)
+
+        setTimeout(() => {
+          selectedEnemyUnits.forEach(unit => {
+            if (unit) {
+              unit.deselect()
+            }
+          })
+        }, 2000)
+      }
+
+      for (let i = 0; i < positions.length; i += 2) {
+        this.createIndicator(positions[i], positions[i + 1])
+      }
     })
   }
 
@@ -192,6 +208,21 @@ class SelectionController {
       y - this.startPoint.y,
     )
     this.selectionRectangle.endFill()
+  }
+
+  private createIndicator(x: number, y: number) {
+    const movieClip = new PIXI.AnimatedSprite(this.indicatorPositionFrames)
+    movieClip.animationSpeed = 0.55
+    movieClip.x = x
+    movieClip.y = y
+    movieClip.loop = false
+    movieClip.anchor.set(0.5)
+    movieClip.scale.set(2)
+    movieClip.onComplete = function() {
+      this.destroy()
+    }
+    this.indicatorsContainer.addChild(movieClip)
+    movieClip.play()
   }
 
   public endSelection() {

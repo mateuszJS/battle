@@ -1,4 +1,4 @@
-import { MAP_SKEW_ANGLE, MATH_PI, MATH_PI_2, UnitState } from "./constants"
+import { MAP_SKEW_ANGLE, MATH_PI_2, UnitState } from "./constants"
 import { getAngleDiff } from "./get-angle-diff"
 import { FLY_DECELERATION, FLY_MIN_SPEED, getFlyModes } from "./get-fly-modes"
 import { getId } from "./get-id"
@@ -52,7 +52,7 @@ export class Unit {
 
   changeStateToFly(angle: f32, strength: f32): void {
     this.state = UnitState.FLY;
-    this.angle = (angle + MATH_PI) % MATH_PI_2
+    this.angle = (angle + Mathf.PI) % MATH_PI_2
     let flyMods = getFlyModes(angle, this.x, this.y, strength);
     this.modX = flyMods.x;
     this.modY = flyMods.y;
@@ -110,8 +110,8 @@ export class Unit {
     this.destination = destination
     // TODO: I'm not really sure about this atan2
     this.setAngle(destination.x, destination.y)
-    this.modX = Math.sin(this.angle) * this.squad.squadDetails.movementSpeed as f32
-    this.modY = -Math.cos(this.angle) * this.squad.squadDetails.movementSpeed as f32
+    this.modX = Mathf.sin(this.angle) * this.squad.squadDetails.movementSpeed
+    this.modY = -Mathf.cos(this.angle) * this.squad.squadDetails.movementSpeed
   }
 
   goToCurrentPointOnTrack(): void {
@@ -183,9 +183,9 @@ export class Unit {
     let availableEnemyUnits: Unit[] = []
     for (let i = 0; i < squadToAttack.members.length; i++) {
       const member = unchecked(squadToAttack.members[i])
-      let angleFroUnitToEnemyMember = Math.atan2(member.x - this.x, this.y - member.y) as f32
+      let angleFroUnitToEnemyMember = Mathf.atan2(member.x - this.x, this.y - member.y)
       let angleDiff = getAngleDiff(this.angle, angleFroUnitToEnemyMember)
-      if (Math.abs(angleDiff) < this.squad.squadDetails.maxChasingShootAngle) {
+      if (Mathf.abs(angleDiff) < this.squad.squadDetails.maxChasingShootAngle) {
         availableEnemyUnits.push(member)
       }
     }
@@ -203,7 +203,7 @@ export class Unit {
     // TODO: what in case if still enemy is out of weapon range???
     if (closestEnemy && minDistance < this.squad.weaponDetails.range) {
       this.attackAim = closestEnemy
-      this.weaponAngleDuringChasing = Math.atan2(closestEnemy.x - this.x, this.y - closestEnemy.y) as f32
+      this.weaponAngleDuringChasing = Mathf.atan2(closestEnemy.x - this.x, this.y - closestEnemy.y)
     } else {
       this.attackAim = null
     }
@@ -213,9 +213,9 @@ export class Unit {
     // check if unit can keep current aim
     const attackAim = this.attackAim 
     if (attackAim != null) {
-      let distance = Math.hypot(attackAim.x - this.x, attackAim.y - this.y) as f32
+      let distance = Mathf.hypot(attackAim.x - this.x, attackAim.y - this.y)
       if (distance <= this.squad.weaponDetails.range) {
-        let angleFromUnitToAim = Math.atan2(attackAim.x - this.x, this.y - attackAim.y) as f32
+        let angleFromUnitToAim = Mathf.atan2(attackAim.x - this.x, this.y - attackAim.y)
         if (getAngleDiff(this.angle, angleFromUnitToAim) < this.squad.squadDetails.maxChasingShootAngle) {
           this.weaponAngleDuringChasing = angleFromUnitToAim;
           return // it's okay, don't have to find an aim
@@ -227,7 +227,7 @@ export class Unit {
   }
 
   setAngle(destinationX: f32, destinationY: f32): void {
-    this.angle = (Math.atan2(destinationX - this.x, this.y - destinationY) as f32 + MATH_PI_2) % MATH_PI_2
+    this.angle = (Mathf.atan2(destinationX - this.x, this.y - destinationY) + MATH_PI_2) % MATH_PI_2
   }
 
 
@@ -262,14 +262,14 @@ export class Unit {
       this.attackAim = enemyUnit
     } else if (isImportantAim) {
       let enemyUnit = unchecked(squadToAttack.members[closestEnemyUnitIndex])
-      let angle = Math.atan2(this.x - enemyUnit.x, enemyUnit.y - this.y)
+      let angle = Mathf.atan2(this.x - enemyUnit.x, enemyUnit.y - this.y)
       let distanceToEnemy = this.squad.weaponDetails.range - this.squad.squadDetails.movementSpeed
       this.trackIndex = this.squad.track.length - 1 as u8;
       if (enemyUnit.state != UnitState.RUN && enemyUnit.state != UnitState.CHASING) {
         // if the enemy is running, then the faction's hunters should handle it
         this.setDestination({
-          x: Math.sin(angle) * distanceToEnemy + enemyUnit.x as f32,
-          y: -Math.cos(angle) * distanceToEnemy + enemyUnit.y as f32,
+          x: Mathf.sin(angle) * distanceToEnemy + enemyUnit.x,
+          y: -Mathf.cos(angle) * distanceToEnemy + enemyUnit.y,
         });
       }
     } else {
@@ -331,7 +331,7 @@ export class Unit {
 
   getAdditionalRepresentationParam(): f32 {
     switch (this.state) {
-      case UnitState.FLY : return Math.hypot(this.modX, this.modY) as f32
+      case UnitState.FLY : return Mathf.hypot(this.modX, this.modY)
       case UnitState.GETUP: return this.gettingUpProgress
       case UnitState.SHOOT : return this.timeToNextShoot
       case UnitState.ABILITY: return 0 //Abilities::get_representation_state(self)

@@ -2,7 +2,7 @@ import { NORMAL_SQUAD_RADIUS } from "./constants";
 import { Squad } from "./squad";
 
 export function getInitialTrackIndex(currentIndex: i8, x: f32, y: f32, squad: Squad): i8 {
-  let distanceUnitFromSquadCenter = Math.hypot(
+  let distanceUnitFromSquadCenter = Mathf.hypot(
     x - squad.centerPoint.x,
     y - squad.centerPoint.y,
   )

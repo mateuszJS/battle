@@ -11,7 +11,7 @@ export class Faction {
   private resource: u32
 
   constructor(
-    public id: u32,
+    public id: i32,
     public isUser: bool,
     private factoryX: f32,
     private factoryY: f32,

@@ -14,7 +14,7 @@ import { UniverseRepresentation } from '~/initGame'
 import Factory from '~/representation/Factory'
 import Unit from '~/representation/Unit'
 import UnitsFactory from '~/representation/UnitFactory'
-import { USER_FACTION_ID } from 'Consts'
+import { USER_FACTION_ID } from '../../logic/constants'
 import BulletFactory from '~/representation/BulletFactory'
 import StrategicPoint from '~/representation/StrategicPoint'
 

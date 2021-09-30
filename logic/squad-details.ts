@@ -26,7 +26,7 @@ SQUAD_DETAILS.set(SquadType.Squad, {
   movementSpeed: 2.5,
   isAllowedToChase: true,
   maxChasingShootAngle: 0.52,
-  unitRadius: 20,
+  unitRadius: 40,
 })
 
 SQUAD_DETAILS.set(SquadType.Portal, {
@@ -37,7 +37,7 @@ SQUAD_DETAILS.set(SquadType.Portal, {
   movementSpeed: 0,
   isAllowedToChase: false,
   maxChasingShootAngle: 0,
-  unitRadius: 0,
+  unitRadius: 200,
 })
 
 export var MAP_SQUAD_REPRESENTATION_TO_TYPE = new Map<f32, SquadType>()

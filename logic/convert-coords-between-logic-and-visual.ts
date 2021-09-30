@@ -2,22 +2,22 @@ import { MAP_SKEW_ANGLE, MAP_VERTICAL_MOD } from './constants'
 import { mapHeightGlob } from '.'
 import { Point } from './geom-types'
 
-export function convertLogicCoordsToVisual(x: number, y: number): Point {
-  const angle = Math.atan2(x, mapHeightGlob - y) + MAP_SKEW_ANGLE
-  const distance = Math.hypot(x, mapHeightGlob - y)
+export function convertLogicCoordsToVisual(x: f32, y: f32): Point {
+  const angle = Mathf.atan2(x, mapHeightGlob - y) + MAP_SKEW_ANGLE
+  const distance = Mathf.hypot(x, mapHeightGlob - y)
   return {
-    x: Math.sin(angle) * distance as f32,
-    y: (-Math.cos(angle) * distance + mapHeightGlob) * MAP_VERTICAL_MOD as f32,
+    x: Mathf.sin(angle) * distance,
+    y: (-Mathf.cos(angle) * distance + mapHeightGlob) * MAP_VERTICAL_MOD,
   }
 }
 
-export function convertVisualCoordsToLogic(x: number, y: number): Point {
+export function convertVisualCoordsToLogic(x: f32, y: f32): Point {
   const correctY = y / MAP_VERTICAL_MOD
-  const angle = Math.atan2(x, mapHeightGlob - correctY) - MAP_SKEW_ANGLE
-  const distance = Math.hypot(x, mapHeightGlob - correctY) as f32
+  const angle = Mathf.atan2(x, mapHeightGlob - correctY) - MAP_SKEW_ANGLE
+  const distance = Mathf.hypot(x, mapHeightGlob - correctY)
 
   return {
-    x: Math.sin(angle) as f32 * distance,
-    y: -Math.cos(angle) as f32 * distance + mapHeightGlob,
+    x: Mathf.sin(angle) * distance,
+    y: -Mathf.cos(angle) * distance + mapHeightGlob,
   }
 }
