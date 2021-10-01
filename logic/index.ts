@@ -72,29 +72,18 @@ function getPointCoordsById(id: i32): UniquePoint {
 }
 
 export function debugObstacles(): Float32Array {
-  let data = outerBoundaries.map<f32[]>(linesList => {
+  const data = outerBoundaries.map<f32[]>(linesList => {
     if (!linesList) return [-2]
     if (linesList.length === 0) return [-3]
     return linesList.map<f32[]>(line => [line.p1.x, line.p1.y, line.p2.x, line.p2.y]).flat().concat([-1])
   }).flat()
-  let result = new Float32Array(data.length)
 
-  for (let i = 0; i < data.length; i++) {
-    let item = data[i]
-    result[i] = item
-  }
-  return result
+  return toFloat32Array(data)
 }
 
 export function debugOuterTrack(): Float32Array {
-  let data = blockingTrackLines.map<f32[]>(line => [line.p1.x, line.p1.y, line.p2.x, line.p2.y, -1.0]).flat()
-  let result = new Float32Array(data.length)
-
-  for (let i = 0; i < data.length; i++) {
-    let item = data[i]
-    result[i] = item
-  }
-  return result
+  const data = blockingTrackLines.map<f32[]>(line => [line.p1.x, line.p1.y, line.p2.x, line.p2.y, -1.0]).flat()
+  return toFloat32Array(data)
 }
 
 export function debugInnerTrack(): Float32Array {
@@ -116,13 +105,7 @@ export function debugInnerTrack(): Float32Array {
     }
   }
 
-  let result = new Float32Array(data.length)
-
-  for (let i = 0; i < data.length; i++) {
-    let item = data[i]
-    result[i] = item
-  }
-  return result
+  return toFloat32Array(data)
 }
 
 export function getFactoriesInitData(): Float32Array {
@@ -164,25 +147,13 @@ function updateUniverse(): void {
 }
 
 export function debugGrid(): Float32Array {
-  const gridData = debugGridNumbers()
-  const result = new Float32Array(gridData.length)
-  for(let i = 0; i < gridData.length; i++) {
-    result[i] = gridData[i]
-  }
-
-  return result
+  return toFloat32Array(debugGridNumbers())
 }
 
 export function getUniverseRepresentation(): Float32Array {
   updateUniverse()
-
-  let representation = factions.map<f32[]>(faction => faction.getRepresentation()).flat()
-  let result = new Float32Array(representation.length)
-  for (let i: i32 = 0; i < representation.length; i++) {
-    unchecked(result[i] = representation[i])
-  }
-
-  return result
+  const representation = factions.map<f32[]>(faction => faction.getRepresentation()).flat()
+  return toFloat32Array(representation)
 }
 
 export function createSquad(squadType: f32): void {
@@ -238,11 +209,7 @@ export function moveUnits(squadsIds: Uint32Array, x: f32, y: f32): Float32Array 
     }
   }
 
-  let serializedResult = new Float32Array(result.length)
-  for (let i: i32 = 0; i < result.length; i++) {
-    serializedResult[i] = result[i]
-  }
-  return serializedResult
+  return toFloat32Array(result)
 
   // return attackers.map<f32[]>(attacker => {
   //   const destination: Point = attacker.track.length > 0
@@ -319,12 +286,7 @@ export function debugSelecting(x1: f32, y1: f32, x2: f32, y2: f32): Float32Array
     leftBottomCorner,
   ]).map<f32[]>(point => [point.x, point.y]).flat();
 
-
-  let result = new Float32Array(data.length)
-  for (let i: i32 = 0; i < data.length; i++) {
-    result[i] = data[i]
-  }
-  return result
+  return toFloat32Array(data)
 }
 
 export function useAbility(squadsIds: Uint32Array, abilityType: u8, x: f32, y: f32): void {
@@ -342,10 +304,17 @@ export function getAbilitiesCoolDowns(squadsIds: Uint32Array, abilityType: u8): 
 //   return result
 // }
 
+function toFloat32Array(arr: f32[]): Float32Array {
+  const len = arr.length
+  const result = instantiate<Float32Array>(len)
+  memory.copy(result.dataStart, arr.dataStart, len * sizeof<f32>())
+  return result
+}
+
 // function toTypedArray<T, TyArr>(arr: Array<T>): TyArr {
-//   let len = arr.length;
-//   let result = instantiate<TyArr>(len);
-//   memory.copy(result.dataStart, arr.dataStart, len);
+//   const len = arr.length;
+//   const result = instantiate<TyArr>(len);
+//   memory.copy(result.dataStart, arr.dataStart, len * sizeof<T>());
 //   return result;
 // }
 
