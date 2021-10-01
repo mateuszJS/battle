@@ -135,9 +135,7 @@ export class Squad {
       });
     }
 
-    if (enemyToAttack) {
-      this.attackAim = enemyToAttack
-    }
+    this.attackAim = enemyToAttack
 
     /* if(ability) {
       this.ability ==

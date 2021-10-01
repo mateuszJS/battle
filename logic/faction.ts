@@ -1,3 +1,4 @@
+import { PRECALCULATED_ATTACKERS_POSITIONS } from "./attacker-positions"
 import { REPRESENTATION_FACTION_ID } from "./constants"
 import { Factory } from "./factory"
 import { Point } from "./geom-types"
@@ -54,7 +55,6 @@ export class Faction {
 
   taskAddDestination(squadsIds: Uint32Array, destination: Point): void {
     const positions = getSquadPositions(squadsIds.length, destination.x, destination.y)
-    trace("positions.length", 1, positions.length)
     let positionIndex = 0
     for (let i = 0; i < this.squads.length; i++) {
       const squad = unchecked(this.squads[i])
@@ -83,7 +83,7 @@ export class Faction {
         attackers.push(squad)
       }
     }
-    setAggressorPositions(attackers, enemySquad.centerPoint)
+    setAggressorPositions(attackers, enemySquad)
   }
 
   checkSquadsCorrectness(): void {
