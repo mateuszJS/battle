@@ -7,10 +7,11 @@ import { Line, Point, UniquePoint } from "./geom-types";
 import { MAP_SQUAD_REPRESENTATION_TO_TYPE, SquadType } from "./squad-details";
 import { convertLogicCoordsToVisual, convertVisualCoordsToLogic } from "./convert-coords-between-logic-and-visual";
 import { initializeGrid, fillGrid, debugGridNumbers, traceLine, pickCellsDebug, getSquadsFromGrid } from "./grid-manager";
-import { CHECK_SQUADS_CORRECTNESS_PERIOD, OBSTACLES_CELL_SIZE, UINT_DATA_SETS_DIVIDER, UPDATE_SQUAD_CENTER_PERIOD } from "./constants";
+import { CHECK_SQUADS_CORRECTNESS_PERIOD, OBSTACLES_CELL_SIZE, REPRESENTATION_BULLETS, UINT_DATA_SETS_DIVIDER, UPDATE_SQUAD_CENTER_PERIOD } from "./constants";
 import { isPointInPolygon } from "./geom-utils";
 import { Squad } from "./squad";
 import { createPermanentTrackGraph, trackPoints, blockingTrackLines, permanentObstaclesGraph } from "./track-manager";
+import { getBulletsRepresentation, updateBullets } from "./bullets-manager";
 
 var factions: Faction[] = []
 export var mapWidthGlob: f32 = 0
@@ -134,6 +135,8 @@ function updateUniverse(): void {
       faction.checkSquadsCorrectness()
     }
   }
+
+  updateBullets()
   
   factions.forEach(faction => {
     faction.update()
@@ -153,7 +156,10 @@ export function debugGrid(): Float32Array {
 export function getUniverseRepresentation(): Float32Array {
   updateUniverse()
   const representation = factions.map<f32[]>(faction => faction.getRepresentation()).flat()
-  return toFloat32Array(representation)
+
+  return toFloat32Array(
+    representation.concat(getBulletsRepresentation())
+  )
 }
 
 export function createSquad(squadType: f32): void {

@@ -36,7 +36,7 @@ for (let i = 1; i <= NUMBER_OF_RANGE_BREAKPOINTS; i++) {
   let distance = max_distance
   let positions: Point[] = []
 
-  while (distance > DISTANCE_BETWEEN_ATTACKERS) {
+  while (distance > DISTANCE_BETWEEN_ATTACKERS / 2) {
     let diff_angle =
       Mathf.acos(
         1.0 - (

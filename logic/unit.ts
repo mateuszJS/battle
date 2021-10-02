@@ -7,6 +7,7 @@ import { getRandom } from "./get-random"
 import { Point } from "./geom-types"
 import { Squad } from "./squad"
 import { convertLogicCoordsToVisual } from "./convert-coords-between-logic-and-visual";
+import { addBullet } from "./bullets-manager"
 
 export class Unit {
   public id: f32
@@ -280,24 +281,26 @@ export class Unit {
 
   updateShoot(): void {
     if (this.timeToNextShoot == 0) {
-      let weapon = this.squad.weaponDetails
-      let scatter = weapon.scatter * 2.0 * (getRandom() - 0.5)
-      let distance = 80.0 * weapon.scatter * getRandom()
+      const weapon = this.squad.weaponDetails
+      const scatterSeed =  getRandom() - 0.5
+      const distanceModSeed = getRandom() - 0.5
 
-      let angle = this.state == UnitState.SHOOT
+      const angle = this.state == UnitState.SHOOT
         ? this.angle
         : this.weaponAngleDuringChasing
 
-      // bullet_manager.add_bullet(
-      //   self.id as f32,
-      //   self.x,
-      //   self.y,
-      //   angle + weaponDeviation,
-      //   &squad_shared_info.weapon.name,
-      //   self.aim.clone(),
-      //   distance_mod,
-      //   weaponDeviation.abs() < MAX_WEAPON_DEVIATION_TO_HIT,
-      // );
+      const targetRadius = (this.attackAim as Unit).squad.squadDetails.unitRadius
+
+      addBullet(
+        this.id as f32,
+        this.x,
+        this.y,
+        angle + weapon.scatter * 2.0 * scatterSeed,
+        weapon,
+        this.attackAim as Unit,
+        1 + distanceModSeed / 5,
+        Math.abs(scatterSeed) + Math.abs(distanceModSeed) < targetRadius / 100,
+      );
 
       this.timeToNextShoot = getRandom() > weapon.chanceForReload
         ? weapon.reloadTime

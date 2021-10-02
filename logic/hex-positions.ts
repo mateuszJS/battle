@@ -326,7 +326,7 @@ export function setAggressorPositions(squads: Squad[], enemySquad: Squad): void 
       }
     }
 
-    const squadsDividedByRangeAndLocalization = getSquadsDividedByRangeAndLocalization(squads)
+    const squadsDividedByRangeAndLocalization = getSquadsDividedByRangeAndLocalization(squadsOutOfRange)
 
     for (let i = 0; i < squadsDividedByRangeAndLocalization.length; i++) {
       const squadGroup = unchecked(squadsDividedByRangeAndLocalization[i])

@@ -1,9 +1,8 @@
+import { GRENADE, HIT_THE_GROUND, STANDARD_RIFLE } from '../../logic/constants'
 import { UniverseRepresentation } from '~/initGame'
 import Unit from './Unit'
 
-const STANDARD_RIFLE = 1.0
-const GRENADE = 2.0
-const HIT_THE_GROUND = 3.0
+
 
 const MAP_TYPE_TO_GRAPHIC_CONSTRUCTOR = {
   [STANDARD_RIFLE]: () => {
