@@ -6,7 +6,7 @@ import { getInitialTrackIndex } from "./get-initial-track-index"
 import { getRandom } from "./get-random"
 import { Point } from "./geom-types"
 import { Squad } from "./squad"
-import { convertLogicCoordsToVisual } from "./convert-coords-between-logic-and-visual";
+import { convertLogicCoordsToVisual } from "./convert-coords-between-logic-and-visual"
 import { addBullet } from "./bullets-manager"
 
 export class Unit {
@@ -17,7 +17,7 @@ export class Unit {
   private trackIndex: i8
   private timeToNextShoot: u16
   private attackAim: Unit | null
-  private hp: i16
+  public hp: i16
   private gettingUpProgress: f32
   private weaponAngleDuringChasing: f32
   public positionOffset: Point
@@ -72,17 +72,17 @@ export class Unit {
   }
 
   changeStateToGetup(): void {
-    if (this.hp <= 0.0) {
+    if (this.hp <= 0) {
       this.changeStateToDie()
     } else {
       this.state = UnitState.GETUP;
-      this.gettingUpProgress = 0.0;
+      this.gettingUpProgress = 0;
     }
   }
 
   updateGetup(): void {
     this.gettingUpProgress += 0.01
-    if (this.gettingUpProgress >= 1.0) {
+    if (this.gettingUpProgress >= 1) {
       this.state = UnitState.IDLE
       if (this.trackIndex != -1) {
         this.trackIndex = getInitialTrackIndex(
@@ -235,7 +235,7 @@ export class Unit {
   changeStateToShoot(squadToAttack: Squad, isImportantAim: bool): void {
     // check if unit can keep current aim
     const attackAim = this.attackAim
-    if (attackAim != null) {
+    if (attackAim != null && attackAim.hp > 0) {
       let distance = Math.hypot(attackAim.x - this.x, attackAim.y - this.y)
       if (distance <= this.squad.weaponDetails.range) {
         this.state = UnitState.SHOOT // if changed from RUN -> IDLE and still has secondary aim from run
@@ -274,7 +274,7 @@ export class Unit {
         });
       }
     } else {
-      this.state = UnitState.IDLE
+      this.resetState()
     }
   }
 
@@ -289,20 +289,21 @@ export class Unit {
         ? this.angle
         : this.weaponAngleDuringChasing
 
-      const targetRadius = (this.attackAim as Unit).squad.squadDetails.unitRadius
+      const attackAim = this.attackAim as Unit
+      const targetRadius = attackAim.squad.squadDetails.unitRadius
+      const distance = Mathf.hypot(this.x - attackAim.x, this.y - attackAim.y) * (1 + distanceModSeed / 3) - this.squad.squadDetails.unitRadius * 2.5
+      // we are subtracting unitRadius * 1.5, because a bullet comes from unit rifle, not from the center of the base
 
       addBullet(
         this.id as f32,
-        this.x,
-        this.y,
         angle + weapon.scatter * 2.0 * scatterSeed,
         weapon,
-        this.attackAim as Unit,
-        1 + distanceModSeed / 5,
+        attackAim,
+        distance,
         Math.abs(scatterSeed) + Math.abs(distanceModSeed) < targetRadius / 100,
       );
 
-      this.timeToNextShoot = getRandom() > weapon.chanceForReload
+      this.timeToNextShoot = getRandom() < weapon.chanceForReload
         ? weapon.reloadTime
         : weapon.shootTime
       
@@ -366,5 +367,9 @@ export class Unit {
 
   takeDamage(damage: u16): void {
     this.hp -= damage
+
+    if (this.hp <= 0 && this.isChangeStateAllowed()) {
+      this.changeStateToDie()
+    }
   }
 }

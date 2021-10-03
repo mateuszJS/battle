@@ -175,10 +175,12 @@ function getAttackedEnemy(target: Point): Squad | null {
     if (squad.factionId == userFaction.id) continue
 
     const unitRadius = squad.squadDetails.unitRadius
+    const offsetY = unitRadius * 1.5
+    const unitSize = unitRadius * 2
     for (let j = 0; j < squad.members.length; j++) {
       const unit = unchecked(squad.members[j])
-      const distance = Mathf.hypot(unit.x - target.x, unit.y - unitRadius - target.y)
-      if (distance < unitRadius) {
+      const distance = Mathf.hypot(unit.x - target.x, unit.y - offsetY - target.y)
+      if (distance < unitSize) {
         return squad
       }
     }
@@ -238,6 +240,13 @@ export function getSelectedUnitsIds(x1: f32, y1: f32, x2: f32, y2: f32): Uint32A
     rightBottomCorner,
     leftBottomCorner,
   ]
+
+  const centerOfSelection: Point = points.reduce<Point>((acc, point) => ({
+    x: acc.x + point.x * 0.25,
+    y: acc.y + point.y * 0.25,
+  }), { x: 0, y: 0 }) // this is used to pretend that unit is closer to the selection
+  // so it's easier to select unit
+
   const squads = getSquadsFromGrid(points)
   const selectedOurSquads: Squad[] = []
 
@@ -248,13 +257,21 @@ export function getSelectedUnitsIds(x1: f32, y1: f32, x2: f32, y2: f32): Uint32A
 
   for (let i = 0; i < squads.length; i++) {
     const squad = unchecked(squads[i])
+
+    const angle = Mathf.atan2(
+      centerOfSelection.x - squad.centerPoint.x,
+      squad.centerPoint.y - centerOfSelection.y,
+    ) // to pretend that unit is closer to the selection
+    const modX = Mathf.sin(angle) * squad.squadDetails.unitRadius
+    const modY = -Mathf.cos(angle) * squad.squadDetails.unitRadius
+
     if (squad.factionId == userFaction.id) {
       let isInside = false
       for (let j = 0; j < squad.members.length; j++) {
         const member = unchecked(squad.members[j])
         if (
           isPointInPolygon(
-            { x: member.x, y: member.y },
+            { x: member.x + modX, y: member.y + modY },
             lines,
           )
         ) {

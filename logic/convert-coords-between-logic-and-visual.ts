@@ -21,3 +21,8 @@ export function convertVisualCoordsToLogic(x: f32, y: f32): Point {
     y: -Mathf.cos(angle) * distance + mapHeightGlob,
   }
 }
+
+export function convertLogicAngleToVisual(angle: f32): f32 {
+  const skewedAngle = angle + MAP_SKEW_ANGLE
+  return Mathf.atan2(Mathf.sin(skewedAngle), Mathf.cos(skewedAngle) * MAP_VERTICAL_MOD)
+}

@@ -1,4 +1,4 @@
-import { MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS } from "./constants"
+import { MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS, UnitState } from "./constants"
 import { getId } from "./get-id"
 import { Point } from "./geom-types"
 import { UNITS_OFFSET } from "./position-utils"
@@ -158,6 +158,17 @@ export class Squad {
   }
 
   checkMembersCorrectness(): void {
+    this.members = this.members.filter(member => member.state != UnitState.DIE)
+
+    const attackAim = this.attackAim
+    const secondaryAttackAim = this.secondaryAttackAim
+    if (attackAim && attackAim.members.length == 0) {
+      this.attackAim = null
+    }
+    if (secondaryAttackAim && secondaryAttackAim.members.length == 0) {
+      this.secondaryAttackAim = null
+    }
+
     for (let i = 0; i < this.members.length; i++) {
       unchecked(this.members[i].checkCorrectness())
     }

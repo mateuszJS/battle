@@ -87,8 +87,13 @@ export class Faction {
   }
 
   checkSquadsCorrectness(): void {
-    for (let i = 0; i < this.squads.length; i++) {
-      unchecked(this.squads[i].checkMembersCorrectness())
-    }
+    // I kept it because we had already a situation when forEach trowed an error
+    // for (let i = 0; i < this.squads.length; i++) {
+    //   unchecked(this.squads[i].checkMembersCorrectness())
+    // }
+    this.squads = this.squads.filter(squad => {
+      squad.checkMembersCorrectness()
+      return squad.members.length != 0
+    })
   }
 }

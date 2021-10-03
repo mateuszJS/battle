@@ -7,8 +7,8 @@ export enum WeaponType {
 export class WeaponDetails {
   representationId: f32
   range: f32
-  scatter: f32
-  chanceForReload: f32
+  scatter: f32 // angle in radians
+  chanceForReload: f32 // 1 -> will always reload, 0 -> will never reload
   reloadTime: u16
   shootTime: u16
   bulletSpeed: f32
@@ -20,11 +20,11 @@ export var WEAPON_DETAILS = new Map<WeaponType,WeaponDetails>()
 WEAPON_DETAILS.set(WeaponType.StandardRifle, {
   representationId: STANDARD_RIFLE,
   range: 600,
-  scatter: 0.15, // angle in radians
-  chanceForReload: 0.2, // 1 -> no reload after shoot, 0 -> always reload after every shoot
-  reloadTime: 30,
-  shootTime: 5,
-  bulletSpeed: 5,
+  scatter: 0.15,
+  chanceForReload: 0.25,
+  reloadTime: 200,
+  shootTime: 50,
+  bulletSpeed: 10,
   damage: 10,
 })
 

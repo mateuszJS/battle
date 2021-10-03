@@ -2,6 +2,7 @@ import { REPRESENTATION_BULLETS } from "./constants"
 import { Point } from "./geom-types"
 import { Unit } from "./unit"
 import { WeaponDetails } from "./weapon-details"
+import { convertLogicAngleToVisual } from './convert-coords-between-logic-and-visual'
 
 class BulletRepresentation {
   sourceId: f32
@@ -73,20 +74,18 @@ var bullets_data: BulletData[] = []
 
 export function addBullet(
   sourceId: f32,
-  x: f32,
-  y: f32,
   angle: f32,
   weaponDetails: WeaponDetails,
   target: Unit,
-  distance_mod: f32,
+  distance: f32,
   hit: bool,
 ): void {
-  const distance = Mathf.hypot(x - target.x, y - target.y) * distance_mod
+  
   const lifetime = distance / weaponDetails.bulletSpeed
 
   bullets_representation.push({
     sourceId,
-    angle,
+    angle: convertLogicAngleToVisual(angle),
     speed: weaponDetails.bulletSpeed,
     representationId: weaponDetails.representationId,
     lifetime,

@@ -151,7 +151,7 @@ class BulletFactory {
 
   static update() {
     this.bullets = this.bullets.filter(bullet => {
-      if (bullet.lifetime <= 0) {
+      if (bullet.lifetime <= Number.EPSILON) {
         // create boom
         bullet.sprite.parent.removeChild(bullet.sprite)
         return false

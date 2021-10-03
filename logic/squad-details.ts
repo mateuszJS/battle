@@ -21,7 +21,7 @@ export var SQUAD_DETAILS = new Map<SquadType,SquadDetails>()
 SQUAD_DETAILS.set(SquadType.Squad, {
   representationId: REPRESENTATION_SOLIDER,
   productionTime: 60,
-  numberOfMembers: 7,
+  numberOfMembers: 1,
   maxHealth: 100,
   movementSpeed: 2.5,
   isAllowedToChase: true,
