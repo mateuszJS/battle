@@ -1,4 +1,3 @@
-import { HALF_UNIT_HEIGHT } from 'Consts'
 import { UniverseRepresentation, WasmModule } from '~/initGame'
 import Unit from '~/representation/Unit'
 import Factory from '~/representation/Factory'
@@ -234,9 +233,9 @@ class SelectionController {
       // click on unit
       this.selectUnits(
         this.startPoint.x - 30,
-        this.startPoint.y - 30 + HALF_UNIT_HEIGHT,
+        this.startPoint.y - 30,
         this.startPoint.x + 30,
-        this.startPoint.y + 30 + HALF_UNIT_HEIGHT,
+        this.startPoint.y + 30,
       )
     }
     this.startPoint = null

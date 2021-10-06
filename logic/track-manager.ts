@@ -44,7 +44,14 @@ export function getTrack(startPoint: Point, endPoint: Point): UniquePoint[] {
   )
 }
 
-function addNewPointToGraph(graph: Map<u32, UniquePoint[]>, point: UniquePoint, isStart: bool): void {
+function addNewPointToGraph(
+  graph: Map<u32, UniquePoint[]>,
+  point: UniquePoint,
+  isStart: bool,
+  blockingLines: Line[],
+): bool {
+  let isConnectedCorrectly = false
+
   for (let i = 0; i < trackPoints.length; i++) {
     const innerTrackPoint = trackPoints[i]
     const newLine: UniqueLine = {
@@ -53,8 +60,8 @@ function addNewPointToGraph(graph: Map<u32, UniquePoint[]>, point: UniquePoint, 
     }
 
     let isIntersect = false
-    for (let j = 0; j < blockingTrackLines.length; j++) {
-      const blockingLine = blockingTrackLines[j]
+    for (let j = 0; j < blockingLines.length; j++) {
+      const blockingLine = blockingLines[j]
       if (checkIntersection(newLine, blockingLine)) {
         isIntersect = true
         break
@@ -63,6 +70,7 @@ function addNewPointToGraph(graph: Map<u32, UniquePoint[]>, point: UniquePoint, 
 
     // ------------end checking intersection-------------------
     if (!isIntersect) {
+      isConnectedCorrectly = true
       const key = isStart ? point.id : innerTrackPoint.id
       const newPoint = isStart ? innerTrackPoint : point
       if (graph.has(key)) {
@@ -72,18 +80,70 @@ function addNewPointToGraph(graph: Map<u32, UniquePoint[]>, point: UniquePoint, 
       }
     }
   }
+
+  return isConnectedCorrectly
+}
+
+function addFakeConnection(
+  graph: Map<u32, UniquePoint[]>,
+  point: UniquePoint,
+): void {
+  // We need to collect two the closest lines
+  let closestDistance: f32 = Infinity
+  let closestLine: Line | null = null
+  let closestSecondDistance: f32 = Infinity
+  let closestSecondLine: Line | null = null
+  
+  for (let i = 0; i < blockingTrackLines.length; i++) {
+    const line = unchecked(blockingTrackLines[i])
+    const distance = Mathf.min(
+      Mathf.hypot(line.p1.x - point.x, line.p1.y - point.y),
+      Mathf.hypot(line.p2.x - point.x, line.p2.y - point.y),
+    )
+
+
+    if (distance < closestDistance) {
+      // store previous shortest distance, as the second shortest distance
+      closestSecondDistance = closestDistance
+      closestSecondLine = closestLine
+      // store a new shortest distance as the shortest
+      closestDistance = distance
+      closestLine = line
+    } else if (distance < closestSecondDistance) {
+      closestSecondDistance = distance
+      closestSecondLine = line
+    }
+  }
+
+  // Collect all blocking lines exclude two found in previous step
+  const filteredBlockingTrackLines: Line[] = []
+
+  for (let i = 0; i < blockingTrackLines.length; i++) {
+    const line = unchecked(blockingTrackLines[i])
+    if (line != closestLine && line != closestSecondLine) {
+      filteredBlockingTrackLines.push(line)
+    }
+  }
+
+  addNewPointToGraph(graph, point, true, filteredBlockingTrackLines)
 }
 
 function getComplicatedTrack(startPoint: UniquePoint, endPoint: UniquePoint): UniquePoint[] {
   let graph: Map<u32, UniquePoint[]> = new Map()
   const permanentObstaclesGraphKeys = permanentObstaclesGraph.keys()
+
   for (let i = 0; i < permanentObstaclesGraphKeys.length; i++) {
     const key = permanentObstaclesGraphKeys[i]
     graph.set(key, permanentObstaclesGraph.get(key).slice(0))
   }
 
-  addNewPointToGraph(graph, startPoint, true)
-  addNewPointToGraph(graph, endPoint, false)
+  if (!addNewPointToGraph(graph, startPoint, true, blockingTrackLines)) {
+    // false -> so we have to find a correct point
+    // since this one is out of squad boundaries
+    addFakeConnection(graph, startPoint)
+  }
+
+  addNewPointToGraph(graph, endPoint, false, blockingTrackLines)
   
   return shortestPathAStart(graph, startPoint, endPoint)
 }
