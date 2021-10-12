@@ -19,6 +19,7 @@ import drawNode from './draw-node'
 import { startDebug as debugInnerTrack } from './debug/innerTrack'
 import { startDebug as debugOuterTrack } from './debug/outerTrack'
 import { startDebug as startDebugObstacles } from './debug/obstacles'
+import { startDebug as gridDebug } from './debug/grid'
 // import { startDebug as startDebugObstaclesMap } from './debug/obstaclesMap'
 import initConvertArraysUtils from '~/attachUtils/init-convert-arrays-utils'
 import enhanceAnimatedSprites from '~/attachUtils/enhance-animated-sprites'
@@ -133,8 +134,11 @@ const initGame = (
   debugInnerTrack(wasmModule)
   debugOuterTrack(wasmModule)
   startDebugObstacles(wasmModule)
+  
 
   window.app.ticker.add((delta: number) => {
+    gridDebug(wasmModule)
+
     // startDebugGrid(wasmModule)
     const pointA = {
       x: mouseX,

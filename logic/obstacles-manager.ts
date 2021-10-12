@@ -56,7 +56,7 @@ export function getMap(data: Float32Array): Array<Line[] | null> {
         x: (x as f32) * OBSTACLES_CELL_SIZE,
         y: (y as f32) * OBSTACLES_CELL_SIZE,
       }
-      // trace("coords", 2, realCoordsPoint.x, realCoordsPoint.y)
+
       const x1: f32 = x <= OBSTACLES_MAP_WIDTH_HALF ? 0 : realCoordsPoint.x
       const x2: f32 = x <= OBSTACLES_MAP_WIDTH_HALF ? realCoordsPoint.x + OBSTACLES_CELL_SIZE : MAP_WIDTH
 

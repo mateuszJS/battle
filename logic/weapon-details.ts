@@ -13,6 +13,7 @@ export class WeaponDetails {
   shootTime: u16
   bulletSpeed: f32
   damage: u16
+  shotDuringRun: bool
 }
 
 export var WEAPON_DETAILS = new Map<WeaponType,WeaponDetails>()
@@ -25,7 +26,8 @@ WEAPON_DETAILS.set(WeaponType.StandardRifle, {
   reloadTime: 200,
   shootTime: 50,
   bulletSpeed: 10,
-  damage: 10,
+  damage: 0,
+  shotDuringRun: true,
 })
 
 export var MAX_POSSIBLE_WEAPON_RANGE: f32 = WEAPON_DETAILS.values().reduce((acc, weaponDetails) => (

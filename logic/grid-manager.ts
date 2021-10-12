@@ -4,6 +4,7 @@ import { Faction } from "./faction";
 import { Point } from "./geom-types";
 import { Squad } from "./squad";
 
+const SQUARE_OF_TWO: f32 = Mathf.sqrt(2)
 const EMPTY_GRID_INDEX = -100
 const GRID_CELL: f32 = 300
 const GRID_MAP_SCALE: f32 = 1 / GRID_CELL
@@ -26,19 +27,23 @@ export function initializeGrid(mapWidth: f32, mapHeight: f32): void {
   gridMapScaleY = gridMapHeight_f32 / mapHeight
 }
 
+function addSquadToGrid(squad: Squad): void {
+  const index = getIndexFromRealPosition(squad.centerPoint.x, squad.centerPoint.y)
+  const array = unchecked(grid[index])
+  if (array) {
+    array.push(squad)
+  } else {
+    unchecked(grid[index] = [squad])
+  }
+}
+
 export function fillGrid(factions: Faction[]): void {
   grid = new Array(gridMapWidth * gridMapHeight)
 
   factions.forEach(faction => {
+    addSquadToGrid(faction.portal)
     faction.squads.forEach(squad => {
-      squad.updateCenter()
-      const index = getIndexFromRealPosition(squad.centerPoint.x, squad.centerPoint.y)
-      const array = unchecked(grid[index])
-      if (array) {
-        array.push(squad)
-      } else {
-        unchecked(grid[index] = [squad])
-      }
+      addSquadToGrid(squad)
     })
   })
 }
@@ -157,8 +162,35 @@ export function traceLine(startPoint: Point, endPoint: Point): Point[] {
   return cells
 }
 
-export function getSquadsFromGrid(points: Point[]): Squad[] {
-  const cellIndexes = pickCells(points)
+function pickCellIndexesInCircle(rawCenter: Point, rawRadius: f32): i32[] {
+  const center = pointToGridFnc(rawCenter)
+  const radius = rawRadius * GRID_MAP_SCALE + SQUARE_OF_TWO
+  const top = Mathf.max(
+    Mathf.ceil(center.y - radius), // ceil to make sure that sqrt later will not get negative argument
+    0,
+  ) as i32
+  const bottom = Mathf.min(
+    Mathf.floor(center.y + radius), // floor to make sure that sqrt later will not get negative argument
+    gridMapHeight as f32 - 1
+  ) as i32
+  const selectedIndexes: i32[] = []
+
+  for (let y = top; y <= bottom; y++) {
+    const dy = (y as f32) - center.y
+    const dx = Mathf.floor(Mathf.sqrt(radius*radius - dy*dy))
+    const left = Mathf.max(center.x - dx, 0) as i32
+    const right = Mathf.min(center.x + dx, gridMapWidth as f32 - 1) as i32
+
+    for (let x = left; x <= right; x++) {
+      selectedIndexes.push(y * gridMapWidth + x)
+    }
+  }
+
+  return selectedIndexes
+}
+
+export function getSquadsFromGridByCircle(position: Point, range: f32): Squad[] {
+  const cellIndexes = pickCellIndexesInCircle(position, range)
   let result: Squad[] = []
 
   for (let i = 0; i < cellIndexes.length; i++) {
@@ -171,82 +203,36 @@ export function getSquadsFromGrid(points: Point[]): Squad[] {
   return result
 }
 
-export function pickCellsDebug(points: Point[]): Point[] {
-  let fMaxY: f32 = -Infinity
-  let fMinY: f32 = Infinity
-  for (let i = 0; i < points.length; i++) {
-    let point = pointToGridFnc(unchecked(points[i]))
-    if (fMinY > point.y) fMinY = point.y
-    if (fMaxY < point.y) fMaxY = point.y
-    
-  }
-  let minY = Mathf.floor(fMinY) as i32
-  const maxY = Mathf.ceil(fMaxY) as i32
-  let length = maxY - minY + 1
+export function getSquadsFromGridByPolygon(points: Point[]): Squad[] {
+  const cellIndexes = pickCellIndexesInPolygon(points)
+  let result: Squad[] = []
 
-  let startEdge = new Array<i32>(length).fill(EMPTY_GRID_INDEX)
-  let endEdge = new Array<i32>(length).fill(EMPTY_GRID_INDEX)
-  
-  for (let i = 0; i < points.length; i++) {
-    const results = traceLine(
-      unchecked(points[i]),
-      unchecked(points[(i + 1) % points.length]),
-    )
-    for (let j = 0; j < results.length; j++) {
-      const currentCell = unchecked(results[j])
-      const cellY = currentCell.y as i32 - minY
-      const cellX = currentCell.x as i32
-      if (unchecked(startEdge[cellY]) == EMPTY_GRID_INDEX) {
-        unchecked(startEdge[cellY] = cellX)
-        unchecked(endEdge[cellY] = cellX)
-      } else {
-        if (unchecked(startEdge[cellY]) > cellX) {
-          unchecked(startEdge[cellY] = cellX)
-        }
-        if (endEdge[cellY] < cellX) {
-          unchecked(endEdge[cellY] =  cellX)
-        }
-      }
+  for (let i = 0; i < cellIndexes.length; i++) {
+    const gridCell = unchecked(grid[cellIndexes[i]])
+    if (gridCell) {
+      result = result.concat(gridCell)
     }
   }
 
-  let cells: Point[] = []
-  /* ========BEGIN - add 1 y to the bottom and to the top========= */
-  if (minY > 0) {
-    startEdge.unshift(unchecked(startEdge[0]))
-    endEdge.unshift(unchecked(endEdge[0]))
-    minY --
-    length ++
-  }
-  if (length - 1 + minY < gridMapHeight - 1) {
-    startEdge.push(unchecked(startEdge[startEdge.length - 1]))
-    endEdge.push(unchecked(endEdge[endEdge.length - 1]))
-    length ++
-  }
-  /* ========END - add 1 y to the bottom and to the top========= */
-  for (let i = 0; i < length; i++) { 
-    // if (startEdge[i] === EMPTY_GRID_INDEX) continue // seems like it's not needed anymore
-    // const start = startEdge[i]
-    // const end = endEdge[i]
-    const start = Math.max(unchecked(startEdge[i]) - 1, 0) as i32 // add x - 1
-    const end = Math.min(unchecked(endEdge[i]) + 1, gridMapWidth - 1) as i32 // add x + 1
-    for (let x = start; x <= end; x++) {
-      const y = i + minY
-      if (x >= 0 && x < gridMapWidth && y >= 0 && y < gridMapHeight) {
-        cells.push({ x: x as f32, y: y as f32 })
-      }
-    }
-  }
+  return result
+}
 
-  return cells.map<Point>(point => (
+export function pickCellIndexesInPolygonDebug(points: Point[]): Point[] {
+  // let indexes = pickCellIndexesInPolygon(points)
+  let indexes = pickCellIndexesInCircle(
+    points[0],
+    Mathf.hypot(points[0].x - points[1].x, points[0].y - points[1].y),
+  )
+
+  return indexes.map<Point>(cellIndex => (
     convertLogicCoordsToVisual(
-      point.x / gridMapScaleX + (1/(2 * gridMapScaleX)),
-      point.y / gridMapScaleY + (1/(2 * gridMapScaleY)),
+      (cellIndex % gridMapWidth) as f32 / gridMapScaleX + (1/(2 * gridMapScaleX)),
+      Mathf.floor((cellIndex as f32) / (gridMapWidth as f32)) / gridMapScaleY + (1/(2 * gridMapScaleY)),
     )
   ));
 }
 
-function pickCells(points: Point[]): i32[] {
+function pickCellIndexesInPolygon(points: Point[]): i32[] {
   let fMaxY: f32 = -Infinity
   let fMinY: f32 = Infinity
   for (let i = 0; i < points.length; i++) {
@@ -255,9 +241,9 @@ function pickCells(points: Point[]): i32[] {
     if (fMaxY < point.y) fMaxY = point.y
     
   }
-  let minY = Mathf.floor(fMinY) as i32
+  const minY = Mathf.floor(fMinY) as i32
   const maxY = Mathf.ceil(fMaxY) as i32
-  let length = maxY - minY + 1
+  const length = maxY - minY + 1
 
   let startEdge = new Array<i32>(length).fill(EMPTY_GRID_INDEX)
   let endEdge = new Array<i32>(length).fill(EMPTY_GRID_INDEX)
@@ -286,30 +272,15 @@ function pickCells(points: Point[]): i32[] {
   }
 
   let selectedIndexes: i32[] = []
-  /* ========BEGIN - add 1 y to the bottom and to the top========= */
-  if (minY > 0) {
-    startEdge.unshift(unchecked(startEdge[0]))
-    endEdge.unshift(unchecked(endEdge[0]))
-    minY --
-    length ++
-  }
-  if (length - 1 + minY < gridMapHeight - 1) {
-    startEdge.push(unchecked(startEdge[startEdge.length - 1]))
-    endEdge.push(unchecked(endEdge[endEdge.length - 1]))
-    length ++
-  }
+ 
+  for (let i = -1; i <= length + 1; i++) {
+    const safeIndex = Mathf.min(Mathf.max(i as f32, 0), startEdge.length as f32) as i32
+    const start = Mathf.max(unchecked(startEdge[safeIndex] as f32) - 1, 0) as i32 // add x - 1
+    const end = Mathf.min(unchecked(endEdge[safeIndex] as f32) + 1, gridMapWidth as f32 - 1) as i32 // add x + 1
+    const y = Mathf.min(Mathf.max(i + minY as f32, 0), gridMapHeight as f32 - 1) as i32
 
-  for (let i = 0; i < length; i++) { 
-    // if (startEdge[i] === EMPTY_GRID_INDEX) continue // seems like it's not needed anymore
-    // const start = startEdge[i]
-    // const end = endEdge[i]
-    const start = Mathf.max(unchecked(startEdge[i] as f32) - 1, 0) as i32 // add x - 1
-    const end = Mathf.min(unchecked(endEdge[i] as f32) + 1, gridMapWidth as f32 - 1) as i32 // add x + 1
     for (let x = start; x <= end; x++) {
-      const y = i + minY
-      if (x >= 0 && x < gridMapWidth && y >= 0 && y < gridMapHeight) {
-        selectedIndexes.push(y * gridMapWidth + x)
-      }
+      selectedIndexes.push(y * gridMapWidth + x)
     }
   }
 

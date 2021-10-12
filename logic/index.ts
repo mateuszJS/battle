@@ -6,12 +6,13 @@ import { outerBoundaries, storeBoundaries } from "./obstacles-manager";
 import { Line, Point, UniquePoint } from "./geom-types";
 import { MAP_SQUAD_REPRESENTATION_TO_TYPE, SquadType } from "./squad-details";
 import { convertLogicCoordsToVisual, convertVisualCoordsToLogic, convertVisualOffsetToLogic } from "./convert-coords-between-logic-and-visual";
-import { initializeGrid, fillGrid, debugGridNumbers, pickCellsDebug, getSquadsFromGrid } from "./grid-manager";
-import { CHECK_SQUADS_CORRECTNESS_PERIOD, UINT_DATA_SETS_DIVIDER, UPDATE_SQUAD_CENTER_PERIOD } from "./constants";
+import { initializeGrid, fillGrid, debugGridNumbers, pickCellIndexesInPolygonDebug, getSquadsFromGridByPolygon } from "./grid-manager";
+import { CHECK_SQUADS_CORRECTNESS_PERIOD, UINT_DATA_SETS_DIVIDER, UPDATE_SQUAD_CENTER_PERIOD, SEARCH_FOR_ENEMIES_PERIOD } from "./constants";
 import { isPointInPolygon } from "./geom-utils";
 import { Squad } from "./squad";
 import { createPermanentTrackGraph, trackPoints, blockingTrackLines, permanentObstaclesGraph } from "./track-manager";
 import { getBulletsRepresentation, updateBullets } from "./bullets-manager";
+import searchForEnemy from "./search-for-enemy";
 
 var factions: Faction[] = []
 export var mapWidthGlob: f32 = 0
@@ -136,7 +137,10 @@ function updateUniverse(): void {
       faction.checkSquadsCorrectness()
     }
   }
-
+  
+  if (time % SEARCH_FOR_ENEMIES_PERIOD == 0) {
+    searchForEnemy(factions)
+  }
   updateBullets()
   
   factions.forEach(faction => {
@@ -168,7 +172,7 @@ export function createSquad(squadType: f32): void {
 }
 
 function getAttackedEnemy(target: Point): Squad | null {
-  const allSquadsAround = getSquadsFromGrid([target])
+  const allSquadsAround = getSquadsFromGridByPolygon([target])
 
   for (let i = 0; i < allSquadsAround.length; i++) {
     const squad = unchecked(allSquadsAround[i])
@@ -245,7 +249,7 @@ export function getSelectedUnitsIds(x1: f32, y1: f32, x2: f32, y2: f32): Uint32A
     leftBottomCorner,
   ]
 
-  const squads = getSquadsFromGrid(points)
+  const squads = getSquadsFromGridByPolygon(points)
   const selectedOurSquads: Squad[] = []
 
   let lines = points.map<Line>((point, index, allPoints) => ({
@@ -294,7 +298,7 @@ export function debugSelecting(x1: f32, y1: f32, x2: f32, y2: f32): Float32Array
   const rightBottomCorner = convertVisualCoordsToLogic(x2, y2)
   const leftBottomCorner = convertVisualCoordsToLogic(x1, y2)
 
-  const data = pickCellsDebug([
+  const data = pickCellIndexesInPolygonDebug([
     leftTopCorner,
     rightTopCorner,
     rightBottomCorner,

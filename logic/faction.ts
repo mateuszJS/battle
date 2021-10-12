@@ -9,6 +9,7 @@ import { SquadType } from "./squad-details"
 export class Faction {
   public factory: Factory
   public squads: Squad[]
+  public portal: Squad
   private resource: u32
 
   constructor(
@@ -21,8 +22,8 @@ export class Faction {
     this.factory = new Factory(id, factoryX, factoryY, factoryAngle, isUser)
     this.resource = 0
     this.squads = []
-    let portal = new Squad(id, SquadType.Portal)
-    portal.addMember(factoryX, factoryY, factoryAngle)
+    this.portal = new Squad(id, SquadType.Portal)
+    this.portal.addMember(factoryX, factoryY, factoryAngle)
   }
 
   update(): void {
