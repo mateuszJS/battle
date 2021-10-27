@@ -129,13 +129,21 @@ function updateUniverse(): void {
   time = (time + 1) % 1000
   if (time % UPDATE_SQUAD_CENTER_PERIOD == 0) {
     fillGrid(factions)
+    factions.forEach(faction => {
+      faction.squads.forEach((squad) => {
+        squad.updateCenter()
+      })
+    })
   }
-
+  
   if (time % CHECK_SQUADS_CORRECTNESS_PERIOD == 0) {
-    for (let i = 0; i < factions.length; i++) {
-      const faction = unchecked(factions[i])
+    // for (let i = 0; i < factions.length; i++) {
+    //   const faction = unchecked(factions[i])
+    //   faction.checkSquadsCorrectness()
+    // }
+    factions.forEach(faction => {
       faction.checkSquadsCorrectness()
-    }
+    })
   }
   
   if (time % SEARCH_FOR_ENEMIES_PERIOD == 0) {
@@ -285,11 +293,12 @@ export function getSelectedUnitsIds(x1: f32, y1: f32, x2: f32, y2: f32): Uint32A
   const unitsIds = selectedOurSquads.map<u32[]>(squad => squad.members.map<u32>(unit => unit.id as u32)).flat()
   const concatedData = unitsIds.concat([UINT_DATA_SETS_DIVIDER]).concat(squadsIds)
 
-  let result = new Uint32Array(concatedData.length)
-  for (let i = 0; i < concatedData.length; i++) {
-    unchecked(result[i] = concatedData[i])
-  }
-  return result
+  // let result = new Uint32Array(concatedData.length)
+  return toTypedArray<u32, Uint32Array>(concatedData)
+  // for (let i = 0; i < concatedData.length; i++) {
+  //   unchecked(result[i] = concatedData[i])
+  // }
+  // return result
 }
 
 export function debugSelecting(x1: f32, y1: f32, x2: f32, y2: f32): Float32Array {
@@ -330,11 +339,11 @@ function toFloat32Array(arr: f32[]): Float32Array {
   return result
 }
 
-// function toTypedArray<T, TyArr>(arr: Array<T>): TyArr {
-//   const len = arr.length;
-//   const result = instantiate<TyArr>(len);
-//   memory.copy(result.dataStart, arr.dataStart, len * sizeof<T>());
-//   return result;
-// }
+function toTypedArray<T, TyArr>(arr: Array<T>): TyArr {
+  const len = arr.length;
+  const result = instantiate<TyArr>(len);
+  memory.copy(result.dataStart, arr.dataStart, len * sizeof<T>());
+  return result;
+}
 
 // const typedf32arr = toTypedArray<f32, Float32Array>(arrf32);

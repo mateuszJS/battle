@@ -56,8 +56,8 @@ function getRealPositionFromIndex(index: f32): Point {
 }
 
 function getIndexFromRealPosition(x: f32, y: f32): i32 {
-  let column = (x * gridMapScaleX) as i32
-  let row = (y * gridMapScaleY) as i32
+  const column = (x * gridMapScaleX) as i32
+  const row = (y * gridMapScaleY) as i32
   return row * gridMapWidth + column
 }
 
