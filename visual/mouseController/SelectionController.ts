@@ -39,7 +39,7 @@ class SelectionController {
   }
 
   public consumeSelection({ x, y }: Point) {
-    if (this.selectedAbilityType) {
+    if (this.selectedAbilityType !== null) {
       this.deselectAbility()
       return
     }
@@ -59,7 +59,6 @@ class SelectionController {
       const enemyUnitIds = moveUnitsResult.subarray(0, indexOfDivider)
       const positions = moveUnitsResult.subarray(indexOfDivider + 1)
       // so we should make a copy
-
       if (enemyUnitIds.length > 0) {
         const selectedEnemyUnits = Array.from(enemyUnitIds).map(id => (
           this.universeRepresentation[id] as Unit | Factory | StrategicPoint
@@ -149,7 +148,7 @@ class SelectionController {
   }
 
   public startSelection(point: Point) {
-    if (this.selectedAbilityType) {
+    if (this.selectedAbilityType !== null) {
       this.wasmModule.useAbility(
         window.getUint32ArrayPointer(this.selectedSquads),
         this.selectedAbilityType,
@@ -170,12 +169,12 @@ class SelectionController {
   }
 
   public updateSelection({ x, y }: Point) {
-    // updateAbilitiesButtons(
-    //   this.selectedSquads,
-    //   this.wasmModule,
-    //   this.selectedAbilityType,
-    //   this.selectAbility,
-    // )
+    updateAbilitiesButtons(
+      this.selectedSquads,
+      this.wasmModule,
+      this.selectedAbilityType,
+      this.selectAbility,
+    )
 
     if (!this.startPoint) return
     

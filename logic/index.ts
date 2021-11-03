@@ -127,28 +127,33 @@ export function getFactoriesInitData(): Float32Array {
 
 function updateUniverse(): void {
   time = (time + 1) % 1000
+
+  // update the center
   if (time % UPDATE_SQUAD_CENTER_PERIOD == 0) {
-    fillGrid(factions)
     factions.forEach(faction => {
       faction.squads.forEach((squad) => {
         squad.updateCenter()
       })
     })
   }
-  
+
+  // check correctness, remove all squads which are not longer alive
   if (time % CHECK_SQUADS_CORRECTNESS_PERIOD == 0) {
-    // for (let i = 0; i < factions.length; i++) {
-    //   const faction = unchecked(factions[i])
-    //   faction.checkSquadsCorrectness()
-    // }
     factions.forEach(faction => {
       faction.checkSquadsCorrectness()
     })
   }
   
+  // fill grid wit hall valid squads now
+  if (time % UPDATE_SQUAD_CENTER_PERIOD == 0) {
+    fillGrid(factions)
+  }
+  
+  // now let's start using the grid
   if (time % SEARCH_FOR_ENEMIES_PERIOD == 0) {
     searchForEnemy(factions)
   }
+
   updateBullets()
   
   factions.forEach(faction => {
@@ -234,15 +239,6 @@ export function moveUnits(squadsIds: Uint32Array, x: f32, y: f32): Float32Array 
   }
 
   return toFloat32Array(result)
-
-  // return attackers.map<f32[]>(attacker => {
-  //   const destination: Point = attacker.track.length > 0
-  //     ? attacker.track[attacker.track.length - 1]
-  //     : attacker.centerPoint
-  //   return [destination.x, destination.y]
-  // }).flat()
-
-  // return new Float32Array(0)
 }
 
 export function getSelectedUnitsIds(x1: f32, y1: f32, x2: f32, y2: f32): Uint32Array {
@@ -318,10 +314,55 @@ export function debugSelecting(x1: f32, y1: f32, x2: f32, y2: f32): Float32Array
 }
 
 export function useAbility(squadsIds: Uint32Array, abilityType: u8, x: f32, y: f32): void {
+  userFaction.taskAddAbility(squadsIds, abilityType, convertVisualCoordsToLogic(x, y))
+  // for (let i = 0; i < userFaction.squads.length; i++) {
+  //   const squad = unchecked(userFaction.squads[i])
+  // }
+  //   .squads
+  //   .iter()
+  //   .filter_map(|ref_cell_squad| {
+  //     let mut squad = ref_cell_squad.borrow();
+  //     if selected_squad_ids.contains(&squad.id)
+  //       && (squad.squad_details.representation_type - ability_type).abs() < std::f32::EPSILON
+  //       && squad.ability_cool_down == 0
+  //     {
+  //       Some(squad.id)
+  //     } else {
+  //       None
+  //     }
+  //   })
+  //   .collect::<Vec<u32>>();
+
+  // user_faction.task_use_ability(&squads_ids, target_x, target_y);
 }
 
 export function getAbilitiesCoolDowns(squadsIds: Uint32Array, abilityType: u8): Float32Array {
-  return new Float32Array(0)
+  let result: f32[] = []
+
+  for (let i = 0; i < userFaction.squads.length; i++) {
+    const squad = unchecked(userFaction.squads[i])
+    const ability = squad.squadDetails.ability
+    if (
+      squadsIds.includes(squad.id)
+      && ability
+      && (
+        abilityType < f32.EPSILON
+        || Math.abs(squad.squadDetails.representationId - abilityType) < f32.EPSILON
+      )
+    ) {
+      squad.updateCenter()
+      const coords = convertLogicCoordsToVisual(squad.centerPoint.x, squad.centerPoint.y)
+      result = result.concat([
+        ability.type as f32,
+        squad.abilityCoolDown == 0 ? 1 : 0,
+        squad.abilityCoolDown as f32 / ability.reloadTime as f32,
+        coords.x,
+        coords.y,
+      ])
+    }
+  }
+
+  return toFloat32Array(result)
 }
 
 // export function debugObstaclesMap(): Uint32Array {

@@ -1,4 +1,5 @@
-import { REPRESENTATION_SOLIDER } from "./constants"
+import { Ability, ABILITY_DETAILS } from "./ability-details"
+import { AbilityType, REPRESENTATION_SOLIDER } from "./constants"
 
 export enum SquadType {
   Portal,
@@ -11,9 +12,8 @@ export class SquadDetails {
   numberOfMembers: u8
   maxHealth: u16
   movementSpeed: f32
-  isAllowedToChase: bool
-  maxChasingShootAngle: f32
   unitRadius: f32
+  ability: Ability | null
 }
 
 export var SQUAD_DETAILS = new Map<SquadType,SquadDetails>()
@@ -21,12 +21,11 @@ export var SQUAD_DETAILS = new Map<SquadType,SquadDetails>()
 SQUAD_DETAILS.set(SquadType.Squad, {
   representationId: REPRESENTATION_SOLIDER,
   productionTime: 60,
-  numberOfMembers: 1,
+  numberOfMembers: 7,
   maxHealth: 100,
   movementSpeed: 2.5,
-  isAllowedToChase: true,
-  maxChasingShootAngle: 0.52,
   unitRadius: 40,
+  ability: ABILITY_DETAILS.get(AbilityType.Grenade)
 })
 
 SQUAD_DETAILS.set(SquadType.Portal, {
@@ -35,9 +34,8 @@ SQUAD_DETAILS.set(SquadType.Portal, {
   numberOfMembers: 0,
   maxHealth: 2000,
   movementSpeed: 0,
-  isAllowedToChase: false,
-  maxChasingShootAngle: 0,
-  unitRadius: 200,
+  unitRadius: 150,
+  ability: null,
 })
 
 export var MAP_SQUAD_REPRESENTATION_TO_TYPE = new Map<f32, SquadType>()

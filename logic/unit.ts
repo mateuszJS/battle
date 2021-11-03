@@ -8,6 +8,7 @@ import { Point } from "./geom-types"
 import { Squad } from "./squad"
 import { convertLogicCoordsToVisual } from "./convert-coords-between-logic-and-visual"
 import { addBullet } from "./bullets-manager"
+import { Ability } from "./ability-details"
 
 export class Unit {
   public id: f32
@@ -24,14 +25,15 @@ export class Unit {
   public state: UnitState
   public x: f32
   public y: f32
-  private angle: f32
+  public angle: f32
   public squad: Squad
+  public hasFinishedUsingAbility: bool
 
   constructor(
     x: f32,
     y: f32,
     angle: f32,
-    squad: Squad
+    squad: Squad,
   ) {
     this.x = x
     this.y = y
@@ -49,6 +51,7 @@ export class Unit {
     this.gettingUpProgress = 0.0
     this.weaponAngleDuringChasing = 0.0
     this.state = UnitState.IDLE
+    this.hasFinishedUsingAbility = false
   }
 
   changeStateToFly(angle: f32, strength: f32): void {
@@ -96,7 +99,7 @@ export class Unit {
   }
 
   isChangeStateAllowed(): bool {
-    return this.state > 3
+    return this.state > UnitState.ABILITY
   }
 
   changeStateToRun(): void {
@@ -110,13 +113,13 @@ export class Unit {
 
     this.destination = destination
     // TODO: I'm not really sure about this atan2
-    this.setAngle(destination.x, destination.y)
+    this.angle = this.getAngle(destination.x, destination.y)
     this.modX = Mathf.sin(this.angle) * this.squad.squadDetails.movementSpeed
     this.modY = -Mathf.cos(this.angle) * this.squad.squadDetails.movementSpeed
   }
 
   goToCurrentPointOnTrack(): void {
-    let currPoint = unchecked(this.squad.track[this.trackIndex])
+    const currPoint = unchecked(this.squad.track[this.trackIndex])
     this.setDestination({
       x: currPoint.x + this.positionOffset.x,
       y: currPoint.y + this.positionOffset.y,
@@ -124,7 +127,7 @@ export class Unit {
   }
 
   updateRun(): void {
-    let isTargetAchieved = Math.hypot(
+    const isTargetAchieved = Math.hypot(
       this.x - this.destination.x,
       this.y - this.destination.y,
     ) < this.squad.squadDetails.movementSpeed
@@ -140,7 +143,7 @@ export class Unit {
       this.x += this.modX;
       this.y += this.modY;
 
-      if (this.squad.squadDetails.isAllowedToChase && this.attackAim != null) {
+      if (this.squad.weaponDetails.shotDuringRun && this.attackAim != null) {
         this.state = UnitState.CHASING
         this.updateShoot()
       }
@@ -163,116 +166,106 @@ export class Unit {
     if (!this.isChangeStateAllowed()) return
     const secondaryAttackAim = this.squad.secondaryAttackAim
     const squadAttackAim = this.squad.attackAim
+    const squadAbilityTarget = this.squad.abilityTarget
     // this method always should be called after check correctness for squad (bc if enemy can be out of whole squad range in shooting)
     if (this.trackIndex != -1) {
       if (this.state != UnitState.RUN && this.state != UnitState.CHASING) {
         this.goToCurrentPointOnTrack()
       }
-      if (secondaryAttackAim != null) {
-        this.changeStateToShootDuringRunning(secondaryAttackAim)
+      const squadToAttack = squadAttackAim || secondaryAttackAim
+      if (this.squad.weaponDetails.shotDuringRun && squadToAttack) {
+        this.changeStateToShoot(squadToAttack, squadAttackAim != null, true)
       }
+    } else if (squadAbilityTarget && this.state != UnitState.ABILITY && !this.hasFinishedUsingAbility) {
+      (this.squad.squadDetails.ability as Ability).start(this)
+      // assuming that unit cannot be disrupted during using ability,
+      // unit is always able to use ability, then squad has ability_target and self.track_index == -1
     } else if (squadAttackAim != null) {
-      this.changeStateToShoot(squadAttackAim, true)
+      this.changeStateToShoot(squadAttackAim, true, false)
     } else if (secondaryAttackAim != null) {
-      this.changeStateToShoot(secondaryAttackAim, false)
+      this.changeStateToShoot(secondaryAttackAim, false, false)
     } else {
       this.state = UnitState.IDLE
     }
   }
 
-  setNewAttackAimDuringRunning(squadToAttack: Squad): void {
-    let availableEnemyUnits: Unit[] = []
-    for (let i = 0; i < squadToAttack.members.length; i++) {
-      const member = unchecked(squadToAttack.members[i])
-      let angleFroUnitToEnemyMember = Mathf.atan2(member.x - this.x, this.y - member.y)
-      let angleDiff = getAngleDiff(this.angle, angleFroUnitToEnemyMember)
-      if (Mathf.abs(angleDiff) < this.squad.squadDetails.maxChasingShootAngle) {
-        availableEnemyUnits.push(member)
-      }
-    }
 
-    let minDistance = Infinity
-    let closestEnemy: Unit | null = null
-    for (let i = 0; i < availableEnemyUnits.length; i++) {
-      let enemyUnit = unchecked(availableEnemyUnits[i])
-      let distance = Math.hypot(enemyUnit.x - this.x, enemyUnit.y - this.y)
-      if (distance < minDistance) {
-        closestEnemy = enemyUnit
-        minDistance = distance
-      }
-    }
-    // TODO: what in case if still enemy is out of weapon range???
-    if (closestEnemy && minDistance < this.squad.weaponDetails.range) {
-      this.attackAim = closestEnemy
-      this.weaponAngleDuringChasing = Mathf.atan2(closestEnemy.x - this.x, this.y - closestEnemy.y)
-    } else {
-      this.attackAim = null
-    }
+
+  getAngle(x: f32, y: f32): f32 {
+    return (Mathf.atan2(x - this.x, this.y - y) + MATH_PI_2) % MATH_PI_2
   }
 
-  changeStateToShootDuringRunning(squadToAttack: Squad): void {
+
+  changeStateToShoot(squadToAttack: Squad, isImportantAim: bool, isRunning: bool): void {
     // check if unit can keep current aim
-    const attackAim = this.attackAim 
-    if (attackAim != null) {
-      let distance = Mathf.hypot(attackAim.x - this.x, attackAim.y - this.y)
-      if (distance <= this.squad.weaponDetails.range) {
-        let angleFromUnitToAim = Mathf.atan2(attackAim.x - this.x, this.y - attackAim.y)
-        if (getAngleDiff(this.angle, angleFromUnitToAim) < this.squad.squadDetails.maxChasingShootAngle) {
-          this.weaponAngleDuringChasing = angleFromUnitToAim;
-          return // it's okay, don't have to find an aim
-        }
-      }
-    }
+    if (isRunning && !this.squad.weaponDetails.shotDuringRun) return
 
-    this.setNewAttackAimDuringRunning(squadToAttack);
-  }
-
-  setAngle(destinationX: f32, destinationY: f32): void {
-    this.angle = (Mathf.atan2(destinationX - this.x, this.y - destinationY) + MATH_PI_2) % MATH_PI_2
-  }
-
-
-  changeStateToShoot(squadToAttack: Squad, isImportantAim: bool): void {
-    // check if unit can keep current aim
     const attackAim = this.attackAim
     if (attackAim != null && attackAim.hp > 0) {
-      let distance = Math.hypot(attackAim.x - this.x, attackAim.y - this.y)
+      const distance = Math.hypot(attackAim.x - this.x, attackAim.y - this.y)
       if (distance <= this.squad.weaponDetails.range) {
-        this.state = UnitState.SHOOT // if changed from RUN -> IDLE and still has secondary aim from run
-        this.setAngle(attackAim.x, attackAim.y)
-        return // it's okay, don't have to find an aim
+
+        if (isRunning) {
+          // check angle to make sure that is allowed
+          const angleFromUnitToAim = Mathf.atan2(attackAim.x - this.x, this.y - attackAim.y)
+          if (getAngleDiff(this.angle, angleFromUnitToAim) < this.squad.weaponDetails.maxChasingShootAngle) {
+            this.state = UnitState.CHASING
+            this.weaponAngleDuringChasing = angleFromUnitToAim
+            return // it's okay, don't have to find an aim
+          }
+        } else {
+          // is allowed because is not running, so can rotate, checking angle is not needed
+          this.state = UnitState.SHOOT
+          this.angle = this.getAngle(attackAim.x, attackAim.y)
+          return // it's okay, don't have to find an aim
+        }
       }
     }
 
     let minDistance = Infinity
     let closestEnemyUnitIndex = -1
     for (let i = 0; i < squadToAttack.members.length; i++) {
-      let enemyUnit = unchecked(squadToAttack.members[i])
-      let distance = Math.hypot(enemyUnit.x - this.x, enemyUnit.y - this.y)
+      const enemyUnit = unchecked(squadToAttack.members[i])
+      const distance = Math.hypot(enemyUnit.x - this.x, enemyUnit.y - this.y)
 
-      if (distance < minDistance) {
+      if (distance < minDistance && enemyUnit.hp > 0) {
+        if (isRunning) {
+          const angleFromUnitToEnemy = Mathf.atan2(enemyUnit.x - this.x, this.y - enemyUnit.y)
+          if (getAngleDiff(this.angle, angleFromUnitToEnemy) > this.squad.weaponDetails.maxChasingShootAngle) {
+            // unit out of angle
+            continue
+          }
+        }
         closestEnemyUnitIndex = i
         minDistance = distance
       }
     }
 
-    if (closestEnemyUnitIndex != -1 && minDistance < this.squad.weaponDetails.range) {
-      let enemyUnit = unchecked(squadToAttack.members[closestEnemyUnitIndex])
-      this.setAngle(enemyUnit.x, enemyUnit.y)
-      this.state = UnitState.SHOOT
-      this.attackAim = enemyUnit
-    } else if (isImportantAim) {
-      let enemyUnit = unchecked(squadToAttack.members[closestEnemyUnitIndex])
-      let angle = Mathf.atan2(this.x - enemyUnit.x, enemyUnit.y - this.y)
-      let distanceToEnemy = this.squad.weaponDetails.range - this.squad.squadDetails.movementSpeed
-      this.trackIndex = this.squad.track.length - 1 as u8;
-      if (enemyUnit.state != UnitState.RUN && enemyUnit.state != UnitState.CHASING) {
-        // if the enemy is running, then the faction's hunters should handle it
-        this.setDestination({
-          x: Mathf.sin(angle) * distanceToEnemy + enemyUnit.x,
-          y: -Mathf.cos(angle) * distanceToEnemy + enemyUnit.y,
-        });
+    if (minDistance < this.squad.weaponDetails.range) {
+      const enemyUnit = unchecked(squadToAttack.members[closestEnemyUnitIndex])
+
+      if (isRunning) {
+        this.weaponAngleDuringChasing = this.getAngle(enemyUnit.x, enemyUnit.y)
+        this.state = UnitState.CHASING
+      } else {
+        this.angle = this.getAngle(enemyUnit.x, enemyUnit.y)
+        this.state = UnitState.SHOOT
       }
+      this.attackAim = enemyUnit
+    } else if (!isRunning && isImportantAim) {
+      // unit is not running, but should go for the enemy
+      const enemyUnit = unchecked(squadToAttack.members[closestEnemyUnitIndex])
+      const angle = Mathf.atan2(this.x - enemyUnit.x, enemyUnit.y - this.y)
+      const distanceToEnemy = this.squad.weaponDetails.range - this.squad.squadDetails.movementSpeed
+      this.trackIndex = this.squad.track.length - 1 as u8;
+      this.setDestination({
+        x: Mathf.sin(angle) * distanceToEnemy + enemyUnit.x,
+        y: -Mathf.cos(angle) * distanceToEnemy + enemyUnit.y,
+      })
+    } else if (isRunning) {
+      // to make sure it's not chasing
+      this.state = UnitState.RUN
+      this.attackAim = null
     } else {
       this.resetState()
     }
@@ -291,14 +284,15 @@ export class Unit {
 
       const attackAim = this.attackAim as Unit
       const targetRadius = attackAim.squad.squadDetails.unitRadius
-      const distance = Mathf.hypot(this.x - attackAim.x, this.y - attackAim.y) * (1 + distanceModSeed / 3) - this.squad.squadDetails.unitRadius * 2.5
+      const distance = Mathf.hypot(this.x - attackAim.x, this.y - attackAim.y) * (1 + distanceModSeed / 4)// - this.squad.squadDetails.unitRadius
       // we are subtracting unitRadius * 1.5, because a bullet comes from unit rifle, not from the center of the base
 
       addBullet(
-        this.id as f32,
-        angle + weapon.scatter * 2.0 * scatterSeed,
+        this,
+        angle + weapon.scatter * 2.0 * scatterSeed, // 2.0 * scatterSeed -> < -1, 1 >
         weapon,
         attackAim,
+        null,
         distance,
         Math.abs(scatterSeed) + Math.abs(distanceModSeed) < targetRadius / 100,
       );
@@ -328,7 +322,7 @@ export class Unit {
         this.updateShoot()
         break;
       case UnitState.ABILITY:
-        // Abilities::updateAbility()
+        (this.squad.squadDetails.ability as Ability).update(this)
         break;
     }
   }

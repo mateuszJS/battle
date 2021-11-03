@@ -1,3 +1,4 @@
+import { Ability } from "./ability-details"
 import { DISTANCE_BETWEEN_ATTACKERS, PRECALCULATED_ATTACKERS_POSITIONS } from "./attacker-positions"
 import { MAP_HEIGHT, MAP_WIDTH, NORMAL_SQUAD_RADIUS } from "./constants"
 import { Point } from "./geom-types"
@@ -260,8 +261,9 @@ function calc_attackers_positions(
   needed_positions: i32,
   range: f32,
 ): Point[] {
-  const breakpoint = (range / DISTANCE_BETWEEN_ATTACKERS) as i32 - 1
+  const breakpoint = (range / DISTANCE_BETWEEN_ATTACKERS) as i32 - 1 // 1
   const precalculated_positions = unchecked(PRECALCULATED_ATTACKERS_POSITIONS[breakpoint])
+
   const precalculated_positions_number = precalculated_positions.length
   let result: Point[] = []
   let position_index = 0;
@@ -279,22 +281,17 @@ function calc_attackers_positions(
   return result
 }
 
-function setPositions(squads: Squad[], enemySquad: Squad, range: f32): void {
+function getPositions(squads: Squad[], target: Point, range: f32): Point[] {
   let positions = calc_attackers_positions(
-    enemySquad.centerPoint,
+    target,
     getSquadsCenter(squads),
     squads.length,
     range,
   );
 
   positions.sort((a, b) => a.y - b.y as i32)
-  squads.sort((a, b) => a.centerPoint.y - b.centerPoint.y as i32)
-
-  for (let i = 0; i < squads.length; i++) {
-    unchecked(
-      squads[i].setTask(positions[i], enemySquad)
-    )
-  }
+  
+  return positions
 }
 
 function getSquadsDividedByRangeAndLocalization (squads: Squad[]): Squad[][] {
@@ -309,10 +306,42 @@ function getSquadsDividedByRangeAndLocalization (squads: Squad[]): Squad[][] {
   return dividedByLocalization
 }
 
+export function setAbilityPositions(squads: Squad[], ability: Ability, target: Point): void {
+  const squadsOutOfRange: Squad[] = []
+  const maxSquadRange = ability.range - NORMAL_SQUAD_RADIUS
+
+  // set ability for squads which are in range
+  // collect all squads out of the range
+  for (let i = 0; i < squads.length; i++) {
+    const squad = squads[i]
+    const distance = Mathf.hypot(
+      squad.centerPoint.x - target.x,
+      squad.centerPoint.y - target.y,
+    )
+    if (maxSquadRange < distance) {
+      squadsOutOfRange.push(squad)
+    } else {
+      squad.setTask(null, null, target)
+    }
+  }
+
+  if (squadsOutOfRange.length == 0) return
+
+  const positions = getPositions(squadsOutOfRange, target, maxSquadRange)
+  squadsOutOfRange.sort((a, b) => a.centerPoint.y - b.centerPoint.y as i32)
+  for (let i = 0; i < squadsOutOfRange.length; i++) {
+    unchecked(
+      squadsOutOfRange[i].setTask(positions[i], null, target)
+    )
+  }
+}
+
 export function setAggressorPositions(squads: Squad[], enemySquad: Squad): void {
     const squadsOutOfRange: Squad[] = []
     const enemySquadCenter = enemySquad.centerPoint
 
+    // set ability for squads which are in range
+    // collect all squads out of the range
     for (let i = 0; i < squads.length; i++) {
       const squad = squads[i]
       const distance = Mathf.hypot(
@@ -322,7 +351,7 @@ export function setAggressorPositions(squads: Squad[], enemySquad: Squad): void 
       if (squad.weaponDetails.range - NORMAL_SQUAD_RADIUS < distance) {
         squadsOutOfRange.push(squad)
       } else {
-        squad.setTask(null, enemySquad)
+        squad.setTask(null, enemySquad, null)
       }
     }
 
@@ -330,10 +359,16 @@ export function setAggressorPositions(squads: Squad[], enemySquad: Squad): void 
 
     for (let i = 0; i < squadsDividedByRangeAndLocalization.length; i++) {
       const squadGroup = unchecked(squadsDividedByRangeAndLocalization[i])
-      setPositions(
+      const positions = getPositions(
         squadGroup,
-        enemySquad,
+        enemySquad.centerPoint,
         unchecked(squadGroup[0]).weaponDetails.range - NORMAL_SQUAD_RADIUS,
       )
+      squadGroup.sort((a, b) => a.centerPoint.y - b.centerPoint.y as i32)
+      for (let i = 0; i < squads.length; i++) {
+        unchecked(
+          squads[i].setTask(positions[i], enemySquad, null)
+        )
+      }
     }
   }

@@ -7,7 +7,7 @@ export function getInitialTrackIndex(currentIndex: i8, x: f32, y: f32, squad: Sq
     y - squad.centerPoint.y,
   )
 
-  if (distanceUnitFromSquadCenter < NORMAL_SQUAD_RADIUS * 1.1 && currentIndex == 0) {
+  if (distanceUnitFromSquadCenter < NORMAL_SQUAD_RADIUS * 1.2 && currentIndex == 0) {
     return 1
   } else {
     let doesNextPointExist = (squad.track.length as i8) != currentIndex + 1

@@ -2,9 +2,11 @@ import { PRECALCULATED_ATTACKERS_POSITIONS } from "./attacker-positions"
 import { REPRESENTATION_FACTION_ID } from "./constants"
 import { Factory } from "./factory"
 import { Point } from "./geom-types"
-import { getSquadPositions, setAggressorPositions } from "./hex-positions"
+import { getSquadPositions, setAggressorPositions, setAbilityPositions } from "./hex-positions"
 import { Squad } from "./squad"
 import { SquadType } from "./squad-details"
+import { getId } from "./get-id"
+import { Ability } from "./ability-details"
 
 export class Faction {
   public factory: Factory
@@ -15,15 +17,17 @@ export class Faction {
   constructor(
     public id: i32,
     public isUser: bool,
-    private factoryX: f32,
-    private factoryY: f32,
-    private factoryAngle: f32,
+    factoryX: f32,
+    factoryY: f32,
+    factoryAngle: f32,
   ) {
-    this.factory = new Factory(id, factoryX, factoryY, factoryAngle, isUser)
+    this.portal = new Squad(id, SquadType.Portal)
+    const portalMember = this.portal.addMember(factoryX, factoryY, factoryAngle)
+    this.portal.updateCenter()
+
+    this.factory = new Factory(portalMember.id, id, factoryX, factoryY, factoryAngle, isUser)
     this.resource = 0
     this.squads = []
-    this.portal = new Squad(id, SquadType.Portal)
-    this.portal.addMember(factoryX, factoryY, factoryAngle)
   }
 
   update(): void {
@@ -54,13 +58,29 @@ export class Faction {
     // this.squads.forEach(squad => squad.getRepresentation())
   }
 
+  taskAddAbility(squadsIds: Uint32Array, abilityType: u8, destination: Point): void {
+    let squadsToUseAbility: Squad[] = []
+    for (let i = 0; i < this.squads.length; i++) {
+      const squad = unchecked(this.squads[i])
+      const ability = squad.squadDetails.ability
+
+      if (squadsIds.includes(squad.id) && ability && ability.type == abilityType && squad.abilityCoolDown == 0) {
+        squadsToUseAbility.push(squad)
+      }
+    }
+    if (squadsToUseAbility.length > 0) {
+      const ability = squadsToUseAbility[0].squadDetails.ability as Ability
+      setAbilityPositions(squadsToUseAbility, ability, destination)
+    }
+  }
+
   taskAddDestination(squadsIds: Uint32Array, destination: Point): void {
     const positions = getSquadPositions(squadsIds.length, destination.x, destination.y)
     let positionIndex = 0
     for (let i = 0; i < this.squads.length; i++) {
       const squad = unchecked(this.squads[i])
       if (squadsIds.includes(squad.id)) {
-        squad.setTask(unchecked(positions[positionIndex]), null)
+        squad.setTask(unchecked(positions[positionIndex]), null, null)
         positionIndex ++
       }
     }
@@ -93,6 +113,9 @@ export class Faction {
     //   unchecked(this.squads[i].checkMembersCorrectness())
     // }
     this.squads = this.squads.filter(squad => {
+      if (squad.abilityCoolDown > 0) {
+        squad.abilityCoolDown --
+      }
       squad.checkMembersCorrectness()
       return squad.members.length != 0
     })

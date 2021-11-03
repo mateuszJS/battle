@@ -1,7 +1,8 @@
-import { STANDARD_RIFLE } from "./constants"
+import { STANDARD_RIFLE, GRENADE } from "./constants"
 
 export enum WeaponType {
-  StandardRifle
+  StandardRifle,
+  Grenade,
 }
 
 export class WeaponDetails {
@@ -14,6 +15,8 @@ export class WeaponDetails {
   bulletSpeed: f32
   damage: u16
   shotDuringRun: bool
+  explosionRange: f32
+  maxChasingShootAngle: f32
 }
 
 export var WEAPON_DETAILS = new Map<WeaponType,WeaponDetails>()
@@ -26,8 +29,24 @@ WEAPON_DETAILS.set(WeaponType.StandardRifle, {
   reloadTime: 200,
   shootTime: 50,
   bulletSpeed: 10,
-  damage: 0,
+  damage: 1,
   shotDuringRun: true,
+  explosionRange: 0,
+  maxChasingShootAngle: 0.52,
+})
+
+WEAPON_DETAILS.set(WeaponType.Grenade, {
+  representationId: GRENADE,
+  range: 0, // N/A
+  scatter: 0, // N/A
+  chanceForReload: 0, // N/A
+  reloadTime: 0, // N/A
+  shootTime: 0, // N/A
+  bulletSpeed: 5,
+  damage: 5,
+  shotDuringRun: false, // N/A
+  explosionRange: 150,
+  maxChasingShootAngle: 0,
 })
 
 export var MAX_POSSIBLE_WEAPON_RANGE: f32 = WEAPON_DETAILS.values().reduce((acc, weaponDetails) => (

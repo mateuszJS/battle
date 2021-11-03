@@ -1,13 +1,12 @@
-import { REPRESENTATION_SOLIDER, REPRESENTATION_RAPTOR } from '../../../logic/constants'
-import { Universe } from 'crate/pkg'
 import createNewIcon, { Ability, RepresentationId, ICON_HEIGHT } from './createIcon'
 import { WasmModule } from '~/initGame'
+import { AbilityType } from '../../../logic/constants'
 
 const abilitiesIcons: {
   [key in RepresentationId]: Ability[]
 } = {
-  [REPRESENTATION_SOLIDER]: [],
-  [REPRESENTATION_RAPTOR]: [],
+  [AbilityType.Grenade]: [],
+  [AbilityType.Jump]: [],
 }
 
 const updateAbilityIcon = (
@@ -50,8 +49,8 @@ const updateAbilitiesButtons = (
   )
 
   const abilitiesIndexes = {
-    [REPRESENTATION_SOLIDER]: 0,
-    [REPRESENTATION_RAPTOR]: 0,
+    [AbilityType.Grenade]: 0,
+    [AbilityType.Jump]: 0,
   }
 
   window.useFloat32ArrayData(abilitiesDataPointer, (abilitiesData) => {
@@ -84,7 +83,7 @@ const updateAbilitiesButtons = (
   })
 
   // hide rest of the icons
-  ;[REPRESENTATION_SOLIDER, REPRESENTATION_RAPTOR].forEach(squadType => {
+  ;[AbilityType.Grenade, AbilityType.Jump].forEach(squadType => {
     const index = abilitiesIndexes[squadType]
     if (abilitiesIcons[squadType][index] && abilitiesIcons[squadType][index].container.visible) {
       // optimization, avoid loop if first icon is already hidden

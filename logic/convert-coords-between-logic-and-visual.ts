@@ -22,9 +22,17 @@ export function convertVisualCoordsToLogic(x: f32, y: f32): Point {
   }
 }
 
+export function convertLogicOffsetToVisual(angle: f32, distance: f32): Point {
+  return {
+    x: Mathf.sin(angle + MAP_SKEW_ANGLE) * distance,
+    y: -Mathf.cos(angle + MAP_SKEW_ANGLE) * distance * MAP_VERTICAL_MOD,
+  }
+}
+
 export function convertVisualOffsetToLogic(x: f32, y: f32): Point {
   const angle = Mathf.atan2(x, y) - MAP_SKEW_ANGLE
   const distance = Mathf.hypot(x, y)
+  // TODO: it's weird that is doesn't care about MAP_VERTICAL_MOD
 
   return {
     x: Mathf.sin(angle) * distance,

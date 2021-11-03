@@ -15,16 +15,24 @@ export const STANDARD_RIFLE: f32 = 1
 export const GRENADE: f32 = 2
 export const HIT_THE_GROUND: f32 = 3
 
+export enum AbilityType {
+  Grenade,
+  Jump,
+}
+
 export enum UnitState {
   DIE,
   FLY,
   GETUP,
-  ABILITY,
+  ABILITY, // last state which disables the state change
+  // (when unit is dying, flying, getting up, using ability, then cannot change the state)
   IDLE,
   SHOOT,
   RUN,
   CHASING,
 }
+
+export const MoveStates: UnitState[] = [UnitState.FLY, UnitState.RUN, UnitState.CHASING]
 
 export const MAP_WIDTH: f32 = 2000
 export const MAP_HEIGHT: f32 = 4500
@@ -36,7 +44,8 @@ export const MAP_VERTICAL_MOD: f32 = 0.52
 
 export const UPDATE_SQUAD_CENTER_PERIOD: usize = 15
 export const CHECK_SQUADS_CORRECTNESS_PERIOD: usize = 2 * UPDATE_SQUAD_CENTER_PERIOD
-export const SEARCH_FOR_ENEMIES_PERIOD: usize = 4 * UPDATE_SQUAD_CENTER_PERIOD
+// always before search for enemies we should do squads correctness
+export const SEARCH_FOR_ENEMIES_PERIOD: usize = 2 * CHECK_SQUADS_CORRECTNESS_PERIOD
 
 export const USER_FACTION_ID: u32 = 0;
 export const UINT_DATA_SETS_DIVIDER: u32 = 0

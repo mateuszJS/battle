@@ -1,4 +1,4 @@
-import { REPRESENTATION_SOLIDER, REPRESENTATION_RAPTOR } from '../../../logic/constants'
+import { AbilityType } from '../../../logic/constants'
 import getTexture from '~/getTexture'
 
 const ICON_WIDTH = 62 * 0.9
@@ -8,11 +8,11 @@ const ICON_Y_OFFSET = 120
 const progressBarTexture = PIXI.Texture.from('assets/ability_progress_bar.png')
 
 const MAP_ID_TO_ABILITY_DETAILS = {
-  [REPRESENTATION_SOLIDER]: {
+  [AbilityType.Grenade]: {
     iconNormal: PIXI.Texture.from('assets/grenade_icon_blue.png'),
     iconHover: PIXI.Texture.from('assets/grenade_icon_blue_hover.png'),
   },
-  [REPRESENTATION_RAPTOR]: {
+  [AbilityType.Jump]: {
     iconNormal: PIXI.Texture.from('assets/wing_icon_blue.png'),
     iconHover: PIXI.Texture.from('assets/wing_icon_blue_hover.png'),
   },

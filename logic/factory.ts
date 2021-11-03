@@ -14,20 +14,19 @@ class ProductionItem {
 }
 
 export class Factory {
-  public id: f32
   private productionLine: Array<ProductionItem>
   private timeToCreate: u16
   private lastCreatedSquad: Squad | null
   private timeToCreateAnotherMember: u8
 
   constructor(
+    public id: f32,
     private factionId: i32,
     public  x: f32,
     public  y: f32,
     public  angle: f32,
     private isOwnByUser: bool,
   ) {
-    this.id = getId() as f32
     this.productionLine = []
     this.timeToCreate = 0
     this.lastCreatedSquad = null

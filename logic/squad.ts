@@ -11,18 +11,19 @@ import { UniquePoint } from "./geom-types"
 class TaskTodo {
   trackDestination: Point | null
   attackAim: Squad | null
-  // abilityTarget: Point | null
+  abilityTarget: Point | null
 }
 
 export class Squad {
   public id: u32
-  private abilityCoolDown: u16
+  public abilityCoolDown: u16
   private isDuringKeepingCoherency: bool
   private taskTodo: TaskTodo
   private anyUnitStartedUsingAbility: bool
   public members: Array<Unit>
   public attackAim: Squad | null
   public secondaryAttackAim: Squad | null
+  public abilityTarget: Point | null
   public track: Array<UniquePoint>
   public centerPoint: Point
   public squadDetails: SquadDetails
@@ -37,7 +38,7 @@ export class Squad {
     this.members = [];
     this.isDuringKeepingCoherency = false;
     this.taskTodo = {
-      // abilityTarget: null,
+      abilityTarget: null,
       trackDestination: null,
       attackAim: null,
     }
@@ -46,6 +47,7 @@ export class Squad {
     this.track = []
     this.attackAim = null
     this.secondaryAttackAim = null
+    this.abilityTarget = null
     this.squadDetails = SQUAD_DETAILS.get(type)
     this.weaponDetails = WEAPON_DETAILS.get(WeaponType.StandardRifle)
   }
@@ -81,12 +83,13 @@ export class Squad {
         this.isDuringKeepingCoherency = true
         this.taskTodo = {
           trackDestination: this.track.length > 0
-            ? unchecked(this.track[this.track.length - 1])
-            : null,
-            attackAim: this.attackAim,
+          ? unchecked(this.track[this.track.length - 1])
+          : null,
+          attackAim: this.attackAim,
+          abilityTarget: this.abilityTarget,
         }
       }
-      this.setTask(this.centerPoint, null)
+      this.setTask(this.centerPoint, null, null)
     } else if (this.isDuringKeepingCoherency) {
       this.isDuringKeepingCoherency = false
       this.restoreTaskTodo()
@@ -108,7 +111,7 @@ export class Squad {
   }
 
   resetState(): void {
-    // this.abilityTarget = null
+    this.abilityTarget = null
     this.attackAim = null
     this.track = []
 
@@ -117,11 +120,16 @@ export class Squad {
     })
   }
 
-  setTask(destination: Point | null, enemyToAttack: Squad | null/*, ability: Ability | null*/): void {
+  setTask(
+    destination: Point | null,
+    enemyToAttack: Squad | null,
+    abilityTarget: Point | null,
+  ): void {
     if (this.isTakingNewTaskDisabled()) {
       this.taskTodo = {
         trackDestination: destination,
         attackAim: enemyToAttack,
+        abilityTarget: abilityTarget,
       }
       return
     }
@@ -136,6 +144,7 @@ export class Squad {
     }
 
     this.attackAim = enemyToAttack
+    this.abilityTarget = abilityTarget
 
     /* if(ability) {
       this.ability ==
@@ -151,7 +160,11 @@ export class Squad {
     this.resetState()
 
     if (this.taskTodo.trackDestination) {
-      this.setTask(this.taskTodo.trackDestination, this.taskTodo.attackAim)
+      this.setTask(
+        this.taskTodo.trackDestination,
+        this.taskTodo.attackAim,
+        this.taskTodo.abilityTarget,
+      )
     }
 
     this.checkMembersCorrectness()
