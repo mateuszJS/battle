@@ -164,17 +164,20 @@ export class Unit {
 
   checkCorrectness(): void {
     if (!this.isChangeStateAllowed()) return
-    const secondaryAttackAim = this.squad.secondaryAttackAim
     const squadAttackAim = this.squad.attackAim
+    const secondaryAttackAim = this.squad.secondaryAttackAim
     const squadAbilityTarget = this.squad.abilityTarget
     // this method always should be called after check correctness for squad (bc if enemy can be out of whole squad range in shooting)
     if (this.trackIndex != -1) {
       if (this.state != UnitState.RUN && this.state != UnitState.CHASING) {
         this.goToCurrentPointOnTrack()
       }
-      const squadToAttack = squadAttackAim || secondaryAttackAim
-      if (this.squad.weaponDetails.shotDuringRun && squadToAttack) {
-        this.changeStateToShoot(squadToAttack, squadAttackAim != null, true)
+      if (this.squad.weaponDetails.shotDuringRun && secondaryAttackAim) {
+        this.changeStateToShoot(secondaryAttackAim, false, true)
+      } else if (this.state == UnitState.CHASING) {
+        // when we removed squad.secondaryAttackAim but unit still has attackAim and is in CHASING state
+        this.state = UnitState.RUN
+        this.attackAim = null
       }
     } else if (squadAbilityTarget && this.state != UnitState.ABILITY && !this.hasFinishedUsingAbility) {
       (this.squad.squadDetails.ability as Ability).start(this)
@@ -202,7 +205,7 @@ export class Unit {
 
     const attackAim = this.attackAim
     if (attackAim != null && attackAim.hp > 0) {
-      const distance = Math.hypot(attackAim.x - this.x, attackAim.y - this.y)
+      const distance = Mathf.hypot(attackAim.x - this.x, attackAim.y - this.y)
       if (distance <= this.squad.weaponDetails.range) {
 
         if (isRunning) {
