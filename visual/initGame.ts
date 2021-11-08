@@ -74,7 +74,11 @@ const initGame = (
 
   const universeRepresentation: UniverseRepresentation = {}
   window.universeRepresentation = universeRepresentation // used to remove unit
-  const serializedWorldInfo = getSerializedWorldInfo(serializedMapInfo)
+
+  const {
+    serializedWorldInfo,
+    unpinAllInfo,
+  } = getSerializedWorldInfo(serializedMapInfo, wasmModule)
 
   initUniverse(
     serializedWorldInfo.factions,
@@ -87,6 +91,7 @@ const initGame = (
     // serializedInfoAboutWorld.obstacles,
     // serializedInfoAboutWorld.strategicPoints,
   )
+  unpinAllInfo()
 
   window.useFloat32ArrayData(getFactoriesInitData(), (factoriesData) => {
     for (let i = 0; i < factoriesData.length; i += 5) {

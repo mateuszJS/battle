@@ -5,9 +5,11 @@ import getPortalCoords from '~/consts/get-portal-coords'
 import getBridgesInnerTrack from './get-bridges-inner-track'
 import getObstaclesInnerTrack from './get-obstacles-inner-track'
 import getSerializedObstacles from './get-serialized-obstacles'
+import { WasmModule } from "~/initGame"
 
 const getSerializedWorldInfo = (
   serializedMapInfo: SerializedMapInfo,
+  wasmModule: WasmModule,
 ) => {
   const serializedFactions = new Float32Array(
     serializedMapInfo.portals.map((graphic, index) => 
@@ -41,12 +43,24 @@ const getSerializedWorldInfo = (
     ).flat()
   )
 
-  return {
-    factions: window.getFloat32ArrayPointer(serializedFactions),
-    obstacles: window.getFloat32ArrayPointer(serializedObstacles),
-    blockingTrackPoints: window.getFloat32ArrayPointer(serializedTrackOuter),
-    rawTrackPoints: window.getFloat32ArrayPointer(serializedTrackInner),
+  const serializedWorldInfo = {
+    factions: wasmModule.__pin(window.getFloat32ArrayPointer(serializedFactions)),
+    obstacles: wasmModule.__pin(window.getFloat32ArrayPointer(serializedObstacles)),
+    blockingTrackPoints: wasmModule.__pin(window.getFloat32ArrayPointer(serializedTrackOuter)),
+    rawTrackPoints: wasmModule.__pin(window.getFloat32ArrayPointer(serializedTrackInner)),
     bridgeSecondToLastPointIndex: bridgesInnerTrack.length - 1,
+  }
+
+  const unpinAllInfo = () => {
+    wasmModule.__unpin(serializedWorldInfo.factions)
+    wasmModule.__unpin(serializedWorldInfo.obstacles)
+    wasmModule.__unpin(serializedWorldInfo.blockingTrackPoints)
+    wasmModule.__unpin(serializedWorldInfo.rawTrackPoints)
+  }
+
+  return {
+    serializedWorldInfo,
+    unpinAllInfo,
   }
 }
 

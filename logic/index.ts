@@ -1,6 +1,3 @@
-// import { alert } from "./utils";
-// import { foo, bar } from "./constants"
-
 import { Faction } from "./faction";
 import { outerBoundaries, storeBoundaries } from "./obstacles-manager";
 import { Line, Point, UniquePoint } from "./geom-types";
@@ -35,31 +32,31 @@ export function initUniverse(
   mapWidth: f32,
   mapHeight: f32,
 ): void {
-  // for (let i = 0; i < factionData.length; i += 4) {
-  //   const isUser = i == 0
-  //   const faction = new Faction(
-  //     factionData[i] as u32,
-  //     isUser,
-  //     factionData[i + 1],
-  //     factionData[i + 2],
-  //     factionData[i + 3],
-  //   )
-  //   if (isUser) {
-  //     userFaction = faction
-  //   }
-  //   factions.push(faction)
-  // }
+  for (let i = 0; i < factionData.length; i += 4) {
+    const isUser = i == 0
+    const faction = new Faction(
+      factionData[i] as u32,
+      isUser,
+      factionData[i + 1],
+      factionData[i + 2],
+      factionData[i + 3],
+    )
+    if (isUser) {
+      userFaction = faction
+    }
+    factions.push(faction)
+  }
   trace("before storeBoundaries")
   storeBoundaries(obstacles, blockingTrackPoints)
-  // trace("before createPermanentTrackGraph")
-  // createPermanentTrackGraph(blockingTrackPoints, rawTrackPoints, bridgeSecondToLastPointIndex)
-  // // testTracer()
+  trace("before createPermanentTrackGraph")
+  createPermanentTrackGraph(blockingTrackPoints, rawTrackPoints, bridgeSecondToLastPointIndex)
+  // testTracer()
   
-  // mapWidthGlob = mapWidth
-  // mapHeightGlob = mapHeight
+  mapWidthGlob = mapWidth
+  mapHeightGlob = mapHeight
   
-  // trace("before initializeGrid")
-  // initializeGrid(mapWidth, mapHeight)
+  trace("before initializeGrid")
+  initializeGrid(mapWidth, mapHeight)
 }
 
 function getPointCoordsById(id: i32): UniquePoint {
