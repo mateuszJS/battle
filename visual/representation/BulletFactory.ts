@@ -1,11 +1,11 @@
-import { GRENADE, HIT_THE_GROUND, STANDARD_RIFLE } from '../../logic/constants'
+import { WeaponType } from '../../logic/constants'
 import { UniverseRepresentation } from '~/initGame'
 import Unit from './Unit'
 
 
 
 const MAP_TYPE_TO_GRAPHIC_CONSTRUCTOR = {
-  [STANDARD_RIFLE]: () => {
+  [WeaponType.StandardRifle]: () => {
     const graphics = new PIXI.Graphics()
     graphics.beginFill(0xff0000)
     graphics.drawRect(0, 0, 2, 14)
@@ -13,7 +13,7 @@ const MAP_TYPE_TO_GRAPHIC_CONSTRUCTOR = {
     graphics.y = -7
     return graphics
   },
-  [GRENADE]: () => {
+  [WeaponType.Grenade]: () => {
     const graphics = new PIXI.Graphics()
     graphics.beginFill(0x00ff00)
     graphics.drawRect(0, 0, 10, 10)
@@ -21,7 +21,7 @@ const MAP_TYPE_TO_GRAPHIC_CONSTRUCTOR = {
     graphics.y = -5
     return graphics
   },
-  [HIT_THE_GROUND]: () => {
+  [WeaponType.HitGround]: () => {
     const graphics = new PIXI.Graphics()
     graphics.beginFill(0xff0000)
     graphics.drawRect(0, 0, 50, 50)
@@ -32,7 +32,7 @@ const MAP_TYPE_TO_GRAPHIC_CONSTRUCTOR = {
 } as const
 
 const MAP_TYPE_TO_UPDATE_FUNC = {
-  [STANDARD_RIFLE]: (
+  [WeaponType.StandardRifle]: (
     bullet: Bullet,
     x: number,
     y: number,
@@ -43,7 +43,7 @@ const MAP_TYPE_TO_UPDATE_FUNC = {
     bullet.sprite.x += bullet.modX
     bullet.sprite.y += bullet.modY
   },
-  [GRENADE]: (
+  [WeaponType.Grenade]: (
     bullet: Bullet,
     x: number,
     y: number,
@@ -73,7 +73,7 @@ const MAP_TYPE_TO_UPDATE_FUNC = {
       bullet.sprite.y = a * bullet.sprite.x ** 2 + b * bullet.sprite.x + c
     }
   },
-  [HIT_THE_GROUND]: (
+  [WeaponType.HitGround]: (
     bullet: Bullet,
     x: number,
     y: number,
@@ -105,7 +105,7 @@ class Bullet {
     sprite.angle = (bulletDetails[0] * 180) / Math.PI
     sprite.addChild(MAP_TYPE_TO_GRAPHIC_CONSTRUCTOR[type]())
 
-    if (type === STANDARD_RIFLE) {
+    if (type === WeaponType.StandardRifle) {
       window.smallPieces.addChild(sprite)
     } else {
       window.world.addChild(sprite)
@@ -125,14 +125,14 @@ class BulletFactory {
 
   static getBulletPosition(type: number, unit: Unit) {
     switch (type) {
-      case STANDARD_RIFLE: {
+      case WeaponType.StandardRifle: {
         const angle = unit.frameUpdaters.getAngleWhenShooting()
         return [unit.graphics.x + Math.sin(angle) * 40, unit.graphics.y - 47 - Math.cos(angle) * 30]
       }
-      case GRENADE: {
+      case WeaponType.Grenade: {
         return [unit.graphics.x, unit.graphics.y - 30]
       }
-      case HIT_THE_GROUND: {
+      case WeaponType.HitGround: {
         return [unit.graphics.x, unit.graphics.y]
       }
     }

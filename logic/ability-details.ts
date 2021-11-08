@@ -1,7 +1,8 @@
 import { addBullet } from "./bullets-manager"
 import { AbilityType } from "./constants"
 import { Unit } from "./unit"
-import { WeaponType, WEAPON_DETAILS } from "./weapon-details"
+import { WEAPON_DETAILS } from "./weapon-details"
+import { WeaponType } from "./constants"
 
 export class Usage {
   public attack: bool

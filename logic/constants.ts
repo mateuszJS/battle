@@ -11,9 +11,11 @@ export const REPRESENTATION_BULLETS: f32 = 4
 export const REPRESENTATION_RAPTOR: f32 = 5
 export const REPRESENTATION_STRATEGIC_POINT: f32 = 7
 
-export const STANDARD_RIFLE: f32 = 1
-export const GRENADE: f32 = 2
-export const HIT_THE_GROUND: f32 = 3
+export enum WeaponType {
+  StandardRifle,
+  Grenade,
+  HitGround
+}
 
 export enum AbilityType {
   Grenade,

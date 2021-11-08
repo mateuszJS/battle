@@ -1,10 +1,10 @@
-import { MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS, UnitState } from "./constants"
+import { MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS, UnitState, WeaponType } from "./constants"
 import { getId } from "./get-id"
 import { Point } from "./geom-types"
 import { UNITS_OFFSET } from "./position-utils"
 import { SquadDetails, SquadType, SQUAD_DETAILS } from "./squad-details"
 import { Unit } from "./unit"
-import { WeaponDetails, WeaponType, WEAPON_DETAILS } from "./weapon-details"
+import { WeaponDetails, WEAPON_DETAILS } from "./weapon-details"
 import { getTrack } from "./track-manager"
 import { UniquePoint } from "./geom-types"
 

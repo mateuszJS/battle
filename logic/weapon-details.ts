@@ -1,9 +1,4 @@
-import { STANDARD_RIFLE, GRENADE } from "./constants"
-
-export enum WeaponType {
-  StandardRifle,
-  Grenade,
-}
+import { WeaponType } from "./constants"
 
 export class WeaponDetails {
   representationId: f32
@@ -22,7 +17,7 @@ export class WeaponDetails {
 export var WEAPON_DETAILS = new Map<WeaponType,WeaponDetails>()
 
 WEAPON_DETAILS.set(WeaponType.StandardRifle, {
-  representationId: STANDARD_RIFLE,
+  representationId: WeaponType.StandardRifle as f32,
   range: 600,
   scatter: 0.15,
   chanceForReload: 0.25,
@@ -36,7 +31,7 @@ WEAPON_DETAILS.set(WeaponType.StandardRifle, {
 })
 
 WEAPON_DETAILS.set(WeaponType.Grenade, {
-  representationId: GRENADE,
+  representationId: WeaponType.Grenade as f32,
   range: 0, // N/A
   scatter: 0, // N/A
   chanceForReload: 0, // N/A
