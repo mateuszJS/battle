@@ -73,7 +73,7 @@ const initGame = (
   UnitFactory.initializationTypes()
 
   const universeRepresentation: UniverseRepresentation = {}
-  window.universeRepresentation = universeRepresentation // used to remove unit
+  window.universeRepresentation = universeRepresentation // used to remove unit's PIXI.Container
 
   const {
     serializedWorldInfo,

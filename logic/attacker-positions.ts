@@ -23,7 +23,7 @@ function sortAttackerPositions(points: Point[], maxDistance: f32): void {
 
       if (a_dis < b_dis) {
         done = false;
-        let tmp = points[i - 1]
+        const tmp = points[i - 1]
         points[i - 1] = points[i]
         points[i] = tmp
       }
@@ -37,22 +37,24 @@ for (let i = 1; i <= NUMBER_OF_RANGE_BREAKPOINTS; i++) {
   let positions: Point[] = []
 
   while (distance > DISTANCE_BETWEEN_ATTACKERS / 2) {
-    let diff_angle =
+    const diffAngle =
       Mathf.acos(
         1.0 - (
           (DISTANCE_BETWEEN_ATTACKERS * DISTANCE_BETWEEN_ATTACKERS) / (2.0 * (distance * distance))
         )
       )
-    let multiple_by: f32 = 0
+    let multipleBy: f32 = 0
 
-    while (Mathf.abs(multiple_by * diff_angle) < Mathf.PI - diff_angle / 2.0) {
-      let angle = multiple_by * diff_angle
-      positions.push({ x: angle, y: distance });
+    while (Mathf.abs(multipleBy * diffAngle) < Mathf.PI - diffAngle / 2.0) {
+      positions.push({
+        x: multipleBy * diffAngle,
+        y: distance,
+      })
 
-      if (multiple_by > 0) {
-        multiple_by = -multiple_by;
+      if (multipleBy > 0) {
+        multipleBy = -multipleBy
       } else {
-        multiple_by = 1.0 - multiple_by;
+        multipleBy = 1.0 - multipleBy
       }
     }
     distance -= DISTANCE_BETWEEN_ATTACKERS;

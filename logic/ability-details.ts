@@ -1,5 +1,5 @@
 import { addBullet } from "./bullets-manager"
-import { AbilityType, UnitState } from "./constants"
+import { AbilityType } from "./constants"
 import { Unit } from "./unit"
 import { WeaponType, WEAPON_DETAILS } from "./weapon-details"
 

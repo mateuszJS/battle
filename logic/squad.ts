@@ -71,7 +71,7 @@ export class Squad {
   }
 
   keepCoherency(): void {
-    let coherencyNotKept = this.members.some(member => (
+    const coherencyNotKept = this.members.some(member => (
       Math.hypot(
         this.centerPoint.x - member.x,
         this.centerPoint.y - member.y
@@ -97,16 +97,16 @@ export class Squad {
   }
 
   addMember(x: f32, y: f32, angle: f32): Unit {
-    let newUnit = new Unit(x, y, angle, this)
+    const newUnit = new Unit(x, y, angle, this)
     this.members.push(newUnit);
     this.recalculateMembersPosition();
     return newUnit
   }
 
   recalculateMembersPosition(): void {
-    let positions = unchecked(UNITS_OFFSET[this.members.length - 1])
+    const positions = unchecked(UNITS_OFFSET[this.members.length - 1])
     for (let i = 0; i < positions.length; i++) {
-      unchecked(this.members[i]).positionOffset = unchecked(positions[i])
+      unchecked(this.members[i].positionOffset = positions[i])
     }
   }
 
@@ -182,9 +182,9 @@ export class Squad {
       this.secondaryAttackAim = null
     }
 
-    for (let i = 0; i < this.members.length; i++) {
-      unchecked(this.members[i].checkCorrectness())
-    }
+    this.members.forEach(unit => {
+      unit.checkCorrectness()
+    })
   }
 
   getRepresentation(): Array<f32> {

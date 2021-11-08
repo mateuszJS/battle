@@ -57,7 +57,7 @@ export class Unit {
   changeStateToFly(angle: f32, strength: f32): void {
     this.state = UnitState.FLY;
     this.angle = (angle + Mathf.PI) % MATH_PI_2
-    let flyMods = getFlyModes(angle, this.x, this.y, strength);
+    const flyMods = getFlyModes(angle, this.x, this.y, strength);
     this.modX = flyMods.x;
     this.modY = flyMods.y;
   }
@@ -112,7 +112,6 @@ export class Unit {
     }
 
     this.destination = destination
-    // TODO: I'm not really sure about this atan2
     this.angle = this.getAngle(destination.x, destination.y)
     this.modX = Mathf.sin(this.angle) * this.squad.squadDetails.movementSpeed
     this.modY = -Mathf.cos(this.angle) * this.squad.squadDetails.movementSpeed

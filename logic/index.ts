@@ -48,7 +48,6 @@ export function initUniverse(
   }
   storeBoundaries(obstacles, blockingTrackPoints)
   createPermanentTrackGraph(blockingTrackPoints, rawTrackPoints, bridgeSecondToLastPointIndex)
-  // testTracer()
   
   mapWidthGlob = mapWidth
   mapHeightGlob = mapHeight
@@ -213,9 +212,7 @@ export function moveUnits(squadsIds: Uint32Array, x: f32, y: f32): Float32Array 
 
   if (enemySquad) {
     userFaction.taskAddEnemy(squadsIds, enemySquad)
-    for (let k = 0; k < enemySquad.members.length; k++) {
-      result.push(unchecked(enemySquad.members[k].id))
-    }
+    result = enemySquad.members.map<f32>(unit => unit.id)
   } else {
     userFaction.taskAddDestination(squadsIds, logicCoords)
   }
@@ -252,7 +249,7 @@ export function getSelectedUnitsIds(x1: f32, y1: f32, x2: f32, y2: f32): Uint32A
   const squads = getSquadsFromGridByPolygon(points)
   const selectedOurSquads: Squad[] = []
 
-  let lines = points.map<Line>((point, index, allPoints) => ({
+  const lines = points.map<Line>((point, index, allPoints) => ({
     p1: point,
     p2: unchecked(allPoints[(index + 1) % allPoints.length]),
   }))
@@ -285,12 +282,7 @@ export function getSelectedUnitsIds(x1: f32, y1: f32, x2: f32, y2: f32): Uint32A
   const unitsIds = selectedOurSquads.map<u32[]>(squad => squad.members.map<u32>(unit => unit.id as u32)).flat()
   const concatedData = unitsIds.concat([UINT_DATA_SETS_DIVIDER]).concat(squadsIds)
 
-  // let result = new Uint32Array(concatedData.length)
   return toTypedArray<u32, Uint32Array>(concatedData)
-  // for (let i = 0; i < concatedData.length; i++) {
-  //   unchecked(result[i] = concatedData[i])
-  // }
-  // return result
 }
 
 export function debugSelecting(x1: f32, y1: f32, x2: f32, y2: f32): Float32Array {
@@ -311,25 +303,6 @@ export function debugSelecting(x1: f32, y1: f32, x2: f32, y2: f32): Float32Array
 
 export function useAbility(squadsIds: Uint32Array, abilityType: u8, x: f32, y: f32): void {
   userFaction.taskAddAbility(squadsIds, abilityType, convertVisualCoordsToLogic(x, y))
-  // for (let i = 0; i < userFaction.squads.length; i++) {
-  //   const squad = unchecked(userFaction.squads[i])
-  // }
-  //   .squads
-  //   .iter()
-  //   .filter_map(|ref_cell_squad| {
-  //     let mut squad = ref_cell_squad.borrow();
-  //     if selected_squad_ids.contains(&squad.id)
-  //       && (squad.squad_details.representation_type - ability_type).abs() < std::f32::EPSILON
-  //       && squad.ability_cool_down == 0
-  //     {
-  //       Some(squad.id)
-  //     } else {
-  //       None
-  //     }
-  //   })
-  //   .collect::<Vec<u32>>();
-
-  // user_faction.task_use_ability(&squads_ids, target_x, target_y);
 }
 
 export function getAbilitiesCoolDowns(squadsIds: Uint32Array, abilityType: u8): Float32Array {
@@ -382,5 +355,3 @@ function toTypedArray<T, TyArr>(arr: Array<T>): TyArr {
   memory.copy(result.dataStart, arr.dataStart, len * sizeof<T>());
   return result;
 }
-
-// const typedf32arr = toTypedArray<f32, Float32Array>(arrf32);

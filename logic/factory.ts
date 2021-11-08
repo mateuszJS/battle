@@ -34,21 +34,21 @@ export class Factory {
   }
 
   update(): Squad | null {
-    let lastCreatedSquad = this.lastCreatedSquad
+    const lastCreatedSquad = this.lastCreatedSquad
     if (lastCreatedSquad) {
       lastCreatedSquad.update()
 
       if (this.timeToCreateAnotherMember == 0) {
         this.timeToCreateAnotherMember = TIME_BETWEEN_MEMBERS_PRODUCTION
-        let position = this.getCreationPoint()
-        let newUnit = lastCreatedSquad.addMember(
+        const position = this.getCreationPoint()
+        const newUnit = lastCreatedSquad.addMember(
           unchecked(position[0]),
           unchecked(position[1]),
           unchecked(position[2]),
         )
 
-        let seedThrowingStrength = getRandom()
-        let throwingStrength: f32 = 4.5 + seedThrowingStrength * 7.0;
+        const seedThrowingStrength = getRandom()
+        const throwingStrength: f32 = 4.5 + seedThrowingStrength * 7.0;
         newUnit.changeStateToFly(this.angle, throwingStrength);
 
         if (lastCreatedSquad.members.length == lastCreatedSquad.squadDetails.numberOfMembers) {
@@ -61,7 +61,7 @@ export class Factory {
     } else if (this.productionLine.length > 0) {
       if (this.timeToCreate == 0) {
         if (this.productionLine.length > 1) {
-          let nextSquadDetails = SQUAD_DETAILS.get(unchecked(this.productionLine[1].squadType))
+          const nextSquadDetails = SQUAD_DETAILS.get(unchecked(this.productionLine[1].squadType))
           this.timeToCreate == nextSquadDetails.productionTime
         }
         this.lastCreatedSquad = new Squad(
@@ -89,17 +89,17 @@ export class Factory {
   }
 
   getCreationPoint(): Array<f32> {
-    let seedDistance = getRandom() - 0.5
-    let distance = seedDistance * FACTORY_WIDTH
-    let perpendicularAngle = this.angle + MATH_PI_HALF
-    let positionX = this.x + Mathf.sin(perpendicularAngle) * distance
-    let positionY = this.y - Mathf.cos(perpendicularAngle) * distance
-    let unitAngle = this.angle + seedDistance / 2
+    const seedDistance = getRandom() - 0.5
+    const distance = seedDistance * FACTORY_WIDTH
+    const perpendicularAngle = this.angle + MATH_PI_HALF
+    const positionX = this.x + Mathf.sin(perpendicularAngle) * distance
+    const positionY = this.y - Mathf.cos(perpendicularAngle) * distance
+    const unitAngle = this.angle + seedDistance / 2
     return [positionX, positionY, unitAngle]
   }
 
   getRepresentation(): Array<f32> {
-    let progress = this.productionLine.length > 0
+    const progress = this.productionLine.length > 0
       ? this.timeToCreate / unchecked(this.productionLine[0]).totalTime
       : 0
 
@@ -119,7 +119,7 @@ export class Factory {
       }
     }
 
-    let lastCreatedSquad = this.lastCreatedSquad
+    const lastCreatedSquad = this.lastCreatedSquad
     if (lastCreatedSquad != null) {
       // it's returned from factory getRepresentation but it's actually representation of the squad
       return results.concat(lastCreatedSquad.getRepresentation())

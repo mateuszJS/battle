@@ -85,13 +85,7 @@ export function debugGridNumbers(): f32[] {
   return lines.concat(gridData)
 }
 
-
-
-
-
-
 // https://stackoverflow.com/questions/23557638/rotated-rectangle-rasterisation-algorithm
-
 function pointToGridFnc(point: Point): Point {
   return {
     x: Mathf.floor(point.x * gridMapScaleX),
@@ -189,30 +183,17 @@ function pickCellIndexesInCircle(rawCenter: Point, rawRadius: f32): i32[] {
 
 export function getSquadsFromGridByCircle(position: Point, range: f32): Squad[] {
   const cellIndexes = pickCellIndexesInCircle(position, range)
-  let result: Squad[] = []
 
-  for (let i = 0; i < cellIndexes.length; i++) {
-    const gridCell = unchecked(grid[cellIndexes[i]])
-    if (gridCell) {
-      result = result.concat(gridCell)
-    }
-  }
-
-  return result
+  return cellIndexes.map<Squad[]>(
+    index => (unchecked(grid[index]) || []) as Squad[]
+  ).flat()
 }
 
 export function getSquadsFromGridByPolygon(points: Point[]): Squad[] {
   const cellIndexes = pickCellIndexesInPolygon(points)
-  let result: Squad[] = []
-
-  for (let i = 0; i < cellIndexes.length; i++) {
-    const gridCell = unchecked(grid[cellIndexes[i]])
-    if (gridCell) {
-      result = result.concat(gridCell)
-    }
-  }
-
-  return result
+  return cellIndexes.map<Squad[]>(
+    index => (unchecked(grid[index]) || []) as Squad[]
+  ).flat()
 }
 
 export function pickCellIndexesInPolygonDebug(points: Point[]): Point[] {
@@ -233,12 +214,13 @@ export function pickCellIndexesInPolygonDebug(points: Point[]): Point[] {
 function pickCellIndexesInPolygon(points: Point[]): i32[] {
   let fMaxY: f32 = -Infinity
   let fMinY: f32 = Infinity
+
   for (let i = 0; i < points.length; i++) {
-    let point = pointToGridFnc(unchecked(points[i]))
+    const point = pointToGridFnc(unchecked(points[i]))
     if (fMinY > point.y) fMinY = point.y
     if (fMaxY < point.y) fMaxY = point.y
-    
   }
+
   const minY = fMinY as i32
   const maxY = fMaxY as i32
   const length = maxY - minY + 1
@@ -273,8 +255,8 @@ function pickCellIndexesInPolygon(points: Point[]): i32[] {
  
   for (let i = -1; i <= length; i++) {
     const safeIndex = Mathf.min(Mathf.max(i as f32, 0), length as f32 - 1) as i32
-    const start = Mathf.max(unchecked(startEdge[safeIndex] as f32) - 1, 0) as i32 // add x - 1
-    const end = Mathf.min(unchecked(endEdge[safeIndex] as f32) + 1, gridMapWidth as f32 - 1) as i32 // add x + 1
+    const start = Mathf.max(unchecked(startEdge[safeIndex] as f32) - 1, 0) as i32
+    const end = Mathf.min(unchecked(endEdge[safeIndex] as f32) + 1, gridMapWidth as f32 - 1) as i32
     const y = Mathf.min(Mathf.max(i + minY as f32, 0), gridMapHeight as f32 - 1) as i32
 
     for (let x = start; x <= end; x++) {

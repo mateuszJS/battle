@@ -24,7 +24,7 @@ export function getFlyModes(angle: f32, startX: f32, startY: f32, strength: f32)
     poweredFlyDeceleration *= FLY_DECELERATION
     time--
   }
-  let allSpeedsSum = strength * (1.0 - poweredFlyDeceleration) / (1.0 - FLY_DECELERATION)
+  const allSpeedsSum = strength * (1.0 - poweredFlyDeceleration) / (1.0 - FLY_DECELERATION)
   // below is the original line, but Math.pow is causing an issue
   // Math.pow in -O3 add lookup table in static segment.
   // This means heap base offset will change.
@@ -39,19 +39,19 @@ export function getFlyModes(angle: f32, startX: f32, startY: f32, strength: f32)
   let distance = allSpeedsSum
 
   // in case if distance have to be shorted bc of the obstacles
-  let distance_portion = allSpeedsSum / FLY_DISTANCE_PRECISION
+  const distancePortion = allSpeedsSum / FLY_DISTANCE_PRECISION
 
   while (distance > 0.01) {
-    let x = (Mathf.sin(angle) * distance + startX)
-    let y = (-Mathf.cos(angle) * distance + startY)
+    const x = (Mathf.sin(angle) * distance + startX)
+    const y = (-Mathf.cos(angle) * distance + startY)
     if (getIsPointAvailable(x, y, false)) {
       break
     } else {
-      distance -= distance_portion;
+      distance -= distancePortion;
     }
   }
 
-  let factor = distance / allSpeedsSum;
+  const factor = distance / allSpeedsSum;
   return {
     x: Mathf.sin(angle) * strength * factor,
     y: -Mathf.cos(angle) * strength * factor,

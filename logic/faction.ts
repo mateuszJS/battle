@@ -34,15 +34,16 @@ export class Faction {
     this.squads.forEach(squad => {
       squad.update()
     })
-    // first update factory, later squads, otherwise we will update new squad twice
-    let newCreatedSquad = this.factory.update()
+    // first update squad, later squads form factory
+    // otherwise we will update new squad from factories twice
+    const newCreatedSquad = this.factory.update()
     if (newCreatedSquad) {
       this.squads.push(newCreatedSquad)
     }
   }
 
   getRepresentation(): Array<f32> {
-    let factionDetails = [
+    const factionDetails = [
       REPRESENTATION_FACTION_ID,
       this.id as f32,
     ];
@@ -54,8 +55,6 @@ export class Faction {
     return factionDetails
       .concat(factoryRepresentation)
       .concat(squadsRepresentation)
-
-    // this.squads.forEach(squad => squad.getRepresentation())
   }
 
   taskAddAbility(squadsIds: Uint32Array, abilityType: u8, destination: Point): void {
@@ -84,16 +83,6 @@ export class Faction {
         positionIndex ++
       }
     }
-
-    // let position = PositionUtils::get_squads_positions(squads_ids.len(), target_x, target_y);
-    // let mut index = 0;
-    // self.squads.iter_mut().for_each(|ref_cell_squad| {
-    //   let mut squad = ref_cell_squad.borrow_mut();
-    //   if squads_ids.contains(&squad.id) {
-    //     squad.task_add_target(position[index], false);
-    //     index += 1;
-    //   }
-    // });
   }
 
   taskAddEnemy(squadsIds: Uint32Array, enemySquad: Squad): void {
@@ -108,10 +97,6 @@ export class Faction {
   }
 
   checkSquadsCorrectness(): void {
-    // I kept it because we had already a situation when forEach trowed an error
-    // for (let i = 0; i < this.squads.length; i++) {
-    //   unchecked(this.squads[i].checkMembersCorrectness())
-    // }
     this.squads = this.squads.filter(squad => {
       if (squad.abilityCoolDown > 0) {
         squad.abilityCoolDown --

@@ -20,18 +20,18 @@ export function getTrack(startPoint: Point, endPoint: Point): UniquePoint[] {
     y: endPoint.y,
   }
   // ------------START checking intersection-------------------
-  let direct_connection_line: UniqueLine =  {
+  const directConnectionLine: UniqueLine =  {
     p1: obstacleStartPoint,
     p2: obstacleEndPoint,
   }
-  let is_possible_direct_connection = true
+  let isDirectConnectionPossible = true
   for (let i = 0; i < blockingTrackLines.length; i++) {
-    if (checkIntersection(direct_connection_line, blockingTrackLines[i])) {
-      is_possible_direct_connection = false
+    if (checkIntersection(directConnectionLine, blockingTrackLines[i])) {
+      isDirectConnectionPossible = false
       break
     }
   }
-  if (is_possible_direct_connection) {
+  if (isDirectConnectionPossible) {
     return [
       obstacleStartPoint,
       obstacleEndPoint,
@@ -212,7 +212,7 @@ function shortestPathAStart(
       const index = getSortedIndex(queue, heuristic);
       let path = currentNode.path.slice(0)
       path.push(neighbor);
-      let newNode: QueueItem =  {
+      const newNode: QueueItem =  {
         point: neighbor,
         path,
         current_length,
@@ -346,37 +346,4 @@ export function createPermanentTrackGraph(
       }
     }
   }
-
-  // for (let i = 0; i < trackPoints.length; i++) {
-  //   const iObstacle = trackPoints[i]
-    // for (let j = i + 1; j < pointsInner.length; j++) {
-    //   const jObstacle = pointsInner[j]
-
-    //   for (let m = 0; m < iObstacle.length; m++) {
-    //     for (let n = 0; n < jObstacle.length; n++) {
-
-    //       const mPoint = iObstacle[m]
-    //       const nPoint = jObstacle[n]
-    //       const newLine: UniqueLine = {
-    //         p1: mPoint,
-    //         p2: nPoint,
-    //       }
-
-    //       let isIntersect = false
-    //       for (let p = 0; p < blockingTrackLines.length; p++) {
-    //         if (checkIntersection(newLine, blockingTrackLines[p])) {
-    //           isIntersect = true
-    //           break
-    //         }
-    //       }
-
-    //       if (!isIntersect) {
-    //         permanentObstaclesGraph.get(mPoint.id).push(nPoint)
-    //         permanentObstaclesGraph.get(nPoint.id).push(mPoint)
-    //       }
-
-    //     }
-    //   }
-    // }
-  // }
 }

@@ -83,24 +83,20 @@ function doExplosion(bullet: BulletData): void {
   }
 }
 
-export function updateBullets(/*squads_on_grid: &SquadsGrid*/): void {
-  let newBulletsData: BulletData[] = []
-
-  for (let i = 0; i < bullets_data.length; i++) {
-    const bullet = unchecked(bullets_data[i])
-    if (bullet.lifetime <= f32.EPSILON) {
+export function updateBullets(): void {
+  bullets_data = bullets_data.filter(bullet => {
+    if (bullet.lifetime < f32.EPSILON) {
       if (bullet.weaponDetails.explosionRange > f32.EPSILON) {
         doExplosion(bullet)
       } else {
         (bullet.singleTarget as Unit).takeDamage(bullet.weaponDetails.damage);
       }
-    } else {
-      bullet.lifetime--
-      newBulletsData.push(bullet)
+      return false
     }
-  }
 
-  bullets_data = newBulletsData
+    bullet.lifetime--
+    return true
+  })
 }
 
 export function getBulletsRepresentation(): f32[] {
