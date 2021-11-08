@@ -47,13 +47,18 @@ function searchForEnemy(factions: Faction[]): void {
       const squadIsRunning = squad.members.filter(
         member => MoveStates.includes(member.state)
       ).length > (squad.members.length / 2 as i32)
+
+      // is staying, has aim to attack
+      // no reason to look for secondary aim
+      if (!squadIsRunning && squad.attackAim) {
+        squad.secondaryAttackAim = null
+        return
+      }
+
       const squadDirectionAngle = squadIsRunning ? getMeanAngle(squad.members) : 0
       // we don't need direction if squad is not running
 
       if (isCurrentSecondaryAimInRange(squadIsRunning, squadDirectionAngle, squad)) {
-        if (squad.factionId == USER_FACTION_ID) {
-          trace("current secondayr aim is okay")
-        }
         return
       }
 

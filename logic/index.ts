@@ -2,9 +2,9 @@ import { Faction } from "./faction";
 import { outerBoundaries, storeBoundaries } from "./obstacles-manager";
 import { Line, Point, UniquePoint } from "./geom-types";
 import { MAP_SQUAD_REPRESENTATION_TO_TYPE, SquadType } from "./squad-details";
-import { convertLogicCoordsToVisual, convertVisualCoordsToLogic, convertVisualOffsetToLogic } from "./convert-coords-between-logic-and-visual";
-import { initializeGrid, fillGrid, debugGridNumbers, pickCellIndexesInPolygonDebug, getSquadsFromGridByPolygon } from "./grid-manager";
-import { CHECK_SQUADS_CORRECTNESS_PERIOD, UINT_DATA_SETS_DIVIDER, UPDATE_SQUAD_CENTER_PERIOD, SEARCH_FOR_ENEMIES_PERIOD } from "./constants";
+import { convertLogicCoordsToVisual, convertVisualCoordsToLogic, getUnitOffset } from "./convert-coords-between-logic-and-visual";
+import { initializeGrid, fillGrid, debugGridNumbers, pickCellIndexesInPolygonDebug, getSquadsFromGridByPolygon, getSquadsFromGridByCircle } from "./grid-manager";
+import { CHECK_SQUADS_CORRECTNESS_PERIOD, UINT_DATA_SETS_DIVIDER, UPDATE_SQUAD_CENTER_PERIOD, SEARCH_FOR_ENEMIES_PERIOD, MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS } from "./constants";
 import { isPointInPolygon } from "./geom-utils";
 import { Squad } from "./squad";
 import { createPermanentTrackGraph, trackPoints, blockingTrackLines, permanentObstaclesGraph } from "./track-manager";
@@ -46,16 +46,13 @@ export function initUniverse(
     }
     factions.push(faction)
   }
-  trace("before storeBoundaries")
   storeBoundaries(obstacles, blockingTrackPoints)
-  trace("before createPermanentTrackGraph")
   createPermanentTrackGraph(blockingTrackPoints, rawTrackPoints, bridgeSecondToLastPointIndex)
   // testTracer()
   
   mapWidthGlob = mapWidth
   mapHeightGlob = mapHeight
   
-  trace("before initializeGrid")
   initializeGrid(mapWidth, mapHeight)
 }
 
@@ -192,7 +189,7 @@ function getAttackedEnemy(target: Point): Squad | null {
     if (squad.factionId == userFaction.id) continue
 
     const unitRadius = squad.squadDetails.unitRadius
-    const offset = convertVisualOffsetToLogic(0, squad.squadDetails.unitRadius * 1.2)
+    const offset = getUnitOffset(squad)
     const unitSize = unitRadius * 1.5
     for (let j = 0; j < squad.members.length; j++) {
       const unit = unchecked(squad.members[j])
@@ -262,7 +259,7 @@ export function getSelectedUnitsIds(x1: f32, y1: f32, x2: f32, y2: f32): Uint32A
 
   for (let i = 0; i < squads.length; i++) {
     const squad = unchecked(squads[i])
-    const offset = convertVisualOffsetToLogic(0, squad.squadDetails.unitRadius * 1.2)
+    const offset = getUnitOffset(squad)
 
     if (squad.factionId == userFaction.id) {
       let isInside = false

@@ -1,12 +1,10 @@
-import { mapHeightGlob, mapWidthGlob } from ".";
+import { GRID_CELL, SQUARE_OF_TWO } from "./constants";
 import { convertLogicCoordsToVisual } from "./convert-coords-between-logic-and-visual";
 import { Faction } from "./faction";
 import { Point } from "./geom-types";
 import { Squad } from "./squad";
 
-const SQUARE_OF_TWO: f32 = Mathf.sqrt(2)
-const EMPTY_GRID_INDEX = -100
-const GRID_CELL: f32 = 300
+const EMPTY_GRID_INDEX = -100 as i32
 const GRID_MAP_SCALE: f32 = 1 / GRID_CELL
 var gridMapWidth: i32 = 0
 var gridMapHeight: i32 = 0
@@ -218,11 +216,11 @@ export function getSquadsFromGridByPolygon(points: Point[]): Squad[] {
 }
 
 export function pickCellIndexesInPolygonDebug(points: Point[]): Point[] {
-  // let indexes = pickCellIndexesInPolygon(points)
-  let indexes = pickCellIndexesInCircle(
-    points[0],
-    Mathf.hypot(points[0].x - points[1].x, points[0].y - points[1].y),
-  )
+  let indexes = pickCellIndexesInPolygon(points)
+  // let indexes = pickCellIndexesInCircle(
+  //   points[0],
+  //   Mathf.hypot(points[0].x - points[1].x, points[0].y - points[1].y),
+  // )
 
   return indexes.map<Point>(cellIndex => (
     convertLogicCoordsToVisual(
@@ -241,8 +239,8 @@ function pickCellIndexesInPolygon(points: Point[]): i32[] {
     if (fMaxY < point.y) fMaxY = point.y
     
   }
-  const minY = Mathf.floor(fMinY) as i32
-  const maxY = Mathf.ceil(fMaxY) as i32
+  const minY = fMinY as i32
+  const maxY = fMaxY as i32
   const length = maxY - minY + 1
 
   let startEdge = new Array<i32>(length).fill(EMPTY_GRID_INDEX)
@@ -265,7 +263,7 @@ function pickCellIndexesInPolygon(points: Point[]): i32[] {
           unchecked(startEdge[cellY] = cellX)
         }
         if (unchecked(endEdge[cellY]) < cellX) {
-          unchecked(endEdge[cellY] =  cellX)
+          unchecked(endEdge[cellY] = cellX)
         }
       }
     }
@@ -273,8 +271,8 @@ function pickCellIndexesInPolygon(points: Point[]): i32[] {
 
   let selectedIndexes: i32[] = []
  
-  for (let i = -1; i <= length + 1; i++) {
-    const safeIndex = Mathf.min(Mathf.max(i as f32, 0), startEdge.length as f32) as i32
+  for (let i = -1; i <= length; i++) {
+    const safeIndex = Mathf.min(Mathf.max(i as f32, 0), length as f32 - 1) as i32
     const start = Mathf.max(unchecked(startEdge[safeIndex] as f32) - 1, 0) as i32 // add x - 1
     const end = Mathf.min(unchecked(endEdge[safeIndex] as f32) + 1, gridMapWidth as f32 - 1) as i32 // add x + 1
     const y = Mathf.min(Mathf.max(i + minY as f32, 0), gridMapHeight as f32 - 1) as i32

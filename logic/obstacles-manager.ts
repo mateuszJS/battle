@@ -20,7 +20,7 @@ export function getMap(data: Float32Array): Array<Line[] | null> {
   let obstacleIndex: i32 = 0
   let i: i32 = 0;
   let obstacles: Point[][] = [[]]
-  trace("0")
+
   //====================CREATE POINTS FOR OBSTACLES=========================
   while (i < data.length) {
     if (data[i] == OBSTACLES_DIVIDER) {
@@ -35,7 +35,7 @@ export function getMap(data: Float32Array): Array<Line[] | null> {
       i += 2
     }
   }
-  trace("1")
+
   //====================CREATE LINES FOR OBSTACLES=========================
   let obstacleLines: Line[] = []
   for (let i = 0; i < obstacles.length; i++) {
@@ -47,12 +47,12 @@ export function getMap(data: Float32Array): Array<Line[] | null> {
       })
     }
   }
-  trace("2")
+
   let linesMap: Array<Line[] | null> = new Array(OBSTACLES_MAP_WIDTH * OBSTACLES_MAP_HEIGHT);
 
   for (let y: i32 = 0; y < OBSTACLES_MAP_HEIGHT; y ++) {
     for (let x: i32 = 0; x < OBSTACLES_MAP_WIDTH; x ++) {
-      trace("3")
+
       const realCoordsPoint: Point = {
         x: (x as f32) * OBSTACLES_CELL_SIZE,
         y: (y as f32) * OBSTACLES_CELL_SIZE,
@@ -74,9 +74,9 @@ export function getMap(data: Float32Array): Array<Line[] | null> {
       }))
 
       let allLinesInsideCell: Line[] = []
-      trace("4")
+
       for (let i = 0; i < obstacleLines.length; i++) {
-        trace("5")
+
         const line = obstacleLines[i]
 
         let isIntersection = false
@@ -98,9 +98,8 @@ export function getMap(data: Float32Array): Array<Line[] | null> {
         ) {
           allLinesInsideCell.push(line)
         }
-        trace("6")
       }
-      trace("7")
+
       const index = y * OBSTACLES_MAP_WIDTH + x
 
       // so there is crossed lines or/and inside the cell
@@ -114,10 +113,9 @@ export function getMap(data: Float32Array): Array<Line[] | null> {
         // is out of polygon, so it's disabled position
         linesMap[index] = []
       }
-      trace("8")
     }
   }
-  trace("9")
+
   return linesMap
 }
 

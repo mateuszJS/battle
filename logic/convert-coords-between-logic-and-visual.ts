@@ -1,6 +1,7 @@
-import { MAP_SKEW_ANGLE, MAP_VERTICAL_MOD } from './constants'
+import { MAP_SKEW_ANGLE, MAP_VERTICAL_MOD, MATH_PI_2 } from './constants'
 import { mapHeightGlob } from '.'
 import { Point } from './geom-types'
+import { Squad } from './squad'
 
 export function convertLogicCoordsToVisual(x: f32, y: f32): Point {
   const angle = Mathf.atan2(x, mapHeightGlob - y) + MAP_SKEW_ANGLE
@@ -29,10 +30,9 @@ export function convertLogicOffsetToVisual(angle: f32, distance: f32): Point {
   }
 }
 
-export function convertVisualOffsetToLogic(x: f32, y: f32): Point {
-  const angle = Mathf.atan2(x, y) - MAP_SKEW_ANGLE
-  const distance = Mathf.hypot(x, y)
-  // TODO: it's weird that is doesn't care about MAP_VERTICAL_MOD
+export function getUnitOffset(squad: Squad): Point {
+  const distance = squad.squadDetails.unitRadius * 1.2
+  const angle = MATH_PI_2 - MAP_SKEW_ANGLE
 
   return {
     x: Mathf.sin(angle) * distance,
