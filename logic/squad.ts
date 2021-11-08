@@ -1,8 +1,8 @@
-import { MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS, UnitState, WeaponType } from "./constants"
+import { MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS, RepresentationId, UnitState, WeaponType } from "./constants"
 import { getId } from "./get-id"
 import { Point } from "./geom-types"
 import { UNITS_OFFSET } from "./position-utils"
-import { SquadDetails, SquadType, SQUAD_DETAILS } from "./squad-details"
+import { SquadDetails, SQUAD_DETAILS } from "./squad-details"
 import { Unit } from "./unit"
 import { WeaponDetails, WEAPON_DETAILS } from "./weapon-details"
 import { getTrack } from "./track-manager"
@@ -31,7 +31,7 @@ export class Squad {
 
   constructor(
     public factionId: u32,
-    public type: SquadType,
+    public type: RepresentationId,
   ) {
     this.id = getId()
     this.abilityCoolDown = 0;

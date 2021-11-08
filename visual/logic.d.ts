@@ -22,7 +22,7 @@ export function debugInnerTrack(): usize;
 export function getFactoriesInitData(): usize;
 export function debugGrid(): usize;
 export function getUniverseRepresentation(): usize;
-export function createSquad(squadType: f32): void;
+export function createSquad(representationId: i32): void;
 export function moveUnits(squadsIds: usize, x: f32, y: f32): usize;
 export function getSelectedUnitsIds(x1: f32, y1: f32, x2: f32, y2: f32): usize;
 export function debugSelecting(x1: f32, y1: f32, x2: f32, y2: f32): usize;

@@ -1,9 +1,9 @@
-import { NORMAL_SQUAD_RADIUS } from "./constants";
+import { NORMAL_SQUAD_RADIUS, RepresentationId } from "./constants";
 import { Point } from "./geom-types";
-import { SquadType, SQUAD_DETAILS } from "./squad-details";
+import { SQUAD_DETAILS } from "./squad-details";
 import { MAX_POSSIBLE_WEAPON_RANGE } from "./weapon-details";
 
-export const DISTANCE_BETWEEN_ATTACKERS: f32 = 2 * (NORMAL_SQUAD_RADIUS + SQUAD_DETAILS.get(SquadType.Squad).unitRadius)
+export const DISTANCE_BETWEEN_ATTACKERS: f32 = 2 * (NORMAL_SQUAD_RADIUS + SQUAD_DETAILS.get(RepresentationId.Solider).unitRadius)
 const NUMBER_OF_RANGE_BREAKPOINTS: i32 = Mathf.ceil(MAX_POSSIBLE_WEAPON_RANGE / DISTANCE_BETWEEN_ATTACKERS) as i32
 export var PRECALCULATED_ATTACKERS_POSITIONS: Point[][] = []
 

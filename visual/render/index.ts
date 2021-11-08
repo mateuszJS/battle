@@ -1,13 +1,4 @@
-import {
-  REPRESENTATION_FACTION_ID,
-  REPRESENTATION_ENEMY_FACTORY,
-  REPRESENTATION_SOLIDER,
-  REPRESENTATION_USER_FACTORY,
-  REPRESENTATION_BULLETS,
-  REPRESENTATION_RAPTOR,
-  REPRESENTATION_STRATEGIC_POINT,
-  PRODUCTION_LINE_LENGTH,
-} from '../../logic/constants'
+import { RepresentationId, PRODUCTION_LINE_LENGTH } from '../../logic/constants'
 
 import * as representationUpdaters from './representationUpdaters'
 import { UniverseRepresentation } from '~/initGame'
@@ -31,13 +22,13 @@ const render = (
     const nextItemType = universeData[index]
 
     switch (nextItemType) {
-      case REPRESENTATION_FACTION_ID: {
+      case RepresentationId.FactionId: {
         const indexOfId = index + 1
         factionId = universeData[indexOfId]
         index = indexOfId + 1
         break
       }
-      case REPRESENTATION_ENEMY_FACTORY: {
+      case RepresentationId.EnemyFactory: {
         const indexOfId = index + 1
         const factoryId = universeData[indexOfId]
         const factory = universeRepresentation[factoryId]
@@ -48,7 +39,7 @@ const render = (
         index = indexOfId + 2
         break
       }
-      case REPRESENTATION_SOLIDER: {
+      case RepresentationId.Solider: {
         const indexOfId = index + 1
         const newIndexValue = indexOfId + 6
         const unitId = universeData[indexOfId]
@@ -66,14 +57,14 @@ const render = (
             universeData[indexOfId + 3],
             factionId === USER_FACTION_ID,
             universeData[indexOfId + 4],
-            REPRESENTATION_SOLIDER,
+            RepresentationId.Solider,
           )
         }
 
         index = newIndexValue
         break
       }
-      case REPRESENTATION_USER_FACTORY: {
+      case RepresentationId.UserFactory: {
         const indexOfId = index + 1
         const newIndexValue = indexOfId + 2 + PRODUCTION_LINE_LENGTH
         const factoryId = universeData[indexOfId]
@@ -86,12 +77,12 @@ const render = (
         index = newIndexValue
         break
       }
-      case REPRESENTATION_BULLETS: {
+      case RepresentationId.Bullets: {
         BulletFactory.create(universeData.slice(index + 1), universeRepresentation)
         index = universeLength
         break
       }
-      case REPRESENTATION_RAPTOR: {
+      case RepresentationId.Raptor: {
         const indexOfId = index + 1
         const newIndexValue = indexOfId + 6
         const unitId = universeData[indexOfId]
@@ -109,14 +100,14 @@ const render = (
             universeData[indexOfId + 3],
             factionId === USER_FACTION_ID,
             universeData[indexOfId + 4],
-            REPRESENTATION_RAPTOR,
+            RepresentationId.Raptor,
           )
         }
 
         index = newIndexValue
         break
       }
-      case REPRESENTATION_STRATEGIC_POINT: {
+      case RepresentationId.StrategicPoint: {
         const indexOfId = index + 1
         const newIndexValue = indexOfId + 3
         const strategicPointId = universeData[indexOfId]

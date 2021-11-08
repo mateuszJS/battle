@@ -1,4 +1,4 @@
-import { REPRESENTATION_SOLIDER, REPRESENTATION_RAPTOR } from '../../logic/constants'
+import { RepresentationId } from '../../logic/constants'
 import Unit from './Unit'
 import getMovieClipCreator from './get-movie-clip-creator'
 import getMySelection from './getMySelection'
@@ -27,7 +27,7 @@ export type UpdateAbilityCallback = (
 ) => void
 
 const MAP_UPDATE_ABILITY = {
-  [REPRESENTATION_SOLIDER]: function(
+  [RepresentationId.Solider]: function(
     x: number,
     y: number,
     angle: number,
@@ -35,7 +35,7 @@ const MAP_UPDATE_ABILITY = {
   ) {
     this.frameUpdaters.goToIdle(angle)
   },
-  [REPRESENTATION_RAPTOR]: function(
+  [RepresentationId.Raptor]: function(
     x: number,
     y: number,
     angle: number,
@@ -63,7 +63,7 @@ class UnitsFactory {
     angle: number,
     isAllianceUnit: boolean,
     state: number,
-    type: typeof REPRESENTATION_SOLIDER | typeof REPRESENTATION_RAPTOR,
+    type: typeof RepresentationId.Solider | typeof RepresentationId.Raptor,
   ) {
     const { movieClip: troopBodyMovieClip, ...troopBodyFrameUpdaters } = this.getTroopBodySprite()
     const { movieClip: regularAccessoriesMovieClip, ...regularAccessoriesFrameUpdaters } = this.getRegularAccessoriesSprite()

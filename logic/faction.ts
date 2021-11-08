@@ -1,11 +1,12 @@
-import { PRECALCULATED_ATTACKERS_POSITIONS } from "./attacker-positions"
-import { REPRESENTATION_FACTION_ID } from "./constants"
+import { RepresentationId } from "./constants"
 import { Factory } from "./factory"
 import { Point } from "./geom-types"
-import { getSquadPositions, setAggressorPositions, setAbilityPositions } from "./hex-positions"
+import {
+  getSquadPositions,
+  setAggressorPositions,
+  setAbilityPositions,
+} from "./hex-positions"
 import { Squad } from "./squad"
-import { SquadType } from "./squad-details"
-import { getId } from "./get-id"
 import { Ability } from "./ability-details"
 
 export class Faction {
@@ -21,7 +22,7 @@ export class Faction {
     factoryY: f32,
     factoryAngle: f32,
   ) {
-    this.portal = new Squad(id, SquadType.Portal)
+    this.portal = new Squad(id, RepresentationId.EnemyFactory)
     const portalMember = this.portal.addMember(factoryX, factoryY, factoryAngle)
     this.portal.updateCenter()
 
@@ -44,7 +45,7 @@ export class Faction {
 
   getRepresentation(): Array<f32> {
     const factionDetails = [
-      REPRESENTATION_FACTION_ID,
+      RepresentationId.FactionId as f32,
       this.id as f32,
     ];
     

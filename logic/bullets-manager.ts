@@ -1,4 +1,4 @@
-import { MATH_PI_HALF, MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS, REPRESENTATION_BULLETS } from "./constants"
+import { MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS, RepresentationId } from "./constants"
 import { Point } from "./geom-types"
 import { Unit } from "./unit"
 import { WeaponDetails } from "./weapon-details"
@@ -108,7 +108,7 @@ export function getBulletsRepresentation(): f32[] {
       bullet.speed,
       bullet.lifetime,
     ]).flat()
-  result.unshift(REPRESENTATION_BULLETS)
+  result.unshift(RepresentationId.Bullets as f32)
   bullets_representation = []
   return result
 }

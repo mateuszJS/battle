@@ -1,15 +1,16 @@
 export const PRODUCTION_LINE_LENGTH: usize = 5
 export const NORMAL_SQUAD_RADIUS: f32 = 60
 export const MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS: f32 = NORMAL_SQUAD_RADIUS + 100
-export const VERTICAL_PERSPECTIVE_FACTOR: f32 = 0.507122507
 
-export const REPRESENTATION_FACTION_ID: f32 = 0
-export const REPRESENTATION_ENEMY_FACTORY: f32 = 1
-export const REPRESENTATION_SOLIDER: f32 = 2
-export const REPRESENTATION_USER_FACTORY: f32 = 3
-export const REPRESENTATION_BULLETS: f32 = 4
-export const REPRESENTATION_RAPTOR: f32 = 5
-export const REPRESENTATION_STRATEGIC_POINT: f32 = 7
+export enum RepresentationId {
+  FactionId,
+  EnemyFactory,
+  Solider,
+  UserFactory,
+  Bullets,
+  Raptor,
+  StrategicPoint,
+}
 
 export enum WeaponType {
   StandardRifle,

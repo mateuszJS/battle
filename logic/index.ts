@@ -1,10 +1,9 @@
 import { Faction } from "./faction";
 import { outerBoundaries, storeBoundaries } from "./obstacles-manager";
 import { Line, Point, UniquePoint } from "./geom-types";
-import { MAP_SQUAD_REPRESENTATION_TO_TYPE, SquadType } from "./squad-details";
 import { convertLogicCoordsToVisual, convertVisualCoordsToLogic, getUnitOffset } from "./convert-coords-between-logic-and-visual";
 import { initializeGrid, fillGrid, debugGridNumbers, pickCellIndexesInPolygonDebug, getSquadsFromGridByPolygon, getSquadsFromGridByCircle } from "./grid-manager";
-import { CHECK_SQUADS_CORRECTNESS_PERIOD, UINT_DATA_SETS_DIVIDER, UPDATE_SQUAD_CENTER_PERIOD, SEARCH_FOR_ENEMIES_PERIOD, MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS } from "./constants";
+import { CHECK_SQUADS_CORRECTNESS_PERIOD, UINT_DATA_SETS_DIVIDER, UPDATE_SQUAD_CENTER_PERIOD, SEARCH_FOR_ENEMIES_PERIOD, MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS, RepresentationId } from "./constants";
 import { isPointInPolygon } from "./geom-utils";
 import { Squad } from "./squad";
 import { createPermanentTrackGraph, trackPoints, blockingTrackLines, permanentObstaclesGraph } from "./track-manager";
@@ -158,7 +157,7 @@ function updateUniverse(): void {
   /*==========DEBUGGING STUFF===============*/
   if (!wasEnemyCreated && factions.length > 1) {
     wasEnemyCreated = true
-    factions[1].factory.addSquadDoProduction(SquadType.Squad)
+    factions[1].factory.addSquadDoProduction(RepresentationId.Solider)
   }
 }
 
@@ -175,8 +174,8 @@ export function getUniverseRepresentation(): Float32Array {
   )
 }
 
-export function createSquad(squadType: f32): void {
-  userFaction.factory.addSquadDoProduction(MAP_SQUAD_REPRESENTATION_TO_TYPE.get(squadType))
+export function createSquad(representationId: i32): void {
+  userFaction.factory.addSquadDoProduction(representationId as RepresentationId)
 }
 
 function getAttackedEnemy(target: Point): Squad | null {

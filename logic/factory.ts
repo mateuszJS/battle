@@ -1,16 +1,15 @@
-import { MATH_PI_HALF, PRODUCTION_LINE_LENGTH, REPRESENTATION_ENEMY_FACTORY, REPRESENTATION_USER_FACTORY } from "./constants";
+import { MATH_PI_HALF, PRODUCTION_LINE_LENGTH, RepresentationId } from "./constants";
 import { getId } from "./get-id";
 import { getRandom } from "./get-random";
 import { Squad } from "./squad";
-import { SquadType, SQUAD_DETAILS } from "./squad-details";
+import { SQUAD_DETAILS } from "./squad-details";
 
 const FACTORY_WIDTH: f32 = 400.0;
 const TIME_BETWEEN_MEMBERS_PRODUCTION: u8 = 10
 
 class ProductionItem {
-  representationId: f32
   totalTime: f32
-  squadType: SquadType
+  representationId: RepresentationId
 }
 
 export class Factory {
@@ -61,12 +60,12 @@ export class Factory {
     } else if (this.productionLine.length > 0) {
       if (this.timeToCreate == 0) {
         if (this.productionLine.length > 1) {
-          const nextSquadDetails = SQUAD_DETAILS.get(unchecked(this.productionLine[1].squadType))
+          const nextSquadDetails = SQUAD_DETAILS.get(unchecked(this.productionLine[1].representationId))
           this.timeToCreate == nextSquadDetails.productionTime
         }
         this.lastCreatedSquad = new Squad(
           this.factionId,
-          this.productionLine.shift().squadType
+          this.productionLine.shift().representationId
         )
       } else {
         this.timeToCreate --
@@ -76,15 +75,14 @@ export class Factory {
     return null
   }
 
-  addSquadDoProduction(squadType: SquadType): void {
-    const squadDetails = SQUAD_DETAILS.get(squadType)
+  addSquadDoProduction(representationId: RepresentationId): void {
+    const squadDetails = SQUAD_DETAILS.get(representationId)
     if (this.productionLine.length == 0) {
       this.timeToCreate == squadDetails.productionTime
     }
     this.productionLine.push({
-      squadType,
       totalTime: squadDetails.productionTime,
-      representationId: squadDetails.representationId,
+      representationId,
     })
   }
 
@@ -104,7 +102,7 @@ export class Factory {
       : 0
 
     let results: f32[] = [
-      this.isOwnByUser ? REPRESENTATION_USER_FACTORY : REPRESENTATION_ENEMY_FACTORY,
+      (this.isOwnByUser ? RepresentationId.UserFactory : RepresentationId.EnemyFactory) as f32,
       this.id,
       progress,
     ]
@@ -112,7 +110,7 @@ export class Factory {
     if (this.isOwnByUser) {
       for (let i = 0; i < (PRODUCTION_LINE_LENGTH as i32); i++) {
         if (i < this.productionLine.length - 1) {
-          results.push(unchecked(this.productionLine[i]).representationId)
+          results.push(unchecked(this.productionLine[i]).representationId as f32)
         } else {
           results.push(0)
         }

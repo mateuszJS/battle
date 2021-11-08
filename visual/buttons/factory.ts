@@ -1,13 +1,11 @@
-import { REPRESENTATION_SOLIDER, REPRESENTATION_RAPTOR } from '../../logic/constants'
+import { RepresentationId } from '../../logic/constants'
 
 const ICON_SIZE = 50
 
 const MAP_ID_TO_RESOURCE = {
-  [REPRESENTATION_SOLIDER]: 'assets/soliderRegularAvatar.png',
-  [REPRESENTATION_RAPTOR]: 'assets/soliderRegularAvatar.png',
+  [RepresentationId.Solider]: 'assets/soliderRegularAvatar.png',
+  [RepresentationId.Raptor]: 'assets/soliderRegularAvatar.png',
 } as const
-
-type RepresentationId = keyof typeof MAP_ID_TO_RESOURCE
 
 type Icons = {
   buyListContainer: PIXI.Container
@@ -92,8 +90,8 @@ export const createFactoryButtons = (
   icons.productionListContainer.y = y + ICON_SIZE
   window.ui.addChild(icons.productionListContainer)
 
-  addItemToBuyList(REPRESENTATION_SOLIDER, createItemCallback)
-  addItemToBuyList(REPRESENTATION_RAPTOR, createItemCallback)
+  addItemToBuyList(RepresentationId.Solider, createItemCallback)
+  addItemToBuyList(RepresentationId.Raptor, createItemCallback)
 }
 
 export const addItemToProductionLine = (index: number, type: number) => {

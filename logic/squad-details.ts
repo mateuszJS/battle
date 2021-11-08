@@ -1,10 +1,5 @@
 import { Ability, ABILITY_DETAILS } from "./ability-details"
-import { AbilityType, REPRESENTATION_SOLIDER } from "./constants"
-
-export enum SquadType {
-  Portal,
-  Squad
-}
+import { AbilityType, RepresentationId } from "./constants"
 
 export class SquadDetails {
   representationId: f32
@@ -16,10 +11,10 @@ export class SquadDetails {
   ability: Ability | null
 }
 
-export var SQUAD_DETAILS = new Map<SquadType,SquadDetails>()
+export var SQUAD_DETAILS = new Map<RepresentationId, SquadDetails>()
 
-SQUAD_DETAILS.set(SquadType.Squad, {
-  representationId: REPRESENTATION_SOLIDER,
+SQUAD_DETAILS.set(RepresentationId.Solider, {
+  representationId: RepresentationId.Solider as f32,
   productionTime: 60,
   numberOfMembers: 7,
   maxHealth: 100,
@@ -28,7 +23,7 @@ SQUAD_DETAILS.set(SquadType.Squad, {
   ability: ABILITY_DETAILS.get(AbilityType.Grenade)
 })
 
-SQUAD_DETAILS.set(SquadType.Portal, {
+SQUAD_DETAILS.set(RepresentationId.EnemyFactory, {
   representationId: 0,
   productionTime: 0,
   numberOfMembers: 0,
@@ -37,7 +32,3 @@ SQUAD_DETAILS.set(SquadType.Portal, {
   unitRadius: 150,
   ability: null,
 })
-
-export var MAP_SQUAD_REPRESENTATION_TO_TYPE = new Map<f32, SquadType>()
-
-MAP_SQUAD_REPRESENTATION_TO_TYPE.set(REPRESENTATION_SOLIDER, SquadType.Squad)
