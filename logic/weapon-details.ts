@@ -24,7 +24,7 @@ WEAPON_DETAILS.set(WeaponType.StandardRifle, {
   reloadTime: 200,
   shootTime: 50,
   bulletSpeed: 10,
-  damage: 1,
+  damage: 0,
   shotDuringRun: true,
   explosionRange: 0,
   maxChasingShootAngle: 0.52,

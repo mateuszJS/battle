@@ -65,6 +65,9 @@ export class Squad {
   }
 
   update(): void {
+    if (this.abilityCoolDown > 0) {
+      this.abilityCoolDown --
+    }
     this.members.forEach(member => {
       member.update()
     })
@@ -145,11 +148,6 @@ export class Squad {
 
     this.attackAim = enemyToAttack
     this.abilityTarget = abilityTarget
-
-    /* if(ability) {
-      this.ability ==
-    }
-    */
   }
 
   isTakingNewTaskDisabled(): bool {

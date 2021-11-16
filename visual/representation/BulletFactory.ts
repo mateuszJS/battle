@@ -143,7 +143,7 @@ class BulletFactory {
       const type = bulletsData[i] as bulletType
       const unitId = bulletsData[i + 1]
 
-      const [x, y] = this.getBulletPosition(type, universeRepresentation[unitId] as Unit)
+      const [x, y] = this.getBulletPosition(type, universeRepresentation.get(unitId) as Unit)
       this.bullets.push(new Bullet(type, x, y, bulletsData.slice(i + 2, i + 5)))
       this.createBoom(type, x, y)
     }

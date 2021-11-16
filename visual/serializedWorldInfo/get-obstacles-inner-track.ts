@@ -1,4 +1,4 @@
-import { AdvancePoint } from "~/map-creator"
+import { AdvancePoint } from '~/map-creator/get-serialized-map-info'
 import getPortalCoords from '~/consts/get-portal-coords'
 
 const getObstaclesInnerTrack = (

@@ -1,5 +1,5 @@
 import { NORMAL_SQUAD_RADIUS, USER_FACTION_ID } from "../../logic/constants"
-import { SerializedMapInfo } from "../map-creator"
+import { SerializedMapInfo } from "../map-creator/get-serialized-map-info"
 import getPlatformCoords from '~/consts/get-platform-coords'
 import getPortalCoords from '~/consts/get-portal-coords'
 import getBridgesInnerTrack from './get-bridges-inner-track'
@@ -12,8 +12,8 @@ const getSerializedWorldInfo = (
   wasmModule: WasmModule,
 ) => {
   const serializedFactions = new Float32Array(
-    serializedMapInfo.portals.map((graphic, index) => 
-      [USER_FACTION_ID + index, graphic.x, graphic.y, 0]
+    serializedMapInfo.portals.map((portal, index) => 
+      [USER_FACTION_ID + index, portal.x, portal.y, portal.angle]
     ).flat()
   )
 

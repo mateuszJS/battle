@@ -1,4 +1,4 @@
-import { AdvancePoint, ConnectionNode, NodeDetails } from "~/map-creator"
+import { AdvancePoint, ConnectionNode, NodeDetails } from "~/map-creator/get-serialized-map-info"
 import getPortalCoords from '~/consts/get-portal-coords'
 import getPlatformCoords from '~/consts/get-platform-coords'
 

@@ -1,14 +1,16 @@
 import initGame, { WasmModule } from '~/initGame'
-import { MAP_HEIGHT, MAP_WIDTH } from '../logic/constants'
+import { MAP_HEIGHT, MAP_WIDTH } from '../../logic/constants'
 import getPlatformCoords from '~/consts/get-platform-coords'
+import getSerializedMapInfo from './get-serialized-map-info'
+import mapDetails from './map-details'
 
 const platformCoords = getPlatformCoords()
-const scaleX = (window.innerWidth * 0.7) / MAP_WIDTH
-const scaleY = (window.innerHeight * 0.9) / MAP_HEIGHT
-const scale = Math.min(scaleX, scaleY)
+
+const portalSize = 30
 
 let activeElement = null
-let isJoiner = true
+let isJoiner = false
+let isPortalArrow = false
 let offset = { x: 0, y: 0 }
 let connections: Array<[PIXI.Graphics, PIXI.Graphics]> = []
 const connectionsContainer = new PIXI.Graphics()
@@ -18,37 +20,7 @@ const portalsWrapper = new PIXI.Container()
 const mapCreatorWrapper = new PIXI.Container()
 
 let nodes: PIXI.Container[] = []
-let portals: PIXI.Graphics[] = []
-
-export interface NodeDetails {
-  id: number
-  x: number
-  y: number
-  visited: boolean[]
-}
-
-export interface ConnectionNode {
-  node: NodeDetails
-  joinIndex: number
-}
-
-export interface AdvancePoint extends Point {
-  angle: number
-}
-
-export interface SerializedMapInfo {
-  nodes: NodeDetails[]
-  connections: [ConnectionNode, ConnectionNode][]
-  portals: AdvancePoint[]
-}
-
-const mapDetails = {
-  x: 100,
-  y: 50,
-  width: MAP_WIDTH * scale,
-  height: MAP_HEIGHT * scale
-}
-const portalSize = 30
+let portals: PIXI.Container[] = []
 
 const onDragStart = (event) => {
   activeElement = event.currentTarget
@@ -115,6 +87,7 @@ const onDragEnd = (event) => {
 
   activeElement = null
   isJoiner = false
+  isPortalArrow = false
   event.stopPropagation()
 }
 
@@ -127,20 +100,31 @@ const updateActiveConnection = (x: number, y: number) => {
   if (hoveredJoiner) {
     activeConnectionContainer.drawCircle(hoveredJoiner.x + hoveredJoiner.parent.x, hoveredJoiner.y + hoveredJoiner.parent.y, 8)
   }
-  if (isJoiner) {
+  if (isJoiner) { // TODO: this is always true!
     activeConnectionContainer.drawCircle(activeElement.x + activeElement.parent.x, activeElement.y + activeElement.parent.y, 8)
   }
 }
 
 const onDragMove = (event)  => {
   if (activeElement) {
-    if (isJoiner) {
+    if (isPortalArrow) {
+      (activeElement as PIXI.Graphics).parent.rotation = Math.atan2(
+        event.data.global.x - activeElement.parent.position.x,
+        activeElement.parent.position.y - event.data.global.y,
+      )
+    } else if (isJoiner) {
       updateActiveConnection(event.data.global.x, event.data.global.y)
     } else {
       activeElement.position.set(...getSafePosition(event.data.global.x, event.data.global.y, activeElement.width / 2))
       drawConnections()
     }
   }
+}
+
+const onPointerDownPortalArrow = (event) => {
+  activeElement = event.currentTarget
+  isPortalArrow = true
+  event.stopPropagation()
 }
 
 const onPointerDownJoiner = (event) => {
@@ -173,7 +157,7 @@ const getNodeVisual = (disableJoinerEvent = false) => {
   const newNode = new PIXI.Graphics()
   newNode.beginFill(0xff0000)
   platformCoords.forEach((coord, index) => {
-    newNode[index === 0 ? 'moveTo' : 'lineTo'](coord.x * scale, coord.y * scale)
+    newNode[index === 0 ? 'moveTo' : 'lineTo'](coord.x * mapDetails.scale, coord.y * mapDetails.scale)
   })
   newNode.closePath()
 
@@ -195,11 +179,28 @@ const getNodeVisual = (disableJoinerEvent = false) => {
   return newNode
 }
 
-const getPortalVisual = () => {
-  const newPortal = new PIXI.Graphics()
-  newPortal.beginFill(0x9900ff)
-  newPortal.drawCircle(0, 0, 20)
-  return newPortal
+const getPortalVisual = (disableArrowEvent = false) => {
+  const portalBase = new PIXI.Graphics()
+  portalBase.beginFill(0x9900ff)
+  portalBase.drawCircle(0, 0, 20)
+
+  const portalArrow = new PIXI.Graphics()
+  portalArrow.beginFill(0xffffff)
+  portalArrow.drawRect(-3, -30, 6, 30)
+  portalArrow.moveTo(0, -40)
+  portalArrow.lineTo(10, -30)
+  portalArrow.lineTo(-10, -30)
+  portalArrow.closePath()
+
+  if (!disableArrowEvent) {
+    portalArrow.interactive = true
+    portalArrow.on('pointerdown', onPointerDownPortalArrow)
+  }
+
+  const portal = new PIXI.Container()
+  portal.addChild(portalBase)
+  portal.addChild(portalArrow)
+  return portal
 }
 
 const createBackground = () => {
@@ -235,7 +236,6 @@ const createToolbar = () => {
       .on('pointerup', onDragEnd)
       .on('pointerupoutside', onDragEnd)
 
-      isJoiner = false
       activeElement = newNode
       offset.x = 0
       offset.y = 0
@@ -246,7 +246,7 @@ const createToolbar = () => {
     })
 
   /* ADD PORTAL BUTTON */
-  const newPortalIcon = getPortalVisual()
+  const newPortalIcon = getPortalVisual(true)
   nodesWrapper.addChild(newPortalIcon)
   newPortalIcon.interactive = true
   newPortalIcon.scale.set(mapDetails.x / newPortalIcon.width)
@@ -291,45 +291,7 @@ const createStartBtn = (onClick) => {
   mapCreatorWrapper.addChild(button)
 }
 
-const getJoinIndex = (join: PIXI.Graphics) => {
-  const angle = Math.atan2(join.x , -join.y)
-  if (join.y < -1) return 0
-  if (join.x > 1) return 1
-  if (join.y > 1) return 2
 
-  return 3
-}
-
-const getSerializedMapInfo = (): SerializedMapInfo => {
-  let id = 0;
-  const serializedNodes: NodeDetails[] = nodes.map(node => ({
-    id: id++,
-    x: (node.x - mapDetails.x) / scale,
-    y: (node.y - mapDetails.y) / scale,
-    visited: new Array(8).fill(false),
-  }))
-
-  const serializedConnections: [ConnectionNode, ConnectionNode][] = connections.map(([join1, join2]) => {
-    const join1Node = nodes.indexOf(join1.parent)
-    const join2Node = nodes.indexOf(join2.parent)
-    return [
-      { node: serializedNodes[join1Node], joinIndex: getJoinIndex(join1) },
-      { node: serializedNodes[join2Node], joinIndex: getJoinIndex(join2) },
-    ]
-  })
-
-  const serializedPortal = portals.map(portal => ({
-    angle: 0,
-    x: (portal.x - mapDetails.x) / scale,
-    y: (portal.y - mapDetails.y) / scale,
-  }))
-
-  return {
-    nodes: serializedNodes,
-    connections: serializedConnections,
-    portals: serializedPortal,
-  }
-}
 
 const mapCreator = (wasmModule: WasmModule) => {
   createBackground()
@@ -337,8 +299,7 @@ const mapCreator = (wasmModule: WasmModule) => {
   createStartBtn(() => {
     initGame(
       wasmModule,
-      getSerializedMapInfo(),
-      portals,
+      getSerializedMapInfo(nodes, connections, portals),
       MAP_WIDTH,
       MAP_HEIGHT,
     )

@@ -1,4 +1,4 @@
-import { ConnectionNode } from "~/map-creator"
+import { ConnectionNode } from '~/map-creator/get-serialized-map-info'
 
 const getBridgesInnerTrack = (connections: [ConnectionNode, ConnectionNode][], coords: Point[]): Point[] => (
   connections.map(([nodeA, nodeB]) => [

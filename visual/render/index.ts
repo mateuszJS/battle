@@ -31,9 +31,9 @@ const render = (
       case RepresentationId.EnemyFactory: {
         const indexOfId = index + 1
         const factoryId = universeData[indexOfId]
-        const factory = universeRepresentation[factoryId]
+        const factory = universeRepresentation.get(factoryId) as Factory
         representationUpdaters.updateFactory(
-          factory as Factory,
+          factory,
           universeData[indexOfId + 1], // progress
         )
         index = indexOfId + 2
@@ -43,14 +43,14 @@ const render = (
         const indexOfId = index + 1
         const newIndexValue = indexOfId + 6
         const unitId = universeData[indexOfId]
-        const unit = universeRepresentation[unitId]
+        const unit = universeRepresentation.get(unitId)
         if (unit) {
           representationUpdaters.updateUnit(
             unit as Unit,
             universeData.slice(indexOfId + 1, newIndexValue),
           )
         } else {
-          universeRepresentation[unitId] = UnitsFactory.createUnit(
+          const newUnit = UnitsFactory.createUnit(
             unitId,
             universeData[indexOfId + 1],
             universeData[indexOfId + 2],
@@ -59,8 +59,8 @@ const render = (
             universeData[indexOfId + 4],
             RepresentationId.Solider,
           )
+          universeRepresentation.set(unitId, newUnit)
         }
-
         index = newIndexValue
         break
       }
@@ -68,9 +68,9 @@ const render = (
         const indexOfId = index + 1
         const newIndexValue = indexOfId + 2 + PRODUCTION_LINE_LENGTH
         const factoryId = universeData[indexOfId]
-        const factory = universeRepresentation[factoryId]
+        const factory = universeRepresentation.get(factoryId) as Factory
         representationUpdaters.updateFactory(
-          factory as Factory,
+          factory,
           universeData[indexOfId + 1],
           universeData.slice(indexOfId + 2, newIndexValue),
         )
@@ -86,14 +86,14 @@ const render = (
         const indexOfId = index + 1
         const newIndexValue = indexOfId + 6
         const unitId = universeData[indexOfId]
-        const unit = universeRepresentation[unitId]
+        const unit = universeRepresentation.get(unitId)
         if (unit) {
           representationUpdaters.updateUnit(
             unit as Unit,
             universeData.slice(indexOfId + 1, newIndexValue),
           )
         } else {
-          universeRepresentation[unitId] = UnitsFactory.createUnit(
+          const newUnit = UnitsFactory.createUnit(
             unitId,
             universeData[indexOfId + 1],
             universeData[indexOfId + 2],
@@ -102,6 +102,7 @@ const render = (
             universeData[indexOfId + 4],
             RepresentationId.Raptor,
           )
+          universeRepresentation.set(unitId, newUnit)
         }
 
         index = newIndexValue
@@ -111,9 +112,9 @@ const render = (
         const indexOfId = index + 1
         const newIndexValue = indexOfId + 3
         const strategicPointId = universeData[indexOfId]
-        const strategicPoint = universeRepresentation[strategicPointId]
+        const strategicPoint = universeRepresentation.get(strategicPointId) as StrategicPoint
         representationUpdaters.updateStrategicPoint(
-          strategicPoint as StrategicPoint,
+          strategicPoint,
           universeData.slice(indexOfId + 1, newIndexValue),
         )
         index = newIndexValue

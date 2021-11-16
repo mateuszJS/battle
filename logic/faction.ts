@@ -99,9 +99,6 @@ export class Faction {
 
   checkSquadsCorrectness(): void {
     this.squads = this.squads.filter(squad => {
-      if (squad.abilityCoolDown > 0) {
-        squad.abilityCoolDown --
-      }
       squad.checkMembersCorrectness()
       return squad.members.length != 0
     })

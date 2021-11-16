@@ -61,7 +61,7 @@ class SelectionController {
       // so we should make a copy
       if (enemyUnitIds.length > 0) {
         const selectedEnemyUnits = Array.from(enemyUnitIds).map(id => (
-          this.universeRepresentation[id] as Unit | Factory | StrategicPoint
+          this.universeRepresentation.get(id) //as Unit | Factory | StrategicPoint
         ))
         selectedEnemyUnits.forEach(unit => {
           unit.select()
@@ -123,7 +123,7 @@ class SelectionController {
             collectedUnits = []
             return
           }
-          const unit = this.universeRepresentation[id] as Unit
+          const unit = this.universeRepresentation.get(id) as Unit
           if (unit) {
             // update wasn't called yet, with new unit
             unit.select()

@@ -109,7 +109,7 @@ class UnitsFactory {
         troopBodyFrameUpdaters.goToDie(angle, () => {
           setTimeout(() => {
             window.world.removeChild(container)
-            window.universeRepresentation[id] = undefined
+            window.universeRepresentation.delete(id)
           }, 5000)
           // TODO: replace setTimeout with dying animation
         })

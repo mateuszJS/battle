@@ -24,12 +24,10 @@ import { startDebug as gridDebug } from './debug/grid'
 import initConvertArraysUtils from '~/attachUtils/init-convert-arrays-utils'
 import enhanceAnimatedSprites from '~/attachUtils/enhance-animated-sprites'
 import attachMethodToConvertLogicCoordsToVisual from '~/attachUtils/attach-method-covert-logic-coords-to-visual'
-import { SerializedMapInfo } from './map-creator'
+import { SerializedMapInfo } from './map-creator/get-serialized-map-info'
 import getSerializedWorldInfo from './serializedWorldInfo'
 
-export type UniverseRepresentation = {
-  [id: number]: Factory | Unit | StrategicPoint
-}
+export type UniverseRepresentation = Map<number, Factory | Unit | StrategicPoint>
 
 export type WasmModule = ASUtil & typeof ExportedWasmModule
 
@@ -50,7 +48,6 @@ const getMapPoints = (mapWidth: number, mapHeight: number) => {
 const initGame = (
   wasmModule: WasmModule,
   serializedMapInfo: SerializedMapInfo,
-  portals: PIXI.Graphics[],
   mapWidth: number,
   mapHeight: number,
 ) => {
@@ -72,7 +69,7 @@ const initGame = (
 
   UnitFactory.initializationTypes()
 
-  const universeRepresentation: UniverseRepresentation = {}
+  const universeRepresentation: UniverseRepresentation = new Map()
   window.universeRepresentation = universeRepresentation // used to remove unit's PIXI.Container
 
   const {
@@ -102,7 +99,7 @@ const initGame = (
         factoriesData[i + 3], // y
         factoriesData[i + 4], // angle
       )
-      universeRepresentation[factoryId] = factoryRepresentation
+      universeRepresentation.set(factoryId, factoryRepresentation)
   
       if (factionId === USER_FACTION_ID) {
         createFactoryButtons(factoriesData[i + 2], factoriesData[i + 3], type => createSquad(type),
