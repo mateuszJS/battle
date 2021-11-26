@@ -51,7 +51,7 @@ const getSerializedWorldInfo = (
     bridgeSecondToLastPointIndex: bridgesInnerTrack.length - 1,
   }
 
-  const unpinAllInfo = () => {
+  const unpinSerializedWorldInfo = () => {
     wasmModule.__unpin(serializedWorldInfo.factions)
     wasmModule.__unpin(serializedWorldInfo.obstacles)
     wasmModule.__unpin(serializedWorldInfo.blockingTrackPoints)
@@ -60,7 +60,7 @@ const getSerializedWorldInfo = (
 
   return {
     serializedWorldInfo,
-    unpinAllInfo,
+    unpinSerializedWorldInfo,
   }
 }
 

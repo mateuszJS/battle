@@ -1,9 +1,9 @@
 import { Faction } from "./faction";
 import { outerBoundaries, storeBoundaries } from "./obstacles-manager";
 import { Line, Point, UniquePoint } from "./geom-types";
-import { convertLogicCoordsToVisual, convertVisualCoordsToLogic, getUnitOffset } from "./convert-coords-between-logic-and-visual";
+import { convertLogicAngleToVisual, convertLogicCoordsToVisual, convertVisualCoordsToLogic, getUnitOffset } from "./convert-coords-between-logic-and-visual";
 import { initializeGrid, fillGrid, debugGridNumbers, pickCellIndexesInPolygonDebug, getSquadsFromGridByPolygon, getSquadsFromGridByCircle } from "./grid-manager";
-import { CHECK_SQUADS_CORRECTNESS_PERIOD, UINT_DATA_SETS_DIVIDER, UPDATE_SQUAD_CENTER_PERIOD, SEARCH_FOR_ENEMIES_PERIOD, MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS, RepresentationId } from "./constants";
+import { CHECK_SQUADS_CORRECTNESS_PERIOD, UINT_DATA_SETS_DIVIDER, UPDATE_SQUAD_CENTER_PERIOD, SEARCH_FOR_ENEMIES_PERIOD, MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS, RepresentationId, MAP_SKEW_ANGLE } from "./constants";
 import { isPointInPolygon } from "./geom-utils";
 import { Squad } from "./squad";
 import { createPermanentTrackGraph, trackPoints, blockingTrackLines, permanentObstaclesGraph } from "./track-manager";
@@ -114,7 +114,7 @@ export function getFactoriesInitData(): Float32Array {
     result[i * 5 + 1] = faction.factory.id
     result[i * 5 + 2] = factoryPos.x
     result[i * 5 + 3] = factoryPos.y
-    result[i * 5 + 4] = faction.factory.angle
+    result[i * 5 + 4] = faction.factory.angle + MAP_SKEW_ANGLE // convertLogicAngleToVisual(faction.factory.angle)
   }
   return result
 }

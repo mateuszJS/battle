@@ -58,6 +58,12 @@ const getSerializedMapInfo = (
     y: (portal.y - mapDetails.y) / mapDetails.scale,
   }))
 
+  // console.log({
+  //   nodes: serializedNodes,
+  //   connections: serializedConnections,
+  //   portals: serializedPortal,
+  // })
+
   return {
     nodes: serializedNodes,
     connections: serializedConnections,

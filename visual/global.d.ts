@@ -7,6 +7,7 @@ declare global {
     world: PIXI.Container
     smallPieces: PIXI.Container
     ui: PIXI.Container
+    updateBackground: (sprite: PIXI.Sprite) => void
     universeRepresentation: UniverseRepresentation
     app: PIXI.Application
     startGame: (playersList: string[]) => void

@@ -55,6 +55,13 @@ export default [
   'assets/units/rodion-head/rodion-head-getup.json',
   'assets/units/rodion-head/rodion-head-fly.json',
   'assets/units/rodion-head/rodion-head-idle.json',
+  
+  'assets/buildings/portal/portal-bottom-base.json',
+  'assets/buildings/portal/portal-dynamic-wing.json',
+  'assets/buildings/portal/portal-lights.json',
+  'assets/buildings/portal/portal-static-wing.json',
+  'assets/buildings/portal/portal-top-base.json',
+
   'assets/bridge/adornment.json',
   'assets/bridge/boundary-stick.json',
   'assets/bridge/track-side.jpg',

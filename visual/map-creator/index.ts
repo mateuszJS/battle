@@ -6,8 +6,6 @@ import mapDetails from './map-details'
 
 const platformCoords = getPlatformCoords()
 
-const portalSize = 30
-
 let activeElement = null
 let isJoiner = false
 let isPortalArrow = false
@@ -108,10 +106,12 @@ const updateActiveConnection = (x: number, y: number) => {
 const onDragMove = (event)  => {
   if (activeElement) {
     if (isPortalArrow) {
-      (activeElement as PIXI.Graphics).parent.rotation = Math.atan2(
+      const angle = Math.atan2(
         event.data.global.x - activeElement.parent.position.x,
         activeElement.parent.position.y - event.data.global.y,
       )
+      const factor = 20 / (2 * Math.PI);
+      (activeElement as PIXI.Graphics).parent.rotation = Math.round(angle * factor) / factor
     } else if (isJoiner) {
       updateActiveConnection(event.data.global.x, event.data.global.y)
     } else {
@@ -290,8 +290,6 @@ const createStartBtn = (onClick) => {
   button.on('click', onClick)
   mapCreatorWrapper.addChild(button)
 }
-
-
 
 const mapCreator = (wasmModule: WasmModule) => {
   createBackground()

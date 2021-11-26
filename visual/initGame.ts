@@ -1,8 +1,7 @@
 import UnitFactory from '~/representation/UnitFactory'
 import Unit from '~/representation/Unit'
 import EffectsFactory from '~/representation/EffectFactory'
-import getSortableLayer from '~/modules/getSortableLayer'
-import createBackgroundTexture from './createBackgroundTexture'
+import setAllLayers from '~/modules/set-all-layers'
 import render from './render'
 import { Universe } from '../crate/pkg/index'
 import Factory from '~/representation/Factory'
@@ -26,6 +25,7 @@ import enhanceAnimatedSprites from '~/attachUtils/enhance-animated-sprites'
 import attachMethodToConvertLogicCoordsToVisual from '~/attachUtils/attach-method-covert-logic-coords-to-visual'
 import { SerializedMapInfo } from './map-creator/get-serialized-map-info'
 import getSerializedWorldInfo from './serializedWorldInfo'
+import predefinedMap from './predefined-maps/portals-spam'
 
 export type UniverseRepresentation = Map<number, Factory | Unit | StrategicPoint>
 
@@ -51,6 +51,7 @@ const initGame = (
   mapWidth: number,
   mapHeight: number,
 ) => {
+  serializedMapInfo = predefinedMap
   const {
     initUniverse,
     getUniverseRepresentation,
@@ -63,8 +64,7 @@ const initGame = (
   enhanceAnimatedSprites()
   attachMethodToConvertLogicCoordsToVisual(mapHeight)
   const mapPoints = getMapPoints(mapWidth, mapHeight)
-  const mapSprite = createBackgroundTexture(mapPoints)
-  getSortableLayer(mapSprite)
+  setAllLayers(mapPoints)
   EffectsFactory.initialize()
 
   UnitFactory.initializationTypes()
@@ -74,7 +74,7 @@ const initGame = (
 
   const {
     serializedWorldInfo,
-    unpinAllInfo,
+    unpinSerializedWorldInfo,
   } = getSerializedWorldInfo(serializedMapInfo, wasmModule)
 
   initUniverse(
@@ -88,7 +88,7 @@ const initGame = (
     // serializedInfoAboutWorld.obstacles,
     // serializedInfoAboutWorld.strategicPoints,
   )
-  unpinAllInfo()
+  unpinSerializedWorldInfo()
 
   window.useFloat32ArrayData(getFactoriesInitData(), (factoriesData) => {
     for (let i = 0; i < factoriesData.length; i += 5) {
@@ -133,7 +133,7 @@ const initGame = (
 
   // startDebugObstaclesMap(wasmModule)
   // debugObstacles(wasmModule)
-  debugInnerTrack(wasmModule)
+  // debugInnerTrack(wasmModule)
   debugOuterTrack(wasmModule)
   startDebugObstacles(wasmModule)
   
