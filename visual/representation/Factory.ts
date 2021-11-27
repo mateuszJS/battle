@@ -119,6 +119,9 @@ class Factory {
       topBase.y + 1.1 + Math.cos(firstWingAngle - Math.PI / 2) / 10, // to just show it above, or below the other objects
     )
     window.world.addChild(firstWingDynamic)
+    const firstWingLights = new PIXI.Sprite(PIXI.Texture.from(`fpl_${framesIndex}`,))
+    firstWingLights.anchor.copyFrom(firstWingDynamic.anchor)
+    firstWingDynamic.addChild(firstWingLights)
 
     const secondWingDynamic = addPortalPart(
       `fpd_${oppositeFrame}`,
@@ -128,29 +131,9 @@ class Factory {
       topBase.y + 1.1 + Math.cos(secondWingAngle + Math.PI / 2) / 10, // to just show it above, or below the other objects
     )
     window.world.addChild(secondWingDynamic)
-
-
-    const lightsFramesIndex = ((safeAngle + 5) % 11 + 1).toString().padStart(4, '0')
-    const lightsOppositeFramesIndex = (11 - ((safeAngle + 5) % 11) + 1).toString().padStart(4, '0')
-    const firstWingLight = addPortalPart(
-      `fpl_${lightsFramesIndex}`,
-      0.5,
-      (sprite) => 0.99 + (topBaseSurfaceOffsetY + Math.cos(firstWingAngle) * radiusY) / sprite.height,
-      topBase.x + Math.sin(firstWingAngle) * radiusX * dynamicWingRadiusMod,
-      topBase.y + 1.3 + Math.cos(firstWingAngle) / 10, // to just show it above, or below the other objects
-    )
-    window.world.addChild(firstWingLight)
-
-    // const secondWingLight = addPortalPart(
-    //   `fpl_${lightsOppositeFramesIndex}`,
-    //   0.5,
-    //   (sprite) => 0.99 + (topBaseSurfaceOffsetY + Math.cos(secondWingAngle) * radiusY) / sprite.height,
-    //   topBase.x + Math.sin(secondWingAngle) * radiusX * dynamicWingRadiusMod,
-    //   topBase.y + 1.3 + Math.cos(secondWingAngle) / 10, // to just show it above, or below the other objects
-    // )
-    // secondWingLight.scale.set(-1, 1)
-    // window.world.addChild(secondWingLight)
-
+    const secondWingLights = new PIXI.Sprite(PIXI.Texture.from(`fpl_${oppositeFrame}`,))
+    secondWingLights.anchor.copyFrom(secondWingDynamic.anchor)
+    secondWingDynamic.addChild(secondWingLights)
     // const props = portalProperties[index]
 
     // gateTop.x = props.gateTop.x
