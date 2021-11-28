@@ -2,11 +2,27 @@ import { AdvancePoint, ConnectionNode, NodeDetails } from "~/map-creator/get-ser
 import getPortalCoords from '~/consts/get-portal-coords'
 import getPlatformCoords from '~/consts/get-platform-coords'
 
+const getBridgeOffset = (cornerIndex: number, rawOffset: number): Point => {
+  const offset = rawOffset * 0.5
+
+  switch (cornerIndex) {
+    case 0: return { x: offset, y: -offset }
+    case 1: return { x: -offset, y: -offset }
+    case 2: return { x: offset, y: offset }
+    case 3: return { x: offset, y: -offset }
+    case 4: return { x: -offset, y: offset }
+    case 5: return { x: offset, y: offset }
+    case 6: return { x: -offset, y: -offset }
+    case 7: return { x: -offset, y: offset }
+  }
+}
+
 const collectNextPoints = (
   nodes: NodeDetails[],
   connections: [ConnectionNode, ConnectionNode][],
   lastVisitedPoint: ConnectionNode,
-  platformCoords: Point[]
+  platformCoords: Point[],
+  distanceOffset: number,
 ): Point[] => {
   const allNodeConnections = connections
     .filter(connection => (
@@ -18,12 +34,6 @@ const collectNextPoints = (
 
   for (let i = 0; i < 4; i++) {
 
-    collectedPoints.push({
-      x: lastVisitedPoint.node.x + platformCoords[startJoinIndex * 2].x,
-      y: lastVisitedPoint.node.y + platformCoords[startJoinIndex * 2].y,
-    })
-    lastVisitedPoint.node.visited[startJoinIndex * 2] = true
-
     let connection: ConnectionNode | null = null
     for (let j = 0; j < allNodeConnections.length; j++) {
       const conn = allNodeConnections[j]
@@ -34,10 +44,19 @@ const collectNextPoints = (
       if (connection) { break }
     }
 
+    const firstOffset = getBridgeOffset(startJoinIndex * 2, connection ? distanceOffset : 0)
+    collectedPoints.push({
+      x: lastVisitedPoint.node.x + platformCoords[startJoinIndex * 2].x + firstOffset.x,
+      y: lastVisitedPoint.node.y + platformCoords[startJoinIndex * 2].y + firstOffset.y,
+    })
+    lastVisitedPoint.node.visited[startJoinIndex * 2] = true
+
+
     if (connection) {
+      const offset = getBridgeOffset(connection.joinIndex * 2 + 1, distanceOffset)
       collectedPoints.push({
-        x: connection.node.x + platformCoords[connection.joinIndex * 2 + 1].x,
-        y: connection.node.y + platformCoords[connection.joinIndex * 2 + 1].y,
+        x: connection.node.x + platformCoords[connection.joinIndex * 2 + 1].x + offset.x,
+        y: connection.node.y + platformCoords[connection.joinIndex * 2 + 1].y + offset.y,
       })
       connection.node.visited[connection.joinIndex * 2 + 1] = true
 
@@ -57,12 +76,14 @@ const collectNextPoints = (
             joinIndex: nextJoinIndex,
           },
           platformCoords,
+          distanceOffset,
         ),
       ]
     }
+    const secondOffset = getBridgeOffset(startJoinIndex * 2 + 1, connection ? distanceOffset : 0)
     collectedPoints.push({
-      x: lastVisitedPoint.node.x + platformCoords[startJoinIndex * 2 + 1].x,
-      y: lastVisitedPoint.node.y + platformCoords[startJoinIndex * 2 + 1].y,
+      x: lastVisitedPoint.node.x + platformCoords[startJoinIndex * 2 + 1].x + secondOffset.x,
+      y: lastVisitedPoint.node.y + platformCoords[startJoinIndex * 2 + 1].y + secondOffset.y,
     })
     lastVisitedPoint.node.visited[startJoinIndex * 2 + 1] = true
     startJoinIndex = (startJoinIndex + 1) % 4
@@ -78,8 +99,9 @@ const collectNextPoints = (
 const getMapBoundaries = (
   nodes: NodeDetails[],
   connections: [ConnectionNode, ConnectionNode][],
-  platformCoords: Point[],
+  distanceOffset: number,
 ): Point[] => {
+  const platformCoords = getPlatformCoords(distanceOffset)
   const safeCopyOfVisitedArrays = nodes.map(node => [...node.visited])
 
   let nodeWithMinY = nodes[0]
@@ -95,7 +117,7 @@ const getMapBoundaries = (
   do {
     results = [
       ...results,
-      ...collectNextPoints(nodes, connections, startingNode, platformCoords),
+      ...collectNextPoints(nodes, connections, startingNode, platformCoords, distanceOffset),
       null,
     ]
     startingNode = null
@@ -126,7 +148,7 @@ const getSerializedObstacles = (
   const mapBoundaries = getMapBoundaries(
     nodes,
     connections,
-    getPlatformCoords(distanceOffset),
+    distanceOffset,
   )
 
 

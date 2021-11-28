@@ -27,11 +27,11 @@ const getSerializedWorldInfo = (
     serializedMapInfo.nodes,
     serializedMapInfo.connections,
     serializedMapInfo.portals,
-    NORMAL_SQUAD_RADIUS - 5,
+    NORMAL_SQUAD_RADIUS,
   )
   const bridgesInnerTrack = getBridgesInnerTrack(
     serializedMapInfo.connections,
-    getPlatformCoords(NORMAL_SQUAD_RADIUS, 0.1),
+    getPlatformCoords(NORMAL_SQUAD_RADIUS),
   )
   const obstaclesInnerTrack = getObstaclesInnerTrack(
     serializedMapInfo.portals,
