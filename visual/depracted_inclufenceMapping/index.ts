@@ -8,7 +8,7 @@ import {
   INFLUENCE_MAP_HEIGHT,
   INFLUENCE_MAP_SCALE_X,
   INFLUENCE_MAP_SCALE_Y,
-} from 'Consts'
+} from './consts'
 import { USER_FACTION_ID } from '../../logic/constants'
 import { Universe } from '../../crate/pkg/index'
 

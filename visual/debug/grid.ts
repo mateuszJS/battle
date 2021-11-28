@@ -22,7 +22,7 @@ export const startDebug = (wasmModule: WasmModule) => {
 
     const lines = gridData.slice(0, indexOfDivider)
     
-    graph.lineStyle(1, 0xffffff, 1)
+    graph.lineStyle(1, 0xffffff, 0.3)
     for (let i = 0; i < lines.length; i += 4) {
       graph.moveTo(...window.convertLogicCoordToVisual(lines[i + 0], lines[i + 1]))
       graph.lineTo(...window.convertLogicCoordToVisual(lines[i + 2], lines[i + 3]))

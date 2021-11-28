@@ -33,13 +33,13 @@ const getSidePoints = (points: Point[]) => {
     : [points[2], points[3]]
 }
 
-let container = null
+// let container = null
 
-const drawBridge = (points: Point[]) => {
-  if (container) {
-    window.world.removeChild(container)
-  }
-  container = new PIXI.Container()
+const drawBridge = (points: Point[]): PIXI.Container => {
+  // if (container) {
+  //   window.world.removeChild(container)
+  // }
+  const container = new PIXI.Container()
 
   /* DRAWING SURFACE */
   const bridgeWidth = Math.hypot(points[0].x - points[3].x, points[0].y - points[3].y)
@@ -115,7 +115,8 @@ const drawBridge = (points: Point[]) => {
     pixels.drawRect(point.x - 5, point.y - 5, 10, 10)
   })
   container.addChild(pixels)
-  window.world.addChild(container)
+  // window.world.addChild(container)
+  return container
 }
 
 export default drawBridge

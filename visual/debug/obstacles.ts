@@ -27,7 +27,7 @@ export const startDebug = (wasmModule: WasmModule) => {
         graph.closePath()
       } else {
         while (result[i] !== -1 && i < result.length) {
-          graph.lineStyle(3, 0x00ff00, 0.3)
+          graph.lineStyle(3, 0x00ff00, 0.1)
           graph.moveTo(...window.convertLogicCoordToVisual(result[i], result[i + 1]))
           graph.lineTo(...window.convertLogicCoordToVisual(result[i + 2], result[i + 3]))
           graph.closePath()

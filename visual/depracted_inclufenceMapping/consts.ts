@@ -18,8 +18,6 @@ export enum UNIT_TYPE {
 
 export const MAP_WIDTH = 2700
 export const MAP_HEIGHT = 2100
-export const MAX_CAMERA_MOVE_SPEED = 15
-export const START_MOVING_CAMERA_BOUNDARY = 100
 export const HALF_UNIT_HEIGHT = 20
 export const INFLUENCE_CELL_SIZE = 175.0
 const INFLUENCE_MAP_SCALE = 1.0 / INFLUENCE_CELL_SIZE

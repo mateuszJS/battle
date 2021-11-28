@@ -1,7 +1,7 @@
 import UnitFactory from '~/representation/UnitFactory'
 import Unit from '~/representation/Unit'
 import EffectsFactory from '~/representation/EffectFactory'
-import setAllLayers from '~/modules/set-all-layers'
+import setAllLayers from './set-all-layers'
 import render from './render'
 import { Universe } from '../crate/pkg/index'
 import Factory from '~/representation/Factory'
@@ -12,8 +12,7 @@ import { USER_FACTION_ID } from '../logic/constants'
 import debugController from '~/debug'
 import type * as ExportedWasmModule from './logic'
 import { ASUtil } from '@assemblyscript/loader'
-import drawBridge from './draw-bridge'
-import drawNode from './draw-node'
+import drawEnvironment from './draw-environment'
 // import { startDebug as debugObstacles } from './debug/obstacles'
 import { startDebug as debugInnerTrack } from './debug/innerTrack'
 import { startDebug as debugOuterTrack } from './debug/outerTrack'
@@ -51,7 +50,7 @@ const initGame = (
   mapWidth: number,
   mapHeight: number,
 ) => {
-  serializedMapInfo = predefinedMap
+  // serializedMapInfo = predefinedMap
   const {
     initUniverse,
     getUniverseRepresentation,
@@ -64,7 +63,8 @@ const initGame = (
   enhanceAnimatedSprites()
   attachMethodToConvertLogicCoordsToVisual(mapHeight)
   const mapPoints = getMapPoints(mapWidth, mapHeight)
-  setAllLayers(mapPoints)
+  const environmentContainer = drawEnvironment(serializedMapInfo)
+  setAllLayers(mapPoints, environmentContainer)
   EffectsFactory.initialize()
 
   UnitFactory.initializationTypes()
@@ -137,7 +137,6 @@ const initGame = (
   debugOuterTrack(wasmModule)
   startDebugObstacles(wasmModule)
   
-
   window.app.ticker.add((delta: number) => {
     gridDebug(wasmModule)
 
@@ -159,8 +158,7 @@ const initGame = (
     //   { x: mouseX + Math.sin(angle) * -100 * 2, y: mouseY - Math.cos(angle) * -35 * 2 },
     // ])
 
-    // const node = drawNode(600, 600, [false, true, false, false], 600)
-    // window.world.addChild(node.graphic)
+
 
     // gridDebug(universe)
     // debugController.update(universe)

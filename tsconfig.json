@@ -10,29 +10,16 @@
     "allowJs": true, // to import web assembly module
     "baseUrl": "./",
     "paths": {
-      "~/*": [
-        "./visual/*"
-      ],
-      "Settings": [
-        "./visual/modules/gameSettings"
-      ],
-      "Consts": [
-        "./visual/consts/consts.ts"
-      ]
+      "~/*": ["./visual/*"],
+      "Constants": ["./logic/constants"],
+      "Settings": ["./visual/modules/gameSettings"]
     },
     "lib": [
       "es2019",
       "dom" // with that, window/document is undefined
     ],
-    "typeRoots": [
-      "node_modules/pixi.js"
-    ],
-    "types": [
-      "pixi.js"
-    ],
+    "typeRoots": ["node_modules/pixi.js"],
+    "types": ["pixi.js"]
   },
-  "include": [
-    "visual"
-    // "logic/constants.ts"
-  ]
+  "include": ["visual", "logic/constants.ts"]
 }

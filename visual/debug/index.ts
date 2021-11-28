@@ -4,7 +4,6 @@ import * as obstaclesDebug from './obstacles'
 import * as gridDebug from './grid'
 import * as enemySecondaryAimDebug from './enemySecondaryAim'
 import * as getPointsInRectangleDebug from './getPointsInRectangle'
-import * as gridLineDebug from './gridLine'
 import * as aiDebug from './ai'
 import { Universe } from '../../crate/pkg/index'
 
@@ -25,7 +24,6 @@ const debugController = {
   gridDebug,
   enemySecondaryAimDebug,
   getPointsInRectangleDebug,
-  gridLineDebug,
   aiDebug,
   update: (universe: Universe) => {
     Object.keys(debugController).forEach(key => {

@@ -1,4 +1,5 @@
-import { MAX_CAMERA_MOVE_SPEED, START_MOVING_CAMERA_BOUNDARY } from 'Consts'
+const MAX_CAMERA_MOVE_SPEED = 15
+const START_MOVING_CAMERA_BOUNDARY = 100
 
 const getCameraPositionModificators = (x: number, y: number) => {
   let modX = 0

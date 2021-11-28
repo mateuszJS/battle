@@ -59,3 +59,5 @@ export const SQUARE_OF_TWO: f32 = Math.sqrt(2) as f32
 
 export const GRID_CELL: f32 = 300
 export const OBSTACLES_CELL_SIZE: f32 = 300
+
+export const PLATFORM_RADIUS: f32 = 600
