@@ -11,6 +11,38 @@ var innerBoundaries: Array<Line[] | null> = new Array(OBSTACLES_MAP_WIDTH * OBST
 // array.length === 0 -> disabled position
 // array.length > 0 -> have to check if position is blocked
 
+function getAllLinesWithinPolygon(lines: Line[], polygon: Point[]): Line[] {
+  let linesWithinPolygon: Line[] = []
+  const polygonLines: Line[] = polygon.map<Line>((point, index, allPoints) => ({
+    p1: point,
+    p2: allPoints[(index + 1) % allPoints.length]
+  }))
+
+  for (let i = 0; i < lines.length; i++) {
+
+    const line = lines[i]
+
+    let isIntersection = false
+    for (let j = 0; j < polygonLines.length; j++) {
+      if (checkIntersection(line, polygonLines[j])) {
+        isIntersection = true
+        break
+      }
+    }
+    if (isIntersection) {
+      linesWithinPolygon.push(line)
+      continue
+    }
+    
+    // line do not cross the cell boundaries, so can be whole inside the cell or outside
+    if (isPointInPolygon(line.p1, polygonLines)) {
+      linesWithinPolygon.push(line)
+    }
+  }
+
+  return linesWithinPolygon
+}
+
 export function storeBoundaries(outerRawData: Float32Array, innerRawData: Float32Array): void {
   outerBoundaries = getMap(outerRawData)
   innerBoundaries = getMap(innerRawData)
@@ -58,61 +90,34 @@ export function getMap(data: Float32Array): Array<Line[] | null> {
         y: (y as f32) * OBSTACLES_CELL_SIZE,
       }
 
+      const cellArea: Point[] = [
+        { x: realCoordsPoint.x, y: realCoordsPoint.y },
+        { x: realCoordsPoint.x + OBSTACLES_CELL_SIZE, y: realCoordsPoint.y },
+        { x: realCoordsPoint.x + OBSTACLES_CELL_SIZE, y: realCoordsPoint.y + OBSTACLES_CELL_SIZE },
+        { x: realCoordsPoint.x, y: realCoordsPoint.y + OBSTACLES_CELL_SIZE },
+      ]
+      const linesInsideCell = getAllLinesWithinPolygon(obstacleLines, cellArea)
+      const index = y * OBSTACLES_MAP_WIDTH + x
+
+      // need to check if cell is out or in the obstacles
+      if (linesInsideCell.length === 0 ) {
+        if (!isPointInPolygon(realCoordsPoint, obstacleLines)) {
+          // is out of polygon, so it's disabled position
+          linesMap[index] = []
+        }
+        continue
+      }
+
       const x1: f32 = x <= OBSTACLES_MAP_WIDTH_HALF ? 0 : realCoordsPoint.x
       const x2: f32 = x <= OBSTACLES_MAP_WIDTH_HALF ? realCoordsPoint.x + OBSTACLES_CELL_SIZE : MAP_WIDTH
-
-      const cellPoints: Point[] = [
+      const searchArea: Point[] = [
         { x: x1, y: realCoordsPoint.y },
         { x: x2, y: realCoordsPoint.y },
         { x: x2, y: realCoordsPoint.y + OBSTACLES_CELL_SIZE },
         { x: x1, y: realCoordsPoint.y + OBSTACLES_CELL_SIZE },
       ]
-
-      const cellLines: Line[] = cellPoints.map<Line>((point, index, allPoints) => ({
-        p1: point,
-        p2: allPoints[(index + 1) % allPoints.length]
-      }))
-
-      let allLinesInsideCell: Line[] = []
-
-      for (let i = 0; i < obstacleLines.length; i++) {
-
-        const line = obstacleLines[i]
-
-        let isIntersection = false
-        for (let j = 0; j < cellLines.length; j++) {
-          if (checkIntersection(line, cellLines[j])) {
-            isIntersection = true
-            break
-          }
-        }
-        if (isIntersection) {
-          allLinesInsideCell.push(line)
-          continue
-        }
-        
-        // line do not cross the cell boundaries, so can be whole inside the cell or outside
-        if (
-          isPointInPolygon(line.p1, cellLines)
-          || isPointInPolygon(line.p2, cellLines)
-        ) {
-          allLinesInsideCell.push(line)
-        }
-      }
-
-      const index = y * OBSTACLES_MAP_WIDTH + x
-
-      // so there is crossed lines or/and inside the cell
-      if (allLinesInsideCell.length > 0) {
-        linesMap[index] = allLinesInsideCell
-        continue
-      }
-
-      // need to check if cell is out or in the obstacles
-      if (!isPointInPolygon(realCoordsPoint, obstacleLines)) {
-        // is out of polygon, so it's disabled position
-        linesMap[index] = []
-      }
+      // collect all obstacles' lines in a row, to test it
+      linesMap[index] = getAllLinesWithinPolygon(obstacleLines, searchArea)
     }
   }
 
