@@ -74,12 +74,13 @@ export class Squad {
   }
 
   keepCoherency(): void {
-    const coherencyNotKept = this.members.some(member => (
-      Math.hypot(
-        this.centerPoint.x - member.x,
-        this.centerPoint.y - member.y
+    const coherencyNotKept = this.members.some(member => {
+      const centerPoint = member.squad.centerPoint
+      return Math.hypot(
+        centerPoint.x - member.x,
+        centerPoint.y - member.y
       ) > MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS
-    ));
+    });
 
     if (coherencyNotKept) {
       if (!this.isDuringKeepingCoherency) {
@@ -92,7 +93,7 @@ export class Squad {
           abilityTarget: this.abilityTarget,
         }
       }
-      this.setTask(this.centerPoint, null, null)
+      this.setTask(this.centerPoint, null, null, true)
     } else if (this.isDuringKeepingCoherency) {
       this.isDuringKeepingCoherency = false
       this.restoreTaskTodo()
@@ -127,8 +128,9 @@ export class Squad {
     destination: Point | null,
     enemyToAttack: Squad | null,
     abilityTarget: Point | null,
+    isPriority: boolean = false
   ): void {
-    if (this.isTakingNewTaskDisabled()) {
+    if (!isPriority && this.isTakingNewTaskDisabled()) {
       this.taskTodo = {
         trackDestination: destination,
         attackAim: enemyToAttack,
@@ -179,6 +181,8 @@ export class Squad {
     if (secondaryAttackAim && secondaryAttackAim.members.length == 0) {
       this.secondaryAttackAim = null
     }
+
+    this.keepCoherency()
 
     this.members.forEach(unit => {
       unit.checkCorrectness()

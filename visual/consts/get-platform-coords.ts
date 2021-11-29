@@ -1,6 +1,6 @@
 import { PLATFORM_RADIUS } from 'Constants'
 
-const getPlatformCoords = (offsetDistance: number = 0, offsetAngle: number = 0) => {
+export default (offsetDistance: number = 0, offsetAngle: number = 0) => {
   const bridgeAngle = 53.6 * Math.PI / 180 - offsetAngle
   const diagonallyAngle = 37 * Math.PI / 180 + offsetAngle
   const radius = PLATFORM_RADIUS - offsetDistance
@@ -14,5 +14,3 @@ const getPlatformCoords = (offsetDistance: number = 0, offsetAngle: number = 0) 
     }
   })
 }
-
-export default getPlatformCoords

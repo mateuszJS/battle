@@ -24,7 +24,7 @@ import enhanceAnimatedSprites from '~/attachUtils/enhance-animated-sprites'
 import attachMethodToConvertLogicCoordsToVisual from '~/attachUtils/attach-method-covert-logic-coords-to-visual'
 import { SerializedMapInfo } from './map-creator/get-serialized-map-info'
 import getSerializedWorldInfo from './serializedWorldInfo'
-import predefinedMap from './predefined-maps/portals-spam'
+import predefinedMap from './predefined-maps/three-islands'
 
 export type UniverseRepresentation = Map<number, Factory | Unit | StrategicPoint>
 
@@ -51,6 +51,7 @@ const initGame = (
   mapHeight: number,
 ) => {
   // serializedMapInfo = predefinedMap
+  // console.log(serializedMapInfo)
   const {
     initUniverse,
     getUniverseRepresentation,
@@ -133,7 +134,7 @@ const initGame = (
 
   // startDebugObstaclesMap(wasmModule)
   // debugObstacles(wasmModule)
-  // debugInnerTrack(wasmModule)
+  debugInnerTrack(wasmModule)
   debugOuterTrack(wasmModule)
   startDebugObstacles(wasmModule)
   

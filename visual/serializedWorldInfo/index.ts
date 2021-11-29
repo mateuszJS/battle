@@ -1,7 +1,5 @@
 import { NORMAL_SQUAD_RADIUS, USER_FACTION_ID } from "../../logic/constants"
 import { SerializedMapInfo } from "../map-creator/get-serialized-map-info"
-import getPlatformCoords from '~/consts/get-platform-coords'
-import getPortalCoords from '~/consts/get-portal-coords'
 import getBridgesInnerTrack from './get-bridges-inner-track'
 import getObstaclesInnerTrack from './get-obstacles-inner-track'
 import getSerializedObstacles from './get-serialized-obstacles'
@@ -27,11 +25,13 @@ const getSerializedWorldInfo = (
     serializedMapInfo.nodes,
     serializedMapInfo.connections,
     serializedMapInfo.portals,
-    NORMAL_SQUAD_RADIUS,
+    NORMAL_SQUAD_RADIUS - 5, // to allow for creating tracks
+    // otherwise all lines will overlap with obstacles
+    // so there will be no available tracks
   )
   const bridgesInnerTrack = getBridgesInnerTrack(
     serializedMapInfo.connections,
-    getPlatformCoords(NORMAL_SQUAD_RADIUS),
+    NORMAL_SQUAD_RADIUS,
   )
   const obstaclesInnerTrack = getObstaclesInnerTrack(
     serializedMapInfo.portals,

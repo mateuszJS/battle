@@ -5,6 +5,8 @@ import { WeaponDetails } from "./weapon-details"
 import { convertLogicAngleToVisual, convertLogicOffsetToVisual } from './convert-coords-between-logic-and-visual'
 import { getSquadsFromGridByCircle } from "./grid-manager"
 
+const MIN_EXPLOSION_STRENGTH: f32 = 3
+
 class BulletRepresentation {
   sourceId: f32
   angle: f32
@@ -72,7 +74,7 @@ function doExplosion(bullet: BulletData): void {
         const unitDistance = Mathf.hypot(unit.x - explosionSource.x, unit.y - explosionSource.y)
         if (unitDistance < explosionRange) {
           const angle = Mathf.atan2(unit.x - explosionSource.x, explosionSource.y - unit.y)
-          const strength = (explosionRange - unitDistance) * 0.05
+          const strength = Mathf.max(MIN_EXPLOSION_STRENGTH, (explosionRange - unitDistance) * 0.1)
           unit.takeDamage(
             bullet.weaponDetails.damage * (1 - unitDistance / explosionRange) as i16,
           )
@@ -89,7 +91,7 @@ export function updateBullets(): void {
       if (bullet.weaponDetails.explosionRange > f32.EPSILON) {
         doExplosion(bullet)
       } else {
-        (bullet.singleTarget as Unit).takeDamage(bullet.weaponDetails.damage);
+        (bullet.singleTarget as Unit).takeDamage(bullet.weaponDetails.damage)
       }
       return false
     }

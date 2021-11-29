@@ -1,21 +1,8 @@
 import { AdvancePoint, ConnectionNode, NodeDetails } from "~/map-creator/get-serialized-map-info"
 import getPortalCoords from '~/consts/get-portal-coords'
 import getPlatformCoords from '~/consts/get-platform-coords'
+import getBridgeOffset from "~/consts/get-bridge-offset"
 
-const getBridgeOffset = (cornerIndex: number, rawOffset: number): Point => {
-  const offset = rawOffset * 0.5
-
-  switch (cornerIndex) {
-    case 0: return { x: offset, y: -offset }
-    case 1: return { x: -offset, y: -offset }
-    case 2: return { x: offset, y: offset }
-    case 3: return { x: offset, y: -offset }
-    case 4: return { x: -offset, y: offset }
-    case 5: return { x: offset, y: offset }
-    case 6: return { x: -offset, y: -offset }
-    case 7: return { x: -offset, y: offset }
-  }
-}
 
 const collectNextPoints = (
   nodes: NodeDetails[],
@@ -150,7 +137,6 @@ const getSerializedObstacles = (
     connections,
     distanceOffset,
   )
-
 
   const portalsPoints = portals.map(portal => [
     null,

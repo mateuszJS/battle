@@ -1,4 +1,4 @@
-const getPortalCoords = (
+export default (
   x: number,
   y: number,
   angle: number,
@@ -18,5 +18,3 @@ const getPortalCoords = (
     }
   })
 }
-
-export default getPortalCoords
