@@ -1,3 +1,4 @@
+import { CAMERA_MOVEMENT_DISABLED_AREA_THRESHOLD } from 'Constants'
 import getTexture from '~/getTexture'
 import drawEnvironment from './draw-environment'
 
@@ -30,16 +31,34 @@ const setAllLayers = (mapPoints: Point[], environmentContainer: PIXI.Container):
   window.ui = new PIXI.Container()
 
   window.app.stage = new PIXI.display.Stage()
-  const background = createBackgroundTexture(mapPoints)
-  window.app.stage.addChild(background) // prob should be included in window.world
-  
-  window.app.stage.addChild(environmentContainer)
+  environmentContainer.addChild(createBackgroundTexture(mapPoints))
+
+  const minX = Math.min(...mapPoints.map(point => point.x))
+  const minY = Math.min(...mapPoints.map(point => point.y))
+  const maxX = Math.max(...mapPoints.map(point => point.x))
+  const maxY = Math.max(...mapPoints.map(point => point.y))
+  // to test if all environment is cropped correctly you can decrease CAMERA_MOVEMENT_DISABLED_AREA_THRESHOLD
+  // up to negative value like CAMERA_MOVEMENT_DISABLED_AREA_THRESHOLD = -CAMERA_MOVEMENT_DISABLED_AREA_THRESHOLD
+  const backgroundTexture = getTexture(
+    environmentContainer,
+    maxX - minX + 2 * CAMERA_MOVEMENT_DISABLED_AREA_THRESHOLD,
+    maxY - minY + 2 * CAMERA_MOVEMENT_DISABLED_AREA_THRESHOLD,
+    {},
+    minX - CAMERA_MOVEMENT_DISABLED_AREA_THRESHOLD,
+    minY - CAMERA_MOVEMENT_DISABLED_AREA_THRESHOLD,
+  )
+  const env = new PIXI.Sprite(backgroundTexture)
+  env.x = minX - CAMERA_MOVEMENT_DISABLED_AREA_THRESHOLD
+  env.y = minY - CAMERA_MOVEMENT_DISABLED_AREA_THRESHOLD
+  window.app.stage.addChild(env) // prob should be included in window.world
+
+
   window.app.stage.addChild(window.world)
   window.app.stage.addChild(window.smallPieces)
   window.app.stage.addChild(window.ui)
 
   window.updateBackground = (sprite: PIXI.Sprite, isAlreadySkew = false): void => {
-    background.addChild(sprite)
+    // background.addChild(sprite)
     // const rectTexture = getTexture(background, 1, 1)
   }
 }

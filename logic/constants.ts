@@ -61,3 +61,5 @@ export const GRID_CELL: f32 = 300
 export const OBSTACLES_CELL_SIZE: f32 = 300
 
 export const PLATFORM_RADIUS: f32 = 600
+
+export const CAMERA_MOVEMENT_DISABLED_AREA_THRESHOLD: f32 = 100

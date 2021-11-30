@@ -1,7 +1,7 @@
 import { UniverseRepresentation, WasmModule } from '~/initGame'
 import SelectionController from './SelectionController'
 import getCameraPositionModificators from './get-camera-position-modificators'
-import { MAP_WIDTH, MAP_HEIGHT } from '../../logic/constants'
+import { CAMERA_MOVEMENT_DISABLED_AREA_THRESHOLD } from 'Constants'
 
 const getCalcYFunc = (
   [x1, y1]: [number, number],
@@ -47,8 +47,8 @@ class MouseController {
   }
 
   private updateCameraBoundaries = () => {
-    const offsetX = (window.innerWidth / 2) - 100
-    const offsetY = (window.innerHeight / 2) - 100
+    const offsetX = (window.innerWidth / 2) - CAMERA_MOVEMENT_DISABLED_AREA_THRESHOLD
+    const offsetY = (window.innerHeight / 2) - CAMERA_MOVEMENT_DISABLED_AREA_THRESHOLD
     
     const leftTopPoint = {
       x: -(this.mapPoints[0].x + offsetX),
