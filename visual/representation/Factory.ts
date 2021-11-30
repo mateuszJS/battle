@@ -58,7 +58,6 @@ class Factory {
       ) * factor + 0.49 // 0.49 instead of 0.5, to don't round up to 21
     )
     const framesIndex = (1 + ((safeAngle + 10) % 20)).toString().padStart(4, '0')
-      console.log(angle, safeAngle, framesIndex)
   
     const bottomBase = addPortalPart(
       `fpb_${framesIndex}`,
@@ -99,7 +98,7 @@ class Factory {
     )
     window.world.addChild(firstWingStatic)
 
-    const oppositeFrame = (safeAngle + 1).toString().padStart(4, '0')
+    const oppositeFrame = ((safeAngle % 20) + 1).toString().padStart(4, '0')
     const secondWingStatic = addPortalPart(
       `fps_${oppositeFrame}`,
       0.5,
