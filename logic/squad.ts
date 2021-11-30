@@ -17,8 +17,8 @@ class TaskTodo {
 export class Squad {
   public id: u32
   public abilityCoolDown: u16
-  private isDuringKeepingCoherency: bool
-  private taskTodo: TaskTodo
+  public isDuringKeepingCoherency: bool // public to read destination from taskTodo if is during keeping coherency
+  public taskTodo: TaskTodo // public to read destination for the user market, when is during keeping coherency
   private anyUnitStartedUsingAbility: bool
   public members: Array<Unit>
   public attackAim: Squad | null

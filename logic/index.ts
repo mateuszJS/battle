@@ -221,9 +221,15 @@ export function moveUnits(squadsIds: Uint32Array, x: f32, y: f32): Float32Array 
   for (let i = 0; i < userFaction.squads.length; i++) {
     const squad = userFaction.squads[i]
     if (squadsIds.includes(squad.id)) {
-      const destinationLogic = squad.track.length > 0
-        ? squad.track[squad.track.length - 1]
-        : squad.centerPoint
+
+      let destinationLogic = squad.centerPoint
+      const taskTodoDestination = squad.taskTodo.trackDestination
+      if (squad.isDuringKeepingCoherency && taskTodoDestination) {
+        destinationLogic = taskTodoDestination
+      } else if (squad.track.length > 0) {
+        destinationLogic = squad.track[squad.track.length - 1]
+      }
+
       const destinationVisual = convertLogicCoordsToVisual(destinationLogic.x, destinationLogic.y)
       result.push(destinationVisual.x)
       result.push(destinationVisual.y)
