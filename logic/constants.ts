@@ -35,7 +35,7 @@ export enum UnitState {
   CHASING,
 }
 
-export const MoveStates: UnitState[] = [UnitState.FLY, UnitState.RUN, UnitState.CHASING]
+// export const MoveStates: UnitState[] = [UnitState.FLY, UnitState.RUN, UnitState.CHASING]
 
 export const MAP_WIDTH: f32 = 2000 * 2
 export const MAP_HEIGHT: f32 = 4500 * 2

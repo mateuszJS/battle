@@ -1,6 +1,5 @@
-import { MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS, MoveStates, NORMAL_SQUAD_RADIUS, USER_FACTION_ID } from "./constants"
+import { MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS, NORMAL_SQUAD_RADIUS, UnitState } from "./constants"
 import { Faction } from "./faction"
-import { Point } from "./geom-types"
 import { getAngleDiff } from "./get-angle-diff"
 import getMeanAngle from "./get-mean-angle"
 import { getSquadsFromGridByCircle } from './grid-manager'
@@ -45,7 +44,7 @@ function searchForEnemy(factions: Faction[]): void {
       }
       // so if half of the squad is running
       const squadIsRunning = squad.members.filter(
-        member => MoveStates.includes(member.state)
+        member => member.state == UnitState.RUN || member.state == UnitState.CHASING
       ).length > (squad.members.length / 2 as i32)
 
       // is staying, has aim to attack

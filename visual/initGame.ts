@@ -80,7 +80,7 @@ const initGame = (
   mapWidth: number,
   mapHeight: number,
 ) => {
-  serializedMapInfo = predefinedMap
+  // serializedMapInfo = predefinedMap
   // console.log(printPredefinedMap(serializedMapInfo))
   const {
     initUniverse,
