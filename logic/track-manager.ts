@@ -3,7 +3,7 @@ import { Line, Point } from "./geom-types"
 import { checkIntersection } from "./geom-utils"
 import { getId } from "./get-id"
 import { UniqueLine, UniquePoint } from "./geom-types"
-import { getClosestTrackBLockerLine, getConnectedLines, getConnectedPoints, initTrackBlockerLines } from "./obstacles-manager"
+import { getConnectedLines, getConnectedPoints } from "./obstacles-manager"
 
 export var trackPoints: UniquePoint[] = []
 export var blockingTrackLines: Line[] = [] // exported just because of debugging
@@ -22,6 +22,21 @@ function getIsDirectConnectionPossible(startPoint: UniquePoint, endPoint: Unique
   }
 
   return true
+}
+
+export function getDirectTrack(rawStartPoint: Point, rawEndPoint: Point): UniquePoint[] {
+  return [
+    {
+      id: 0,
+      x: rawStartPoint.x,
+      y: rawStartPoint.y,
+    },
+    {
+      id: 1,
+      x: rawEndPoint.x,
+      y: rawEndPoint.y,
+    }
+  ]
 }
 
 export function getTrack(rawStartPoint: Point, rawEndPoint: Point): UniquePoint[] {
@@ -60,7 +75,6 @@ function addNewPointToGraph(
   graph: Map<u32, UniquePoint[]>,
   point: UniquePoint,
   isStart: bool,
-  blockingLines: Line[],
 ): bool {
   let isConnectedCorrectly = false
 
@@ -72,8 +86,8 @@ function addNewPointToGraph(
     }
 
     let isIntersect = false
-    for (let j = 0; j < blockingLines.length; j++) {
-      const blockingLine = unchecked(blockingLines[j])
+    for (let j = 0; j < blockingTrackLines.length; j++) {
+      const blockingLine = unchecked(blockingTrackLines[j])
       if (checkIntersection(newLine, blockingLine)) {
         isIntersect = true
         break
@@ -96,23 +110,23 @@ function addNewPointToGraph(
   return isConnectedCorrectly
 }
 
-function getFilteredTrackBlockerLines(
-  point: UniquePoint,
-): Line[] {
-  const lineToRemove = getClosestTrackBLockerLine(point)
+// function getFilteredTrackBlockerLines(
+//   point: UniquePoint,
+// ): Line[] {
+//   const lineToRemove = getClosestTrackBLockerLine(point)
 
-  // Collect all blocking lines exclude two found in previous step
-  const filteredBlockingTrackLines: Line[] = []
+//   // Collect all blocking lines exclude two found in previous step
+//   const filteredBlockingTrackLines: Line[] = []
 
-  for (let i = 0; i < blockingTrackLines.length; i++) {
-    const line = unchecked(blockingTrackLines[i])
-    if (line != lineToRemove) {
-      filteredBlockingTrackLines.push(line)
-    }
-  }
+//   for (let i = 0; i < blockingTrackLines.length; i++) {
+//     const line = unchecked(blockingTrackLines[i])
+//     if (line != lineToRemove) {
+//       filteredBlockingTrackLines.push(line)
+//     }
+//   }
 
-  return filteredBlockingTrackLines
-}
+//   return filteredBlockingTrackLines
+// }
 
 function getComplicatedTrack(startPoint: UniquePoint, endPoint: UniquePoint): UniquePoint[] {
   let graph: Map<u32, UniquePoint[]> = new Map()
@@ -123,20 +137,27 @@ function getComplicatedTrack(startPoint: UniquePoint, endPoint: UniquePoint): Un
     graph.set(key, permanentObstaclesGraph.get(key).slice(0))
   }
 
-  if (!addNewPointToGraph(graph, startPoint, true, blockingTrackLines)) {
+  if (!addNewPointToGraph(graph, startPoint, true)) {
     // false -> so we have to find a correct point
     // because this one doesn't have any direct connection to graph's nodes
     // since this one is out of squad boundaries
-    const filteredBlockingTrackLines = getFilteredTrackBlockerLines(startPoint)
-    // check one more time direct connection
-    if (getIsDirectConnectionPossible(startPoint, endPoint, filteredBlockingTrackLines)) {
-      return [startPoint, endPoint]
-    }
 
-    addNewPointToGraph(graph, startPoint, true, filteredBlockingTrackLines)
+    // the following code should be no longer needed
+    // because we do not allow this situation
+    // https://github.com/mateuszJS/battle/commit/830f87c4bb4a2eb10c0845a94fac5d846848ca15
+    // when after tests we will be sure about this fix, then we can remove this if
+    trace("something very bad happened! squadCenter was out of allowed boundary")
+
+    // const filteredBlockingTrackLines = getFilteredTrackBlockerLines(startPoint)
+    // // check one more time direct connection
+    // if (getIsDirectConnectionPossible(startPoint, endPoint, filteredBlockingTrackLines)) {
+    //   return [startPoint, endPoint]
+    // }
+
+    // addNewPointToGraph(graph, startPoint, true, filteredBlockingTrackLines)
   }
 
-  addNewPointToGraph(graph, endPoint, false, blockingTrackLines)
+  addNewPointToGraph(graph, endPoint, false)
   
   return shortestPathAStart(graph, startPoint, endPoint)
 }
@@ -258,8 +279,6 @@ export function createPermanentTrackGraph(
   trackPoints = getInnerUniquePoints(rawTrackPoints)
   const pointsOuter = getConnectedPoints(blockingTrackPoints)
   blockingTrackLines = getConnectedLines(pointsOuter)
-
-  initTrackBlockerLines(blockingTrackLines)
 
   /*========GO OVER ALL POINTS ONLY IN iObstacle TO CONNECTED THEM===========*/
   for (let m = 0; m < trackPoints.length; m++) {

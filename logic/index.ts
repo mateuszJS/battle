@@ -212,7 +212,7 @@ function getSquadsDestinations(squadsIds: Uint32Array): f32[] {
 
       let destinationLogic = squad.centerPoint
       const taskTodoDestination = squad.taskTodo.trackDestination
-      if (squad.isDuringKeepingCoherency && taskTodoDestination) {
+      if (squad.isDuringFixingSquadCenter && taskTodoDestination) {
         destinationLogic = taskTodoDestination
       } else if (squad.track.length > 0) {
         destinationLogic = squad.track[squad.track.length - 1]

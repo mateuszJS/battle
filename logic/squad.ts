@@ -5,8 +5,10 @@ import { UNITS_OFFSET } from "./position-utils"
 import { SquadDetails, SQUAD_DETAILS } from "./squad-details"
 import { Unit } from "./unit"
 import { WeaponDetails, WEAPON_DETAILS } from "./weapon-details"
-import { getTrack } from "./track-manager"
+import { getDirectTrack, getTrack } from "./track-manager"
 import { UniquePoint } from "./geom-types"
+import { getSquadPositions } from "./hex-positions"
+import { getIsPointAvailable } from "./obstacles-manager"
 
 class TaskTodo {
   trackDestination: Point | null
@@ -17,7 +19,7 @@ class TaskTodo {
 export class Squad {
   public id: u32
   public abilityCoolDown: u16
-  public isDuringKeepingCoherency: bool // public to read destination from taskTodo if is during keeping coherency
+  public isDuringFixingSquadCenter: bool // public to read destination from taskTodo if is during keeping coherency
   public taskTodo: TaskTodo // public to read destination for the user market, when is during keeping coherency
   private anyUnitStartedUsingAbility: bool
   public members: Array<Unit>
@@ -36,7 +38,7 @@ export class Squad {
     this.id = getId()
     this.abilityCoolDown = 0;
     this.members = [];
-    this.isDuringKeepingCoherency = false;
+    this.isDuringFixingSquadCenter = false;
     this.taskTodo = {
       abilityTarget: null,
       trackDestination: null,
@@ -82,20 +84,10 @@ export class Squad {
       ) > MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS
     });
 
-    if (coherencyNotKept) {
-      if (!this.isDuringKeepingCoherency) {
-        this.isDuringKeepingCoherency = true
-        this.taskTodo = {
-          trackDestination: this.track.length > 0
-          ? unchecked(this.track[this.track.length - 1])
-          : null,
-          attackAim: this.attackAim,
-          abilityTarget: this.abilityTarget,
-        }
-      }
-      this.setTask(this.centerPoint, null, null, true)
-    } else if (this.isDuringKeepingCoherency) {
-      this.isDuringKeepingCoherency = false
+    if (coherencyNotKept || this.getIsSquadCenterInvalid()) {
+      this.fixSquadCenter()
+    } else if (this.isDuringFixingSquadCenter) {
+      this.isDuringFixingSquadCenter = false
       this.restoreTaskTodo()
     }
   }
@@ -124,18 +116,46 @@ export class Squad {
     })
   }
 
+  fixSquadCenter(): void {
+    if (!this.isDuringFixingSquadCenter) {
+      this.isDuringFixingSquadCenter = true
+      this.taskTodo = {
+        trackDestination: this.track.length > 0
+        ? unchecked(this.track[this.track.length - 1])
+        : null,
+        attackAim: this.attackAim,
+        abilityTarget: this.abilityTarget,
+      }
+    }
+
+    const correctPosition = unchecked(getSquadPositions(1, this.centerPoint.x, this.centerPoint.y)[0])
+    this.resetState()
+    this.track = getDirectTrack(this.centerPoint, correctPosition)
+    this.members.forEach(unit => {
+      unit.changeStateToRun()
+    })
+  }
+
+  getIsSquadCenterInvalid(): bool {
+    return !getIsPointAvailable(this.centerPoint.x, this.centerPoint.y, true)
+  }
+
   setTask(
     destination: Point | null,
     enemyToAttack: Squad | null,
     abilityTarget: Point | null,
-    isPriority: boolean = false
   ): void {
-    if (!isPriority && this.isTakingNewTaskDisabled()) {
+    if (this.isTakingNewTaskDisabled()) {
       this.taskTodo = {
         trackDestination: destination,
         attackAim: enemyToAttack,
         abilityTarget: abilityTarget,
       }
+      return
+    }
+
+    if (this.getIsSquadCenterInvalid()) {
+      this.fixSquadCenter()
       return
     }
 
@@ -153,7 +173,7 @@ export class Squad {
   }
 
   isTakingNewTaskDisabled(): bool {
-    return this.isDuringKeepingCoherency
+    return this.isDuringFixingSquadCenter
   }
 
   restoreTaskTodo(): void {
