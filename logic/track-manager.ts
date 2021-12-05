@@ -3,44 +3,56 @@ import { Line, Point } from "./geom-types"
 import { checkIntersection } from "./geom-utils"
 import { getId } from "./get-id"
 import { UniqueLine, UniquePoint } from "./geom-types"
+import { getClosestTrackBLockerLine, getConnectedLines, getConnectedPoints, initTrackBlockerLines } from "./obstacles-manager"
 
 export var trackPoints: UniquePoint[] = []
 export var blockingTrackLines: Line[] = [] // exported just because of debugging
 export var permanentObstaclesGraph: Map<u32, UniquePoint[]> = new Map()
 
-export function getTrack(startPoint: Point, endPoint: Point): UniquePoint[] {
-  const obstacleStartPoint: UniquePoint = {
-    id: 0,
-    x: startPoint.x,
-    y: startPoint.y,
-  }
-  const obstacleEndPoint: UniquePoint = {
-    id: 1,
-    x: endPoint.x,
-    y: endPoint.y,
-  }
-  // ------------START checking intersection-------------------
+function getIsDirectConnectionPossible(startPoint: UniquePoint, endPoint: UniquePoint, blockerLines: Line[]): bool {
   const directConnectionLine: UniqueLine =  {
-    p1: obstacleStartPoint,
-    p2: obstacleEndPoint,
+    p1: startPoint,
+    p2: endPoint,
   }
-  let isDirectConnectionPossible = true
-  for (let i = 0; i < blockingTrackLines.length; i++) {
-    if (checkIntersection(directConnectionLine, blockingTrackLines[i])) {
-      isDirectConnectionPossible = false
-      break
+
+  for (let i = 0; i < blockerLines.length; i++) {
+    if (checkIntersection(directConnectionLine, blockerLines[i])) {
+      return false
     }
   }
+
+  return true
+}
+
+export function getTrack(rawStartPoint: Point, rawEndPoint: Point): UniquePoint[] {
+  const startPoint: UniquePoint = {
+    id: 0,
+    x: rawStartPoint.x,
+    y: rawStartPoint.y,
+  }
+  const endPoint: UniquePoint = {
+    id: 1,
+    x: rawEndPoint.x,
+    y: rawEndPoint.y,
+  }
+  // ------------START checking intersection-------------------
+
+  const isDirectConnectionPossible = getIsDirectConnectionPossible(
+    startPoint,
+    endPoint,
+    blockingTrackLines,
+  )
+
   if (isDirectConnectionPossible) {
     return [
-      obstacleStartPoint,
-      obstacleEndPoint,
+      startPoint,
+      endPoint,
     ]
   }
 
   return getComplicatedTrack(
-    obstacleStartPoint,
-    obstacleEndPoint,
+    startPoint,
+    endPoint,
   )
 }
 
@@ -61,7 +73,7 @@ function addNewPointToGraph(
 
     let isIntersect = false
     for (let j = 0; j < blockingLines.length; j++) {
-      const blockingLine = blockingLines[j]
+      const blockingLine = unchecked(blockingLines[j])
       if (checkIntersection(newLine, blockingLine)) {
         isIntersect = true
         break
@@ -84,48 +96,22 @@ function addNewPointToGraph(
   return isConnectedCorrectly
 }
 
-function addFakeConnection(
-  graph: Map<u32, UniquePoint[]>,
+function getFilteredTrackBlockerLines(
   point: UniquePoint,
-): void {
-  // We need to collect two the closest lines
-  let closestDistance: f32 = Infinity
-  let closestLine: Line | null = null
-  let closestSecondDistance: f32 = Infinity
-  let closestSecondLine: Line | null = null
-  
-  for (let i = 0; i < blockingTrackLines.length; i++) {
-    const line = unchecked(blockingTrackLines[i])
-    const distance = Mathf.min(
-      Mathf.hypot(line.p1.x - point.x, line.p1.y - point.y),
-      Mathf.hypot(line.p2.x - point.x, line.p2.y - point.y),
-    )
-
-
-    if (distance < closestDistance) {
-      // store previous shortest distance, as the second shortest distance
-      closestSecondDistance = closestDistance
-      closestSecondLine = closestLine
-      // store a new shortest distance as the shortest
-      closestDistance = distance
-      closestLine = line
-    } else if (distance < closestSecondDistance) {
-      closestSecondDistance = distance
-      closestSecondLine = line
-    }
-  }
+): Line[] {
+  const lineToRemove = getClosestTrackBLockerLine(point)
 
   // Collect all blocking lines exclude two found in previous step
   const filteredBlockingTrackLines: Line[] = []
 
   for (let i = 0; i < blockingTrackLines.length; i++) {
     const line = unchecked(blockingTrackLines[i])
-    if (line != closestLine && line != closestSecondLine) {
+    if (line != lineToRemove) {
       filteredBlockingTrackLines.push(line)
     }
   }
 
-  addNewPointToGraph(graph, point, true, filteredBlockingTrackLines)
+  return filteredBlockingTrackLines
 }
 
 function getComplicatedTrack(startPoint: UniquePoint, endPoint: UniquePoint): UniquePoint[] {
@@ -139,8 +125,15 @@ function getComplicatedTrack(startPoint: UniquePoint, endPoint: UniquePoint): Un
 
   if (!addNewPointToGraph(graph, startPoint, true, blockingTrackLines)) {
     // false -> so we have to find a correct point
+    // because this one doesn't have any direct connection to graph's nodes
     // since this one is out of squad boundaries
-    addFakeConnection(graph, startPoint)
+    const filteredBlockingTrackLines = getFilteredTrackBlockerLines(startPoint)
+    // check one more time direct connection
+    if (getIsDirectConnectionPossible(startPoint, endPoint, filteredBlockingTrackLines)) {
+      return [startPoint, endPoint]
+    }
+
+    addNewPointToGraph(graph, startPoint, true, filteredBlockingTrackLines)
   }
 
   addNewPointToGraph(graph, endPoint, false, blockingTrackLines)
@@ -239,28 +232,6 @@ function insertLinesToGraph(
   }
 }
 
-function getConnectedPoints(data: Float32Array): Point[][] {
-  let obstacleIndex: i32 = 0
-  let i: i32 = 0;
-  let result: Point[][] = [[]]
-
-  //====================CREATE POINTS FOR OBSTACLES=========================
-  while (i < data.length) {
-    if (data[i] == OBSTACLES_DIVIDER) {
-      result.push([])
-      obstacleIndex ++
-      i ++
-    } else {
-      result[obstacleIndex].push({
-        x: data[i],
-        y: data[i + 1],
-      })
-      i += 2
-    }
-  }
-
-  return result
-}
 
 function getInnerUniquePoints(data: Float32Array): UniquePoint[] {
   let i: i32 = 0
@@ -279,38 +250,6 @@ function getInnerUniquePoints(data: Float32Array): UniquePoint[] {
   return result
 }
 
-function getConnectedLines(data: Point[][]): Line[] {
-  let result: Line[] = []
-
-  for (let i = 0; i < data.length; i++) {
-    const obstacle = data[i]
-    for (let j = 0; j < obstacle.length; j++) {
-      result.push({
-        p1: obstacle[j],
-        p2: obstacle[(j + 1) % obstacle.length],
-      })
-    }
-  }
-
-  return result
-}
-
-function getConnectedUniqueLines(data: UniquePoint[][]): UniqueLine[] {
-  let result: UniqueLine[] = []
-
-  for (let i = 0; i < data.length; i++) {
-    const obstacle = data[i]
-    for (let j = 0; j < obstacle.length; j++) {
-      result.push({
-        p1: obstacle[j],
-        p2: obstacle[(j + 1) % obstacle.length],
-      })
-    }
-  }
-
-  return result
-}
-
 export function createPermanentTrackGraph(
   blockingTrackPoints: Float32Array,
   rawTrackPoints: Float32Array,
@@ -319,6 +258,8 @@ export function createPermanentTrackGraph(
   trackPoints = getInnerUniquePoints(rawTrackPoints)
   const pointsOuter = getConnectedPoints(blockingTrackPoints)
   blockingTrackLines = getConnectedLines(pointsOuter)
+
+  initTrackBlockerLines(blockingTrackLines)
 
   /*========GO OVER ALL POINTS ONLY IN iObstacle TO CONNECTED THEM===========*/
   for (let m = 0; m < trackPoints.length; m++) {

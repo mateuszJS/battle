@@ -1,12 +1,13 @@
 import { MAP_HEIGHT, MAP_WIDTH, OBSTACLES_CELL_SIZE, OBSTACLES_DIVIDER } from "./constants";
-import { Line, Point } from "./geom-types";
+import { Line, Point, UniquePoint } from "./geom-types";
 import { checkIntersection, isObstaclePointInPolygon, isPointInPolygon, isPointInPolygonLine } from "./geom-utils";
 
 const OBSTACLES_MAP_WIDTH: i32 = Mathf.ceil(MAP_WIDTH / OBSTACLES_CELL_SIZE) as i32
 const OBSTACLES_MAP_WIDTH_HALF: i32 = OBSTACLES_MAP_WIDTH / 2 as i32
 const OBSTACLES_MAP_HEIGHT: i32 = Mathf.ceil(MAP_HEIGHT / OBSTACLES_CELL_SIZE) as i32
-export var outerBoundaries: Array<Line[] | null> = new Array(OBSTACLES_MAP_WIDTH * OBSTACLES_MAP_HEIGHT);
-var innerBoundaries: Array<Line[] | null> = new Array(OBSTACLES_MAP_WIDTH * OBSTACLES_MAP_HEIGHT);
+export var outerBoundaries: Array<Line[] | null> = new Array(OBSTACLES_MAP_WIDTH * OBSTACLES_MAP_HEIGHT)
+var innerBoundaries: Array<Line[] | null> = new Array(OBSTACLES_MAP_WIDTH * OBSTACLES_MAP_HEIGHT)
+var trackBlockers: Array<Line[]> = new Array(OBSTACLES_MAP_WIDTH * OBSTACLES_MAP_HEIGHT)
 // null -> available position
 // array.length === 0 -> disabled position
 // array.length > 0 -> have to check if position is blocked
@@ -48,19 +49,19 @@ export function storeBoundaries(outerRawData: Float32Array, innerRawData: Float3
   innerBoundaries = getMap(innerRawData)
 }
 
-export function getMap(data: Float32Array): Array<Line[] | null> {
+export function getConnectedPoints(data: Float32Array): Point[][] {
   let obstacleIndex: i32 = 0
   let i: i32 = 0;
-  let obstacles: Point[][] = [[]]
+  let result: Point[][] = [[]]
 
   //====================CREATE POINTS FOR OBSTACLES=========================
   while (i < data.length) {
     if (data[i] == OBSTACLES_DIVIDER) {
-      obstacles.push([])
+      result.push([])
       obstacleIndex ++
       i ++
     } else {
-      obstacles[obstacleIndex].push({
+      result[obstacleIndex].push({
         x: data[i],
         y: data[i + 1],
       })
@@ -68,17 +69,28 @@ export function getMap(data: Float32Array): Array<Line[] | null> {
     }
   }
 
-  //====================CREATE LINES FOR OBSTACLES=========================
-  let obstacleLines: Line[] = []
-  for (let i = 0; i < obstacles.length; i++) {
-    const obstacle = obstacles[i]
+  return result
+}
+
+export function getConnectedLines(data: Point[][]): Line[] {
+  let result: Line[] = []
+
+  for (let i = 0; i < data.length; i++) {
+    const obstacle = data[i]
     for (let j = 0; j < obstacle.length; j++) {
-      obstacleLines.push({
+      result.push({
         p1: obstacle[j],
         p2: obstacle[(j + 1) % obstacle.length],
       })
     }
   }
+
+  return result
+}
+
+export function getMap(data: Float32Array): Array<Line[] | null> {
+  const obstacles = getConnectedPoints(data)
+  const obstacleLines = getConnectedLines(obstacles)
 
   let linesMap: Array<Line[] | null> = new Array(OBSTACLES_MAP_WIDTH * OBSTACLES_MAP_HEIGHT);
 
@@ -147,4 +159,138 @@ export function getIsPointAvailable(x: f32, y: f32, isSquad: bool): bool {
   }
 
   return isPointInPolygonLine(line, linesList)
+}
+
+
+
+
+
+
+
+
+/*==============USEFUL FOR TRACK MANAGER====================*/
+
+export function initTrackBlockerLines(obstacleLines: Line[]): void {
+  for (let y: i32 = 0; y < OBSTACLES_MAP_HEIGHT; y ++) {
+    for (let x: i32 = 0; x < OBSTACLES_MAP_WIDTH; x ++) {
+
+      const realCoordsPoint: Point = {
+        x: (x as f32) * OBSTACLES_CELL_SIZE,
+        y: (y as f32) * OBSTACLES_CELL_SIZE,
+      }
+
+      const cellArea: Point[] = [
+        { x: realCoordsPoint.x, y: realCoordsPoint.y },
+        { x: realCoordsPoint.x + OBSTACLES_CELL_SIZE, y: realCoordsPoint.y },
+        { x: realCoordsPoint.x + OBSTACLES_CELL_SIZE, y: realCoordsPoint.y + OBSTACLES_CELL_SIZE },
+        { x: realCoordsPoint.x, y: realCoordsPoint.y + OBSTACLES_CELL_SIZE },
+      ]
+      const index = y * OBSTACLES_MAP_WIDTH + x
+      trackBlockers[index] = getAllLinesWithinPolygon(obstacleLines, cellArea)
+    }
+  }
+}
+
+// https://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
+function getDistancePointToSegment<T extends Point>(
+  p: T,
+  l1: Point,
+  l2: Point,
+) : f32 {
+  const A = p.x - l1.x
+  const B = p.y - l1.y
+  const C = l2.x - l1.x
+  const D = l2.y - l1.y
+  const dot = A * C + B * D
+  const len_sq = C * C + D * D
+  const param = dot / len_sq // doesn't handle cae when len_sq (line length) is 0
+  let xx: f32 = 0
+  let yy: f32 = 0
+  if (param < 0) {
+    xx = l1.x
+    yy = l1.y
+  } else if (param > 1) {
+    xx = l2.x
+    yy = l2.y
+  } else {
+    xx = l1.x + param * C
+    yy = l1.y + param * D
+  }
+  const dx: f32 = p.x - xx
+  const dy: f32 = p.y - yy
+
+  return Mathf.sqrt(dx * dx + dy * dy)
+}
+
+class PointI32 {
+  x: i32
+  y: i32
+}
+
+function getIndexOffsets(point: Point): PointI32[] {
+  let result: PointI32[] = [{ x: 0, y: 0 }]
+  // actually 4 closes cells will be enough
+  const normX = point.x % OBSTACLES_CELL_SIZE
+  const modX: i32 = normX < OBSTACLES_CELL_SIZE / 2 ? -1 : 1
+
+  const normY = point.y % OBSTACLES_CELL_SIZE
+  const modY: i32 = normY < OBSTACLES_CELL_SIZE / 2 ? -1 : 1
+
+  if (Math.abs(OBSTACLES_CELL_SIZE - normX) < Math.abs(OBSTACLES_CELL_SIZE - normY)) {
+    // if normX is closer to the half of the cell than normY
+    // then normX is further from the edge, so should go as the second
+    result.push({ x: 0, y: modY })
+    result.push({ x: modX, y: 0 })
+  } else {
+    // otherwise push items in the revers order
+    result.push({ x: modX, y: 0 })
+    result.push({ x: 0, y: modY })
+  }
+
+  result.push({ x: modX, y: modY })
+
+  return result
+}
+
+export function getClosestTrackBLockerLine(point: UniquePoint): Line {
+  const originCellX = point.x / OBSTACLES_CELL_SIZE as i32
+  const originCellY = point.y / OBSTACLES_CELL_SIZE as i32
+  const offsetsList = getIndexOffsets(point)
+  
+  let offsetIndex = 0;
+  let linesInCell: Line[] = []
+
+  // Find the closest group of lines
+  while (offsetIndex < offsetsList.length) {
+    const offset = unchecked(offsetsList[offsetIndex])
+    const cellX = originCellX + offset.x
+    const cellY = originCellY + offset.y
+
+    if (cellX < 0 || cellX >= OBSTACLES_MAP_WIDTH || cellY < 0 || cellY >= OBSTACLES_MAP_HEIGHT) {
+      continue
+    }
+    const index = cellY * OBSTACLES_MAP_WIDTH + cellX
+    const lines = unchecked(trackBlockers[index])
+    if (lines && lines.length > 0) {
+      linesInCell = lines
+      break
+    }
+    offsetIndex ++
+  }
+
+  // Find the closest line
+  let closestLineIndex = 0
+  let minDistance = Infinity
+
+  for (let i = 0; i < linesInCell.length; i++) {
+    const lines = unchecked(linesInCell[i])
+    const distance = getDistancePointToSegment(point, lines.p1, lines.p2)
+
+    if (distance < minDistance) {
+      closestLineIndex = i
+      minDistance = distance
+    }
+  }
+
+  return unchecked(linesInCell[closestLineIndex])
 }

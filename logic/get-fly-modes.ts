@@ -3,7 +3,7 @@ import { getIsPointAvailable } from "./obstacles-manager";
 
 export const FLY_MIN_SPEED: f32 = 0.035;
 export const FLY_DECELERATION: f32 = 0.97;
-const FLY_DISTANCE_PRECISION: f32 = 3.0;
+const FLY_DISTANCE_PRECISION: f32 = 5.0;
 
 export function getFlyModes(angle: f32, startX: f32, startY: f32, strength: f32): Point {
   let time = Mathf.ceil(

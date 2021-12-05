@@ -1,5 +1,5 @@
 import { Faction } from "./faction";
-import { outerBoundaries, storeBoundaries } from "./obstacles-manager";
+import { getIsPointAvailable, outerBoundaries, storeBoundaries } from "./obstacles-manager";
 import { Line, Point, UniquePoint } from "./geom-types";
 import { convertLogicAngleToVisual, convertLogicCoordsToVisual, convertVisualCoordsToLogic, getUnitOffset } from "./convert-coords-between-logic-and-visual";
 import { initializeGrid, fillGrid, debugGridNumbers, pickCellIndexesInPolygonDebug, getSquadsFromGridByPolygon, getSquadsFromGridByCircle } from "./grid-manager";
@@ -204,20 +204,8 @@ function getAttackedEnemy(target: Point): Squad | null {
   return null
 }
 
-export function moveUnits(squadsIds: Uint32Array, x: f32, y: f32): Float32Array {
-  const logicCoords = convertVisualCoordsToLogic(x, y)
-  const enemySquad = getAttackedEnemy(logicCoords)
+function getSquadsDestinations(squadsIds: Uint32Array): f32[] {
   let result: f32[] = []
-
-  if (enemySquad) {
-    userFaction.taskAddEnemy(squadsIds, enemySquad)
-    result = enemySquad.members.map<f32>(unit => unit.id)
-  } else {
-    userFaction.taskAddDestination(squadsIds, logicCoords)
-  }
-
-  result.push(UINT_DATA_SETS_DIVIDER as f32)
-
   for (let i = 0; i < userFaction.squads.length; i++) {
     const squad = userFaction.squads[i]
     if (squadsIds.includes(squad.id)) {
@@ -236,7 +224,32 @@ export function moveUnits(squadsIds: Uint32Array, x: f32, y: f32): Float32Array 
     }
   }
 
-  return toFloat32Array(result)
+  return result
+}
+
+export function moveUnits(squadsIds: Uint32Array, x: f32, y: f32): Float32Array {
+  const logicCoords = convertVisualCoordsToLogic(x, y)
+
+  const isValidDestination = getIsPointAvailable(logicCoords.x, logicCoords.y, false)
+  if (!isValidDestination) {
+    return new Float32Array(0)
+  }
+
+  const enemySquad = getAttackedEnemy(logicCoords)
+  let result: f32[] = []
+
+  if (enemySquad) {
+    userFaction.taskAddEnemy(squadsIds, enemySquad)
+    result = enemySquad.members.map<f32>(unit => unit.id)
+  } else {
+    userFaction.taskAddDestination(squadsIds, logicCoords)
+  }
+
+  result.push(UINT_DATA_SETS_DIVIDER as f32)
+
+  const destinations = getSquadsDestinations(squadsIds)
+
+  return toFloat32Array(result.concat(destinations))
 }
 
 export function getSelectedUnitsIds(x1: f32, y1: f32, x2: f32, y2: f32): Uint32Array {
@@ -306,8 +319,17 @@ export function debugSelecting(x1: f32, y1: f32, x2: f32, y2: f32): Float32Array
   return toFloat32Array(data)
 }
 
-export function useAbility(squadsIds: Uint32Array, abilityType: u8, x: f32, y: f32): void {
-  userFaction.taskAddAbility(squadsIds, abilityType, convertVisualCoordsToLogic(x, y))
+export function useAbility(squadsIds: Uint32Array, abilityType: u8, x: f32, y: f32): Float32Array {
+  const logicCoords = convertVisualCoordsToLogic(x, y)
+
+  const isValidDestination = getIsPointAvailable(logicCoords.x, logicCoords.y, false)
+  if (!isValidDestination) {
+    return new Float32Array(0)
+  }
+
+  userFaction.taskAddAbility(squadsIds, abilityType, logicCoords)
+
+  return toFloat32Array(getSquadsDestinations(squadsIds))
 }
 
 export function getAbilitiesCoolDowns(squadsIds: Uint32Array, abilityType: u8): Float32Array {

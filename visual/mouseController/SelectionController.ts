@@ -149,12 +149,20 @@ class SelectionController {
 
   public startSelection(point: Point) {
     if (this.selectedAbilityType !== null) {
-      this.wasmModule.useAbility(
+
+      const useAbilityResultsPointer = this.wasmModule.useAbility(
         window.getUint32ArrayPointer(this.selectedSquads),
         this.selectedAbilityType,
         point.x,
         point.y,
       )
+
+      window.useFloat32ArrayData(useAbilityResultsPointer, useAbilityResult => {
+        for (let i = 0; i < useAbilityResult.length; i += 2) {
+          this.createIndicator(useAbilityResult[i], useAbilityResult[i + 1])
+        }
+      })
+
       this.deselectAbility()
       return
     }
