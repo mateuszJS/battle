@@ -1,4 +1,5 @@
-import { MAP_WIDTH, OBSTACLES_CELL_SIZE } from '../../logic/constants'
+import { OBSTACLES_CELL_SIZE } from '../../logic/constants'
+import { MAP_WIDTH } from '../map-creator/constants'
 import { WasmModule } from '~/initGame'
 
 let graph = null

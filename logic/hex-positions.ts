@@ -1,6 +1,6 @@
 import { Ability } from "./ability-details"
 import { DISTANCE_BETWEEN_ATTACKERS, PRECALCULATED_ATTACKERS_POSITIONS } from "./attacker-positions"
-import { MAP_HEIGHT, MAP_WIDTH, NORMAL_SQUAD_RADIUS } from "./constants"
+import { NORMAL_SQUAD_RADIUS } from "./constants"
 import { Point } from "./geom-types"
 import { getIsPointAvailable } from "./obstacles-manager"
 import { Squad } from "./squad"

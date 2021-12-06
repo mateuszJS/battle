@@ -1,8 +1,8 @@
 import { Faction } from "./faction";
-import { getIsPointAvailable, outerBoundaries, storeBoundaries } from "./obstacles-manager";
+import { getIsPointAvailable, initObstaclesManager, outerBoundaries, storeBoundaries } from "./obstacles-manager";
 import { Line, Point, UniquePoint } from "./geom-types";
-import { convertLogicAngleToVisual, convertLogicCoordsToVisual, convertVisualCoordsToLogic, getUnitOffset } from "./convert-coords-between-logic-and-visual";
-import { initializeGrid, fillGrid, debugGridNumbers, pickCellIndexesInPolygonDebug, getSquadsFromGridByPolygon, getSquadsFromGridByCircle } from "./grid-manager";
+import { convertLogicCoordsToVisual, convertVisualCoordsToLogic, getUnitOffset } from "./convert-coords-between-logic-and-visual";
+import { initSquadsGrid, fillGrid, debugGridNumbers, pickCellIndexesInPolygonDebug, getSquadsFromGridByPolygon, getSquadsFromGridByCircle } from "./squads-grid-manager";
 import { CHECK_SQUADS_CORRECTNESS_PERIOD, UINT_DATA_SETS_DIVIDER, UPDATE_SQUAD_CENTER_PERIOD, SEARCH_FOR_ENEMIES_PERIOD, MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS, RepresentationId, MAP_SKEW_ANGLE } from "./constants";
 import { isPointInPolygon } from "./geom-utils";
 import { Squad } from "./squad";
@@ -45,13 +45,14 @@ export function initUniverse(
     }
     factions.push(faction)
   }
+  initObstaclesManager(mapWidth, mapHeight)
   storeBoundaries(obstacles, blockingTrackPoints)
   createPermanentTrackGraph(blockingTrackPoints, rawTrackPoints, bridgeSecondToLastPointIndex)
   
   mapWidthGlob = mapWidth
   mapHeightGlob = mapHeight
   
-  initializeGrid(mapWidth, mapHeight)
+  initSquadsGrid(mapWidth, mapHeight)
 }
 
 function getPointCoordsById(id: i32): UniquePoint {

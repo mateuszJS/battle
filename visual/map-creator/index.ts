@@ -1,5 +1,5 @@
 import initGame, { WasmModule } from '~/initGame'
-import { MAP_HEIGHT, MAP_WIDTH } from '../../logic/constants'
+import { MAP_HEIGHT, MAP_WIDTH } from './constants'
 import getPlatformCoords from '~/consts/get-platform-coords'
 import getSerializedMapInfo from './get-serialized-map-info'
 import mapDetails from './map-details'

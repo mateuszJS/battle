@@ -6,17 +6,17 @@ import { Squad } from "./squad";
 
 const EMPTY_GRID_INDEX = -100 as i32
 const GRID_MAP_SCALE: f32 = 1 / GRID_CELL
-var gridMapWidth: i32 = 0
-var gridMapHeight: i32 = 0
+var gridMapWidth: i32
+var gridMapHeight: i32
 
-var gridMapWidth_f32: f32 = 0
-var gridMapHeight_f32: f32 = 0
+var gridMapWidth_f32: f32
+var gridMapHeight_f32: f32
 
-var gridMapScaleX: f32 = 0
-var gridMapScaleY: f32 = 0
+var gridMapScaleX: f32
+var gridMapScaleY: f32
 var grid: Array<Squad[] | null>
 
-export function initializeGrid(mapWidth: f32, mapHeight: f32): void {
+export function initSquadsGrid(mapWidth: f32, mapHeight: f32): void {
   gridMapWidth = Mathf.ceil(mapWidth * GRID_MAP_SCALE) as i32
   gridMapHeight = Mathf.ceil(mapHeight * GRID_MAP_SCALE) as i32
   gridMapWidth_f32 = gridMapWidth as f32

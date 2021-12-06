@@ -1,9 +1,10 @@
 import { Universe } from '../../crate/pkg/index'
-import { MAP_WIDTH, MAP_HEIGHT, GRID_CELL } from 'logic/constants'
+import { MAP_WIDTH, MAP_HEIGHT } from '../map-creator/constants'
+import { GRID_CELL } from 'Constants'
 
 const GRID_MAP_SCALE = 1.0 / GRID_CELL
-const GRID_MAP_WIDTH = Math.floor(MAP_WIDTH * GRID_MAP_SCALE + 1.0)
-const GRID_MAP_HEIGHT = Math.floor(MAP_HEIGHT * GRID_MAP_SCALE + 1.0)
+const GRID_MAP_WIDTH = Math.ceil(MAP_WIDTH * GRID_MAP_SCALE)
+const GRID_MAP_HEIGHT = Math.ceil(MAP_HEIGHT * GRID_MAP_SCALE)
 export const GRID_MAP_SCALE_X = GRID_MAP_WIDTH / MAP_WIDTH
 export const GRID_MAP_SCALE_Y = GRID_MAP_HEIGHT / MAP_HEIGHT
 

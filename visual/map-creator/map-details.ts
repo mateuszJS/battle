@@ -1,4 +1,4 @@
-import { MAP_HEIGHT, MAP_WIDTH } from '../../logic/constants'
+import { MAP_HEIGHT, MAP_WIDTH } from './constants'
 
 const scaleX = (window.innerWidth * 0.7) / MAP_WIDTH
 const scaleY = (window.innerHeight * 0.9) / MAP_HEIGHT

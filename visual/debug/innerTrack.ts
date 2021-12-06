@@ -1,4 +1,3 @@
-import { MAP_HEIGHT, MAP_WIDTH } from '../../logic/constants'
 import { WasmModule } from '~/initGame'
 
 let graph = null

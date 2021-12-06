@@ -2,7 +2,7 @@ import { MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS, NORMAL_SQUAD_RADIUS, UnitState } f
 import { Faction } from "./faction"
 import { getAngleDiff } from "./get-angle-diff"
 import getMeanAngle from "./get-mean-angle"
-import { getSquadsFromGridByCircle } from './grid-manager'
+import { getSquadsFromGridByCircle } from './squads-grid-manager'
 import { Squad } from "./squad"
 
 function isCurrentSecondaryAimInRange(

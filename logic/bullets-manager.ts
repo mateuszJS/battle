@@ -3,7 +3,7 @@ import { Point } from "./geom-types"
 import { Unit } from "./unit"
 import { WeaponDetails } from "./weapon-details"
 import { convertLogicAngleToVisual, convertLogicOffsetToVisual } from './convert-coords-between-logic-and-visual'
-import { getSquadsFromGridByCircle } from "./grid-manager"
+import { getSquadsFromGridByCircle } from "./squads-grid-manager"
 
 const MIN_EXPLOSION_STRENGTH: f32 = 3
 

@@ -1,15 +1,23 @@
-import { MAP_HEIGHT, MAP_WIDTH, OBSTACLES_CELL_SIZE, OBSTACLES_DIVIDER } from "./constants";
-import { Line, Point, UniquePoint } from "./geom-types";
-import { checkIntersection, isObstaclePointInPolygon, isPointInPolygon, isPointInPolygonLine } from "./geom-utils";
+import { OBSTACLES_CELL_SIZE, OBSTACLES_DIVIDER } from "./constants";
+import { Line, Point } from "./geom-types";
+import { checkIntersection, isPointInPolygon, isPointInPolygonLine } from "./geom-utils";
 
-const OBSTACLES_MAP_WIDTH: i32 = Mathf.ceil(MAP_WIDTH / OBSTACLES_CELL_SIZE) as i32
-const OBSTACLES_MAP_WIDTH_HALF: i32 = OBSTACLES_MAP_WIDTH / 2 as i32
-const OBSTACLES_MAP_HEIGHT: i32 = Mathf.ceil(MAP_HEIGHT / OBSTACLES_CELL_SIZE) as i32
-export var outerBoundaries: Array<Line[] | null> = new Array(OBSTACLES_MAP_WIDTH * OBSTACLES_MAP_HEIGHT)
-var innerBoundaries: Array<Line[] | null> = new Array(OBSTACLES_MAP_WIDTH * OBSTACLES_MAP_HEIGHT)
+var OBSTACLES_MAP_WIDTH: i32
+var OBSTACLES_MAP_WIDTH_HALF: i32
+var OBSTACLES_MAP_HEIGHT: i32
+export var outerBoundaries: Array<Line[] | null>
+var innerBoundaries: Array<Line[] | null>
 // null -> available position
 // array.length === 0 -> disabled position
 // array.length > 0 -> have to check if position is blocked
+
+export function initObstaclesManager(mapWidth: f32, mapHeight: f32): void {
+  OBSTACLES_MAP_WIDTH = Mathf.ceil(mapWidth / OBSTACLES_CELL_SIZE) as i32
+  OBSTACLES_MAP_WIDTH_HALF = OBSTACLES_MAP_WIDTH / 2 as i32
+  OBSTACLES_MAP_HEIGHT  = Mathf.ceil(mapHeight / OBSTACLES_CELL_SIZE) as i32
+  outerBoundaries = new Array(OBSTACLES_MAP_WIDTH * OBSTACLES_MAP_HEIGHT)
+  innerBoundaries = new Array(OBSTACLES_MAP_WIDTH * OBSTACLES_MAP_HEIGHT)
+}
 
 function getAllLinesWithinPolygon(lines: Line[], polygon: Point[]): Line[] {
   let linesWithinPolygon: Line[] = []
