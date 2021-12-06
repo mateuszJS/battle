@@ -6,7 +6,7 @@ import { getSquadsFromGridByCircle } from './grid-manager'
 import { Squad } from "./squad"
 
 function isCurrentSecondaryAimInRange(
-  squadIsRunning: bool,
+  onlyEnemiesInFrontOf: bool,
   squadDirectionAngle: f32,
   squad: Squad
 ): bool {
@@ -20,7 +20,7 @@ function isCurrentSecondaryAimInRange(
 
   if (distance < squad.weaponDetails.range - NORMAL_SQUAD_RADIUS) {
     // minus NORMAL_SQUAD_RADIUS so most of members should have aim in the range
-    if (squadIsRunning) {
+    if (onlyEnemiesInFrontOf) {
       const angleFromSquadToEnemy = Mathf.atan2(
         currSecAimPos.x - squadPosition.x,
         squadPosition.y - currSecAimPos.y,
@@ -38,26 +38,29 @@ function searchForEnemy(factions: Faction[]): void {
   factions.forEach(faction => {
     faction.squads.forEach(squad => {
       // if you cannot run and shoot and you have attackAim, then you don't need secondaryAttackAim
+      // when you have attackAim then you are running or in range with the enemy squad
       if (!squad.weaponDetails.shotDuringRun && squad.attackAim) {
         squad.secondaryAttackAim = null
         return
       }
+
       // so if half of the squad is running
       const squadIsRunning = squad.members.filter(
         member => member.state == UnitState.RUN || member.state == UnitState.CHASING
       ).length > (squad.members.length / 2 as i32)
+      const onlyEnemiesInFrontOf = !squad.isDuringFixingSquadCenter && squadIsRunning
 
       // is staying, has aim to attack
       // no reason to look for secondary aim
-      if (!squadIsRunning && squad.attackAim) {
+      if (!onlyEnemiesInFrontOf && squad.attackAim) {
         squad.secondaryAttackAim = null
         return
       }
 
-      const squadDirectionAngle = squadIsRunning ? getMeanAngle(squad.members) : 0
+      const squadDirectionAngle = onlyEnemiesInFrontOf ? getMeanAngle(squad.members) : 0
       // we don't need direction if squad is not running
 
-      if (isCurrentSecondaryAimInRange(squadIsRunning, squadDirectionAngle, squad)) {
+      if (isCurrentSecondaryAimInRange(onlyEnemiesInFrontOf, squadDirectionAngle, squad)) {
         return
       }
 
@@ -81,7 +84,7 @@ function searchForEnemy(factions: Faction[]): void {
         )
   
         if (distance < minDistance) {
-          if (squadIsRunning) {
+          if (onlyEnemiesInFrontOf) {
             const angleFromSquadToEnemy = Mathf.atan2(
               enemySquadPosition.x - squadPosition.x,
               squadPosition.y - enemySquadPosition.y,
@@ -96,11 +99,9 @@ function searchForEnemy(factions: Faction[]): void {
         }
       }
       
-      if (closestEnemySquadIndex != -1) {
-        squad.secondaryAttackAim = unchecked(squadsAround[closestEnemySquadIndex])
-      } else {
-        squad.secondaryAttackAim = null
-      }
+      squad.secondaryAttackAim = closestEnemySquadIndex != -1
+        ? unchecked(squadsAround[closestEnemySquadIndex])
+        : null
     })
   })
 }

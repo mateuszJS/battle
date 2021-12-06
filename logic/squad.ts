@@ -170,6 +170,10 @@ export class Squad {
 
     this.attackAim = enemyToAttack
     this.abilityTarget = abilityTarget
+
+    this.members.forEach(unit => {
+      unit.checkCorrectness()
+    })
   }
 
   isTakingNewTaskDisabled(): bool {
