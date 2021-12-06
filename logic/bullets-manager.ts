@@ -36,13 +36,14 @@ export function addBullet(
   hit: bool,
 ): void {
   const lifetime = distance / weaponDetails.bulletSpeed
-  const visualOffset = convertLogicOffsetToVisual(angle, lifetime)
+  const visualSpeedCoords = convertLogicOffsetToVisual(angle, weaponDetails.bulletSpeed)
+
   bullets_representation.push({
     sourceId: unit.id as f32,
     angle: convertLogicAngleToVisual(angle),
-    speed: weaponDetails.bulletSpeed,
+    speed: Mathf.hypot(visualSpeedCoords.x, visualSpeedCoords.y),
     representationId: weaponDetails.representationId,
-    lifetime: Mathf.hypot(visualOffset.x, -visualOffset.y),
+    lifetime: lifetime,
   });
 
   if (hit) {
