@@ -32,7 +32,7 @@ const drawEnvironment = (serializedMapInfo: SerializedMapInfo): PIXI.Container =
       const [x, y] = window.convertLogicCoordToVisual(point.x + side.node.x, point.y + side.node.y)
       points.push({ x, y })
     })
-    points.push(points.splice(0, 1)[0])
+    points.push(points.splice(0, 1)[0]) // change the order of points
     container.addChild(drawBridge(points))
       // pixels.beginFill(index === 0 ? 0x00ff00 : 0xff0000)
       // // const pointX = point.x * radius + x

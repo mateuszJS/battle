@@ -24,7 +24,8 @@ import enhanceAnimatedSprites from '~/attachUtils/enhance-animated-sprites'
 import attachMethodToConvertLogicCoordsToVisual from '~/attachUtils/attach-method-covert-logic-coords-to-visual'
 import { SerializedMapInfo } from './map-creator/get-serialized-map-info'
 import getSerializedWorldInfo from './serializedWorldInfo'
-import predefinedMap from './predefined-maps/rich'
+import predefinedMap from './predefined-maps/test-bridges'
+import printPredefinedMap from './print-predefined-map'
 
 export type UniverseRepresentation = Map<number, Factory | Unit | StrategicPoint>
 
@@ -45,42 +46,13 @@ const getMapPoints = (mapWidth: number, mapHeight: number) => {
 }
 
 
-
-const printPredefinedMap = (serializedMapInfo: SerializedMapInfo) => (
-  `
-  import { SerializedMapInfo } from "~/map-creator/get-serialized-map-info"
-
-  const nodes = [${
-    serializedMapInfo.nodes.map(node => (
-      `{ id: ${node.id}, x: ${node.x}, y: ${node.y}, visited: new Array(8).fill(false) }`
-    )).join()
-  }]
-
-  export default {
-    nodes,
-    connections: [${
-      serializedMapInfo.connections.map(([nodeA, nodeB]) => (
-        `[
-          { joinIndex: ${nodeA.joinIndex}, node: nodes[${nodeA.node.id}] },
-          { joinIndex: ${nodeB.joinIndex}, node: nodes[${nodeB.node.id}] },
-        ]`        
-      )).join()
-    }],
-    portals: [${
-      serializedMapInfo.portals.map(portal => (
-        `{ angle: ${portal.angle}, x: ${portal.x}, y: ${portal.y} }`
-      )).join()
-    }],
-  } as SerializedMapInfo`
-)
-
 const initGame = (
   wasmModule: WasmModule,
   serializedMapInfo: SerializedMapInfo,
   mapWidth: number,
   mapHeight: number,
 ) => {
-  // serializedMapInfo = predefinedMap
+  serializedMapInfo = predefinedMap
   // console.log(printPredefinedMap(serializedMapInfo))
   const {
     initUniverse,

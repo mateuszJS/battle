@@ -110,9 +110,9 @@ const drawBridge = (points: Point[]): PIXI.Container => {
   }
 
   const pixels = new PIXI.Graphics()
-  pixels.beginFill(0xff0000)
+  pixels.beginFill(0xffff00)
   points.forEach(point => {
-    pixels.drawRect(point.x - 5, point.y - 5, 10, 10)
+    pixels.drawRect(point.x - 2, point.y - 2, 4, 4)
   })
   container.addChild(pixels)
   // window.world.addChild(container)
