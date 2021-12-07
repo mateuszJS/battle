@@ -5,6 +5,7 @@ import {
   updateItemInProductionLine,
 } from '~/buttons/factory'
 import getMySelection from './getMySelection'
+import { addItemToBackground } from '~/set-all-layers'
 
 function onFrameChange() {
   if (this.currentFrame > 70) {
@@ -66,7 +67,7 @@ class Factory {
       x,
       (sprite) => y - sprite.height / 2
     )
-    window.updateBackground(bottomBase)
+    addItemToBackground(bottomBase)
     
     const topBase = addPortalPart(
       `fpt_${framesIndex}`,

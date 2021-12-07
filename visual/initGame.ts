@@ -1,7 +1,7 @@
 import UnitFactory from '~/representation/UnitFactory'
 import Unit from '~/representation/Unit'
 import EffectsFactory from '~/representation/EffectFactory'
-import setAllLayers from './set-all-layers'
+import setAllLayers, { addItemToBackground, updateBackground } from './set-all-layers'
 import render from './render'
 import { Universe } from '../crate/pkg/index'
 import Factory from '~/representation/Factory'
@@ -52,8 +52,8 @@ const initGame = (
   mapWidth: number,
   mapHeight: number,
 ) => {
-  serializedMapInfo = predefinedMap
-  // console.log(printPredefinedMap(serializedMapInfo))
+  // serializedMapInfo = predefinedMap
+  console.log(printPredefinedMap(serializedMapInfo))
   const {
     initUniverse,
     getUniverseRepresentation,
@@ -66,8 +66,9 @@ const initGame = (
   enhanceAnimatedSprites()
   attachMethodToConvertLogicCoordsToVisual(mapHeight)
   const mapPoints = getMapPoints(mapWidth, mapHeight)
-  const environmentContainer = drawEnvironment(serializedMapInfo)
-  setAllLayers(mapPoints, environmentContainer)
+  const envContainer = drawEnvironment(serializedMapInfo)
+  setAllLayers(mapPoints)
+  addItemToBackground(envContainer)
   EffectsFactory.initialize()
 
   UnitFactory.initializationTypes()
@@ -188,6 +189,8 @@ const initGame = (
         universeRepresentation,
       )
     })
+
+    updateBackground()
   })
 }
 

@@ -35,7 +35,14 @@ const getSidePoints = (points: Point[]) => {
 
 // let container = null
 
-const drawBridge = (points: Point[]): PIXI.Container => {
+const drawBridge = (rawPoints: Point[]): PIXI.Container => {
+  const minX = Math.min(...rawPoints.map(point => point.x))
+  const minY = Math.min(...rawPoints.map(point => point.y))
+
+  const points = rawPoints.map(point => ({
+    x: point.x - minX,
+    y: point.y - minY,
+  }))
   // if (container) {
   //   window.world.removeChild(container)
   // }
@@ -115,7 +122,17 @@ const drawBridge = (points: Point[]): PIXI.Container => {
     pixels.drawRect(point.x - 2, point.y - 2, 4, 4)
   })
   container.addChild(pixels)
-  // window.world.addChild(container)
+
+  const containerHalfWidth = container.width / 2
+  const containerHalfHeight = container.height / 2
+  container.children.forEach(child => {
+    child.x -= containerHalfWidth
+    child.y -= containerHalfHeight
+  })
+
+  container.x = containerHalfWidth + minX
+  container.y = containerHalfHeight + minY
+
   return container
 }
 

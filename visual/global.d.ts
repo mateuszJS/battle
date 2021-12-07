@@ -4,10 +4,10 @@ import 'pixi-projection/dist/pixi-projection.d.ts'
 
 declare global {
   interface Window {
+    background: PIXI.Container
     world: PIXI.Container
     smallPieces: PIXI.Container
     ui: PIXI.Container
-    updateBackground: (sprite: PIXI.Sprite) => void
     universeRepresentation: UniverseRepresentation
     app: PIXI.Application
     startGame: (playersList: string[]) => void

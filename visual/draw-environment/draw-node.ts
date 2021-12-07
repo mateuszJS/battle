@@ -24,15 +24,13 @@ const drawNode = (
   nodePlatform.scale.set(scale)
   nodePlatform.anchor.set(0.5, 0.2)
 
-  nodePlatform.x = x
-  nodePlatform.y = y
   container.addChild(nodePlatform)
   // window.world.addChild(container)
 
   const pixels = new PIXI.Graphics()
   const radius = width * 0.483
   const yOffset = width * 0.375
-  console.log('root', x, y)
+
   platformCoords.forEach((point, index) => {
 
     pixels.beginFill(index === 0 ? 0x00ff00 : 0xff0000)
@@ -51,12 +49,12 @@ const drawNode = (
 
     container.addChild(drawRailingLine(
       {
-        x: pointX,
-        y: pointY,
+        x: pointX - x,
+        y: pointY - y,
       },
       {
-        x: nextCoordX,
-        y: nextCoordY, //  * 0.52 * radius + y - yOffset,
+        x: nextCoordX - x,
+        y: nextCoordY - y, //  * 0.52 * radius + y - yOffset,
       },
       angleMean + Math.PI / 2,
       index % 2 === 0,
@@ -64,6 +62,9 @@ const drawNode = (
     // draw connection to the next point
   })
   container.addChild(pixels)
+
+  container.x = x
+  container.y = y
 
   return {
     graphic: container,

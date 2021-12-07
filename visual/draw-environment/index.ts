@@ -8,7 +8,7 @@ const platformCoords = getNodePlatformCoords()
 const drawEnvironment = (serializedMapInfo: SerializedMapInfo): PIXI.Container => {
   const flattenConnections = serializedMapInfo.connections.flat()
   
-  const nodeContainers = serializedMapInfo.nodes.map(node => {
+  const envItems = serializedMapInfo.nodes.map(node => {
     const relatedConnections = flattenConnections
       .filter(connectionNode => connectionNode.node.id === node.id)
       .map(connection => connection.joinIndex)
@@ -18,14 +18,19 @@ const drawEnvironment = (serializedMapInfo: SerializedMapInfo): PIXI.Container =
       (_, index) => relatedConnections.includes(index),
     )
 
-    return drawNode(node.x, node.y, isBridgeList).graphic
+    const sprite = drawNode(node.x, node.y, isBridgeList).graphic
+    const graphics = new PIXI.Graphics()
+    graphics.beginFill(0x00ffff)
+    sprite.addChild(graphics)
+    graphics.drawRect(-10, -10, 20, 20)
+
+    return sprite
   })
   const container = new PIXI.Container
-  container.addChild(...nodeContainers)
 
   serializedMapInfo.connections.map(connection => {
-
     const points: Point[] = []
+
     platformCoords.forEach((point, index) => {
       const side = connection.find(side => Math.floor(index / 2) === side.joinIndex)
       if (!side) return
@@ -33,15 +38,18 @@ const drawEnvironment = (serializedMapInfo: SerializedMapInfo): PIXI.Container =
       points.push({ x, y })
     })
     points.push(points.splice(0, 1)[0]) // change the order of points
-    container.addChild(drawBridge(points))
-      // pixels.beginFill(index === 0 ? 0x00ff00 : 0xff0000)
-      // // const pointX = point.x * radius + x
-      // // const pointY = point.y * 0.52 * radius + y - yOffset
-      // const [pointX, pointY] = window.convertLogicCoordToVisual(point.x + logicX, point.y + logicY)
+    const sprite = drawBridge(points)
+    const graphics = new PIXI.Graphics()
+    graphics.beginFill(0xff00ff)
+    graphics.drawRect(-10, -10, 20, 20)
+    sprite.addChild(graphics)
 
-
-    // firstSide.
+    envItems.push(sprite)
   })
+
+  envItems.sort((itemA, itemB) => itemA.y - itemB.y)
+
+  container.addChild(...envItems)
 
   return container
 }
