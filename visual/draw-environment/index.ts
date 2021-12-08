@@ -5,7 +5,13 @@ import drawBridge from "./draw-bridge";
 
 const platformCoords = getNodePlatformCoords()
 
-const drawEnvironment = (serializedMapInfo: SerializedMapInfo): PIXI.Container => {
+export interface DrawEnvResult {
+  background: PIXI.Container | PIXI.Sprite
+  sortableItems: Array<PIXI.Container | PIXI.Sprite>
+}
+
+const drawEnvironment = (serializedMapInfo: SerializedMapInfo): DrawEnvResult => {
+  const envSortableItems: DrawEnvResult['sortableItems'] = []
   const flattenConnections = serializedMapInfo.connections.flat()
   
   const envItems = serializedMapInfo.nodes.map(node => {
@@ -18,13 +24,16 @@ const drawEnvironment = (serializedMapInfo: SerializedMapInfo): PIXI.Container =
       (_, index) => relatedConnections.includes(index),
     )
 
-    const sprite = drawNode(node.x, node.y, isBridgeList).graphic
+    const { background, sortableItems } = drawNode(node.x, node.y, isBridgeList)
+
+    envSortableItems.push(...sortableItems)
+
     const graphics = new PIXI.Graphics()
     graphics.beginFill(0x00ffff)
-    sprite.addChild(graphics)
+    background.addChild(graphics)
     graphics.drawRect(-10, -10, 20, 20)
 
-    return sprite
+    return background
   })
   const container = new PIXI.Container
 
@@ -34,24 +43,33 @@ const drawEnvironment = (serializedMapInfo: SerializedMapInfo): PIXI.Container =
     platformCoords.forEach((point, index) => {
       const side = connection.find(side => Math.floor(index / 2) === side.joinIndex)
       if (!side) return
-      const [x, y] = window.convertLogicCoordToVisual(point.x + side.node.x, point.y + side.node.y)
-      points.push({ x, y })
+      
+      points.push({
+        x: point.x + side.node.x,
+        y: point.y + side.node.y,
+      })
     })
     points.push(points.splice(0, 1)[0]) // change the order of points
-    const sprite = drawBridge(points)
+    const { background, sortableItems } = drawBridge(points)
+
+    envSortableItems.push(...sortableItems)
+
     const graphics = new PIXI.Graphics()
     graphics.beginFill(0xff00ff)
     graphics.drawRect(-10, -10, 20, 20)
-    sprite.addChild(graphics)
+    background.addChild(graphics)
 
-    envItems.push(sprite)
+    envItems.push(background)
   })
 
   envItems.sort((itemA, itemB) => itemA.y - itemB.y)
 
   container.addChild(...envItems)
 
-  return container
+  return {
+    background: container,
+    sortableItems: envSortableItems
+  }
 }
 
 export default drawEnvironment

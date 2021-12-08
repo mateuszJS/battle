@@ -52,7 +52,7 @@ const initGame = (
   mapWidth: number,
   mapHeight: number,
 ) => {
-  // serializedMapInfo = predefinedMap
+  serializedMapInfo = predefinedMap
   console.log(printPredefinedMap(serializedMapInfo))
   const {
     initUniverse,
@@ -68,7 +68,8 @@ const initGame = (
   const mapPoints = getMapPoints(mapWidth, mapHeight)
   const envContainer = drawEnvironment(serializedMapInfo)
   setAllLayers(mapPoints)
-  addItemToBackground(envContainer)
+  addItemToBackground(envContainer.background)
+  window.world.addChild(...envContainer.sortableItems)
   EffectsFactory.initialize()
 
   UnitFactory.initializationTypes()
