@@ -45,6 +45,25 @@ const drawRailingLine = (
     container.addChild(railingSprite)
   }
 
+  const graphics = new PIXI.Graphics()
+  const x = Math.abs(Math.atan2(Math.sin(offsetAngle), Math.cos(offsetAngle))) < Math.PI * 0.5 
+  graphics.beginFill(x ? 0xff0000 : 0x00ff00)
+  graphics.drawRect(-5, -3, 10, 10)
+
+
+  const methodName = x ? 'max' : 'min'
+  const coords = Math[methodName](startPoint.y, endPoint.y) === startPoint.y ? startPoint : endPoint
+
+  container.children.forEach(child => {
+    child.x -= coords.x
+    child.y -= coords.y
+  })
+
+  container.x += coords.x
+  container.y += coords.y
+
+  container.addChild(graphics)
+
   return container
 }
 
