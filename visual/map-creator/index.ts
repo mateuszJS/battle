@@ -3,8 +3,10 @@ import { MAP_HEIGHT, MAP_WIDTH } from './constants'
 import getPlatformCoords from '~/consts/get-platform-coords'
 import getSerializedMapInfo from './get-serialized-map-info'
 import mapDetails from './map-details'
+import { createMenu, addNewFaction } from './menu'
 
 const platformCoords = getPlatformCoords()
+const bridgeWidth = (platformCoords[3].y - platformCoords[2].y) * mapDetails.scale
 
 let activeElement = null
 let isJoiner = false
@@ -34,13 +36,18 @@ const getSafePosition = (x: number, y: number, size: number) => [
 
 const drawConnections = () => {
   connectionsContainer.clear()
-  connectionsContainer.lineStyle(3, 0x0000ff, 1);
-
+  
   connections.forEach(([node1, node2]) => {
+    connectionsContainer.lineStyle(bridgeWidth, 0x0000ff, 1);
+    const node1Width = node1.width
+    const node1Height = node1.height
+    const node2Width = node2.width
+    const node2Height = node2.height
     connectionsContainer.moveTo(node1.x + node1.parent.x, node1.y + node1.parent.y);
     connectionsContainer.lineTo(node2.x + node2.parent.x, node2.y + node2.parent.y);
-    connectionsContainer.drawCircle(node1.x + node1.parent.x, node1.y + node1.parent.y, 6)
-    connectionsContainer.drawCircle(node2.x + node2.parent.x, node2.y + node2.parent.y, 6)
+    connectionsContainer.lineStyle(3, 0x0000ff, 1);
+    drawJoiner(connectionsContainer, Math.round(node1.x) === 0, node1.x + node1.parent.x, node1.y + node1.parent.y)
+    drawJoiner(connectionsContainer, Math.round(node2.x) === 0, node2.x + node2.parent.x, node2.y + node2.parent.y)
   })
 }
 
@@ -48,8 +55,16 @@ const getHoveredJoiner = (x: number, y: number): PIXI.Graphics => {
   let hoveredJoiner = null
   nodes.forEach(node => {
     node.children.forEach(joiner => {
-      const distance = Math.hypot(joiner.x + joiner.parent.x - x, joiner.y + joiner.parent.y - y)
-      if (distance < 15) {
+      const width = (joiner as PIXI.Graphics).width
+      const height = (joiner as PIXI.Graphics).height
+      const inRange = (
+        joiner.x + joiner.parent.x - width / 2 < x &&
+        joiner.x + joiner.parent.x + width / 2 > x &&
+        joiner.y + joiner.parent.y - height / 2 < y &&
+        joiner.y + joiner.parent.y + height / 2 > y
+      )
+      // const distance = Math.hypot(joiner.x + joiner.parent.x - x, joiner.y + joiner.parent.y - y)
+      if (inRange) {
         hoveredJoiner = joiner
       }
     })
@@ -91,15 +106,16 @@ const onDragEnd = (event) => {
 
 const updateActiveConnection = (x: number, y: number) => {
   activeConnectionContainer.clear()
-  activeConnectionContainer.lineStyle(5, 0x7700ff, 1)
+  activeConnectionContainer.lineStyle(bridgeWidth, 0x7700ff, 1)
   activeConnectionContainer.moveTo(offset.x,offset.y)
   activeConnectionContainer.lineTo(x, y)
+  activeConnectionContainer.lineStyle(5, 0x7700ff, 1)
   const hoveredJoiner = getHoveredJoiner(x, y)
   if (hoveredJoiner) {
-    activeConnectionContainer.drawCircle(hoveredJoiner.x + hoveredJoiner.parent.x, hoveredJoiner.y + hoveredJoiner.parent.y, 8)
+    drawJoiner(activeConnectionContainer, Math.round(hoveredJoiner.x) === 0, hoveredJoiner.x + hoveredJoiner.parent.x, hoveredJoiner.y + hoveredJoiner.parent.y)
   }
   if (isJoiner) { // TODO: this is always true!
-    activeConnectionContainer.drawCircle(activeElement.x + activeElement.parent.x, activeElement.y + activeElement.parent.y, 8)
+    drawJoiner(activeConnectionContainer, Math.round(activeElement.x) === 0, activeElement.x + activeElement.parent.x, activeElement.y + activeElement.parent.y)
   }
 }
 
@@ -153,6 +169,12 @@ const onPointerDownJoiner = (event) => {
   event.stopPropagation()
 }
 
+const drawJoiner = (graphics: PIXI.Graphics, isMiddleX: boolean, offsetX = 0, offsetY = 0) => {
+  const width = isMiddleX ? bridgeWidth : 10
+  const height = isMiddleX ? 10 : bridgeWidth
+  graphics.drawRect(-width/2 + offsetX, -height/2 + offsetY, width, height)
+}
+
 const getNodeVisual = (disableJoinerEvent = false) => {
   const newNode = new PIXI.Graphics()
   newNode.beginFill(0xff0000)
@@ -163,11 +185,12 @@ const getNodeVisual = (disableJoinerEvent = false) => {
 
   for (let i = 0; i < 4; i++) {
     const joiner = new PIXI.Graphics()
-    joiner.beginFill(0x00ff00)
-    joiner.drawCircle(0, 0, 5)
-    joiner.endFill()
     joiner.x = Math.sin(i / 4 * Math.PI * 2) * newNode.width / 2
     joiner.y = -Math.cos(i / 4 * Math.PI * 2) * newNode.height / 2
+    joiner.beginFill(0x00ff00)
+    drawJoiner(joiner, Math.round(joiner.x) === 0)
+    joiner.endFill()
+
 
     if (!disableJoinerEvent) {
       joiner.interactive = true
@@ -271,37 +294,24 @@ const createToolbar = () => {
 
       portalsWrapper.addChild(newNode)
       portals.push(newNode)
-    })
-}
 
-const createStartBtn = (onClick) => {
-  const button = new PIXI.Graphics()
-  button.beginFill(0xffffff)
-  button.drawRect(0, 0, 150, 60)
-  button.endFill()
-  
-  const text = new PIXI.Text('START');
-  text.x = 20;
-  text.y = 20;
-  button.addChild(text)
-  button.x = mapDetails.x + mapDetails.width
-  button.interactive = true
-  button.buttonMode = true
-  button.on('click', onClick)
-  mapCreatorWrapper.addChild(button)
+      addNewFaction()
+    })
 }
 
 const mapCreator = (wasmModule: WasmModule) => {
   createBackground()
   createToolbar()
-  createStartBtn(() => {
+  const startGame = (filterMatrixes: number[][]) => {
     initGame(
       wasmModule,
       getSerializedMapInfo(nodes, connections, portals),
       MAP_WIDTH,
       MAP_HEIGHT,
+      filterMatrixes,
     )
-  })
+  }
+  createMenu(startGame)
   window.app.stage.addChild(mapCreatorWrapper)
 }
 

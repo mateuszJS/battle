@@ -28,8 +28,11 @@ import predefinedMap from './predefined-maps/test-bridges'
 import printPredefinedMap from './print-predefined-map'
 
 export type UniverseRepresentation = Map<number, Factory | Unit | StrategicPoint>
-
 export type WasmModule = ASUtil & typeof ExportedWasmModule
+export interface FactionVisualDetails {
+  bodyFilterMatrix: number[]
+}
+export type FactionsList = Map<number, FactionVisualDetails>
 
 const getMapPoints = (mapWidth: number, mapHeight: number) => {
   const leftTopCorner = window.convertLogicCoordToVisual(0, 0)
@@ -51,8 +54,9 @@ const initGame = (
   serializedMapInfo: SerializedMapInfo,
   mapWidth: number,
   mapHeight: number,
+  filterMatrixes: number[][]
 ) => {
-  serializedMapInfo = predefinedMap
+  // serializedMapInfo = predefinedMap
   console.log(printPredefinedMap(serializedMapInfo))
   const {
     initUniverse,
@@ -95,6 +99,8 @@ const initGame = (
   )
   unpinSerializedWorldInfo()
 
+  const factionsVisualDetails: FactionsList = new Map()
+
   window.useFloat32ArrayData(getFactoriesInitData(), (factoriesData) => {
     for (let i = 0; i < factoriesData.length; i += 5) {
       const factoryId = factoriesData[i + 1]
@@ -110,6 +116,8 @@ const initGame = (
         createFactoryButtons(factoriesData[i + 2], factoriesData[i + 3], type => createSquad(type),
         )
       }
+
+      factionsVisualDetails.set(factionId, { bodyFilterMatrix: filterMatrixes.splice(0, 1)[0] }) 
     }
   })
 
@@ -124,13 +132,6 @@ const initGame = (
   // }
 
   const mouseController = new initializeMouseController(wasmModule, universeRepresentation, mapPoints)
-
-  let mouseX = 0
-  let mouseY = 0
-  document.addEventListener('mousemove', event => {
-    mouseX = event.clientX
-    mouseY = event.clientY
-  })
 
   // debugController.init()
   // let timeToCreateEnemy = 0
@@ -148,24 +149,6 @@ const initGame = (
     // gridDebug(wasmModule)
 
     // startDebugGrid(wasmModule)
-    const pointA = {
-      x: mouseX,
-      y: mouseY,
-    }
-    const pointB = {
-      x: window.innerWidth / 2,
-      y: window.innerHeight / 2,
-    }
-    const angle = Math.atan2(pointA.x - pointB.x, pointB.y - pointA.y) + Math.PI / 2
-
-    // drawBridge([
-    //   { x: mouseX + Math.sin(angle) * 100 * 2, y: mouseY - Math.cos(angle) * 35 * 2 },
-    //   { x: pointB.x + Math.sin(angle) * 100 * 2, y: pointB.y - Math.cos(angle) * 35 * 2 },
-    //   { x: pointB.x + Math.sin(angle) * -100 * 2, y: pointB.y - Math.cos(angle) * -35 * 2  },
-    //   { x: mouseX + Math.sin(angle) * -100 * 2, y: mouseY - Math.cos(angle) * -35 * 2 },
-    // ])
-
-
 
     // gridDebug(universe)
     // debugController.update(universe)
@@ -188,6 +171,7 @@ const initGame = (
         0,
         universeData,
         universeRepresentation,
+        factionsVisualDetails,
       )
     })
 

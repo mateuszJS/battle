@@ -5,6 +5,7 @@ import getMySelection from './getMySelection'
 import troopBodyFramesData from './framesData/troop-body';
 import regularAccessoriesFramesData from './framesData/regular-accessories';
 import rodionHeadFramesData from './framesData/rodion-head';
+import { FactionVisualDetails } from '~/initGame';
 
 const MAX_JUMP_HEIGHT = 1200
 // the same constant exists in rust
@@ -54,9 +55,31 @@ class UnitsFactory {
   private static getRodionHeadSprite: ReturnType<typeof getMovieClipCreator>
 
   static initializationTypes() {
-    this.getTroopBodySprite = getMovieClipCreator(troopBodyFramesData)
-    this.getRegularAccessoriesSprite = getMovieClipCreator(regularAccessoriesFramesData)
-    this.getRodionHeadSprite = getMovieClipCreator(rodionHeadFramesData)
+    if (!this.getTroopBodySprite) {
+      this.getTroopBodySprite = getMovieClipCreator(troopBodyFramesData)
+      this.getRegularAccessoriesSprite = getMovieClipCreator(regularAccessoriesFramesData)
+      this.getRodionHeadSprite = getMovieClipCreator(rodionHeadFramesData)
+    }
+  }
+
+  static getUnitPreview(colorMatrixFilter: PIXI.filters.ColorMatrixFilter): PIXI.Container {
+    if (!this.getTroopBodySprite) {
+      this.initializationTypes()
+    }
+    const container = new PIXI.Container();
+    [
+      { filter: colorMatrixFilter, ...this.getTroopBodySprite() },
+      { filter: colorMatrixFilter, ...this.getRegularAccessoriesSprite() },
+      { filter: null, ...this.getRodionHeadSprite() },
+    ].forEach(({ filter, movieClip, goToRun }) => {
+      if (filter) {
+        movieClip.filters = [filter]
+      }
+      container.addChild(movieClip)
+      goToRun(Math.PI * 0.75)
+    })
+
+    return container
   }
 
   static createUnit(
@@ -67,6 +90,7 @@ class UnitsFactory {
     isAllianceUnit: boolean,
     state: number,
     type: typeof RepresentationId.Solider | typeof RepresentationId.Raptor,
+    factionVisualDetails: FactionVisualDetails,
   ) {
     const { movieClip: troopBodyMovieClip, ...troopBodyFrameUpdaters } = this.getTroopBodySprite()
     const { movieClip: regularAccessoriesMovieClip, ...regularAccessoriesFrameUpdaters } = this.getRegularAccessoriesSprite()
@@ -125,6 +149,11 @@ class UnitsFactory {
     container.addChild(troopBodyMovieClip)
     container.addChild(regularAccessoriesMovieClip)
     container.addChild(rodionHeadMovieClip)
+
+    const filter = new PIXI.filters.ColorMatrixFilter();
+    filter.matrix = factionVisualDetails.bodyFilterMatrix
+    troopBodyMovieClip.filters = [filter]
+    regularAccessoriesMovieClip.filters = [filter]
 
     const graphicParams = {
       container,

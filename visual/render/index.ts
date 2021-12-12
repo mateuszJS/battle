@@ -1,7 +1,7 @@
 import { RepresentationId, PRODUCTION_LINE_LENGTH } from '../../logic/constants'
 
 import * as representationUpdaters from './representationUpdaters'
-import { UniverseRepresentation } from '~/initGame'
+import { FactionsList, UniverseRepresentation } from '~/initGame'
 import Factory from '~/representation/Factory'
 import Unit from '~/representation/Unit'
 import UnitsFactory from '~/representation/UnitFactory'
@@ -9,10 +9,13 @@ import { USER_FACTION_ID } from '../../logic/constants'
 import BulletFactory from '~/representation/BulletFactory'
 import StrategicPoint from '~/representation/StrategicPoint'
 
+
+
 const render = (
   delta: number,
   universeData: Float32Array,
   universeRepresentation: UniverseRepresentation,
+  factionDetails: FactionsList
 ) => {
   const universeLength = universeData.length
   let factionId
@@ -58,6 +61,7 @@ const render = (
             factionId === USER_FACTION_ID,
             universeData[indexOfId + 4],
             RepresentationId.Solider,
+            factionDetails.get(factionId),
           )
           universeRepresentation.set(unitId, newUnit)
         }
@@ -101,6 +105,7 @@ const render = (
             factionId === USER_FACTION_ID,
             universeData[indexOfId + 4],
             RepresentationId.Raptor,
+            factionDetails.get(factionId)
           )
           universeRepresentation.set(unitId, newUnit)
         }

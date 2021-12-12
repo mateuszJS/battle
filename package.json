@@ -47,6 +47,7 @@
     "@babel/runtime": "^7.14.6",
     "@pixi/filter-drop-shadow": "^3.1.1",
     "debounce": "^1.2.0",
+    "lodash": "^4.17.21",
     "pixi-layers": "^0.2.2",
     "pixi-projection": "^0.3.13",
     "pixi.js": "^5.3.3"

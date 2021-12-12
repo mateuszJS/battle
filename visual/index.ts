@@ -18,6 +18,7 @@ const startGame = () => {
     width: window.innerWidth,
     height: window.innerHeight,
   })
+  app.view.id = 'view'
   document.body.appendChild(app.view)
   window.app = app
 
