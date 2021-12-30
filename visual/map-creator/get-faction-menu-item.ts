@@ -2,15 +2,17 @@ import throttle from 'lodash/throttle'
 import UnitsFactory from '../representation/UnitFactory'
 
 const channels = ['red', 'green', 'blue'] as const
-const MAP_CHANNEL_TO_HEX = {
+const MAP_CHANNEL_TO_INIT_HEX = {
   red: '#ff0000',
   green: '#00ff00',
   blue: '#0000ff',
+  head: '#00ff00',
 } as const
 const MAP_CHANNEL_TO_DISPLAY_TEXT = {
   red: 'Primary',
   green: 'Secondary',
   blue: 'Details',
+  head: 'Head',
 } as const
 
 const PREVIEW_WIDTH = 80
@@ -18,7 +20,8 @@ const PREVIEW_HEIGHT = 80
 
 export default (): {
   node: HTMLLIElement,
-  filterMatrix: number[],
+  bodyMatrixColorFilter: number[],
+  headMatrixColorFilter: number[],
  } => {
   const listItemNode = document.createElement('li')
   const divNode = document.createElement('div')
@@ -26,43 +29,72 @@ export default (): {
   listItemNode.appendChild(app.view);
   
   listItemNode.appendChild(divNode)
-  const getNewInput = (id: string) => `
+  const getNewInput = (id: string, className: string) => `
     <label>
-      <input id="${id}" type="color" value="${MAP_CHANNEL_TO_HEX[id]}">
+      <input data-channel="${id}" type="color" value="${MAP_CHANNEL_TO_INIT_HEX[id]}" class="${className}">
       ${MAP_CHANNEL_TO_DISPLAY_TEXT[id]}
     </label>
   `
-
+/*===========ADD HTML STRUCTURE==============*/
   channels.forEach(channel => {
-    divNode.innerHTML += getNewInput(channel)
+    divNode.innerHTML += getNewInput(channel, 'change-body-color')
+  })
+  divNode.innerHTML += getNewInput('head', 'change-head-color')
+
+  /*===========ADD LISTENERS TO CHANGE BODY COLORS==============*/
+  
+  const bodyMatrixColorFilter = new PIXI.filters.ColorMatrixFilter()
+  const rgbChannels = ['red', 'green', 'blue']
+
+  function onChangeBodyColor(this: HTMLInputElement) {
+    const channelIndex = rgbChannels.indexOf(this.getAttribute('data-channel'))
+    const { r, g, b } = hexToRgb(this.value.slice(1))
+
+    bodyMatrixColorFilter.matrix[channelIndex  + 0 * 5] = r / 255
+    bodyMatrixColorFilter.matrix[channelIndex + 1 * 5] = g / 255
+    bodyMatrixColorFilter.matrix[channelIndex + 2 * 5] = b / 255
+  }
+  const onChangeBodyColorThrottle = throttle(
+    onChangeBodyColor,
+    300,
+    { trailing: true },
+  ) as typeof onChangeBodyColor
+
+  Array.from(listItemNode.querySelectorAll('.change-body-color')).forEach(input => {
+    console.log(input)
+    input.addEventListener('input', onChangeBodyColorThrottle)
   })
 
-  const filter = new PIXI.filters.ColorMatrixFilter()
-  const unit =  UnitsFactory.getUnitPreview(filter)
+  /*===========ADD LISTENERS TO CHANGE HEAD COLORS==============*/
+  const headMatrixColorFilter = new PIXI.filters.ColorMatrixFilter()
+
+  function onChangeHeadColor(this: HTMLInputElement) {
+    const { r, g, b } = hexToRgb(this.value.slice(1))
+    const channelIndex = rgbChannels.indexOf('green')
+    headMatrixColorFilter.matrix[channelIndex  + 0 * 5] = r / 255
+    headMatrixColorFilter.matrix[channelIndex + 1 * 5] = g / 255
+    headMatrixColorFilter.matrix[channelIndex + 2 * 5] = b / 255
+  }
+
+  const onChangeHeadColorThrottle = throttle(
+    onChangeHeadColor,
+    300,
+    { trailing: true },
+  ) as typeof onChangeHeadColor
+
+  listItemNode.querySelector('.change-head-color')
+    .addEventListener('input', onChangeHeadColorThrottle)
+
+  const unit =  UnitsFactory.getUnitPreview(bodyMatrixColorFilter, headMatrixColorFilter)
   unit.scale.set(PREVIEW_WIDTH / unit.width)
   unit.x = PREVIEW_WIDTH * 0.45
   unit.y = PREVIEW_HEIGHT * 0.85
   app.stage.addChild(unit)
 
-  const rgbChannels = ['red', 'green', 'blue']
-
-  const onChange = (event) => {
-    const channelIndex = rgbChannels.indexOf(event.target.id)
-    const { r, g, b } = hexToRgb(event.target.value.slice(1))
-
-    filter.matrix[channelIndex  + 0 * 5] = r / 255
-    filter.matrix[channelIndex + 1 * 5] = g / 255
-    filter.matrix[channelIndex + 2 * 5] = b / 255
-  }
-  const inputCallback = throttle(onChange, 300, { trailing: true }) as ((event: InputEvent) => void)
-
-  Array.from(listItemNode.querySelectorAll('input')).forEach(input => {
-    input.addEventListener('input', inputCallback)
-  })
-
   return {
     node: listItemNode,
-    filterMatrix: filter.matrix,
+    bodyMatrixColorFilter: bodyMatrixColorFilter.matrix,
+    headMatrixColorFilter: headMatrixColorFilter.matrix,
   }
 }
 

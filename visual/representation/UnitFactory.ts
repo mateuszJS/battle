@@ -5,7 +5,7 @@ import getMySelection from './getMySelection'
 import troopBodyFramesData from './framesData/troop-body';
 import regularAccessoriesFramesData from './framesData/regular-accessories';
 import rodionHeadFramesData from './framesData/rodion-head';
-import { FactionVisualDetails } from '~/initGame';
+import { FactionVisualDetails } from '~/map-creator/menu';
 
 const MAX_JUMP_HEIGHT = 1200
 // the same constant exists in rust
@@ -62,19 +62,20 @@ class UnitsFactory {
     }
   }
 
-  static getUnitPreview(colorMatrixFilter: PIXI.filters.ColorMatrixFilter): PIXI.Container {
+  static getUnitPreview(
+    bodyMatrixColorFilter: PIXI.filters.ColorMatrixFilter,
+    headMatrixColorFilter: PIXI.filters.ColorMatrixFilter,
+  ): PIXI.Container {
     if (!this.getTroopBodySprite) {
       this.initializationTypes()
     }
     const container = new PIXI.Container();
     [
-      { filter: colorMatrixFilter, ...this.getTroopBodySprite() },
-      { filter: colorMatrixFilter, ...this.getRegularAccessoriesSprite() },
-      { filter: null, ...this.getRodionHeadSprite() },
+      { filter: bodyMatrixColorFilter, ...this.getTroopBodySprite() },
+      { filter: bodyMatrixColorFilter, ...this.getRegularAccessoriesSprite() },
+      { filter: headMatrixColorFilter, ...this.getRodionHeadSprite() },
     ].forEach(({ filter, movieClip, goToRun }) => {
-      if (filter) {
-        movieClip.filters = [filter]
-      }
+      movieClip.filters = [filter]
       container.addChild(movieClip)
       goToRun(Math.PI * 0.75)
     })
@@ -150,10 +151,14 @@ class UnitsFactory {
     container.addChild(regularAccessoriesMovieClip)
     container.addChild(rodionHeadMovieClip)
 
-    const filter = new PIXI.filters.ColorMatrixFilter();
-    filter.matrix = factionVisualDetails.bodyFilterMatrix
-    troopBodyMovieClip.filters = [filter]
-    regularAccessoriesMovieClip.filters = [filter]
+    const bodyFilter = new PIXI.filters.ColorMatrixFilter();
+    bodyFilter.matrix = factionVisualDetails.bodyMatrixColorFilter
+    troopBodyMovieClip.filters = [bodyFilter]
+    regularAccessoriesMovieClip.filters = [bodyFilter]
+
+    const headFilter = new PIXI.filters.ColorMatrixFilter();
+    headFilter.matrix = factionVisualDetails.headMatrixColorFilter
+    rodionHeadMovieClip.filters = [headFilter]
 
     const graphicParams = {
       container,

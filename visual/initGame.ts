@@ -26,12 +26,10 @@ import { SerializedMapInfo } from './map-creator/get-serialized-map-info'
 import getSerializedWorldInfo from './serializedWorldInfo'
 import predefinedMap from './predefined-maps/test-bridges'
 import printPredefinedMap from './print-predefined-map'
+import { FactionVisualDetails } from './map-creator/menu'
 
 export type UniverseRepresentation = Map<number, Factory | Unit | StrategicPoint>
 export type WasmModule = ASUtil & typeof ExportedWasmModule
-export interface FactionVisualDetails {
-  bodyFilterMatrix: number[]
-}
 export type FactionsList = Map<number, FactionVisualDetails>
 
 const getMapPoints = (mapWidth: number, mapHeight: number) => {
@@ -54,7 +52,7 @@ const initGame = (
   serializedMapInfo: SerializedMapInfo,
   mapWidth: number,
   mapHeight: number,
-  filterMatrixes: number[][]
+  factionVisualDetails: FactionVisualDetails[]
 ) => {
   // serializedMapInfo = predefinedMap
   console.log(printPredefinedMap(serializedMapInfo))
@@ -117,7 +115,7 @@ const initGame = (
         )
       }
 
-      factionsVisualDetails.set(factionId, { bodyFilterMatrix: filterMatrixes.splice(0, 1)[0] }) 
+      factionsVisualDetails.set(factionId, factionVisualDetails.splice(0, 1)[0]) 
     }
   })
 

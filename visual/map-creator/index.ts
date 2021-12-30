@@ -3,7 +3,7 @@ import { MAP_HEIGHT, MAP_WIDTH } from './constants'
 import getPlatformCoords from '~/consts/get-platform-coords'
 import getSerializedMapInfo from './get-serialized-map-info'
 import mapDetails from './map-details'
-import { createMenu, addNewFaction } from './menu'
+import { createMenu, addNewFaction, FactionVisualDetails } from './menu'
 
 const platformCoords = getPlatformCoords()
 const bridgeWidth = (platformCoords[3].y - platformCoords[2].y) * mapDetails.scale
@@ -302,13 +302,13 @@ const createToolbar = () => {
 const mapCreator = (wasmModule: WasmModule) => {
   createBackground()
   createToolbar()
-  const startGame = (filterMatrixes: number[][]) => {
+  const startGame = (factionVisualDetails: FactionVisualDetails[]) => {
     initGame(
       wasmModule,
       getSerializedMapInfo(nodes, connections, portals),
       MAP_WIDTH,
       MAP_HEIGHT,
-      filterMatrixes,
+      factionVisualDetails,
     )
   }
   createMenu(startGame)
