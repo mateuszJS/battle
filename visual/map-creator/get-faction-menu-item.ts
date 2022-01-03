@@ -3,12 +3,6 @@ import UnitsFactory, { Species } from '../representation/UnitFactory'
 import { FactionVisualDetails } from './menu'
 
 const channels = ['red', 'green', 'blue'] as const
-const MAP_CHANNEL_TO_INIT_HEX = {
-  red: '#ff0000',
-  green: '#00ff00',
-  blue: '#0000ff',
-  head: '#00ff00',
-} as const
 const MAP_CHANNEL_TO_DISPLAY_TEXT = {
   red: 'Primary',
   green: 'Secondary',
@@ -24,6 +18,10 @@ interface MenuItemDetails {
   getFactionDetails: () => FactionVisualDetails
 }
 
+const getRndColor = () => '#'+(0x1000000+(Math.random())*0xffffff).toString(16).substr(1,6)
+
+const listOfSpecies = [Species.Rodion, Species.Elephant]
+
 export default (): MenuItemDetails => {
   const listItemNode = document.createElement('li')
   const divNode = document.createElement('div')
@@ -33,7 +31,7 @@ export default (): MenuItemDetails => {
   listItemNode.appendChild(divNode)
   const getNewInput = (id: string, className: string) => `
     <label>
-      <input data-channel="${id}" type="color" value="${MAP_CHANNEL_TO_INIT_HEX[id]}" class="${className}">
+      <input data-channel="${id}" type="color" value="${getRndColor()}" class="${className}">
       ${MAP_CHANNEL_TO_DISPLAY_TEXT[id]}
     </label>
   `
@@ -57,34 +55,47 @@ export default (): MenuItemDetails => {
   const bodyMatrixColorFilter = new PIXI.filters.ColorMatrixFilter()
   const rgbChannels = ['red', 'green', 'blue']
 
-  function onChangeBodyColor(this: HTMLInputElement) {
-    const channelIndex = rgbChannels.indexOf(this.getAttribute('data-channel'))
-    const { r, g, b } = hexToRgb(this.value.slice(1))
+  function updateMatrix(
+    matrixColorFilter: PIXI.filters.ColorMatrixFilter,
+    channelIndex: number,
+    hex: string,
+  ) {
+    const { r, g, b } = hexToRgb(hex)
 
-    bodyMatrixColorFilter.matrix[channelIndex  + 0 * 5] = r / 255
-    bodyMatrixColorFilter.matrix[channelIndex + 1 * 5] = g / 255
-    bodyMatrixColorFilter.matrix[channelIndex + 2 * 5] = b / 255
+    matrixColorFilter.matrix[channelIndex  + 0 * 5] = r / 255
+    matrixColorFilter.matrix[channelIndex + 1 * 5] = g / 255
+    matrixColorFilter.matrix[channelIndex + 2 * 5] = b / 255
   }
+
+  function onChangeBodyColor(this: HTMLInputElement) {
+    updateMatrix(
+      bodyMatrixColorFilter,
+      rgbChannels.indexOf(this.getAttribute('data-channel')),
+      this.value.slice(1)
+    )
+  }
+
   const onChangeBodyColorThrottle = throttle(
     onChangeBodyColor,
     300,
     { trailing: true },
   ) as typeof onChangeBodyColor
 
-  Array.from(listItemNode.querySelectorAll('.change-body-color')).forEach(input => {
-    console.log(input)
-    input.addEventListener('input', onChangeBodyColorThrottle)
-  })
+  Array.from(listItemNode.querySelectorAll('.change-body-color'))
+    .forEach((input: HTMLInputElement) => {
+      onChangeBodyColor.call(input)
+      input.addEventListener('input', onChangeBodyColorThrottle)
+    })
 
   /*===========ADD LISTENERS TO CHANGE HEAD COLORS==============*/
   const headMatrixColorFilter = new PIXI.filters.ColorMatrixFilter()
 
   function onChangeHeadColor(this: HTMLInputElement) {
-    const { r, g, b } = hexToRgb(this.value.slice(1))
-    const channelIndex = rgbChannels.indexOf('green')
-    headMatrixColorFilter.matrix[channelIndex  + 0 * 5] = r / 255
-    headMatrixColorFilter.matrix[channelIndex + 1 * 5] = g / 255
-    headMatrixColorFilter.matrix[channelIndex + 2 * 5] = b / 255
+    updateMatrix(
+      headMatrixColorFilter,
+      rgbChannels.indexOf('green'),
+      this.value.slice(1)
+    )
   }
 
   const onChangeHeadColorThrottle = throttle(
@@ -93,11 +104,12 @@ export default (): MenuItemDetails => {
     { trailing: true },
   ) as typeof onChangeHeadColor
 
-  listItemNode.querySelector('.change-head-color')
-    .addEventListener('input', onChangeHeadColorThrottle)
+  const headColorInput: HTMLInputElement = listItemNode.querySelector('.change-head-color')
+  onChangeHeadColor.call(headColorInput)
+  headColorInput.addEventListener('input', onChangeHeadColorThrottle)
 
   let unit: PIXI.Container = null
-  let selectedSpecies: Species = Species.Rodion
+  let selectedSpecies: Species = listOfSpecies[Math.floor(Math.random() * listOfSpecies.length)]
   
   function updateUnit() {
     if (unit) {
