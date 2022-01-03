@@ -3,6 +3,7 @@ export interface FrameDataEntry {
   sides: number
   length: number
   prefix: string
+  scale: number
   anchor: Point
 }
 
@@ -12,6 +13,7 @@ export type FramePeriods = {
     sides: number
     length: number
     last: number
+    scale: number,
     anchor: Point
     getName: (id: string) => string
   }
@@ -27,6 +29,7 @@ export const getFramePeriods = (frameData: readonly FrameDataEntry[]): FramePeri
         sides: item.sides,
         length: item.length,
         last: first + item.sides * item.length - 1,
+        scale: item.scale,
         anchor: item.anchor,
         getName: (id: string) => `${item.prefix}${id}`,
       },

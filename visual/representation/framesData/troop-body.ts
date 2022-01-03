@@ -4,6 +4,7 @@ export default [
     sides: 12,
     length: 1,
     prefix: 'tbi_',
+    scale: 1,
     anchor: { x: 0.53, y: 0.851 },
   },
   {
@@ -11,6 +12,7 @@ export default [
     sides: 12,
     length: 16,
     prefix: 'tbr_',
+    scale: 1,
     anchor: { x: 0.515, y: 0.72 },
   },
   {
@@ -18,6 +20,7 @@ export default [
     sides: 12,
     length: 7,
     prefix: 'tbs_',
+    scale: 1,
     anchor: { x: 0.494, y: 0.814 },
   },
   {
@@ -25,6 +28,7 @@ export default [
     sides: 8,
     length: 30,
     prefix: 'tbf_',
+    scale: 1,
     anchor: { x: 0.5, y: 0.765 },
   },
   {
@@ -32,6 +36,7 @@ export default [
     sides: 8,
     length: 25,
     prefix: 'tbg_',
+    scale: 1,
     anchor: { x: 0.483, y: 0.669 },
   },
 ] as const

@@ -44,17 +44,25 @@ export default [
   'assets/units/troop-body/troop-body-fly.json',
   'assets/units/troop-body/troop-body-getup.json',
   'assets/units/troop-body/troop-body-shoot.json',
+
   'assets/units/troop-regular-accessories/regular-accessories-run.json',
   'assets/units/troop-regular-accessories/regular-accessories-idle.json',
   'assets/units/troop-regular-accessories/regular-accessories-fly.json',
   'assets/units/troop-regular-accessories/regular-accessories-getup.json',
   'assets/units/troop-regular-accessories/regular-accessories-shoot.json',
   'assets/units/troop-regular-accessories/regular-accessories-chasing.json',
+
   'assets/units/rodion-head/rodion-head-shoot.json',
   'assets/units/rodion-head/rodion-head-run.json',
   'assets/units/rodion-head/rodion-head-getup.json',
   'assets/units/rodion-head/rodion-head-fly.json',
   'assets/units/rodion-head/rodion-head-idle.json',
+  
+  'assets/units/elephant-head/elephant-head-shoot.json',
+  'assets/units/elephant-head/elephant-head-run.json',
+  'assets/units/elephant-head/elephant-head-getup.json',
+  'assets/units/elephant-head/elephant-head-fly.json',
+  'assets/units/elephant-head/elephant-head-idle.json',
   
   'assets/buildings/portal/portal-bottom-base.json',
   'assets/buildings/portal/portal-dynamic-wing.json',

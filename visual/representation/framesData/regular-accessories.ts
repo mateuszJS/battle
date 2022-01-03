@@ -4,6 +4,7 @@ export default [
     sides: 12,
     length: 1,
     prefix: 'rai_',
+    scale: 1,
     anchor: { x: 0.534, y: 1.247 },
   },
   {
@@ -11,6 +12,7 @@ export default [
     sides: 12,
     length: 16,
     prefix: 'rar_',
+    scale: 1,
     anchor: { x: 0.513, y: 1.302 },
   },
   {
@@ -18,6 +20,7 @@ export default [
     sides: 12,
     length: 7,
     prefix: 'ras_',
+    scale: 1,
     anchor: { x: 0.492, y: 1.366 },
   },
   {
@@ -25,6 +28,7 @@ export default [
     sides: 8,
     length: 30,
     prefix: 'raf_',
+    scale: 1,
     anchor: { x: 0.487, y: 0.786 },
   },
   {
@@ -32,6 +36,7 @@ export default [
     sides: 8,
     length: 25,
     prefix: 'rag_',
+    scale: 1,
     anchor: { x: 0.48, y: 0.586 },
   },
   {
@@ -39,6 +44,7 @@ export default [
     sides: 12,
     length: 16,
     prefix: 'rac_',
+    scale: 1,
     anchor: { x: 0.513, y: 1.17 },
   },
 ] as const

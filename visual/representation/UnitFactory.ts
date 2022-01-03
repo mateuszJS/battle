@@ -4,7 +4,8 @@ import getMovieClipCreator from './get-movie-clip-creator'
 import getMySelection from './getMySelection'
 import troopBodyFramesData from './framesData/troop-body';
 import regularAccessoriesFramesData from './framesData/regular-accessories';
-import rodionHeadFramesData from './framesData/rodion-head';
+import rodionHeadFramesData from './framesData/elephant-head';
+// import rodionHeadFramesData from './framesData/rodion-head';
 import { FactionVisualDetails } from '~/map-creator/menu';
 
 const MAX_JUMP_HEIGHT = 1200
