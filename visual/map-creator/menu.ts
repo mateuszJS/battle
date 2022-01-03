@@ -1,14 +1,16 @@
+import { Species } from "~/representation/UnitFactory"
 import getFactionMenuItem from "./get-faction-menu-item"
 
 export interface FactionVisualDetails {
   bodyMatrixColorFilter: number[]
   headMatrixColorFilter: number[]
+  species: Species
 }
 
 const containerId = 'map-creator-menu'
 const factionsListId = 'factions-list'
 const startGameBtnId = 'start-game-button'
-const factionVisualDetails: FactionVisualDetails[] = []
+const factionVisualDetailsGetters: Array<() => FactionVisualDetails> = []
 
 export const createMenu = (
   startGameCallback: (factionVisualDetails: FactionVisualDetails[],
@@ -25,6 +27,7 @@ export const createMenu = (
 
   const startGameBtn = document.getElementById(startGameBtnId)
   startGameBtn.addEventListener('click', () => {
+    const factionVisualDetails = factionVisualDetailsGetters.map(getter => getter())
     startGameCallback(factionVisualDetails)
     document.body.removeChild(divNode)
   })
@@ -32,9 +35,9 @@ export const createMenu = (
 
 export const addNewFaction = () => {
   const listNode = document.getElementById(factionsListId)
-  const { node, ...factionDetails } = getFactionMenuItem()
+  const { node, getFactionDetails } = getFactionMenuItem()
   listNode.appendChild(node)
-  factionVisualDetails.push(factionDetails)
+  factionVisualDetailsGetters.push(getFactionDetails)
 }
 
 

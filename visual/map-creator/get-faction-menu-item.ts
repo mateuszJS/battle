@@ -1,5 +1,6 @@
 import throttle from 'lodash/throttle'
-import UnitsFactory from '../representation/UnitFactory'
+import UnitsFactory, { Species } from '../representation/UnitFactory'
+import { FactionVisualDetails } from './menu'
 
 const channels = ['red', 'green', 'blue'] as const
 const MAP_CHANNEL_TO_INIT_HEX = {
@@ -18,11 +19,12 @@ const MAP_CHANNEL_TO_DISPLAY_TEXT = {
 const PREVIEW_WIDTH = 80
 const PREVIEW_HEIGHT = 80
 
-export default (): {
+interface MenuItemDetails {
   node: HTMLLIElement,
-  bodyMatrixColorFilter: number[],
-  headMatrixColorFilter: number[],
- } => {
+  getFactionDetails: () => FactionVisualDetails
+}
+
+export default (): MenuItemDetails => {
   const listItemNode = document.createElement('li')
   const divNode = document.createElement('div')
   const app = new PIXI.Application({ width: PREVIEW_WIDTH, height: PREVIEW_HEIGHT });
@@ -39,6 +41,15 @@ export default (): {
   channels.forEach(channel => {
     divNode.innerHTML += getNewInput(channel, 'change-body-color')
   })
+  divNode.innerHTML += `
+    <label>
+      Species:
+      <select class="change-species">
+        <option value="${Species.Rodion}">Rodion</option>
+        <option value="${Species.Elephant}">Elephant</option>
+      </select>
+    </label>
+  `
   divNode.innerHTML += getNewInput('head', 'change-head-color')
 
   /*===========ADD LISTENERS TO CHANGE BODY COLORS==============*/
@@ -85,16 +96,43 @@ export default (): {
   listItemNode.querySelector('.change-head-color')
     .addEventListener('input', onChangeHeadColorThrottle)
 
-  const unit =  UnitsFactory.getUnitPreview(bodyMatrixColorFilter, headMatrixColorFilter)
-  unit.scale.set(PREVIEW_WIDTH / unit.width)
-  unit.x = PREVIEW_WIDTH * 0.45
-  unit.y = PREVIEW_HEIGHT * 0.85
-  app.stage.addChild(unit)
+  let unit: PIXI.Container = null
+  let selectedSpecies: Species = Species.Rodion
+  
+  function updateUnit() {
+    if (unit) {
+      app.stage.removeChild(unit)
+    }
+    unit =  UnitsFactory.getUnitPreview(
+      bodyMatrixColorFilter,
+      headMatrixColorFilter,
+      selectedSpecies,
+    )
+    unit.scale.set(PREVIEW_WIDTH / unit.width)
+    unit.x = PREVIEW_WIDTH * 0.45
+    unit.y = PREVIEW_HEIGHT * 0.85
+    app.stage.addChild(unit)
+  }
+
+  function onChangeSpecies(this: HTMLSelectElement) {
+    selectedSpecies = this.value as unknown as Species
+    updateUnit()
+  }
+
+  listItemNode.querySelector('.change-species')
+    .addEventListener('input', onChangeSpecies)
+
+  updateUnit()
+
+  const getFactionDetails = (): FactionVisualDetails => ({
+    bodyMatrixColorFilter: bodyMatrixColorFilter.matrix,
+    headMatrixColorFilter: headMatrixColorFilter.matrix,
+    species: selectedSpecies,
+  })
 
   return {
     node: listItemNode,
-    bodyMatrixColorFilter: bodyMatrixColorFilter.matrix,
-    headMatrixColorFilter: headMatrixColorFilter.matrix,
+    getFactionDetails,
   }
 }
 

@@ -4,12 +4,17 @@ import getMovieClipCreator from './get-movie-clip-creator'
 import getMySelection from './getMySelection'
 import troopBodyFramesData from './framesData/troop-body';
 import regularAccessoriesFramesData from './framesData/regular-accessories';
-import rodionHeadFramesData from './framesData/elephant-head';
-// import rodionHeadFramesData from './framesData/rodion-head';
+import elephantHeadFramesData from './framesData/elephant-head';
+import rodionHeadFramesData from './framesData/rodion-head';
 import { FactionVisualDetails } from '~/map-creator/menu';
 
 const MAX_JUMP_HEIGHT = 1200
 // the same constant exists in rust
+
+export enum Species {
+  Rodion = 'rodion',
+  Elephant = 'elephant'
+}
 
 export interface FrameUpdaters {
   goToIdle(angle: number): void,
@@ -54,18 +59,28 @@ class UnitsFactory {
   private static getTroopBodySprite: ReturnType<typeof getMovieClipCreator>
   private static getRegularAccessoriesSprite: ReturnType<typeof getMovieClipCreator>
   private static getRodionHeadSprite: ReturnType<typeof getMovieClipCreator>
+  private static getElephantHeadSprite: ReturnType<typeof getMovieClipCreator>
 
   static initializationTypes() {
     if (!this.getTroopBodySprite) {
       this.getTroopBodySprite = getMovieClipCreator(troopBodyFramesData)
       this.getRegularAccessoriesSprite = getMovieClipCreator(regularAccessoriesFramesData)
       this.getRodionHeadSprite = getMovieClipCreator(rodionHeadFramesData)
+      this.getElephantHeadSprite = getMovieClipCreator(elephantHeadFramesData)
+    }
+  }
+
+  static getHead(species: Species): ReturnType<typeof getMovieClipCreator> {
+    switch (species) {
+      case Species.Rodion: return this.getRodionHeadSprite
+      case Species.Elephant: return this.getElephantHeadSprite
     }
   }
 
   static getUnitPreview(
     bodyMatrixColorFilter: PIXI.filters.ColorMatrixFilter,
     headMatrixColorFilter: PIXI.filters.ColorMatrixFilter,
+    species: Species
   ): PIXI.Container {
     if (!this.getTroopBodySprite) {
       this.initializationTypes()
@@ -74,7 +89,7 @@ class UnitsFactory {
     [
       { filter: bodyMatrixColorFilter, ...this.getTroopBodySprite() },
       { filter: bodyMatrixColorFilter, ...this.getRegularAccessoriesSprite() },
-      { filter: headMatrixColorFilter, ...this.getRodionHeadSprite() },
+      { filter: headMatrixColorFilter, ...this.getHead(species)() },
     ].forEach(({ filter, movieClip, goToRun }) => {
       movieClip.filters = [filter]
       container.addChild(movieClip)
@@ -96,7 +111,7 @@ class UnitsFactory {
   ) {
     const { movieClip: troopBodyMovieClip, ...troopBodyFrameUpdaters } = this.getTroopBodySprite()
     const { movieClip: regularAccessoriesMovieClip, ...regularAccessoriesFrameUpdaters } = this.getRegularAccessoriesSprite()
-    const { movieClip: rodionHeadMovieClip, ...rodionHeadFrameUpdaters } = this.getRodionHeadSprite()
+    const { movieClip: rodionHeadMovieClip, ...rodionHeadFrameUpdaters } = this.getHead(factionVisualDetails.species)()
 
 
     const frameUpdaters = {
