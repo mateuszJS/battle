@@ -74,5 +74,8 @@ export default [
   'assets/bridge/boundary-stick.json',
   'assets/bridge/track-side.jpg',
   'assets/bridge/track-surface.jpg',
-  'assets/bridge/node-platform.png',
+
+  'assets/clouds/clouds.json',
+  'assets/node-platform.png',
+  'assets/node-platform-mask.png',
 ]

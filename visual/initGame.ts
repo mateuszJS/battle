@@ -27,6 +27,7 @@ import getSerializedWorldInfo from './serializedWorldInfo'
 import predefinedMap from './predefined-maps/test-bridges'
 import printPredefinedMap from './print-predefined-map'
 import { FactionVisualDetails } from './map-creator/menu'
+import drawClouds from "~/draw-environment/draw-clouds";
 
 export type UniverseRepresentation = Map<number, Factory | Unit | StrategicPoint>
 export type WasmModule = ASUtil & typeof ExportedWasmModule
@@ -72,6 +73,7 @@ const initGame = (
   setAllLayers(mapPoints)
   addItemToBackground(envContainer.background)
   window.world.addChild(...envContainer.sortableItems)
+  drawClouds(mapWidth, mapHeight, mapPoints, serializedMapInfo)
   EffectsFactory.initialize()
 
   UnitFactory.initializationTypes()

@@ -6,6 +6,24 @@ import { DrawEnvResult } from '.'
 const platformCoords = getNodePlatformCoords()
 
 const nodePlatformTexture = PIXI.Texture.from('assets/node-platform.png')
+const nodePlatformMaskTexture = PIXI.Texture.from('assets/node-platform-mask.png')
+
+export const getNodePlatform = (
+  logicX: number,
+  logicY: number,
+  width = 2.1 * PLATFORM_RADIUS,
+  isMask = false,
+): PIXI.Sprite => {
+  const [x, y] = window.convertLogicCoordToVisual(logicX, logicY)
+  const nodePlatform = new PIXI.Sprite(isMask ? nodePlatformMaskTexture : nodePlatformTexture)
+  const scale = width / nodePlatform.width
+  nodePlatform.scale.set(scale)
+  nodePlatform.anchor.set(0.5, 0.2)
+  nodePlatform.x = x
+  nodePlatform.y = y
+
+  return nodePlatform
+}
 
 const drawNode = (
   logicX: number,
@@ -13,16 +31,8 @@ const drawNode = (
   isBridgesList: boolean[],
   width = 2.1 * PLATFORM_RADIUS,
 ): DrawEnvResult => {
-  const [x, y] = window.convertLogicCoordToVisual(logicX, logicY)
-  const nodePlatform = new PIXI.Sprite(nodePlatformTexture)
-  const scale = width / nodePlatform.width
-  nodePlatform.scale.set(scale)
-  nodePlatform.anchor.set(0.5, 0.2)
-  nodePlatform.x = x
-  nodePlatform.y = y
-
+  const nodePlatform = getNodePlatform(logicX, logicY, width)
   const sortableItems = []
-
   const pixels = new PIXI.Graphics()
 
   platformCoords.forEach((point, index) => {

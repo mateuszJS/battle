@@ -113,7 +113,6 @@ class UnitsFactory {
     const { movieClip: regularAccessoriesMovieClip, ...regularAccessoriesFrameUpdaters } = this.getRegularAccessoriesSprite()
     const { movieClip: rodionHeadMovieClip, ...rodionHeadFrameUpdaters } = this.getHead(factionVisualDetails.species)()
 
-
     const frameUpdaters = {
       goToIdle(angle: number) {
         troopBodyFrameUpdaters.goToIdle(angle)
