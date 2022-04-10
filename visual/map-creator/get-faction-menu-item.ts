@@ -35,6 +35,7 @@ export default (): MenuItemDetails => {
       ${MAP_CHANNEL_TO_DISPLAY_TEXT[id]}
     </label>
   `
+  let selectedSpecies: Species = listOfSpecies[Math.floor(Math.random() * listOfSpecies.length)]
 /*===========ADD HTML STRUCTURE==============*/
   channels.forEach(channel => {
     divNode.innerHTML += getNewInput(channel, 'change-body-color')
@@ -43,8 +44,8 @@ export default (): MenuItemDetails => {
     <label>
       Species:
       <select class="change-species">
-        <option value="${Species.Rodion}">Rodion</option>
-        <option value="${Species.Elephant}">Elephant</option>
+        <option value="${Species.Rodion}" ${selectedSpecies === Species.Rodion ? "selected" : ""}>Rodion</option>
+        <option value="${Species.Elephant}" ${selectedSpecies === Species.Elephant ? "selected" : ""}>Elephant</option>
       </select>
     </label>
   `
@@ -109,7 +110,6 @@ export default (): MenuItemDetails => {
   headColorInput.addEventListener('input', onChangeHeadColorThrottle)
 
   let unit: PIXI.Container = null
-  let selectedSpecies: Species = listOfSpecies[Math.floor(Math.random() * listOfSpecies.length)]
   
   function updateUnit() {
     if (unit) {

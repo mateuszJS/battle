@@ -37,9 +37,10 @@ const render = (
         const factory = universeRepresentation.get(factoryId) as Factory
         representationUpdaters.updateFactory(
           factory,
-          universeData[indexOfId + 1], // progress
+          universeData[indexOfId + 1], // factory hp
+          universeData[indexOfId + 2], // progress
         )
-        index = indexOfId + 2
+        index = indexOfId + 3
         break
       }
       case RepresentationId.Solider: {
@@ -70,13 +71,14 @@ const render = (
       }
       case RepresentationId.UserFactory: {
         const indexOfId = index + 1
-        const newIndexValue = indexOfId + 2 + PRODUCTION_LINE_LENGTH
+        const newIndexValue = indexOfId + 3 + PRODUCTION_LINE_LENGTH
         const factoryId = universeData[indexOfId]
         const factory = universeRepresentation.get(factoryId) as Factory
         representationUpdaters.updateFactory(
           factory,
           universeData[indexOfId + 1],
-          universeData.slice(indexOfId + 2, newIndexValue),
+          universeData[indexOfId + 2],
+          universeData.slice(indexOfId + 3, newIndexValue),
         )
         index = newIndexValue
         break

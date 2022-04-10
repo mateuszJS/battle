@@ -2,7 +2,7 @@ import Factory from '~/representation/Factory'
 import StrategicPoint from '~/representation/StrategicPoint'
 import Unit from '~/representation/Unit'
 
-export const updateFactory = (factory: Factory, progress: number, productionLine?: Float32Array) => {
+export const updateFactory = (factory: Factory, hp: number, progress: number, productionLine?: Float32Array) => {
   if (progress !== 0) {
     factory.turnOnProduction()
   } else {
@@ -11,6 +11,10 @@ export const updateFactory = (factory: Factory, progress: number, productionLine
 
   if (productionLine && productionLine.length > 0) {
     factory.updateProductionLine(progress, productionLine)
+  }
+
+  if (hp < 2000) {
+    console.log("hp", hp)
   }
 }
 

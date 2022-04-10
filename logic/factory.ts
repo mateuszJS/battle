@@ -96,7 +96,7 @@ export class Factory {
     return [positionX, positionY, unitAngle]
   }
 
-  getRepresentation(): Array<f32> {
+  getRepresentation(factoryHp: i16): Array<f32> {
     const progress = this.productionLine.length > 0
       ? this.timeToCreate / unchecked(this.productionLine[0]).totalTime
       : 0
@@ -104,6 +104,7 @@ export class Factory {
     let results: f32[] = [
       (this.isOwnByUser ? RepresentationId.UserFactory : RepresentationId.EnemyFactory) as f32,
       this.id,
+      factoryHp as f32,
       progress,
     ]
 

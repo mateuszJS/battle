@@ -5,6 +5,8 @@ import { checkIntersection, isPointInPolygon, isPointInPolygonLine } from "./geo
 var OBSTACLES_MAP_WIDTH: i32
 var OBSTACLES_MAP_WIDTH_HALF: i32
 var OBSTACLES_MAP_HEIGHT: i32
+var MAP_HEIGHT: f32
+var MAP_WIDTH: f32
 export var outerBoundaries: Array<Line[] | null>
 var innerBoundaries: Array<Line[] | null>
 // null -> available position
@@ -17,6 +19,8 @@ export function initObstaclesManager(mapWidth: f32, mapHeight: f32): void {
   OBSTACLES_MAP_HEIGHT  = Mathf.ceil(mapHeight / OBSTACLES_CELL_SIZE) as i32
   outerBoundaries = new Array(OBSTACLES_MAP_WIDTH * OBSTACLES_MAP_HEIGHT)
   innerBoundaries = new Array(OBSTACLES_MAP_WIDTH * OBSTACLES_MAP_HEIGHT)
+  MAP_WIDTH = mapWidth
+  MAP_HEIGHT = mapHeight
 }
 
 function getAllLinesWithinPolygon(lines: Line[], polygon: Point[]): Line[] {

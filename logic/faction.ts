@@ -48,8 +48,8 @@ export class Faction {
       RepresentationId.FactionId as f32,
       this.id as f32,
     ];
-    
-    const factoryRepresentation = this.factory.getRepresentation()
+    const portalSquadMembers = this.portal.members
+    const factoryRepresentation = this.factory.getRepresentation(portalSquadMembers.length > 0 ? unchecked(portalSquadMembers[0]).hp : 0)
     const squadsRepresentation = this.squads.map<Array<f32>>(
       squad => squad.getRepresentation()
     ).flat()
