@@ -75,7 +75,8 @@ export default [
   'assets/bridge/track-side.jpg',
   'assets/bridge/track-surface.jpg',
 
-  'assets/clouds/clouds.json',
+  // 'assets/clouds/clouds.json',
+  'assets/cloud-tail-2-cropped.png',
   'assets/node-platform.png',
-  'assets/node-platform-mask.png',
+  'assets/node-platform-shaded.png',
 ]

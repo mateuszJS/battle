@@ -1,5 +1,6 @@
 import { CAMERA_MOVEMENT_DISABLED_AREA_THRESHOLD } from 'Constants'
 import getTexture from '~/getTexture'
+import getTilingClouds from "~/draw-environment/draw-clouds";
 
 let env = new PIXI.Container()
 let mapCoords = null
@@ -59,6 +60,7 @@ const setAllLayers = (mapPoints: Point[]): void => {
     sprite.zOrder = sprite.y
   })
 
+  const clouds = getTilingClouds(mapPoints)
   window.background = new PIXI.Container()
   window.world = new PIXI.display.Layer(sortableLayer)
   window.smallPieces = new PIXI.Container()
@@ -74,6 +76,7 @@ const setAllLayers = (mapPoints: Point[]): void => {
     maxY: Math.max(...mapPoints.map(point => point.y)),
   }
 
+  window.app.stage.addChild(clouds)
   window.app.stage.addChild(window.background)
   window.app.stage.addChild(window.world)
   window.app.stage.addChild(window.smallPieces)

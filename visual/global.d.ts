@@ -4,6 +4,7 @@ import 'pixi-projection/dist/pixi-projection.d.ts'
 
 declare global {
   interface Window {
+    updateClouds: VoidFunction
     background: PIXI.Container
     world: PIXI.Container
     smallPieces: PIXI.Container

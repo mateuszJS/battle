@@ -5,17 +5,15 @@ import { DrawEnvResult } from '.'
 
 const platformCoords = getNodePlatformCoords()
 
-const nodePlatformTexture = PIXI.Texture.from('assets/node-platform.png')
-const nodePlatformMaskTexture = PIXI.Texture.from('assets/node-platform-mask.png')
+const nodePlatformTexture = PIXI.Texture.from('assets/node-platform-shaded.png')
 
 export const getNodePlatform = (
   logicX: number,
   logicY: number,
   width = 2.1 * PLATFORM_RADIUS,
-  isMask = false,
 ): PIXI.Sprite => {
   const [x, y] = window.convertLogicCoordToVisual(logicX, logicY)
-  const nodePlatform = new PIXI.Sprite(isMask ? nodePlatformMaskTexture : nodePlatformTexture)
+  const nodePlatform = new PIXI.Sprite(nodePlatformTexture)
   const scale = width / nodePlatform.width
   nodePlatform.scale.set(scale)
   nodePlatform.anchor.set(0.5, 0.2)
