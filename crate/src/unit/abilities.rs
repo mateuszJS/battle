@@ -18,6 +18,8 @@ impl Abilities {
     }
 
     unit.state = STATE_ABILITY;
+    // if any unit has state UnitState.ABILITY or has field hasFinishedUsingAbility on true,
+    // then it means that uni unit had started using the ability
     squad_shared_info.any_unit_started_using_ability = true;
 
     match unit.squad_details.representation_type as u8 {

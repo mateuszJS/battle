@@ -1,31 +1,25 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "es6",
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
-    "module": "ESNext", // Pixi works with commonJS, but dynamic imports works with EXNext </3
+    "module": "ESNext", // Pixi works with commonJS, but dynamic imports works with ESNext </3
     "moduleResolution": "node", // to fix above comment, no pixi is resolved correctly
     // ^ also with that we don't have to import PIXI in each file
     "importHelpers": true,
     "allowJs": true, // to import web assembly module
     "baseUrl": "./",
     "paths": {
-      "~/*": [
-        "./src/*"
-      ],
-      "Settings": [
-        "./src/modules/gameSettings"
-      ],
-      "Consts": [
-        "./src/consts/consts.ts"
-      ]
+      "~/*": ["./visual/*"],
+      "Constants": ["./logic/constants"],
+      "Settings": ["./visual/modules/gameSettings"]
     },
     "lib": [
       "es2019",
       "dom" // with that, window/document is undefined
-    ]
+    ],
+    "typeRoots": ["node_modules/pixi.js"],
+    "types": ["pixi.js"]
   },
-  "include": [
-    "src"
-  ]
+  "include": ["visual", "logic/constants.ts"]
 }

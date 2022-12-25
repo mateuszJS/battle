@@ -1,19 +1,16 @@
 {
-  "presets": [
-    "@babel/preset-env"
-  ],
+  "presets": ["@babel/preset-env"],
   "plugins": [
+    "@babel/transform-runtime",
     "@babel/plugin-syntax-dynamic-import",
     [
       "module-resolver",
       {
-        "root": [
-          "./src"
-        ],
+        "root": ["./visual"],
         "alias": {
-          "~": "./src",
-          "Settings": "./src/modules/gameSettings.ts",
-          "Consts": "./src/consts/consts.ts"
+          "~": "./visual",
+          "Constants": "./logic/constants.ts",
+          "Settings": "./visual/modules/gameSettings.ts"
         }
       }
     ]
