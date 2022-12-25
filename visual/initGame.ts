@@ -20,13 +20,14 @@ import { startDebug as startDebugObstacles } from './debug/obstacles'
 import { startDebug as gridDebug } from './debug/grid'
 // import { startDebug as startDebugObstaclesMap } from './debug/obstaclesMap'
 import initConvertArraysUtils from '~/attachUtils/init-convert-arrays-utils'
-import enhanceAnimatedSprites from '~/attachUtils/enhance-animated-sprites'
 import attachMethodToConvertLogicCoordsToVisual from '~/attachUtils/attach-method-covert-logic-coords-to-visual'
 import { SerializedMapInfo } from './map-creator/get-serialized-map-info'
 import getSerializedWorldInfo from './serializedWorldInfo'
 import predefinedMap from './predefined-maps/test-bridges'
 import printPredefinedMap from './print-predefined-map'
 import { FactionVisualDetails } from './map-creator/menu'
+import initWebGL2 from 'webgl/init'
+import loadTextures from 'webgl/loadTextures'
 
 export type UniverseRepresentation = Map<number, Factory | Unit | StrategicPoint>
 export type WasmModule = ASUtil & typeof ExportedWasmModule
@@ -47,13 +48,36 @@ const getMapPoints = (mapWidth: number, mapHeight: number) => {
 }
 
 
-const initGame = (
+function startLoadingTextures(input: InitGameInput) {
+  const canvas = document.createElement<"canvas">("canvas")
+  window.app.view.parentNode.removeChild(window.app.view)
+  const { gl, ext } = initWebGL2(canvas)
+
+  loadTextures(
+    gl,
+    ['assets/node-platform-shaded.png'],
+    () => initGame(gl, input)
+  )
+  
+}
+
+interface InitGameInput {
   wasmModule: WasmModule,
   serializedMapInfo: SerializedMapInfo,
   mapWidth: number,
   mapHeight: number,
   factionVisualDetails: FactionVisualDetails[]
-) => {
+}
+
+function initGame (gl: WebGL2RenderingContext, input: InitGameInput) {
+  const {
+    wasmModule,
+    serializedMapInfo,
+    mapWidth,
+    mapHeight,
+    factionVisualDetails
+  } = input
+
   // serializedMapInfo = predefinedMap
   console.log(printPredefinedMap(serializedMapInfo))
   const {
@@ -65,7 +89,6 @@ const initGame = (
   } = wasmModule;
 
   initConvertArraysUtils(wasmModule)
-  enhanceAnimatedSprites()
   attachMethodToConvertLogicCoordsToVisual(mapHeight)
   const mapPoints = getMapPoints(mapWidth, mapHeight)
   const envContainer = drawEnvironment(serializedMapInfo)
@@ -179,4 +202,5 @@ const initGame = (
   })
 }
 
-export default initGame
+export default startLoadingTextures
+

@@ -303,13 +303,13 @@ const mapCreator = (wasmModule: WasmModule) => {
   createBackground()
   createToolbar()
   const startGame = (factionVisualDetails: FactionVisualDetails[]) => {
-    initGame(
+    initGame({
       wasmModule,
-      getSerializedMapInfo(nodes, connections, portals),
-      MAP_WIDTH,
-      MAP_HEIGHT,
-      factionVisualDetails,
-    )
+      serializedMapInfo:  getSerializedMapInfo(nodes, connections, portals),
+      mapWidth: MAP_WIDTH,
+      mapHeight: MAP_HEIGHT,
+      factionVisualDetails
+    })
   }
   createMenu(startGame)
   window.app.stage.addChild(mapCreatorWrapper)
