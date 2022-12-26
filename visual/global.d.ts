@@ -20,6 +20,23 @@ declare global {
     useUint32ArrayData: (pointer: number, callback: (arr: Uint32Array) => void) => void
     useFloat32ArrayData: (pointer: number, callback: (arr: Float32Array) => void) => void
     convertLogicCoordToVisual: (x: number, y: number) => [number, number]
+
+    gl: WebGL2RenderingContext
+    glExt: {
+      formatRGBA: {
+        format: GLenum
+        internalFormat: GLenum
+      }
+      formatRG: {
+        format: GLenum
+        internalFormat: GLenum
+      }
+      formatR: {
+        format: GLenum
+        internalFormat: GLenum
+      }
+      supportLinearFiltering: OES_texture_float_linear
+    }
   }
 
   type ValueOf<T> = T[keyof T]

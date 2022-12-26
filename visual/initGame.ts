@@ -12,7 +12,7 @@ import { USER_FACTION_ID } from '../logic/constants'
 import debugController from '~/debug'
 import type * as ExportedWasmModule from './logic'
 import { ASUtil } from '@assemblyscript/loader'
-import drawEnvironment from './draw-environment'
+import { initBackground } from './draw-environment-new'
 // import { startDebug as debugObstacles } from './debug/obstacles'
 import { startDebug as debugInnerTrack } from './debug/innerTrack'
 import { startDebug as debugOuterTrack } from './debug/outerTrack'
@@ -26,8 +26,10 @@ import getSerializedWorldInfo from './serializedWorldInfo'
 import predefinedMap from './predefined-maps/test-bridges'
 import printPredefinedMap from './print-predefined-map'
 import { FactionVisualDetails } from './map-creator/menu'
-import initWebGL2 from 'webgl/init'
-import loadTextures from 'webgl/loadTextures'
+import initWebGL2 from '~/webgl/init'
+import loadTextures from '~/webgl/loadTextures'
+import compilePrograms from '~/webgl/compilePrograms'
+import resizeCanvas from '~/webgl/resizeCanvas'
 
 export type UniverseRepresentation = Map<number, Factory | Unit | StrategicPoint>
 export type WasmModule = ASUtil & typeof ExportedWasmModule
@@ -49,9 +51,15 @@ const getMapPoints = (mapWidth: number, mapHeight: number) => {
 
 
 function startLoadingTextures(input: InitGameInput) {
-  const canvas = document.createElement<"canvas">("canvas")
   window.app.view.parentNode.removeChild(window.app.view)
-  const { gl, ext } = initWebGL2(canvas)
+
+  const canvas = document.createElement<"canvas">("canvas")
+  canvas.id = 'main-game-view'
+  document.body.appendChild(canvas)
+
+  resizeCanvas(canvas)
+  initWebGL2(canvas)
+  const gl = window.gl
 
   loadTextures(
     gl,
@@ -59,6 +67,7 @@ function startLoadingTextures(input: InitGameInput) {
     () => initGame(gl, input)
   )
   
+  compilePrograms(gl)
 }
 
 interface InitGameInput {
@@ -90,116 +99,120 @@ function initGame (gl: WebGL2RenderingContext, input: InitGameInput) {
 
   initConvertArraysUtils(wasmModule)
   attachMethodToConvertLogicCoordsToVisual(mapHeight)
+
   const mapPoints = getMapPoints(mapWidth, mapHeight)
-  const envContainer = drawEnvironment(serializedMapInfo)
-  setAllLayers(mapPoints)
-  addItemToBackground(envContainer.background)
-  window.world.addChild(...envContainer.sortableItems)
-  EffectsFactory.initialize()
+  const envContainer = initBackground(serializedMapInfo)
 
-  UnitFactory.initializationTypes()
+  return
 
-  const universeRepresentation: UniverseRepresentation = new Map()
-  window.universeRepresentation = universeRepresentation // used to remove unit's PIXI.Container
+  // setAllLayers(mapPoints)
+  // addItemToBackground(envContainer.background)
+  // window.world.addChild(...envContainer.sortableItems)
+  // EffectsFactory.initialize()
 
-  const {
-    serializedWorldInfo,
-    unpinSerializedWorldInfo,
-  } = getSerializedWorldInfo(serializedMapInfo, wasmModule)
+  // UnitFactory.initializationTypes()
 
-  initUniverse(
-    serializedWorldInfo.factions,
-    serializedWorldInfo.obstacles,
-    serializedWorldInfo.blockingTrackPoints,
-    serializedWorldInfo.rawTrackPoints,
-    serializedWorldInfo.bridgeSecondToLastPointIndex,
-    mapWidth,
-    mapHeight,
-    // serializedInfoAboutWorld.obstacles,
-    // serializedInfoAboutWorld.strategicPoints,
-  )
-  unpinSerializedWorldInfo()
+  // const universeRepresentation: UniverseRepresentation = new Map()
+  // window.universeRepresentation = universeRepresentation // used to remove unit's PIXI.Container
 
-  const factionsVisualDetails: FactionsList = new Map()
+  // const {
+  //   serializedWorldInfo,
+  //   unpinSerializedWorldInfo,
+  // } = getSerializedWorldInfo(serializedMapInfo, wasmModule)
 
-  window.useFloat32ArrayData(getFactoriesInitData(), (factoriesData) => {
-    for (let i = 0; i < factoriesData.length; i += 5) {
-      const factoryId = factoriesData[i + 1]
-      const factionId = factoriesData[i]
-      const factoryRepresentation = new Factory(
-        factoriesData[i + 2], // x
-        factoriesData[i + 3], // y
-        factoriesData[i + 4], // angle
-      )
-      universeRepresentation.set(factoryId, factoryRepresentation)
+  // initUniverse(
+  //   serializedWorldInfo.factions,
+  //   serializedWorldInfo.obstacles,
+  //   serializedWorldInfo.blockingTrackPoints,
+  //   serializedWorldInfo.rawTrackPoints,
+  //   serializedWorldInfo.bridgeSecondToLastPointIndex,
+  //   mapWidth,
+  //   mapHeight,
+  //   // serializedInfoAboutWorld.obstacles,
+  //   // serializedInfoAboutWorld.strategicPoints,
+  // )
+  // unpinSerializedWorldInfo()
+
+  // const factionsVisualDetails: FactionsList = new Map()
+
+  // window.useFloat32ArrayData(getFactoriesInitData(), (factoriesData) => {
+  //   for (let i = 0; i < factoriesData.length; i += 5) {
+  //     const factoryId = factoriesData[i + 1]
+  //     const factionId = factoriesData[i]
+  //     const factoryRepresentation = new Factory(
+  //       factoriesData[i + 2], // x
+  //       factoriesData[i + 3], // y
+  //       factoriesData[i + 4], // angle
+  //     )
+  //     universeRepresentation.set(factoryId, factoryRepresentation)
   
-      if (factionId === USER_FACTION_ID) {
-        createFactoryButtons(factoriesData[i + 2], factoriesData[i + 3], type => createSquad(type),
-        )
-      }
+  //     if (factionId === USER_FACTION_ID) {
+  //       createFactoryButtons(factoriesData[i + 2], factoriesData[i + 3], type => createSquad(type),
+  //       )
+  //     }
 
-      factionsVisualDetails.set(factionId, factionVisualDetails.splice(0, 1)[0]) 
-    }
-  })
+  //     factionsVisualDetails.set(factionId, factionVisualDetails.splice(0, 1)[0]) 
+  //   }
+  // })
 
-  // const strategicPointsInitData = universe.get_strategic_points_init_data()
-  // for (let i = 0; i < strategicPointsInitData.length; i += 3) {
-  //   const strategicPointId = strategicPointsInitData[i]
-  //   const factoryRepresentation = new StrategicPoint(
-  //     strategicPointsInitData[i + 1],
-  //     strategicPointsInitData[i + 2],
-  //   )
-  //   universeRepresentation[strategicPointId] = factoryRepresentation
-  // }
+  // // const strategicPointsInitData = universe.get_strategic_points_init_data()
+  // // for (let i = 0; i < strategicPointsInitData.length; i += 3) {
+  // //   const strategicPointId = strategicPointsInitData[i]
+  // //   const factoryRepresentation = new StrategicPoint(
+  // //     strategicPointsInitData[i + 1],
+  // //     strategicPointsInitData[i + 2],
+  // //   )
+  // //   universeRepresentation[strategicPointId] = factoryRepresentation
+  // // }
 
-  const mouseController = new initializeMouseController(wasmModule, universeRepresentation, mapPoints)
+  // const mouseController = new initializeMouseController(wasmModule, universeRepresentation, mapPoints)
 
-  // debugController.init()
-  // let timeToCreateEnemy = 0
-  // let nextIsRaptor = false
+  // // debugController.init()
+  // // let timeToCreateEnemy = 0
+  // // let nextIsRaptor = false
 
-  // startDebugObstaclesMap(wasmModule)
-  // debugObstacles(wasmModule)
+  // // startDebugObstaclesMap(wasmModule)
+  // // debugObstacles(wasmModule)
 
 
-  // debugInnerTrack(wasmModule)
-  // debugOuterTrack(wasmModule)
-  // startDebugObstacles(wasmModule)
+  // // debugInnerTrack(wasmModule)
+  // // debugOuterTrack(wasmModule)
+  // // startDebugObstacles(wasmModule)
 
-  window.app.ticker.add((delta: number) => {
-    // gridDebug(wasmModule)
+  // window.app.ticker.add((delta: number) => {
+  //   // gridDebug(wasmModule)
 
-    // startDebugGrid(wasmModule)
+  //   // startDebugGrid(wasmModule)
 
-    // gridDebug(universe)
-    // debugController.update(universe)
+  //   // gridDebug(universe)
+  //   // debugController.update(universe)
 
-    // if (window.debugAiMode) return
+  //   // if (window.debugAiMode) return
 
-    // if (timeToCreateEnemy == 0) {
-    //   universe.create_enemy_squad(
-    //     nextIsRaptor ? REPRESENTATION_RAPTOR : REPRESENTATION_SOLIDER,
-    //   )
-    //   nextIsRaptor = !nextIsRaptor
+  //   // if (timeToCreateEnemy == 0) {
+  //   //   universe.create_enemy_squad(
+  //   //     nextIsRaptor ? REPRESENTATION_RAPTOR : REPRESENTATION_SOLIDER,
+  //   //   )
+  //   //   nextIsRaptor = !nextIsRaptor
 
-    //   timeToCreateEnemy = 1500
-    // } else {
-    //   timeToCreateEnemy--
-    // }
-    mouseController.updateScenePosition()
-    window.useFloat32ArrayData(getUniverseRepresentation(), (universeData) => {
-      render(
-        0,
-        universeData,
-        universeRepresentation,
-        factionsVisualDetails,
-      )
-    })
+  //   //   timeToCreateEnemy = 1500
+  //   // } else {
+  //   //   timeToCreateEnemy--
+  //   // }
+  //   mouseController.updateScenePosition()
+  //   window.useFloat32ArrayData(getUniverseRepresentation(), (universeData) => {
+  //     render(
+  //       0,
+  //       universeData,
+  //       universeRepresentation,
+  //       factionsVisualDetails,
+  //     )
+  //   })
 
-    updateBackground()
+  //   updateBackground()
 
-    window.updateClouds()
-  })
+  //   window.updateClouds()
+  // })
 }
 
 export default startLoadingTextures

@@ -65,13 +65,11 @@ export default function getWebGLContext(canvas: HTMLCanvasElement) {
   const formatRG = getSupportedFormat(gl, gl.RG16F, gl.RG, gl.HALF_FLOAT);
   const formatR = getSupportedFormat(gl, gl.R16F, gl.RED, gl.HALF_FLOAT);
 
-  return {
-    gl,
-    ext: {
-      formatRGBA,
-      formatRG,
-      formatR,
-      supportLinearFiltering,
-    },
-  };
+  window.gl = gl
+  window.glExt = {
+    formatRGBA,
+    formatRG,
+    formatR,
+    supportLinearFiltering,
+  }
 }
