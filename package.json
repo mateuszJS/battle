@@ -2,10 +2,12 @@
   "name": "webpack-game",
   "version": "1.0.0",
   "description": "",
-  "main": "webpack.config.js",
+  "engines": {
+    "node": ">=16.3.0"
+  },
   "scripts": {
-    "dev": "webpack-dev-server -d --hot --inline  --config webpack.dev.js",
-    "build": "webpack --display-optimization-bailout --config webpack.prod.js",
+    "start": "webpack serve --open",
+    "build": "webpack",
     "build-as": "asc -b logic/index.wasm -t logic/index.wat -0 logic/index.ts",
     "asbuild:untouched": "asc logic/index.ts --target debug",
     "asbuild:optimized": "asc logic/index.ts --target release"
@@ -13,43 +15,16 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@babel/core": "^7.7.7",
-    "@babel/plugin-syntax-dynamic-import": "^7.8.3",
-    "@babel/plugin-transform-runtime": "^7.14.5",
-    "@babel/preset-env": "^7.7.7",
-    "@typescript-eslint/eslint-plugin": "^4.22.1",
-    "@typescript-eslint/parser": "^4.22.1",
+    "@tsconfig/recommended": "^1.0.1",
     "assemblyscript": "^0.19.16",
-    "babel-loader": "^8.0.6",
-    "babel-plugin-module-resolver": "^4.0.0",
-    "copy-webpack-plugin": "^6.1.1",
-    "eslint": "^7.26.0",
-    "eslint-config-prettier": "^8.3.0",
-    "eslint-plugin-prettier": "^3.4.0",
-    "file-loader": "^0.11.2",
-    "html-webpack-plugin": "^3.2.0",
-    "prettier": "^1.19.1",
-    "raw-loader": "^4.0.1",
-    "ts-loader": "^8.2.0",
-    "tslib": "^2.2.0",
-    "typescript": "^4.2.4",
-    "uglifyjs-webpack-plugin": "^2.1.1",
-    "url-loader": "^0.5.9",
-    "webpack": "^4.25.1",
-    "webpack-bundle-analyzer": "^3.6.0",
-    "webpack-cli": "^3.1.2",
-    "webpack-dashboard": "^0.4.0",
-    "webpack-dev-server": "^3.1.10",
-    "webpack-merge": "^4.1.0"
+    "html-webpack-plugin": "^5.5.0",
+    "ts-loader": "^9.4.2",
+    "typescript": "^4.9.4",
+    "webpack": "^5.75.0",
+    "webpack-cli": "^5.0.1",
+    "webpack-dev-server": "^4.11.1"
   },
   "dependencies": {
-    "@assemblyscript/loader": "^0.19.16",
-    "@babel/runtime": "^7.14.6",
-    "@pixi/filter-drop-shadow": "^3.1.1",
-    "debounce": "^1.2.0",
-    "lodash": "^4.17.21",
-    "pixi-layers": "^0.2.2",
-    "pixi-projection": "^0.3.13",
-    "pixi.js": "^5.3.3"
+    "@assemblyscript/loader": "^0.19.16"
   }
 }

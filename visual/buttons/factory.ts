@@ -1,114 +1,114 @@
-import { RepresentationId } from '../../logic/constants'
+// import { RepresentationId } from '../../logic/constants'
 
-const ICON_SIZE = 50
+// const ICON_SIZE = 50
 
-const MAP_ID_TO_RESOURCE = {
-  [RepresentationId.Solider]: 'assets/soliderRegularAvatar.png',
-  [RepresentationId.Raptor]: 'assets/soliderRegularAvatar.png',
-} as const
+// const MAP_ID_TO_RESOURCE = {
+//   [RepresentationId.Solider]: 'assets/soliderRegularAvatar.png',
+//   [RepresentationId.Raptor]: 'assets/soliderRegularAvatar.png',
+// } as const
 
-type Icons = {
-  buyListContainer: PIXI.Container
-  productionListContainer: PIXI.Container
-  buyList: Array<{
-    sprite: PIXI.Sprite
-    representationId: RepresentationId
-  }>
-  productionList: PIXI.Sprite[]
-}
+// type Icons = {
+//   buyListContainer: PIXI.Container
+//   productionListContainer: PIXI.Container
+//   buyList: Array<{
+//     sprite: PIXI.Sprite
+//     representationId: RepresentationId
+//   }>
+//   productionList: PIXI.Sprite[]
+// }
 
-const icons: Icons = {
-  buyListContainer: new PIXI.Container(),
-  productionListContainer: new PIXI.Container(),
-  buyList: [],
-  productionList: [],
-}
+// const icons: Icons = {
+//   buyListContainer: new PIXI.Container(),
+//   productionListContainer: new PIXI.Container(),
+//   buyList: [],
+//   productionList: [],
+// }
 
-function mouseOver() {
-  this.alpha = 0.8
-}
+// function mouseOver() {
+//   this.alpha = 0.8
+// }
 
-function mouseOut() {
-  this.alpha = 1
-}
+// function mouseOut() {
+//   this.alpha = 1
+// }
 
-const addNewIcon = (
-  x: number,
-  y: number,
-  representationId: RepresentationId,
-  onClick?: VoidFunction,
-) => {
-  // assets/soliderRegularAvatar.png
-  const icon = new PIXI.Sprite(PIXI.Texture.from(MAP_ID_TO_RESOURCE[representationId]))
-  icon.x = x
-  icon.y = y
-  icon.width = ICON_SIZE
-  icon.height = ICON_SIZE
-  icon.interactive = true
-  icon.buttonMode = true
-  icon.on('mouseover', mouseOver)
-  icon.on('mouseout', mouseOut)
+// const addNewIcon = (
+//   x: number,
+//   y: number,
+//   representationId: RepresentationId,
+//   onClick?: VoidFunction,
+// ) => {
+//   // assets/soliderRegularAvatar.png
+//   const icon = new PIXI.Sprite(PIXI.Texture.from(MAP_ID_TO_RESOURCE[representationId]))
+//   icon.x = x
+//   icon.y = y
+//   icon.width = ICON_SIZE
+//   icon.height = ICON_SIZE
+//   icon.interactive = true
+//   icon.buttonMode = true
+//   icon.on('mouseover', mouseOver)
+//   icon.on('mouseout', mouseOut)
 
-  if (onClick) {
-    icon.on('mousedown', function(event) {
-      event.stopPropagation()
-    })
-    icon.on('mouseup', function(event) {
-      event.stopPropagation()
-      onClick()
-    })
-  }
+//   if (onClick) {
+//     icon.on('mousedown', function(event) {
+//       event.stopPropagation()
+//     })
+//     icon.on('mouseup', function(event) {
+//       event.stopPropagation()
+//       onClick()
+//     })
+//   }
 
-  return icon
-}
+//   return icon
+// }
 
-const addItemToBuyList = (
-  representationId: RepresentationId,
-  createItemCallback: (representationId: RepresentationId) => void,
-) => {
-  const sprite = addNewIcon(icons.buyList.length * ICON_SIZE, 0, representationId, () =>
-    createItemCallback(representationId),
-  )
-  icons.buyList.push({
-    representationId,
-    sprite,
-  })
+// const addItemToBuyList = (
+//   representationId: RepresentationId,
+//   createItemCallback: (representationId: RepresentationId) => void,
+// ) => {
+//   const sprite = addNewIcon(icons.buyList.length * ICON_SIZE, 0, representationId, () =>
+//     createItemCallback(representationId),
+//   )
+//   icons.buyList.push({
+//     representationId,
+//     sprite,
+//   })
 
-  icons.buyListContainer.addChild(sprite)
-}
+//   icons.buyListContainer.addChild(sprite)
+// }
 
-export const createFactoryButtons = (
-  x: number,
-  y: number,
-  createItemCallback: (representationId: RepresentationId) => void,
-) => {
-  icons.buyListContainer.x = x
-  icons.buyListContainer.y = y
-  window.ui.addChild(icons.buyListContainer)
+// export const createFactoryButtons = (
+//   x: number,
+//   y: number,
+//   createItemCallback: (representationId: RepresentationId) => void,
+// ) => {
+//   icons.buyListContainer.x = x
+//   icons.buyListContainer.y = y
+//   window.ui.addChild(icons.buyListContainer)
 
-  icons.productionListContainer.x = x
-  icons.productionListContainer.y = y + ICON_SIZE
-  window.ui.addChild(icons.productionListContainer)
+//   icons.productionListContainer.x = x
+//   icons.productionListContainer.y = y + ICON_SIZE
+//   window.ui.addChild(icons.productionListContainer)
 
-  addItemToBuyList(RepresentationId.Solider, createItemCallback)
-  addItemToBuyList(RepresentationId.Raptor, createItemCallback)
-}
+//   addItemToBuyList(RepresentationId.Solider, createItemCallback)
+//   addItemToBuyList(RepresentationId.Raptor, createItemCallback)
+// }
 
-export const addItemToProductionLine = (index: number, type: number) => {
-  if (icons.productionList[index]) return
+// export const addItemToProductionLine = (index: number, type: number) => {
+//   if (icons.productionList[index]) return
 
-  const icon = addNewIcon(icons.productionList.length * ICON_SIZE, 0, type as RepresentationId)
-  icons.productionList[index] = icon
-  icons.productionListContainer.addChild(icon)
-}
+//   const icon = addNewIcon(icons.productionList.length * ICON_SIZE, 0, type as RepresentationId)
+//   icons.productionList[index] = icon
+//   icons.productionListContainer.addChild(icon)
+// }
 
-export const removeItemFromProductionLine = (index: number) => {
-  if (icons.productionList[index]) {
-    icons.productionListContainer.removeChild(icons.productionList[index])
-    icons.productionList.splice(index, 1)
-  }
-}
+// export const removeItemFromProductionLine = (index: number) => {
+//   if (icons.productionList[index]) {
+//     icons.productionListContainer.removeChild(icons.productionList[index])
+//     icons.productionList.splice(index, 1)
+//   }
+// }
 
-export const updateItemInProductionLine = (progress: number) => {
-  icons.productionList[0].alpha = progress
-}
+// export const updateItemInProductionLine = (progress: number) => {
+//   icons.productionList[0].alpha = progress
+// }

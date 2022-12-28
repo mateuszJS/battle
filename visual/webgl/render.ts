@@ -1,11 +1,11 @@
-export default function(target) {
+import FrameBuffer from 'webgl/models/FrameBuffer'
+
+export default function(target: FrameBuffer | null) {
   const gl = window.gl
 
 
   // a_position;
   // a_texCoord;
-  
-
 
 
   if (target == null) {
@@ -13,7 +13,7 @@ export default function(target) {
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   } else {
     gl.viewport(0, 0, target.width, target.height);
-    gl.bindFramebuffer(gl.FRAMEBUFFER, target.fbo);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, target.frameBufferLocation);
   }
 
   // CHECK_FRAMEBUFFER_STATUS(); not sure why si was commented out

@@ -4,11 +4,6 @@
     <meta charset="UTF-8" />
     <title>Battle</title>
     <style>
-      #view {
-        position: fixed;
-        top: 0;
-      }
-
       body {
         display: flex;
         justify-content: center;
@@ -17,10 +12,6 @@
         margin: 0;
         background: black;
         overflow: hidden;
-      }
-
-      svg ~ #view {
-        display: none;
       }
 
       svg {
@@ -118,7 +109,7 @@
 
   <body>
     <div id="debug-panel"></div>
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 796 260">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 796 260" id="loader">
       <style>
         .st0 {
           fill: #fff;

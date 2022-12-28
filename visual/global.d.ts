@@ -1,53 +1,32 @@
-import { UniverseRepresentation } from '~/initGame'
-import 'pixi-layers/dist/pixi-layers.d.ts'
-import 'pixi-projection/dist/pixi-projection.d.ts'
+declare module "*.vert" {
+  const content: string;
+  export default content;
+}
 
-declare global {
-  interface Window {
-    updateClouds: VoidFunction
-    background: PIXI.Container
-    world: PIXI.Container
-    smallPieces: PIXI.Container
-    ui: PIXI.Container
-    universeRepresentation: UniverseRepresentation
-    app: PIXI.Application
-    startGame: (playersList: string[]) => void
-    visibleInfluenceMap: boolean
-    debugAiMode: boolean
+declare module "*.frag" {
+  const content: string;
+  export default content;
+}
 
-    getUint32ArrayPointer:(array: Uint32Array) => number
-    getFloat32ArrayPointer:(array: Float32Array) => number
-    useUint32ArrayData: (pointer: number, callback: (arr: Uint32Array) => void) => void
-    useFloat32ArrayData: (pointer: number, callback: (arr: Float32Array) => void) => void
-    convertLogicCoordToVisual: (x: number, y: number) => [number, number]
+declare module "*.png" {
+  const content: string;
+  export default content;
+}
 
-    gl: WebGL2RenderingContext
-    glExt: {
-      formatRGBA: {
-        format: GLenum
-        internalFormat: GLenum
-      }
-      formatRG: {
-        format: GLenum
-        internalFormat: GLenum
-      }
-      formatR: {
-        format: GLenum
-        internalFormat: GLenum
-      }
-      supportLinearFiltering: OES_texture_float_linear
-    }
-  }
+declare module "*.jpg" {
+  const content: string;
+  export default content;
+}
 
-  type ValueOf<T> = T[keyof T]
+type ValueOf<T> = T[keyof T]
 
-  interface Math {
-    clamp: (value: number, min: number, max: number) => number
-  }
+type f32 = number
+type f64 = number
+type usize = number
+type u32 = number
+type u8 = number
 
-  type f32 = number
-  type f64 = number
-  type usize = number
-  type u32 = number
-  type u8 = number
+interface Extension {
+  internalFormat: GLint,
+  format: GLenum,
 }

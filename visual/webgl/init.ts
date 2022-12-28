@@ -1,4 +1,4 @@
-function getSupportedFormat(gl: WebGL2RenderingContext, internalFormat: GLint, format: GLenum, type: GLenum) {
+function getSupportedFormat(gl: WebGL2RenderingContext, internalFormat: GLint, format: GLenum, type: GLenum): Extension {
   if (!supportRenderTextureFormat(gl, internalFormat, format, type)) {
     switch (internalFormat) {
       case gl.R16F:
@@ -6,7 +6,7 @@ function getSupportedFormat(gl: WebGL2RenderingContext, internalFormat: GLint, f
       case gl.RG16F:
         return getSupportedFormat(gl, gl.RGBA16F, gl.RGBA, type);
       default:
-        return null;
+        throw Error("Seems like even gl.RGBA16F is not supported")
     }
   }
 

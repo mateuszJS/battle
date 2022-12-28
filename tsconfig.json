@@ -1,25 +1,20 @@
 {
   "compilerOptions": {
-    "target": "es6",
-    "allowSyntheticDefaultImports": true,
+    "outDir": "./dist",
     "sourceMap": true,
-    "module": "ESNext", // Pixi works with commonJS, but dynamic imports works with ESNext </3
-    "moduleResolution": "node", // to fix above comment, no pixi is resolved correctly
-    // ^ also with that we don't have to import PIXI in each file
-    "importHelpers": true,
-    "allowJs": true, // to import web assembly module
-    "baseUrl": "./",
-    "paths": {
-      "~/*": ["./visual/*"],
-      "Constants": ["./logic/constants"],
-      "Settings": ["./visual/modules/gameSettings"]
-    },
-    "lib": [
-      "es2019",
-      "dom" // with that, window/document is undefined
-    ],
-    "typeRoots": ["node_modules/pixi.js"],
-    "types": ["pixi.js"]
+    "module": "es6",
+    "target": "es5",
+    "allowJs": true,
+    "moduleResolution": "node",
+    "baseUrl": "visual",
+
+    // everything below is just suggested by https://www.npmjs.com/package/@tsconfig/recommended
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
   },
-  "include": ["visual", "logic/constants.ts"]
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Recommended",
+  "exclude": ["logic"]
 }

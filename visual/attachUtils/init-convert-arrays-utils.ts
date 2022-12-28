@@ -1,4 +1,4 @@
-import { WasmModule } from '~/initGame'
+import { WasmModule } from 'initGame'
 
 const initConvertArraysUtils = (wasmModule: WasmModule) => {
   const {
