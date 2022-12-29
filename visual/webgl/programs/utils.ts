@@ -46,3 +46,32 @@ export function getUniform(program: WebGLProgram, name: string) {
 
   return uniformLocation
 }
+
+export function splitFloatIntoVec3(value: number): [number, number, number] {
+  return [
+    ((value >>  0) & 0xFF) / 0xFF,
+    ((value >>  8) & 0xFF) / 0xFF,
+    ((value >> 16) & 0xFF) / 0xFF,
+    // ((value >> 24) & 0xFF) / 0xFF,
+  ]
+}
+
+export function getIdFromLastRender(x: number, y: number) {
+  const gl = window.gl
+  const canvas = gl.canvas as HTMLCanvasElement
+
+  const pixelX = x * canvas.width / canvas.clientWidth;
+  const pixelY = gl.canvas.height - y * canvas.height / canvas.clientHeight - 1;
+  const data = new Uint8Array(4);
+  gl.readPixels(
+      pixelX,            // x
+      pixelY,            // y
+      1,                 // width
+      1,                 // height
+      gl.RGBA,           // format
+      gl.UNSIGNED_BYTE,  // type
+      data);             // typed array to hold result
+  // const id = data[0] + (data[1] << 8) + (data[2] << 16) + (data[3] << 24);
+  const id = data[0] + (data[1] << 8) + (data[2] << 16);
+  console.log(id)
+}

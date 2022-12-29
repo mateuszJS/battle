@@ -15,9 +15,6 @@ declare global {
       formatR: Extension
       supportLinearFiltering: OES_texture_float_linear | null
     }
-
-    // to remove
-    app: PIXI.Application
   }
 
 

@@ -5,6 +5,14 @@
 // import mapDetails from './map-details'
 // import { createMenu, addNewFaction, FactionVisualDetails } from './menu'
 
+import { WasmModule } from "initGame"
+import FrameBuffer from "webgl/models/FrameBuffer"
+import { drawPrimitivePickingProgram, drawPrimitiveProgram, drawSpritesProgram } from "webgl/programs"
+import { getIdFromLastRender, splitFloatIntoVec3 } from "webgl/programs/utils"
+import renderPrimitive from "webgl/renders/renderPrimitive"
+import renderSprite from "webgl/renders/renderSprite"
+import { TEXTURES_CACHE } from "webgl/textures"
+
 // const platformCoords = getPlatformCoords()
 // const bridgeWidth = (platformCoords[3].y - platformCoords[2].y) * mapDetails.scale
 
@@ -226,21 +234,6 @@
 //   return portal
 // }
 
-// const createBackground = () => {
-//   const background = new PIXI.Graphics()
-//   background.beginFill(0x333333)
-//   background.drawRect(mapDetails.x, mapDetails.y, mapDetails.width, mapDetails.height)
-//   background.endFill()
-//   mapCreatorWrapper.addChild(background)
-//   mapCreatorWrapper.addChild(nodesWrapper)
-//   mapCreatorWrapper.addChild(portalsWrapper)
-//   mapCreatorWrapper.addChild(connectionsContainer)
-//   mapCreatorWrapper.addChild(activeConnectionContainer)
-
-//   background.interactive = true;
-//   background.on('pointermove', onDragMove)
-// }
-
 // const createToolbar = () => {
 //   /* ADD PLATFORM BUTTON */
 //   const newNodeIcon = getNodeVisual(true)
@@ -299,20 +292,70 @@
 //     })
 // }
 
-// const mapCreator = (wasmModule: WasmModule) => {
-//   createBackground()
-//   createToolbar()
-//   const startGame = (factionVisualDetails: FactionVisualDetails[]) => {
-//     initGame({
-//       wasmModule,
-//       serializedMapInfo:  getSerializedMapInfo(nodes, connections, portals),
-//       mapWidth: MAP_WIDTH,
-//       mapHeight: MAP_HEIGHT,
-//       factionVisualDetails
-//     })
-//   }
-//   createMenu(startGame)
-//   window.app.stage.addChild(mapCreatorWrapper)
-// }
+export default function mapCreator() {
+  const gl = window.gl
+  const canvas = gl.canvas as HTMLCanvasElement
+  let mouseX = -1
+  let mouseY = -1
 
-// export default mapCreator
+  canvas.addEventListener('mousemove', (e: MouseEventInit) => {
+    const rect = canvas.getBoundingClientRect();
+    mouseX = (e.clientX as number) - rect.left;
+    mouseY = (e.clientY as number) - rect.top;
+  });
+
+
+  const frameBuffer = new FrameBuffer()
+  frameBuffer.resize(gl.drawingBufferWidth, gl.drawingBufferHeight)
+
+  function createBackground() {
+    drawPrimitiveProgram.setup({ color: [0, 0, 0, 1] })
+    renderPrimitive(
+      null,
+      drawPrimitiveProgram.setupRect(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight)
+    )
+
+    drawPrimitivePickingProgram.setup({ id: splitFloatIntoVec3(97) })
+    renderPrimitive(
+      frameBuffer,
+      drawPrimitivePickingProgram.setupRect(100, 100, gl.drawingBufferWidth / 2 - 200, gl.drawingBufferHeight - 500)
+    )
+    getIdFromLastRender(mouseX, mouseY)
+
+    drawPrimitiveProgram.setup({ color: [0.2, 0.2, 0.2, 1]})
+    renderPrimitive(
+      null,
+      drawPrimitiveProgram.setupRect(100, 100, gl.drawingBufferWidth / 2 - 200, gl.drawingBufferHeight - 500)
+    )
+    
+    requestAnimationFrame(createBackground);
+
+    // const background = new PIXI.Graphics()
+    // background.beginFill(0x333333)
+    // background.drawRect(mapDetails.x, mapDetails.y, mapDetails.width, mapDetails.height)
+    // background.endFill()
+    // mapCreatorWrapper.addChild(background)
+    // mapCreatorWrapper.addChild(nodesWrapper)
+    // mapCreatorWrapper.addChild(portalsWrapper)
+    // mapCreatorWrapper.addChild(connectionsContainer)
+    // mapCreatorWrapper.addChild(activeConnectionContainer)
+
+    // background.interactive = true;
+    // background.on('pointermove', onDragMove)
+  }
+
+  requestAnimationFrame(createBackground);
+
+  // createToolbar()
+  // const startGame = (factionVisualDetails: FactionVisualDetails[]) => {
+  //   initGame({
+  //     wasmModule,
+  //     serializedMapInfo:  getSerializedMapInfo(nodes, connections, portals),
+  //     mapWidth: MAP_WIDTH,
+  //     mapHeight: MAP_HEIGHT,
+  //     factionVisualDetails
+  //   })
+  // }
+  // createMenu(startGame)
+  // window.app.stage.addChild(mapCreatorWrapper)
+}

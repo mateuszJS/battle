@@ -2,20 +2,52 @@
 // import createItem from './createItem'
 // import blendColorBurn from './blendColorBurn'
 // import hoverMesh from './hoverMesh'
-// import mapCreator from '../map-creator'
+import mapCreator from 'map-creator'
 
 import { drawSpritesProgram } from 'webgl/programs'
-import render from 'webgl/render'
+import render from 'webgl/renders/renderSprite'
 import { TEXTURES_CACHE } from 'webgl/textures'
 
-// import { instantiate } from "@assemblyscript/loader"
-// import type * as ExportedWasmModule from '~/logic'
-// import { WasmModule } from '~/initGame'
+import { instantiate } from "@assemblyscript/loader"
+// import type * as ExportedWasmModule from '../../logic'
+import { WasmModule } from 'initGame'
 
 export default function setup() {
-  drawSpritesProgram.use()
-  drawSpritesProgram.setPosition()
-  drawSpritesProgram.attachTexture(TEXTURES_CACHE.GUIstartBtn.bind(0))
+  mapCreator()
+  return
+  drawSpritesProgram.setup({
+    texUnitIndex: TEXTURES_CACHE.GUIbackground.bind(0),
+  })
+  render(null)
+
+  drawSpritesProgram.setup({
+    texUnitIndex: TEXTURES_CACHE.GUIdivider.bind(0),
+    position: TEXTURES_CACHE.GUIdivider.getPositionCenter(
+      window.gl.drawingBufferWidth * .5,
+      window.gl.drawingBufferHeight * .5,
+      window.gl.drawingBufferWidth * .025,
+    ),
+  })
+  render(null)
+
+  drawSpritesProgram.setup({
+    texUnitIndex: TEXTURES_CACHE.GUIstartBtn.bind(0),
+    position: TEXTURES_CACHE.GUIstartBtn.getPositionCenter(
+      window.gl.drawingBufferWidth * .22,
+      window.gl.drawingBufferHeight * .3,
+      window.gl.drawingBufferWidth * .3,
+    ),
+  })
+  render(null)
+
+  drawSpritesProgram.setup({
+    texUnitIndex: TEXTURES_CACHE.GUIdonateBtn.bind(0),
+    position: TEXTURES_CACHE.GUIdonateBtn.getPositionCenter(
+      window.gl.drawingBufferWidth * .22,
+      window.gl.drawingBufferHeight * .65,
+      window.gl.drawingBufferWidth * .3,
+    ),
+  })
   render(null)
 
   // const backgroundTexture = PIXI.Texture.from('assets/pure_background_with_traced_images.jpg')
@@ -34,26 +66,27 @@ export default function setup() {
   // const handleResize = debounce(onResize, 500, undefined)
   // window.addEventListener('resize', handleResize)
 
-  // const startGame = (wasmModule: WasmModule) => {
-  //   window.removeEventListener('resize', handleResize)
-  //   mapCreator(wasmModule)
-  //   menuContainer.visible = false
-  // }
+  const startGame = (wasmModule: WasmModule) => {
+    // window.removeEventListener('resize', handleResize)
+    mapCreator()
+    // menuContainer.visible = false
+  }
 
-  // let startWhenLoaded = false
-  // let wasmModule: null | WasmModule = null
+  let startWhenLoaded = false
+  let wasmModule: null | WasmModule = null
 
-  // const loadWasmModule = async () => {
-  //   // not sure if I recall, but wasm cannot be loaded in initial chunk?
-  //   // GUI setup is not the best place for loading wasm from DX
-  //   const response = await instantiate<typeof ExportedWasmModule>(fetch("/logic-build/index.wasm"));
-  //   wasmModule = response.exports
-  //   if (startWhenLoaded) {
-  //     startGame(wasmModule)
-  //   }
-  // }
+  const loadWasmModule = async () => {
+    // not sure if I recall, but wasm cannot be loaded in initial chunk?
+    // GUI setup is not the best place for loading wasm from DX
+    const response = await instantiate<any>(fetch("/logic-build/index.wasm"));
+    // const response = await instantiate<typeof ExportedWasmModule>(fetch("/logic-build/index.wasm"));
+    wasmModule = response.exports as unknown as WasmModule
+    if (startWhenLoaded) {
+      startGame(wasmModule)
+    }
+  }
 
-  // loadWasmModule()
+  setTimeout(mapCreator, 3000)
 
   // const onClickStart = () => {
   //   if (wasmModule) {

@@ -1,12 +1,7 @@
 import FrameBuffer from 'webgl/models/FrameBuffer'
 
-export default function(target: FrameBuffer | null) {
+export default function(target: FrameBuffer | null, pointsNumber: number) {
   const gl = window.gl
-
-
-  // a_position;
-  // a_texCoord;
-
 
   if (target == null) {
     gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
@@ -15,9 +10,8 @@ export default function(target: FrameBuffer | null) {
     gl.viewport(0, 0, target.width, target.height);
     gl.bindFramebuffer(gl.FRAMEBUFFER, target.frameBufferLocation);
   }
-
   // CHECK_FRAMEBUFFER_STATUS(); not sure why si was commented out
-  gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+  gl.drawArrays(gl.TRIANGLES, 0, pointsNumber);
   // https://webglsamples.org/sprites/readme.html
   // https://groups.google.com/g/webgl-dev-list/c/fO9IOv9AFf8
 

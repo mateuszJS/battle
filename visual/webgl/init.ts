@@ -65,6 +65,11 @@ export default function getWebGLContext(canvas: HTMLCanvasElement) {
   const formatRG = getSupportedFormat(gl, gl.RG16F, gl.RG, gl.HALF_FLOAT);
   const formatR = getSupportedFormat(gl, gl.R16F, gl.RED, gl.HALF_FLOAT);
 
+  gl.enable(gl.BLEND);
+  // we assume we are working with pre-multiplied alpha textures
+  // https://webglfundamentals.org/webgl/lessons/webgl-and-alpha.html
+  gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+
   window.gl = gl
   window.glExt = {
     formatRGBA,

@@ -30,3 +30,15 @@ interface Extension {
   internalFormat: GLint,
   format: GLenum,
 }
+
+type Matrix3 = [
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number
+];

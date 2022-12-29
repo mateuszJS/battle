@@ -10,7 +10,9 @@ function loadImage(name: TextureName, url: string, onLoad: VoidFunction) {
   const image = new Image();
 
   image.onload = () => {
-    TEXTURES_CACHE[name] = new Texture(image)
+    const tex = new Texture()
+    tex.fill(image)
+    TEXTURES_CACHE[name] = tex
     onLoad()
   };
 
