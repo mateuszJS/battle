@@ -6,11 +6,13 @@
 // import { createMenu, addNewFaction, FactionVisualDetails } from './menu'
 
 import { WasmModule } from "initGame"
+import { projection, projectionFlipY, translate } from "webgl/m3"
 import FrameBuffer from "webgl/models/FrameBuffer"
 import { drawPrimitivePickingProgram, drawPrimitiveProgram, drawSpritesProgram } from "webgl/programs"
 import { getIdFromLastRender, splitFloatIntoVec3 } from "webgl/programs/utils"
 import renderPrimitive from "webgl/renders/renderPrimitive"
 import renderSprite from "webgl/renders/renderSprite"
+import setupRenderTarget from "webgl/renders/setupRenderTarget"
 import { TEXTURES_CACHE } from "webgl/textures"
 
 // const platformCoords = getPlatformCoords()
@@ -304,29 +306,155 @@ export default function mapCreator() {
     mouseY = (e.clientY as number) - rect.top;
   });
 
+  let selectedId = 0
 
-  const frameBuffer = new FrameBuffer()
-  frameBuffer.resize(gl.drawingBufferWidth, gl.drawingBufferHeight)
+  const elements = [
+    {
+      type: 'platform',
+      id: 255,
+      x: 300,
+      y: 300,
+    },
+    {
+      type: 'platform',
+      id: 255 * 255,
+      x: 600,
+      y: 600,
+    },
+  ]
 
   function createBackground() {
-    drawPrimitiveProgram.setup({ color: [0, 0, 0, 1] })
-    renderPrimitive(
-      null,
-      drawPrimitiveProgram.setupRect(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight)
+    // drawPrimitiveProgram.setup({ color: [0, 0, 0, 1] })
+    // renderPrimitive(
+    //   null,
+    //   drawPrimitiveProgram.setupRect(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight)
+    // )
+
+    // render map background
+    drawPrimitiveProgram.setup({ color: [0.2, 0.2, 0.2, 1] })
+    setupRenderTarget(null, [0, 0, 0, 1])
+    renderPrimitive(drawPrimitiveProgram.setupRect(
+      100,
+      100,
+      gl.drawingBufferWidth / 2 - 200,
+      gl.drawingBufferHeight - 500),
     )
 
-    drawPrimitivePickingProgram.setup({ id: splitFloatIntoVec3(97) })
-    renderPrimitive(
-      frameBuffer,
-      drawPrimitivePickingProgram.setupRect(100, 100, gl.drawingBufferWidth / 2 - 200, gl.drawingBufferHeight - 500)
-    )
-    getIdFromLastRender(mouseX, mouseY)
+    // const pixelX = -mouseX * canvas.width / canvas.clientWidth + 1;
+    // const pixelY = - mouseY * gl.canvas.height / canvas.clientHeight + 2;
+    const pixelX = -mouseX * canvas.width / canvas.clientWidth;
+    const pixelY = canvas.height - mouseY * gl.canvas.height / canvas.clientHeight - 1;
+    drawPrimitivePickingProgram.updateMatrix(pixelX, pixelY)
 
-    drawPrimitiveProgram.setup({ color: [0.2, 0.2, 0.2, 1]})
-    renderPrimitive(
-      null,
-      drawPrimitiveProgram.setupRect(100, 100, gl.drawingBufferWidth / 2 - 200, gl.drawingBufferHeight - 500)
-    )
+    setupRenderTarget(null)
+    // setupRenderTarget(drawPrimitivePickingProgram.frameBuffer, [0, 0, 0, 1])
+    elements.forEach(element => {
+      if (element.type = 'platform') {
+        drawPrimitivePickingProgram.setup({ id: splitFloatIntoVec3(element.id) })
+        renderPrimitive(drawPrimitivePickingProgram.setupOctagon(
+          element.x,
+          element.y,
+          100,
+        ))
+      }
+    })
+
+    selectedId = getIdFromLastRender()
+
+    setupRenderTarget(null)
+    elements.forEach(element => {
+      if (element.type = 'platform') {
+        drawPrimitiveProgram.setup({ color: element.id === selectedId ? [0.9, 0.4, 0.2, 1] : [0.4, 0.1, 0.7, 1] })
+        renderPrimitive(drawPrimitiveProgram.setupOctagon(
+          element.x,
+          element.y,
+          100,
+        ))
+      }
+    })
+
+    drawPrimitiveProgram.setup({ color:[1, 0, 0, 1] })
+    renderPrimitive(drawPrimitiveProgram.setupRect(
+      mouseX,
+      mouseY - 500,
+      1,
+      1000
+    ))
+
+    drawPrimitiveProgram.setup({ color:[0, 1, 0, 1] })
+    renderPrimitive(drawPrimitiveProgram.setupRect(
+      mouseX - 500,
+      mouseY,
+      1000,
+      1
+    ))
+
+
+    // drawPrimitiveProgram.setup({ color: [0.8, 0.4, 0.1, 1]})
+    // renderPrimitive(
+    //   null,
+    //   drawPrimitiveProgram.setupOctagon(gl.drawingBufferWidth * 0.5, gl.drawingBufferHeight * 0.5, 300),
+    //   // drawPrimitiveProgram.setupRect(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight)
+    //   // drawPrimitiveProgram.setupRect(100, 100, gl.drawingBufferWidth / 2 - 200, gl.drawingBufferHeight - 500)
+    // )
+
+    // drawSpritesProgram.setup({
+    //   texUnitIndex: frameBuffer.attach(0),
+    //   position: frameBuffer.getPositionCenter(1000, 1000, 100),
+    // })
+    // renderSprite(null)
+
+
+
+
+    
+
+    // drawSpritesProgram.setup({
+    //   texUnitIndex: frameBuffer.attach(0),
+    //   position: frameBuffer.getPositionCenter(1000, 1000, 100),
+    // })
+    // renderSprite(null)
+
+    // drawPrimitivePickingProgram.setup({ id: splitFloatIntoVec3(97), x: 0, y: 0 })
+    // super.setup(inputData, translate(this.matrix, inputData.x, inputData.y))
+    // const matrix = translate(projectionFlipY(gl.drawingBufferWidth, gl.drawingBufferHeight), -mouseX / gl.drawingBufferWidth, -mouseY / gl.drawingBufferHeight)
+    // drawPrimitiveProgram.setup({ color: [0, 0, 0, 1] }, matrix)
+
+
+    // const projectionFunction = inputData.noFlipY ? projection : projectionFlipY
+    // gl.uniformMatrix3fv(this.matrixUniform, false, matrix || projectionFunction(
+    //   inputData.outputWidth || gl.drawingBufferWidth,
+    //   inputData.outputHeight || gl.drawingBufferHeight
+    // ));
+
+
+
+    // drawPrimitivePickingProgram.setup({ id: splitFloatIntoVec3(97), x: mouseX, y: mouseY })
+    // renderPrimitive(
+    //   frameBuffer,
+    //   drawPrimitiveProgram.setupRect(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight)
+    // )
+    
+
+
+    // drawSpritesProgram.setup({
+    //   texUnitIndex: TEXTURES_CACHE.GUIdivider.bind(0),
+    //   position: TEXTURES_CACHE.GUIdivider.getPositionCenter(
+    //     window.gl.drawingBufferWidth * .5,
+    //     window.gl.drawingBufferHeight * .5,
+    //     window.gl.drawingBufferWidth * .025,
+    //   ),
+    // })
+    // render(null)
+
+    
+    // getIdFromLastRender(mouseX, mouseY)
+
+    // drawPrimitiveProgram.setup({ color: [0.2, 0.2, 0.2, 1]})
+    // renderPrimitive(
+    //   null,
+    //   drawPrimitiveProgram.setupRect(100, 100, gl.drawingBufferWidth / 2 - 200, gl.drawingBufferHeight - 500)
+    // )
     
     requestAnimationFrame(createBackground);
 

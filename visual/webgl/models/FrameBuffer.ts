@@ -41,12 +41,16 @@ export default class FrameBuffer {
     return this.texture.height
   }
 
+  getPositionCenter(x: number, y: number, width: number) {
+    return this.texture.getPositionCenter(x, y, width)
+  }
+
   resize(width: number, height: number) {
     this.texture.fill({ width, height })
   }
 
   attach(textureUnitIndex: number) {
     // purpose is to attached texture of the frame buffer to currently active program
-    this.texture.bind(textureUnitIndex)
+    return this.texture.bind(textureUnitIndex)
   }
 }

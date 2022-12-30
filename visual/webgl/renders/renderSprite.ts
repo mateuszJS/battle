@@ -1,15 +1,5 @@
-import FrameBuffer from 'webgl/models/FrameBuffer'
-
-export default function(target: FrameBuffer | null) {
+export default function renderSprite() {
   const gl = window.gl
-
-  if (target == null) {
-    gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-  } else {
-    gl.viewport(0, 0, target.width, target.height);
-    gl.bindFramebuffer(gl.FRAMEBUFFER, target.frameBufferLocation);
-  }
 
   // CHECK_FRAMEBUFFER_STATUS(); not sure why si was commented out
   gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);

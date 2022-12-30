@@ -5,20 +5,22 @@
 import mapCreator from 'map-creator'
 
 import { drawSpritesProgram } from 'webgl/programs'
-import render from 'webgl/renders/renderSprite'
+import renderSprite from 'webgl/renders/renderSprite'
 import { TEXTURES_CACHE } from 'webgl/textures'
 
 import { instantiate } from "@assemblyscript/loader"
 // import type * as ExportedWasmModule from '../../logic'
 import { WasmModule } from 'initGame'
+import setupRenderTarget from 'webgl/renders/setupRenderTarget'
 
 export default function setup() {
   mapCreator()
   return
+  setupRenderTarget(null)
   drawSpritesProgram.setup({
     texUnitIndex: TEXTURES_CACHE.GUIbackground.bind(0),
   })
-  render(null)
+  renderSprite()
 
   drawSpritesProgram.setup({
     texUnitIndex: TEXTURES_CACHE.GUIdivider.bind(0),
@@ -28,7 +30,7 @@ export default function setup() {
       window.gl.drawingBufferWidth * .025,
     ),
   })
-  render(null)
+  renderSprite()
 
   drawSpritesProgram.setup({
     texUnitIndex: TEXTURES_CACHE.GUIstartBtn.bind(0),
@@ -38,7 +40,7 @@ export default function setup() {
       window.gl.drawingBufferWidth * .3,
     ),
   })
-  render(null)
+  renderSprite()
 
   drawSpritesProgram.setup({
     texUnitIndex: TEXTURES_CACHE.GUIdonateBtn.bind(0),
@@ -48,7 +50,7 @@ export default function setup() {
       window.gl.drawingBufferWidth * .3,
     ),
   })
-  render(null)
+  renderSprite()
 
   // const backgroundTexture = PIXI.Texture.from('assets/pure_background_with_traced_images.jpg')
   // const startBtnPrimaryTexture = PIXI.Texture.from('assets/start_btn.png')

@@ -56,16 +56,13 @@ export function splitFloatIntoVec3(value: number): [number, number, number] {
   ]
 }
 
-export function getIdFromLastRender(x: number, y: number) {
+export function getIdFromLastRender() {
   const gl = window.gl
-  const canvas = gl.canvas as HTMLCanvasElement
 
-  const pixelX = x * canvas.width / canvas.clientWidth;
-  const pixelY = gl.canvas.height - y * canvas.height / canvas.clientHeight - 1;
   const data = new Uint8Array(4);
   gl.readPixels(
-      pixelX,            // x
-      pixelY,            // y
+      0,            // x
+      0,            // y
       1,                 // width
       1,                 // height
       gl.RGBA,           // format
@@ -73,5 +70,6 @@ export function getIdFromLastRender(x: number, y: number) {
       data);             // typed array to hold result
   // const id = data[0] + (data[1] << 8) + (data[2] << 16) + (data[3] << 24);
   const id = data[0] + (data[1] << 8) + (data[2] << 16);
-  console.log(id)
+
+  return id
 }
