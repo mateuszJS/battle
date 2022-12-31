@@ -1,7 +1,7 @@
 import Texture from "./Texture";
 
 export default class FrameBuffer {
-  private texture: Texture
+  readonly texture: Texture
   // public texelSizeX: number
   // public texelSizeY: number
   readonly  frameBufferLocation: WebGLFramebuffer
@@ -31,14 +31,6 @@ export default class FrameBuffer {
 
     // this.texelSizeX = 1.0 / width
     // this.texelSizeY = 1.0 / height
-  }
-
-  get width() {
-    return this.texture.width
-  }
-
-  get height() {
-    return this.texture.height
   }
 
   getPositionCenter(x: number, y: number, width: number) {

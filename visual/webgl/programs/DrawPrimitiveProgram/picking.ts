@@ -30,9 +30,7 @@ export default class DrawPrimitivePickingProgram extends DrawPrimitiveProgram  {
   // https://webglfundamentals.org/webgl/lessons/webgl-picking.html
 
   updateMatrix(x: number, y: number) {
-    const gl = window.gl
-    this.matrix = translate(projectionFlipY(gl.drawingBufferWidth, gl.drawingBufferHeight), x, y)
-    // this.matrix = translate(projection(BUFFER_SIZE, BUFFER_SIZE), -x, -y)
+    this.matrix = translate(projectionFlipY(BUFFER_SIZE, BUFFER_SIZE), x, y)
   }
 
   setup(inputData: InputDataWithId) {

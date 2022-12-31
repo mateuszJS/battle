@@ -1,6 +1,6 @@
 import FrameBuffer from 'webgl/models/FrameBuffer'
 
-export default function setupRenderTarget(target: FrameBuffer | null, clearColor?: [number, number, number, number]) {
+export default function setupRenderTarget(target: FrameBuffer | null, clearColor?: vec4) {
   const gl = window.gl
 
   if (target == null) {
@@ -8,7 +8,7 @@ export default function setupRenderTarget(target: FrameBuffer | null, clearColor
     gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
   } else {
     gl.bindFramebuffer(gl.FRAMEBUFFER, target.frameBufferLocation);
-    gl.viewport(0, 0, target.width, target.height);
+    gl.viewport(0, 0, target.texture.width, target.texture.height);
   }
 
   if (clearColor) {

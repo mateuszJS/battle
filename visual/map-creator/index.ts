@@ -9,6 +9,8 @@ import { WasmModule } from "initGame"
 import { projection, projectionFlipY, translate } from "webgl/m3"
 import FrameBuffer from "webgl/models/FrameBuffer"
 import { drawPrimitivePickingProgram, drawPrimitiveProgram, drawSpritesProgram } from "webgl/programs"
+import DrawPrimitiveProgram from "webgl/programs/DrawPrimitiveProgram"
+import DrawPrimitivePickingProgram from "webgl/programs/DrawPrimitiveProgram/picking"
 import { getIdFromLastRender, splitFloatIntoVec3 } from "webgl/programs/utils"
 import renderPrimitive from "webgl/renders/renderPrimitive"
 import renderSprite from "webgl/renders/renderSprite"
@@ -294,41 +296,104 @@ import { TEXTURES_CACHE } from "webgl/textures"
 //     })
 // }
 
+interface InteractiveElement {
+  type: 'platform'
+  x: number
+  y: number
+  id: number
+  vec3_id: [number, number, number]
+}
+
 export default function mapCreator() {
   const gl = window.gl
   const canvas = gl.canvas as HTMLCanvasElement
+
+  let selectedElementId = 0
+
   let mouseX = -1
   let mouseY = -1
+
+  const interactiveElements: InteractiveElement[] = [
+    {
+      type: 'platform' as const,
+      x: 300,
+      y: 300,
+    },
+    {
+      type: 'platform' as const,
+      x: 600,
+      y: 600,
+    },
+  ].map((elem, index) => ({
+    ...elem,
+    id: index + 1, // 0 is no selection
+    vec3_id: splitFloatIntoVec3(index + 1)
+  }))
+
+  let selection: { offsetX: number, offsetY: number, element: InteractiveElement } | null = null
 
   canvas.addEventListener('mousemove', (e: MouseEventInit) => {
     const rect = canvas.getBoundingClientRect();
     mouseX = (e.clientX as number) - rect.left;
     mouseY = (e.clientY as number) - rect.top;
+
+    if (selection) {
+      selection.element.x = mouseX - selection.offsetX
+      selection.element.y = mouseY - selection.offsetY
+    }
   });
 
-  let selectedId = 0
+  canvas.addEventListener('mousedown', (e: MouseEventInit) => {
+    if (selectedElementId) {
+      const selectedElement = interactiveElements.find(obj => obj.id === selectedElementId)
 
-  const elements = [
-    {
-      type: 'platform',
-      id: 255,
-      x: 300,
-      y: 300,
-    },
-    {
-      type: 'platform',
-      id: 255 * 255,
-      x: 600,
-      y: 600,
-    },
-  ]
+      if (!selectedElement) return // it SHOULD NOT happen...
+
+      selection = {
+        offsetX: mouseX - selectedElement.x,
+        offsetY: mouseY - selectedElement.y,
+        element: selectedElement
+      }
+    }
+  });
+
+  canvas.addEventListener('mouseup', (e: MouseEventInit) => {
+    selection = null
+  });
+
+  function drawInteractiveElements(program: DrawPrimitiveProgram | DrawPrimitivePickingProgram) {
+    interactiveElements.forEach(element => {
+      switch (element.type) {
+        case 'platform': {
+          if (element.id === selectedElementId) {
+            program.setup({ id: element.vec3_id, color: [1, 1, 1, 1] })
+            renderPrimitive(program.setupOctagon(
+              element.x,
+              element.y,
+              110,
+            ))
+          }
+
+          program.setup({ id: element.vec3_id, color: [0.4, 0.1, 0.7, 1] })
+          renderPrimitive(program.setupOctagon(
+            element.x,
+            element.y,
+            100,
+          ))
+          break;
+        }
+        default: {}
+      }
+    })
+  }
 
   function createBackground() {
-    // drawPrimitiveProgram.setup({ color: [0, 0, 0, 1] })
-    // renderPrimitive(
-    //   null,
-    //   drawPrimitiveProgram.setupRect(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight)
-    // )
+    const pixelX = -mouseX * canvas.width / canvas.clientWidth;
+    const pixelY = - mouseY * gl.canvas.height / canvas.clientHeight;
+    drawPrimitivePickingProgram.updateMatrix(pixelX, pixelY)
+    setupRenderTarget(drawPrimitivePickingProgram.frameBuffer, [0, 0, 0, 1])
+    drawInteractiveElements(drawPrimitivePickingProgram)
+    selectedElementId = getIdFromLastRender()
 
     // render map background
     drawPrimitiveProgram.setup({ color: [0.2, 0.2, 0.2, 1] })
@@ -340,55 +405,8 @@ export default function mapCreator() {
       gl.drawingBufferHeight - 500),
     )
 
-    // const pixelX = -mouseX * canvas.width / canvas.clientWidth + 1;
-    // const pixelY = - mouseY * gl.canvas.height / canvas.clientHeight + 2;
-    const pixelX = -mouseX * canvas.width / canvas.clientWidth;
-    const pixelY = canvas.height - mouseY * gl.canvas.height / canvas.clientHeight - 1;
-    drawPrimitivePickingProgram.updateMatrix(pixelX, pixelY)
-
     setupRenderTarget(null)
-    // setupRenderTarget(drawPrimitivePickingProgram.frameBuffer, [0, 0, 0, 1])
-    elements.forEach(element => {
-      if (element.type = 'platform') {
-        drawPrimitivePickingProgram.setup({ id: splitFloatIntoVec3(element.id) })
-        renderPrimitive(drawPrimitivePickingProgram.setupOctagon(
-          element.x,
-          element.y,
-          100,
-        ))
-      }
-    })
-
-    selectedId = getIdFromLastRender()
-
-    setupRenderTarget(null)
-    elements.forEach(element => {
-      if (element.type = 'platform') {
-        drawPrimitiveProgram.setup({ color: element.id === selectedId ? [0.9, 0.4, 0.2, 1] : [0.4, 0.1, 0.7, 1] })
-        renderPrimitive(drawPrimitiveProgram.setupOctagon(
-          element.x,
-          element.y,
-          100,
-        ))
-      }
-    })
-
-    drawPrimitiveProgram.setup({ color:[1, 0, 0, 1] })
-    renderPrimitive(drawPrimitiveProgram.setupRect(
-      mouseX,
-      mouseY - 500,
-      1,
-      1000
-    ))
-
-    drawPrimitiveProgram.setup({ color:[0, 1, 0, 1] })
-    renderPrimitive(drawPrimitiveProgram.setupRect(
-      mouseX - 500,
-      mouseY,
-      1000,
-      1
-    ))
-
+    drawInteractiveElements(drawPrimitiveProgram)
 
     // drawPrimitiveProgram.setup({ color: [0.8, 0.4, 0.1, 1]})
     // renderPrimitive(

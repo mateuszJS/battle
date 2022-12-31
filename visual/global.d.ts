@@ -42,3 +42,5 @@ type Matrix3 = [
   number,
   number
 ];
+
+type vec4 = [number, number, number, number]
