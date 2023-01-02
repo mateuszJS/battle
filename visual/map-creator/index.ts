@@ -15,8 +15,9 @@ import renderPrimitive from "webgl/renders/renderPrimitive"
 import renderSprite from "webgl/renders/renderSprite"
 import setupRenderTarget from "webgl/renders/setupRenderTarget"
 import { TEXTURES_CACHE } from "webgl/textures"
-import { MAP_HEIGHT, MAP_SIZE, MAP_WIDTH, scaledBridgeWidth, scaledJoinerSize, scaledPlatformJoinersOffset } from './constants'
+import { MAP_HEIGHT, MAP_LEFT_MARGIN, MAP_TOP_MARGIN, MAP_WIDTH, platformJoinersOffset, scale, scaledBridgeWidth, scaledJoinerSize, updateConstsOnResize } from './constants'
 import drawInteractiveElements from "./drawInteractiveElements"
+import drawBridges from "./drawBridges"
 
 
 // let activeElement = null
@@ -295,26 +296,37 @@ const getNodeVisual = (disableJoinerEvent = false) => {
 //     })
 // }
 
-export interface InteractiveElement {
-  type: 'platform' | 'create-platform-btn' | 'platform-bridge-point'
+export interface Platform {
+  type: 'platform' | 'create-platform-btn'
   x: number
   y: number
   id: number
   vec3_id: [number, number, number]
-  positionRelativeTo?: InteractiveElement
-  horizontal?: boolean
 }
 
-interface Bridge {
-  sourceJoint: InteractiveElement
-  destinationJoint: InteractiveElement | null // it's null in case if bridge is during creation
+export interface BridgePoint {
+  type: 'bridge-point'
+  x: number
+  y: number
+  id: number
+  vec3_id: [number, number, number]
+  positionRelativeTo: InteractiveElement
+  horizontal: boolean
+}
+
+export type InteractiveElement = Platform | BridgePoint
+
+export interface NonInteractiveBridge {
+  srcJoint: BridgePoint
+  destJoint: BridgePoint | null // it's null in case if bridge is during creation
   // so we should use mouse coords
 }
 
-let bridges: Bridge[] = []
+let bridges: NonInteractiveBridge[] = []
 // mutable to allow .filter() method
 
 export default function mapCreator() {
+  const stopUpdatingConstsOnResize = updateConstsOnResize()
   const gl = window.gl
   const canvas = gl.canvas as HTMLCanvasElement
 
@@ -326,8 +338,8 @@ export default function mapCreator() {
   const interactiveElements: InteractiveElement[] = [
     {
       type: 'create-platform-btn' as const,
-      x: 50,
-      y: 100,
+      x: MAP_LEFT_MARGIN / 2,
+      y: MAP_TOP_MARGIN,
     },
   ].map((elem, index) => ({
     ...elem,
@@ -344,12 +356,12 @@ export default function mapCreator() {
 
     if (selection) {
       switch (selection.element.type) {
-        case 'platform-bridge-point': {
+        case 'bridge-point': {
           break;
         }
         case 'platform': {
-          selection.element.x = mouseX - selection.offsetX
-          selection.element.y = mouseY - selection.offsetY
+          selection.element.x = mouseX / scale - selection.offsetX - MAP_LEFT_MARGIN
+          selection.element.y = mouseY / scale - selection.offsetY - MAP_TOP_MARGIN
           break
         }
       }
@@ -365,34 +377,34 @@ export default function mapCreator() {
       switch (hoveredElement.type) {
         case 'platform': {
           selection = {
-            offsetX: mouseX - hoveredElement.x,
-            offsetY: mouseY - hoveredElement.y,
+            offsetX: mouseX / scale - hoveredElement.x - MAP_LEFT_MARGIN,
+            offsetY: mouseY / scale - hoveredElement.y - MAP_TOP_MARGIN,
             element: hoveredElement
           }
           break
         }
-        case 'platform-bridge-point': {
-          const bridge = bridges.find(bridge => bridge.destinationJoint === hoveredElement || bridge.sourceJoint === hoveredElement)
+        case 'bridge-point': {
+          const bridge = bridges.find(bridge => bridge.destJoint === hoveredElement || bridge.srcJoint === hoveredElement)
           if (bridge) {
-            if (!bridge.destinationJoint || !bridge.sourceJoint) return // it should never happen
+            if (!bridge.destJoint || !bridge.srcJoint) return // it should never happen
+            // if mouse is down, it means that before that was up, so there is no bridge during creation, so there is no null destJoint
 
-            const newSrcJoint = bridge.sourceJoint === hoveredElement ? bridge.destinationJoint : bridge.sourceJoint
-            bridge.sourceJoint = newSrcJoint
-            bridge.destinationJoint = null
+            bridge.srcJoint = bridge.srcJoint === hoveredElement ? bridge.destJoint : bridge.srcJoint
+            bridge.destJoint = null
             selection = {
-              offsetX: 0,
+              offsetX: 0, // not sure if we really need to calculate offset
               offsetY: 0,
-              element: bridge.sourceJoint
+              element: bridge.srcJoint // pretend that this was selected first
             }
           } else {
             selection = {
-              offsetX: mouseX - hoveredElement.x,
-              offsetY: mouseY - hoveredElement.y,
+              offsetX: mouseX / scale - hoveredElement.x - MAP_LEFT_MARGIN,
+              offsetY: mouseY / scale - hoveredElement.y - MAP_TOP_MARGIN,
               element: hoveredElement
             }
             bridges.push({
-              sourceJoint: hoveredElement,
-              destinationJoint: null
+              srcJoint: hoveredElement,
+              destJoint: null
             })
           }
           break
@@ -403,22 +415,22 @@ export default function mapCreator() {
   });
 
   canvas.addEventListener('mouseup', (e: MouseEventInit) => {
-    if (selection?.element.type === 'platform-bridge-point') {
+    if (selection?.element.type === 'bridge-point') {
       if (hoveredElementId) {
         const hoveredElement = interactiveElements.find(obj => obj.id === hoveredElementId)
 
-        if (!hoveredElement || hoveredElement.type !== 'platform-bridge-point') {
-          bridges = bridges.filter(bridge => !!bridge.destinationJoint)
+        if (!hoveredElement || hoveredElement.type !== 'bridge-point') {
+          bridges = bridges.filter(bridge => !!bridge.destJoint) // failed to create a bridge
         } else {
-          const bridgeDuringCreation = bridges.find(bridge => !bridge.destinationJoint)
+          const bridgeDuringCreation = bridges.find(bridge => !bridge.destJoint)
 
           if (bridgeDuringCreation) {
             // if should be always true, if there is a selection of bridge point, then there should be also a bridge without the destination
-            bridgeDuringCreation.destinationJoint = hoveredElement
+            bridgeDuringCreation.destJoint = hoveredElement
           }
         }
       } else {
-        bridges = bridges.filter(bridge => !!bridge.destinationJoint)
+        bridges = bridges.filter(bridge => !!bridge.destJoint) // failed to create a bridge
       }
     }
 
@@ -436,8 +448,8 @@ export default function mapCreator() {
           const id = interactiveElements[interactiveElements.length - 1].id + 1
           const platformElement = {
             type: 'platform',
-            x: MAP_SIZE.x + MAP_SIZE.width / 2,
-            y: MAP_SIZE.y + MAP_SIZE.height / 2,
+            x: MAP_LEFT_MARGIN + MAP_WIDTH / 2,
+            y: MAP_TOP_MARGIN + MAP_HEIGHT / 2,
             id,
             vec3_id: splitFloatIntoVec3(id)
           } as const
@@ -450,9 +462,9 @@ export default function mapCreator() {
             const id = interactiveElements[interactiveElements.length - 1].id + 1
 
             interactiveElements.push({
-              type: 'platform-bridge-point',
-              x: Math.sin(joinAngle) * scaledPlatformJoinersOffset,
-              y: -Math.cos(joinAngle) * scaledPlatformJoinersOffset,
+              type: 'bridge-point',
+              x: Math.sin(joinAngle) * platformJoinersOffset,
+              y: -Math.cos(joinAngle) * platformJoinersOffset,
               id,
               vec3_id: splitFloatIntoVec3(id),
               positionRelativeTo: platformElement,
@@ -466,119 +478,33 @@ export default function mapCreator() {
     }
   });
 
-  function createBackground() {
-    const pixelX = -mouseX * canvas.width / canvas.clientWidth;
-    const pixelY = - mouseY * gl.canvas.height / canvas.clientHeight;
+  function draw() {
+    /* DETECTING HOVERED INTERACTIVE ELEMENT */
+    const pixelX = -mouseX * canvas.width / canvas.clientWidth
+    const pixelY = - mouseY * gl.canvas.height / canvas.clientHeight
     drawPrimitivePickingProgram.updateMatrix(pixelX, pixelY)
     setupRenderTarget(drawPrimitivePickingProgram.frameBuffer, [0, 0, 0, 1])
     drawInteractiveElements(interactiveElements, hoveredElementId, drawPrimitivePickingProgram)
     hoveredElementId = getIdFromLastRender()
 
-    // render map background
+    /* RENDER TO CANVAS */
     setupRenderTarget(null, [0, 0, 0, 1])
-    
+    /* MAP BACKGROUND */
     drawPrimitiveProgram.setup({ color: [0.2, 0.2, 0.2, 1] })
     renderPrimitive(drawPrimitiveProgram.setupRect(
-      100,
-      100,
-      gl.drawingBufferWidth / 2 - 200,
-      gl.drawingBufferHeight - 500),
-    )
+      MAP_LEFT_MARGIN,
+      MAP_TOP_MARGIN,
+      MAP_WIDTH * scale,
+      MAP_HEIGHT * scale,
+    ))
 
+    /* ALL INTERACTIVE ELEMENTS */
     drawInteractiveElements(interactiveElements, hoveredElementId, drawPrimitiveProgram)
 
-    drawPrimitiveProgram.setup({ color: [1, 0.4, 0.2, 1] })
-    bridges.forEach(({ sourceJoint, destinationJoint}) => {
-      if (!sourceJoint.positionRelativeTo) return // it should never happen
-      const [sourceJointOffsetX, sourceJointOffsetY] = sourceJoint.horizontal ? [scaledBridgeWidth * .5, 0] : [0, scaledBridgeWidth * .5]
-      const sourcePoint = {
-        x: sourceJoint.x + sourceJoint.positionRelativeTo.x,
-        y: sourceJoint.y + sourceJoint.positionRelativeTo.y,
-      }
+    /* DRAWING BRIDGES */
+    drawBridges(bridges, mouseX, mouseY)
 
-      // we need to improve typing, separated type for bridge points
-      const relative = destinationJoint?.positionRelativeTo || { x: 0, y: 0 }
-      const destinationPoint = {
-        x: destinationJoint ? destinationJoint.x + relative.x : mouseX,
-        y: destinationJoint ? destinationJoint.y + relative.y : mouseY,
-      }
-      renderPrimitive(
-        drawPrimitiveProgram.setup4CornerShape(
-          sourcePoint.x + sourceJointOffsetX, sourcePoint.y + sourceJointOffsetY,
-          sourcePoint.x - sourceJointOffsetX, sourcePoint.y - sourceJointOffsetY,
-          destinationPoint.x + sourceJointOffsetX, destinationPoint.y + sourceJointOffsetY,
-          destinationPoint.x - sourceJointOffsetX, destinationPoint.y - sourceJointOffsetY,
-        )
-      )
-    })
-
-    // drawPrimitiveProgram.setup({ color: [0.8, 0.4, 0.1, 1]})
-    // renderPrimitive(
-    //   null,
-    //   drawPrimitiveProgram.setupOctagon(gl.drawingBufferWidth * 0.5, gl.drawingBufferHeight * 0.5, 300),
-    //   // drawPrimitiveProgram.setupRect(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight)
-    //   // drawPrimitiveProgram.setupRect(100, 100, gl.drawingBufferWidth / 2 - 200, gl.drawingBufferHeight - 500)
-    // )
-
-    // drawSpritesProgram.setup({
-    //   texUnitIndex: frameBuffer.attach(0),
-    //   position: frameBuffer.getPositionCenter(1000, 1000, 100),
-    // })
-    // renderSprite(null)
-
-
-
-
-    
-
-    // drawSpritesProgram.setup({
-    //   texUnitIndex: frameBuffer.attach(0),
-    //   position: frameBuffer.getPositionCenter(1000, 1000, 100),
-    // })
-    // renderSprite(null)
-
-    // drawPrimitivePickingProgram.setup({ id: splitFloatIntoVec3(97), x: 0, y: 0 })
-    // super.setup(inputData, translate(this.matrix, inputData.x, inputData.y))
-    // const matrix = translate(projectionFlipY(gl.drawingBufferWidth, gl.drawingBufferHeight), -mouseX / gl.drawingBufferWidth, -mouseY / gl.drawingBufferHeight)
-    // drawPrimitiveProgram.setup({ color: [0, 0, 0, 1] }, matrix)
-
-
-    // const projectionFunction = inputData.noFlipY ? projection : projectionFlipY
-    // gl.uniformMatrix3fv(this.matrixUniform, false, matrix || projectionFunction(
-    //   inputData.outputWidth || gl.drawingBufferWidth,
-    //   inputData.outputHeight || gl.drawingBufferHeight
-    // ));
-
-
-
-    // drawPrimitivePickingProgram.setup({ id: splitFloatIntoVec3(97), x: mouseX, y: mouseY })
-    // renderPrimitive(
-    //   frameBuffer,
-    //   drawPrimitiveProgram.setupRect(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight)
-    // )
-    
-
-
-    // drawSpritesProgram.setup({
-    //   texUnitIndex: TEXTURES_CACHE.GUIdivider.bind(0),
-    //   position: TEXTURES_CACHE.GUIdivider.getPositionCenter(
-    //     window.gl.drawingBufferWidth * .5,
-    //     window.gl.drawingBufferHeight * .5,
-    //     window.gl.drawingBufferWidth * .025,
-    //   ),
-    // })
-    // render(null)
-
-    
-    // getIdFromLastRender(mouseX, mouseY)
-
-    // drawPrimitiveProgram.setup({ color: [0.2, 0.2, 0.2, 1]})
-    // renderPrimitive(
-    //   null,
-    //   drawPrimitiveProgram.setupRect(100, 100, gl.drawingBufferWidth / 2 - 200, gl.drawingBufferHeight - 500)
-    // )
-    
-    requestAnimationFrame(createBackground);
+    requestAnimationFrame(draw);
 
     // const background = new PIXI.Graphics()
     // background.beginFill(0x333333)
@@ -593,8 +519,8 @@ export default function mapCreator() {
     // background.interactive = true;
     // background.on('pointermove', onDragMove)
   }
-
-  requestAnimationFrame(createBackground);
+  // REMEMBER to call stopUpdatingConstsOnResize on going to game
+  requestAnimationFrame(draw);
 
   // createToolbar()
   // const startGame = (factionVisualDetails: FactionVisualDetails[]) => {

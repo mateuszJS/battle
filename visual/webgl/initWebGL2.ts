@@ -39,7 +39,7 @@ function supportRenderTextureFormat(gl: WebGL2RenderingContext, internalFormat: 
   return status == gl.FRAMEBUFFER_COMPLETE;
 }
 
-export default function getWebGLContext(canvas: HTMLCanvasElement) {
+export default function initWebGL2(canvas: HTMLCanvasElement) {
   const params: WebGLContextAttributes = {
     alpha: true,
     depth: false,

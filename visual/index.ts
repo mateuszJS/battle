@@ -1,8 +1,9 @@
 import setupGUI from 'GUI'
-import initWebGL2 from 'webgl/init'
+import initWebGL2 from 'webgl/initWebGL2'
 import loadTextures from 'webgl/textures'
 import { compilePrograms } from 'webgl/programs'
 import resizeCanvas from 'webgl/resizeCanvas'
+import { initResizeEvent } from 'webgl/resize'
 
 function initWebGL() {
   const canvas = document.createElement<"canvas">("canvas")
@@ -68,6 +69,8 @@ if (!Math.clamp) {
 }
 
 initWebGL()
+
+initResizeEvent()
 
 const progressNode = document.querySelector('#dynamic-loader') as SVGPathElement
 
