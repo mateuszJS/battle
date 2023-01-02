@@ -71,6 +71,32 @@ export default class DrawPrimitiveProgram {
     return 6
   }
 
+  setupPolygonWithCenter(points: Point[], offset: Point) {
+    const centerPoint: Point = points.reduce((resultPoint, point) => ({
+      x: resultPoint.x + point.x / points.length,
+      y: resultPoint.y + point.y / points.length,
+    }), { x: 0, y: 0 })
+
+    const vertices = []
+    for (let i = 0; i < points.length; i++) {
+      const currentPoint = points[i]
+      vertices.push(currentPoint.x + offset.x)
+      vertices.push(currentPoint.y + offset.y)
+
+      const nextPoint = points[(i + 1) % points.length]
+      vertices.push(nextPoint.x + offset.x)
+      vertices.push(nextPoint.y + offset.y)
+
+      vertices.push(centerPoint.x + offset.x)
+      vertices.push(centerPoint.y + offset.y)
+    }
+  
+    this.setPositionAttr(new Float32Array(vertices))
+
+    // returns number of vertices, useful to pass to render function
+    return vertices.length / 2
+  }
+
   setupOctagon(x: number, y: number, radius: number) {
   //   const width = 100;
   //   const height = 150;

@@ -44,3 +44,8 @@ type Matrix3 = [
 ];
 
 type vec4 = [number, number, number, number]
+
+interface Point {
+  x: number
+  y: number
+}

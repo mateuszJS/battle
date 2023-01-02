@@ -1,8 +1,7 @@
 // import initGame, { WasmModule } from '~/initGame'
 // import { MAP_HEIGHT, MAP_WIDTH } from './constants'
-// import getPlatformCoords from '~/consts/get-platform-coords'
+
 // import getSerializedMapInfo from './get-serialized-map-info'
-// import mapDetails from './map-details'
 // import { createMenu, addNewFaction, FactionVisualDetails } from './menu'
 
 import { WasmModule } from "initGame"
@@ -16,9 +15,9 @@ import renderPrimitive from "webgl/renders/renderPrimitive"
 import renderSprite from "webgl/renders/renderSprite"
 import setupRenderTarget from "webgl/renders/setupRenderTarget"
 import { TEXTURES_CACHE } from "webgl/textures"
+import { MAP_HEIGHT, MAP_SIZE, MAP_WIDTH, scaledBridgeWidth, scaledJoinerSize, scaledPlatformJoinersOffset } from './constants'
+import drawInteractiveElements from "./drawInteractiveElements"
 
-// const platformCoords = getPlatformCoords()
-// const bridgeWidth = (platformCoords[3].y - platformCoords[2].y) * mapDetails.scale
 
 // let activeElement = null
 // let isJoiner = false
@@ -187,32 +186,32 @@ import { TEXTURES_CACHE } from "webgl/textures"
 //   graphics.drawRect(-width/2 + offsetX, -height/2 + offsetY, width, height)
 // }
 
-// const getNodeVisual = (disableJoinerEvent = false) => {
-//   const newNode = new PIXI.Graphics()
-//   newNode.beginFill(0xff0000)
-//   platformCoords.forEach((coord, index) => {
-//     newNode[index === 0 ? 'moveTo' : 'lineTo'](coord.x * mapDetails.scale, coord.y * mapDetails.scale)
-//   })
-//   newNode.closePath()
+const getNodeVisual = (disableJoinerEvent = false) => {
+  // const newNode = new PIXI.Graphics()
+  // newNode.beginFill(0xff0000)
+  // platformCoords.forEach((coord, index) => {
+  //   newNode[index === 0 ? 'moveTo' : 'lineTo'](coord.x * mapDetails.scale, coord.y * mapDetails.scale)
+  // })
+  // newNode.closePath()
 
-//   for (let i = 0; i < 4; i++) {
-//     const joiner = new PIXI.Graphics()
-//     joiner.x = Math.sin(i / 4 * Math.PI * 2) * newNode.width / 2
-//     joiner.y = -Math.cos(i / 4 * Math.PI * 2) * newNode.height / 2
-//     joiner.beginFill(0x00ff00)
-//     drawJoiner(joiner, Math.round(joiner.x) === 0)
-//     joiner.endFill()
+  // for (let i = 0; i < 4; i++) {
+  //   const joiner = new PIXI.Graphics()
+  //   joiner.x = Math.sin(i / 4 * Math.PI * 2) * newNode.width / 2
+  //   joiner.y = -Math.cos(i / 4 * Math.PI * 2) * newNode.height / 2
+  //   joiner.beginFill(0x00ff00)
+  //   drawJoiner(joiner, Math.round(joiner.x) === 0)
+  //   joiner.endFill()
 
 
-//     if (!disableJoinerEvent) {
-//       joiner.interactive = true
-//       joiner.on('pointerdown', onPointerDownJoiner)
-//     }
-//     newNode.addChild(joiner)
-//   }
+  //   if (!disableJoinerEvent) {
+  //     joiner.interactive = true
+  //     joiner.on('pointerdown', onPointerDownJoiner)
+  //   }
+  //   newNode.addChild(joiner)
+  // }
 
-//   return newNode
-// }
+  // return newNode
+}
 
 // const getPortalVisual = (disableArrowEvent = false) => {
 //   const portalBase = new PIXI.Graphics()
@@ -296,33 +295,39 @@ import { TEXTURES_CACHE } from "webgl/textures"
 //     })
 // }
 
-interface InteractiveElement {
-  type: 'platform'
+export interface InteractiveElement {
+  type: 'platform' | 'create-platform-btn' | 'platform-bridge-point'
   x: number
   y: number
   id: number
   vec3_id: [number, number, number]
+  positionRelativeTo?: InteractiveElement
+  horizontal?: boolean
 }
+
+interface Bridge {
+  sourceJoint: InteractiveElement
+  destinationJoint: InteractiveElement | null // it's null in case if bridge is during creation
+  // so we should use mouse coords
+}
+
+let bridges: Bridge[] = []
+// mutable to allow .filter() method
 
 export default function mapCreator() {
   const gl = window.gl
   const canvas = gl.canvas as HTMLCanvasElement
 
-  let selectedElementId = 0
+  let hoveredElementId = 0
 
   let mouseX = -1
   let mouseY = -1
 
   const interactiveElements: InteractiveElement[] = [
     {
-      type: 'platform' as const,
-      x: 300,
-      y: 300,
-    },
-    {
-      type: 'platform' as const,
-      x: 600,
-      y: 600,
+      type: 'create-platform-btn' as const,
+      x: 50,
+      y: 100,
     },
   ].map((elem, index) => ({
     ...elem,
@@ -338,66 +343,141 @@ export default function mapCreator() {
     mouseY = (e.clientY as number) - rect.top;
 
     if (selection) {
-      selection.element.x = mouseX - selection.offsetX
-      selection.element.y = mouseY - selection.offsetY
+      switch (selection.element.type) {
+        case 'platform-bridge-point': {
+          break;
+        }
+        case 'platform': {
+          selection.element.x = mouseX - selection.offsetX
+          selection.element.y = mouseY - selection.offsetY
+          break
+        }
+      }
     }
   });
 
   canvas.addEventListener('mousedown', (e: MouseEventInit) => {
-    if (selectedElementId) {
-      const selectedElement = interactiveElements.find(obj => obj.id === selectedElementId)
+    if (hoveredElementId) {
+      const hoveredElement = interactiveElements.find(obj => obj.id === hoveredElementId)
 
-      if (!selectedElement) return // it SHOULD NOT happen...
+      if (!hoveredElement) return // it SHOULD NOT happen...
 
-      selection = {
-        offsetX: mouseX - selectedElement.x,
-        offsetY: mouseY - selectedElement.y,
-        element: selectedElement
+      switch (hoveredElement.type) {
+        case 'platform': {
+          selection = {
+            offsetX: mouseX - hoveredElement.x,
+            offsetY: mouseY - hoveredElement.y,
+            element: hoveredElement
+          }
+          break
+        }
+        case 'platform-bridge-point': {
+          const bridge = bridges.find(bridge => bridge.destinationJoint === hoveredElement || bridge.sourceJoint === hoveredElement)
+          if (bridge) {
+            if (!bridge.destinationJoint || !bridge.sourceJoint) return // it should never happen
+
+            const newSrcJoint = bridge.sourceJoint === hoveredElement ? bridge.destinationJoint : bridge.sourceJoint
+            bridge.sourceJoint = newSrcJoint
+            bridge.destinationJoint = null
+            selection = {
+              offsetX: 0,
+              offsetY: 0,
+              element: bridge.sourceJoint
+            }
+          } else {
+            selection = {
+              offsetX: mouseX - hoveredElement.x,
+              offsetY: mouseY - hoveredElement.y,
+              element: hoveredElement
+            }
+            bridges.push({
+              sourceJoint: hoveredElement,
+              destinationJoint: null
+            })
+          }
+          break
+        }
       }
+
     }
   });
 
   canvas.addEventListener('mouseup', (e: MouseEventInit) => {
+    if (selection?.element.type === 'platform-bridge-point') {
+      if (hoveredElementId) {
+        const hoveredElement = interactiveElements.find(obj => obj.id === hoveredElementId)
+
+        if (!hoveredElement || hoveredElement.type !== 'platform-bridge-point') {
+          bridges = bridges.filter(bridge => !!bridge.destinationJoint)
+        } else {
+          const bridgeDuringCreation = bridges.find(bridge => !bridge.destinationJoint)
+
+          if (bridgeDuringCreation) {
+            // if should be always true, if there is a selection of bridge point, then there should be also a bridge without the destination
+            bridgeDuringCreation.destinationJoint = hoveredElement
+          }
+        }
+      } else {
+        bridges = bridges.filter(bridge => !!bridge.destinationJoint)
+      }
+    }
+
     selection = null
   });
 
-  function drawInteractiveElements(program: DrawPrimitiveProgram | DrawPrimitivePickingProgram) {
-    interactiveElements.forEach(element => {
-      switch (element.type) {
-        case 'platform': {
-          if (element.id === selectedElementId) {
-            program.setup({ id: element.vec3_id, color: [1, 1, 1, 1] })
-            renderPrimitive(program.setupOctagon(
-              element.x,
-              element.y,
-              110,
-            ))
-          }
+  canvas.addEventListener('click', (e: MouseEventInit) => {
+    if (hoveredElementId) {
+      const selectedElement = interactiveElements.find(obj => obj.id === hoveredElementId)
 
-          program.setup({ id: element.vec3_id, color: [0.4, 0.1, 0.7, 1] })
-          renderPrimitive(program.setupOctagon(
-            element.x,
-            element.y,
-            100,
-          ))
+      if (!selectedElement) return // it SHOULD NOT happen...
+
+      switch (selectedElement.type) {
+        case 'create-platform-btn': {
+          const id = interactiveElements[interactiveElements.length - 1].id + 1
+          const platformElement = {
+            type: 'platform',
+            x: MAP_SIZE.x + MAP_SIZE.width / 2,
+            y: MAP_SIZE.y + MAP_SIZE.height / 2,
+            id,
+            vec3_id: splitFloatIntoVec3(id)
+          } as const
+          interactiveElements.push(platformElement)
+
+
+          const joinersAngles = [0, Math.PI * .5, Math.PI, Math.PI * 1.5]
+
+          joinersAngles.forEach(joinAngle => {
+            const id = interactiveElements[interactiveElements.length - 1].id + 1
+
+            interactiveElements.push({
+              type: 'platform-bridge-point',
+              x: Math.sin(joinAngle) * scaledPlatformJoinersOffset,
+              y: -Math.cos(joinAngle) * scaledPlatformJoinersOffset,
+              id,
+              vec3_id: splitFloatIntoVec3(id),
+              positionRelativeTo: platformElement,
+              horizontal: Math.round(joinAngle % Math.PI) === 0
+            })
+  
+          })
           break;
         }
-        default: {}
       }
-    })
-  }
+    }
+  });
 
   function createBackground() {
     const pixelX = -mouseX * canvas.width / canvas.clientWidth;
     const pixelY = - mouseY * gl.canvas.height / canvas.clientHeight;
     drawPrimitivePickingProgram.updateMatrix(pixelX, pixelY)
     setupRenderTarget(drawPrimitivePickingProgram.frameBuffer, [0, 0, 0, 1])
-    drawInteractiveElements(drawPrimitivePickingProgram)
-    selectedElementId = getIdFromLastRender()
+    drawInteractiveElements(interactiveElements, hoveredElementId, drawPrimitivePickingProgram)
+    hoveredElementId = getIdFromLastRender()
 
     // render map background
-    drawPrimitiveProgram.setup({ color: [0.2, 0.2, 0.2, 1] })
     setupRenderTarget(null, [0, 0, 0, 1])
+    
+    drawPrimitiveProgram.setup({ color: [0.2, 0.2, 0.2, 1] })
     renderPrimitive(drawPrimitiveProgram.setupRect(
       100,
       100,
@@ -405,8 +485,32 @@ export default function mapCreator() {
       gl.drawingBufferHeight - 500),
     )
 
-    setupRenderTarget(null)
-    drawInteractiveElements(drawPrimitiveProgram)
+    drawInteractiveElements(interactiveElements, hoveredElementId, drawPrimitiveProgram)
+
+    drawPrimitiveProgram.setup({ color: [1, 0.4, 0.2, 1] })
+    bridges.forEach(({ sourceJoint, destinationJoint}) => {
+      if (!sourceJoint.positionRelativeTo) return // it should never happen
+      const [sourceJointOffsetX, sourceJointOffsetY] = sourceJoint.horizontal ? [scaledBridgeWidth * .5, 0] : [0, scaledBridgeWidth * .5]
+      const sourcePoint = {
+        x: sourceJoint.x + sourceJoint.positionRelativeTo.x,
+        y: sourceJoint.y + sourceJoint.positionRelativeTo.y,
+      }
+
+      // we need to improve typing, separated type for bridge points
+      const relative = destinationJoint?.positionRelativeTo || { x: 0, y: 0 }
+      const destinationPoint = {
+        x: destinationJoint ? destinationJoint.x + relative.x : mouseX,
+        y: destinationJoint ? destinationJoint.y + relative.y : mouseY,
+      }
+      renderPrimitive(
+        drawPrimitiveProgram.setup4CornerShape(
+          sourcePoint.x + sourceJointOffsetX, sourcePoint.y + sourceJointOffsetY,
+          sourcePoint.x - sourceJointOffsetX, sourcePoint.y - sourceJointOffsetY,
+          destinationPoint.x + sourceJointOffsetX, destinationPoint.y + sourceJointOffsetY,
+          destinationPoint.x - sourceJointOffsetX, destinationPoint.y - sourceJointOffsetY,
+        )
+      )
+    })
 
     // drawPrimitiveProgram.setup({ color: [0.8, 0.4, 0.1, 1]})
     // renderPrimitive(
