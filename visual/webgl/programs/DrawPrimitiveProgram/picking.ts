@@ -1,7 +1,7 @@
 import { getUniform } from "../utils";
 import shaderFragmentSource from "./picking.frag"
 import DrawPrimitiveProgram, { InputData } from ".";
-import { identity, projection, projectionFlipY, translate } from "webgl/m3";
+import m3 from "webgl/m3";
 import FrameBuffer from "webgl/models/FrameBuffer";
 
 interface InputDataWithId extends InputData {
@@ -13,6 +13,7 @@ const BUFFER_SIZE = 1
 export default class DrawPrimitivePickingProgram extends DrawPrimitiveProgram  {
   private idUniform: WebGLUniformLocation
   private matrix: Matrix3
+  private projectMatrix: Matrix3
   readonly frameBuffer: FrameBuffer
 
   constructor() {
@@ -23,14 +24,15 @@ export default class DrawPrimitivePickingProgram extends DrawPrimitiveProgram  {
   
 
     this.idUniform = getUniform(this.program, 'u_id');
-    this.matrix = identity() // just any default valid value
+    this.matrix = m3.identity() // just any default valid value
+    this.projectMatrix = m3.projectionFlipY(BUFFER_SIZE, BUFFER_SIZE)
   }
 
   // Before we go anywhere else, firstly we need to optimize out picking strategy with this link
   // https://webglfundamentals.org/webgl/lessons/webgl-picking.html
 
   updateMatrix(x: number, y: number) {
-    this.matrix = translate(projectionFlipY(BUFFER_SIZE, BUFFER_SIZE), x, y)
+    this.matrix = m3.translate(this.projectMatrix, x, y)
   }
 
   setup(inputData: InputDataWithId) {

@@ -1,4 +1,5 @@
-// import mapDetails from './map-details'
+// import { BridgePoint, Platform } from "map-creator"
+
 
 // export interface AdvancePoint extends Point {
 //   angle: number
@@ -8,7 +9,7 @@
 //   id: number
 //   x: number
 //   y: number
-//   visited: boolean[]
+//   // visited: boolean[]
 // }
 
 // export interface ConnectionNode {
@@ -16,10 +17,20 @@
 //   joinIndex: number
 // }
 
+// // export interface Platform {
+// //   type: 'platform' | 'create-platform-btn'
+// //   x: number
+// //   y: number
+// //   id: number
+// //   vec3_id: [number, number, number]
+// // }
+
+// // export interface BridgePoint {
+
 // export interface SerializedMapInfo {
 //   nodes: NodeDetails[]
 //   connections: [ConnectionNode, ConnectionNode][]
-//   portals: AdvancePoint[]
+//   // portals: AdvancePoint[]
 // }
 
 // const getJoinIndex = (join: PIXI.Graphics) => {
@@ -30,17 +41,17 @@
 //   return 3
 // }
 
-// const getSerializedMapInfo = (
-//   nodes: PIXI.Container[],
-//   connections: Array<[PIXI.Graphics, PIXI.Graphics]>,
-//   portals: PIXI.Container[],
-//   ): SerializedMapInfo => {
+// export default function getSerializedMapInfo (
+//   nodes: Platform[],
+//   connections: BridgePoint[],
+//   // portals: PIXI.Container[],
+//   ): SerializedMapInfo {
 //   let id = 0;
 //   const serializedNodes: NodeDetails[] = nodes.map(node => ({
 //     id: id++,
-//     x: (node.x - mapDetails.x) / mapDetails.scale,
-//     y: (node.y - mapDetails.y) / mapDetails.scale,
-//     visited: new Array(8).fill(false),
+//     x: node.x,
+//     y: node.y,
+//     // visited: new Array(8).fill(false),
 //   }))
 
 //   const serializedConnections: [ConnectionNode, ConnectionNode][] = connections.map(([join1, join2]) => {
@@ -52,11 +63,11 @@
 //     ]
 //   })
 
-//   const serializedPortal = portals.map(portal => ({
-//     angle: portal.rotation,
-//     x: (portal.x - mapDetails.x) / mapDetails.scale,
-//     y: (portal.y - mapDetails.y) / mapDetails.scale,
-//   }))
+//   // const serializedPortal = portals.map(portal => ({
+//   //   angle: portal.rotation,
+//   //   x: portal.x,
+//   //   y: portal.y,
+//   // }))
 
 //   // console.log({
 //   //   nodes: serializedNodes,
@@ -67,8 +78,6 @@
 //   return {
 //     nodes: serializedNodes,
 //     connections: serializedConnections,
-//     portals: serializedPortal,
+//     portals: [],
 //   }
 // }
-
-// export default getSerializedMapInfo

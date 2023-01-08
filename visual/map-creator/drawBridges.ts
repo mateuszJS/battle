@@ -17,8 +17,8 @@ export default function drawBridges(bridges: NonInteractiveBridge[], mouseX: num
     }
     renderPrimitive(
       drawPrimitiveProgram.setup4CornerShape(
-        sourcePoint.x + srcJointOffsetX,       sourcePoint.y + srcJointOffsetY,
         sourcePoint.x - srcJointOffsetX,       sourcePoint.y - srcJointOffsetY,
+        sourcePoint.x + srcJointOffsetX,       sourcePoint.y + srcJointOffsetY,
         destinationPoint.x + srcJointOffsetX,  destinationPoint.y + srcJointOffsetY,
         destinationPoint.x - srcJointOffsetX,  destinationPoint.y - srcJointOffsetY,
       )

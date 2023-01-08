@@ -2,7 +2,7 @@ import { compileShader, createProgram, getUniform } from "../utils";
 import shaderVertexSource from "./index.vert"
 import shaderFragmentSource from "./index.frag"
 import { createAttribute, createAttrIndex } from "../createAttribute";
-import { projection, projectionFlipY } from "webgl/m3"
+import { canvasMatrix } from "webgl/constants";
 
 const texCoordDefault = new Float32Array([
   0, 0,
@@ -41,9 +41,6 @@ interface InputData {
   texUnitIndex: number
   texCoord?: [number, number, number, number, number, number, number, number]
   position?: Float32Array
-  outputWidth?: number
-  outputHeight?: number
-  noFlipY?: boolean
 }
 
 export default class DrawSpritesProgram {
@@ -75,11 +72,7 @@ export default class DrawSpritesProgram {
     const gl = window.gl
     gl.useProgram(this.program);
     gl.uniform1i(this.texUniform, inputData.texUnitIndex);
-    const projectionFunction = inputData.noFlipY ? projection : projectionFlipY
-    gl.uniformMatrix3fv(this.matrixUniform, false, projectionFunction(
-      inputData.outputWidth || gl.drawingBufferWidth,
-      inputData.outputHeight || gl.drawingBufferHeight
-    ));
+    gl.uniformMatrix3fv(this.matrixUniform, false, canvasMatrix);
     this.setPositionAttr(inputData.position || getDefaultPosition());
     this.setTexCoordAttr(inputData.texCoord ? new Float32Array(inputData.texCoord) : texCoordDefault);
     this.setAttrIndex(indexes);

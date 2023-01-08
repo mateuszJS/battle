@@ -2,10 +2,10 @@
 // import { MAP_HEIGHT, MAP_WIDTH } from './constants'
 
 // import getSerializedMapInfo from './get-serialized-map-info'
-// import { createMenu, addNewFaction, FactionVisualDetails } from './menu'
+import createHTMLMenu from './createHTMLMenu'
 
 import { WasmModule } from "initGame"
-import { projection, projectionFlipY, translate } from "webgl/m3"
+import m3 from "webgl/m3"
 import FrameBuffer from "webgl/models/FrameBuffer"
 import { drawPrimitivePickingProgram, drawPrimitiveProgram, drawSpritesProgram } from "webgl/programs"
 import DrawPrimitiveProgram from "webgl/programs/DrawPrimitiveProgram"
@@ -18,6 +18,7 @@ import { TEXTURES_CACHE } from "webgl/textures"
 import { MAP_HEIGHT, MAP_LEFT_MARGIN, MAP_TOP_MARGIN, MAP_WIDTH, platformJoinersOffset, scale, scaledBridgeWidth, scaledJoinerSize, updateConstsOnResize } from './constants'
 import drawInteractiveElements from "./drawInteractiveElements"
 import drawBridges from "./drawBridges"
+import initGame from 'initGame'
 
 
 // let activeElement = null
@@ -296,6 +297,7 @@ const getNodeVisual = (disableJoinerEvent = false) => {
 //     })
 // }
 
+
 export interface Platform {
   type: 'platform' | 'create-platform-btn'
   x: number
@@ -312,6 +314,10 @@ export interface BridgePoint {
   vec3_id: [number, number, number]
   positionRelativeTo: InteractiveElement
   horizontal: boolean
+}
+
+export interface CreatedMapDetails {
+  platforms: Platform[]
 }
 
 export type InteractiveElement = Platform | BridgePoint
@@ -334,6 +340,8 @@ export default function mapCreator() {
 
   let mouseX = -1
   let mouseY = -1
+
+  let stopMapCreator = false
 
   const interactiveElements: InteractiveElement[] = [
     {
@@ -479,6 +487,8 @@ export default function mapCreator() {
   });
 
   function draw() {
+    if (stopMapCreator) return
+
     /* DETECTING HOVERED INTERACTIVE ELEMENT */
     const pixelX = -mouseX * canvas.width / canvas.clientWidth
     const pixelY = - mouseY * gl.canvas.height / canvas.clientHeight
@@ -519,19 +529,26 @@ export default function mapCreator() {
     // background.interactive = true;
     // background.on('pointermove', onDragMove)
   }
-  // REMEMBER to call stopUpdatingConstsOnResize on going to game
+
   requestAnimationFrame(draw);
+
+  function isPlatform(element: InteractiveElement): element is Platform {
+    return element.type === 'platform'
+  }
 
   // createToolbar()
   // const startGame = (factionVisualDetails: FactionVisualDetails[]) => {
-  //   initGame({
-  //     wasmModule,
-  //     serializedMapInfo:  getSerializedMapInfo(nodes, connections, portals),
-  //     mapWidth: MAP_WIDTH,
-  //     mapHeight: MAP_HEIGHT,
-  //     factionVisualDetails
-  //   })
-  // }
-  // createMenu(startGame)
+  const startGame = () => {
+    stopMapCreator = true
+    stopUpdatingConstsOnResize()
+    initGame(
+      // wasmModule,
+      { platforms: interactiveElements.filter<Platform>(isPlatform) },
+      MAP_WIDTH,
+      MAP_HEIGHT,
+      // factionVisualDetails
+    )
+  }
+  createHTMLMenu(startGame)
   // window.app.stage.addChild(mapCreatorWrapper)
 }

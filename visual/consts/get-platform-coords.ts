@@ -1,9 +1,8 @@
-// import { PLATFORM_RADIUS } from 'logic/constants.ts'
-import { PLATFORM_RADIUS } from '../../logic/constants'
 
 const BRIDGE_ANGLE = 53 * Math.PI / 180
 const DIAGONALLY_ANGLE = 37 * Math.PI / 180
 const INITIAL_ANGLE_OFFSET = 0.035 // why there is any offset?!
+export const PLATFORM_RADIUS = 600 // real size of the platform
 
 export default (offsetDistance: number = 0) => {
   const radius = PLATFORM_RADIUS - offsetDistance

@@ -33,10 +33,6 @@ export default class FrameBuffer {
     // this.texelSizeY = 1.0 / height
   }
 
-  getPositionCenter(x: number, y: number, width: number) {
-    return this.texture.getPositionCenter(x, y, width)
-  }
-
   resize(width: number, height: number) {
     this.texture.fill({ width, height })
   }

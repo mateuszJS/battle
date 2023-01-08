@@ -6,7 +6,6 @@ declare global {
     getFloat32ArrayPointer:(array: Float32Array) => number
     useUint32ArrayData: (pointer: number, callback: (arr: Uint32Array) => void) => void
     useFloat32ArrayData: (pointer: number, callback: (arr: Float32Array) => void) => void
-    convertLogicCoordToVisual: (x: number, y: number) => [number, number]
 
     gl: WebGL2RenderingContext
     glExt: {
@@ -15,10 +14,5 @@ declare global {
       formatR: Extension
       supportLinearFiltering: OES_texture_float_linear | null
     }
-  }
-
-
-  interface Math {
-    clamp: (value: number, min: number, max: number) => number
   }
 }

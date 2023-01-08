@@ -1,8 +1,10 @@
 import type * as ExportedWasmModule from './logic'
 import { ASUtil } from '@assemblyscript/loader'
-// import { initBackground } from './draw-environment-new'
+import drawEnvironment from './draw-environment'
+import { CreatedMapDetails } from 'map-creator'
 // import initConvertArraysUtils from 'attachUtils/init-convert-arrays-utils'
-// import attachMethodToConvertLogicCoordsToVisual from 'attachUtils/attach-method-covert-logic-coords-to-visual'
+import { convertLogicToVisual, initUtils } from 'utils'
+import { initMouseController, updateScenePosition } from 'mouseController'
 // import { SerializedMapInfo } from './map-creator/get-serialized-map-info'
 // import getSerializedWorldInfo from './serializedWorldInfo'
 // // import predefinedMap from './predefined-maps/test-bridges'
@@ -14,58 +16,40 @@ import { ASUtil } from '@assemblyscript/loader'
 export type WasmModule = ASUtil & typeof ExportedWasmModule
 // // export type FactionsList = Map<number, FactionVisualDetails>
 
-// const getMapPoints = (mapWidth: number, mapHeight: number) => {
-//   const leftTopCorner = window.convertLogicCoordToVisual(0, 0)
-//   const rightTopCorner = window.convertLogicCoordToVisual(mapWidth, 0)
-//   const rightBottomCorner = window.convertLogicCoordToVisual(mapWidth, mapHeight)
-//   const leftBottomCorner = window.convertLogicCoordToVisual(0, mapHeight)
+const getMapPoints = (mapWidth: number, mapHeight: number) => {
+  const leftTopCorner = convertLogicToVisual(0, 0)
+  const rightTopCorner = convertLogicToVisual(mapWidth, 0)
+  const rightBottomCorner = convertLogicToVisual(mapWidth, mapHeight)
+  const leftBottomCorner = convertLogicToVisual(0, mapHeight)
 
-//   return [
-//     { x: leftTopCorner[0], y: leftTopCorner[1] },
-//     { x: rightTopCorner[0], y: rightTopCorner[1] },
-//     { x: rightBottomCorner[0], y: rightBottomCorner[1] },
-//     { x: leftBottomCorner[0], y: leftBottomCorner[1] },
-//   ]
-// }
+  return [
+    { x: leftTopCorner[0], y: leftTopCorner[1] },
+    { x: rightTopCorner[0], y: rightTopCorner[1] },
+    { x: rightBottomCorner[0], y: rightBottomCorner[1] },
+    { x: leftBottomCorner[0], y: leftBottomCorner[1] },
+  ]
+}
 
+export default function initGame (
+  // wasmModule: WasmModule,
+  createdMapDetails: CreatedMapDetails,
+  mapWidth: number,
+  mapHeight: number,
+  // factionVisualDetails: FactionVisualDetails[]
+) {
+  initUtils(mapHeight)
+  const mapPoints = getMapPoints(mapWidth, mapHeight)
+  initMouseController(mapPoints,   mapWidth,
+    mapHeight)
 
-// function startLoadingTextures(input: InitGameInput) {
-//   window.app.view.parentNode.removeChild(window.app.view)
+  const update = () => {
+    drawEnvironment(createdMapDetails, mapWidth, mapHeight)
+    updateScenePosition()
 
-//   const canvas = document.createElement<"canvas">("canvas")
-//   canvas.id = 'main-game-view'
-//   document.body.appendChild(canvas)
+    requestAnimationFrame(update)
+  }
 
-//   resizeCanvas(canvas)
-//   initWebGL2(canvas)
-//   const gl = window.gl
-
-//   loadTextures(
-//     gl,
-//     ['assets/node-platform-shaded.png'],
-//     () => initGame(gl, input)
-//   )
-  
-//   compilePrograms(gl)
-// }
-
-// interface InitGameInput {
-//   wasmModule: WasmModule,
-//   serializedMapInfo: SerializedMapInfo,
-//   mapWidth: number,
-//   mapHeight: number,
-//   factionVisualDetails: FactionVisualDetails[]
-// }
-
-// function initGame (gl: WebGL2RenderingContext, input: InitGameInput) {
-//   const {
-//     wasmModule,
-//     serializedMapInfo,
-//     mapWidth,
-//     mapHeight,
-//     factionVisualDetails
-//   } = input
-
+  requestAnimationFrame(update)
 //   // serializedMapInfo = predefinedMap
 //   console.log(printPredefinedMap(serializedMapInfo))
 //   const {
@@ -77,10 +61,10 @@ export type WasmModule = ASUtil & typeof ExportedWasmModule
 //   } = wasmModule;
 
 //   initConvertArraysUtils(wasmModule)
-//   attachMethodToConvertLogicCoordsToVisual(mapHeight)
+  
 
-//   const mapPoints = getMapPoints(mapWidth, mapHeight)
-//   const envContainer = initBackground(serializedMapInfo)
+ 
+// const envContainer = initBackground(serializedMapInfo)
 
 //   return
 
@@ -144,7 +128,11 @@ export type WasmModule = ASUtil & typeof ExportedWasmModule
 //   // //   universeRepresentation[strategicPointId] = factoryRepresentation
 //   // // }
 
-//   // const mouseController = new initializeMouseController(wasmModule, universeRepresentation, mapPoints)
+  // const mouseController = new initializeMouseController(
+    // wasmModule,
+    // universeRepresentation,
+    // mapPoints
+  // )
 
 //   // // debugController.init()
 //   // // let timeToCreateEnemy = 0
@@ -178,7 +166,7 @@ export type WasmModule = ASUtil & typeof ExportedWasmModule
 //   //   // } else {
 //   //   //   timeToCreateEnemy--
 //   //   // }
-//   //   mouseController.updateScenePosition()
+    // mouseController.updateScenePosition()
 //   //   window.useFloat32ArrayData(getUniverseRepresentation(), (universeData) => {
 //   //     render(
 //   //       0,
@@ -192,7 +180,5 @@ export type WasmModule = ASUtil & typeof ExportedWasmModule
 
 //   //   window.updateClouds()
 //   // })
-// }
-
-// export default startLoadingTextures
+}
 

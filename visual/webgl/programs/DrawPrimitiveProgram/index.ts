@@ -2,14 +2,11 @@ import { compileShader, createProgram, getUniform } from "../utils";
 import shaderVertexSource from "./index.vert"
 import shaderFragmentSource from "./index.frag"
 import { createAttribute } from "../createAttribute";
-import { projection, projectionFlipY } from "webgl/m3"
+import { canvasMatrix } from "webgl/constants";
 
 const defaultColor = [1, 1, 1, 1]
 
 export interface InputData {
-  outputWidth?: number
-  outputHeight?: number
-  noFlipY?: boolean
   color?: vec4,
 }
 
@@ -62,7 +59,7 @@ export default class DrawPrimitiveProgram {
       x1, y1,
       x2, y2,
       x3, y3,
-      x2, y2,
+      x1, y1,
       x3, y3,
       x4, y4
     ]))
@@ -119,12 +116,8 @@ export default class DrawPrimitiveProgram {
 
   setup(inputData: InputData, matrix?: Matrix3) {
     const gl = window.gl
-    gl.useProgram(this.program);
-    const projectionFunction = inputData.noFlipY ? projection : projectionFlipY
-    gl.uniformMatrix3fv(this.matrixUniform, false, matrix || projectionFunction(
-      inputData.outputWidth || gl.drawingBufferWidth,
-      inputData.outputHeight || gl.drawingBufferHeight
-    ));
+    gl.useProgram(this.program)
+    gl.uniformMatrix3fv(this.matrixUniform, false, matrix || canvasMatrix)
     if (this.colorUniform) {
       gl.uniform4fv(this.colorUniform, inputData.color || defaultColor)
     }

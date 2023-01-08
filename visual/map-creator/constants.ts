@@ -10,7 +10,10 @@ let scaleX = 0
 let scaleY = 0
 export let scale = 0
 
+/* THOSE ARE USED ALSO OUT OF MAP CREATOR */
 export const platformCoords = getPlatformCoords()
+
+/* FOLLOWING ARE USED ONLY IN MAP CREATOR */
 export let scaledPlatformCoords: Point[] = []
 export let scaledPlatformCoordsHover: Point[] = []
 export let scaledPlatformCoordsToolbar: Point[] = []
@@ -21,8 +24,8 @@ export let scaledJoinerHoverOffset = 0
 export let platformJoinersOffset = 0
 
 function updateConstants() {
-  scaleX = (window.innerWidth * 0.7) / MAP_WIDTH
-  scaleY = (window.innerHeight * 0.9) / MAP_HEIGHT
+  scaleX = (window. gl.drawingBufferWidth * 0.7) / MAP_WIDTH
+  scaleY = (window.gl.drawingBufferHeight * 0.9) / MAP_HEIGHT
   scale = Math.min(scaleX, scaleY)
 
   scaledPlatformCoords = platformCoords.map(({ x, y }) => ({

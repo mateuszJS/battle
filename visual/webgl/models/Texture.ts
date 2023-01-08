@@ -128,18 +128,19 @@ gl.readPixels(
     return textureUnitIndex
   }
 
-  getPositionCenter(x: number, y: number, width: number) {
+  getPosition(x: number, y: number, width: number, pivotX = 0.5, pivotY = 0.5) {
     if (!this.aspect) {
       throw Error("Texture has no aspect ratio. Method .fill(input) was not called.")
     }
     // from login point of view, I'm not sure if this method should be part of texture class
     // but it's very convenient for us to set a program's attributes
     const height = this.aspect * width
+
     return new Float32Array([
-      x - width * .5, y - height * .5,
-      x - width * .5, y + height * .5,
-      x + width * .5, y + height * .5,
-      x + width * .5, y - height * .5,
+      x - width * pivotX, y - height * pivotY,
+      x - width * pivotX, y + height * (1 - pivotY),
+      x + width * (1 - pivotX), y + height * (1 - pivotY),
+      x + width * (1 - pivotX), y - height * pivotY,
     ])
   }
 }

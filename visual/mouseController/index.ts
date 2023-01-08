@@ -1,154 +1,99 @@
 // import { UniverseRepresentation, WasmModule } from '~/initGame'
+import { translateWorldView } from 'webgl/constants'
 // import SelectionController from './SelectionController'
-// import getCameraPositionModificators from './get-camera-position-modificators'
-// import { CAMERA_MOVEMENT_DISABLED_AREA_THRESHOLD } from 'Constants'
+import getCameraPositionModificators from './get-camera-position-modificators'
+import { clamp, convertLogicToVisual, convertVisualToLogic } from 'utils'
 
-// const getCalcYFunc = (
-//   [x1, y1]: [number, number],
-//   [x2, y2]: [number, number],
-// ) => {
-//   const a = (y2 - y1) / (x2 - x1)
-//   const b = y1 - a * x1
-//   return (x: number) => a * x + b
-// }
+const getCalcYFunc = (
+  [x1, y1]: [number, number],
+  [x2, y2]: [number, number],
+) => {
+  const a = (y2 - y1) / (x2 - x1)
+  const b = y1 - a * x1
+  return (x: number) => a * x + b
+}
 
-// class MouseController {
-//   private modX: number
-//   private modY: number
-//   private sceneX: number
-//   private sceneY: number
-//   private mouseX: number
-//   private mouseY: number
-//   private selectionController: SelectionController
-//   private getTopBoundary: (x: number) => number
-//   private getBottomBoundary: (x: number) => number
-//   private rightBoundary: number
-//   private leftBoundary: number
-//   private mapPoints: Point[]
+let modX = 0
+let modY = 0
+let sceneX = 0
+let sceneY = 0
+// let mouseX = 0
+// let mouseY = 0
+// this.selectionController = new SelectionController(wasmModule, universeRepresentation)
+let mapPoints: Point[] = []
 
-//   constructor(wasmModule: WasmModule, universeRepresentation: UniverseRepresentation, mapPoints: Point[]) {
-//     this.modX = 0
-//     this.modY = 0
-//     this.sceneX = 0
-//     this.sceneY = 0
-//     this.mouseX = 0
-//     this.mouseY = 0
-//     this.selectionController = new SelectionController(wasmModule, universeRepresentation)
-//     this.mapPoints = mapPoints
-    
-//     window.app.stage.interactive = true
-//     window.app.stage.on('mousedown', this.onMouseDown)
-//     window.app.stage.on('rightdown', this.onMouseRightBtnDown)
-//     window.app.stage.on('mouseup', this.onMouseUp)
-//     window.app.view.addEventListener('mousemove', this.onMouseMove)
-//     window.app.view.addEventListener('mouseleave', this.onMouseLeave)
-//     window.addEventListener('resize', this.updateCameraBoundaries)
-//     this.updateCameraBoundaries()
-//   }
+// private selectionController: SelectionController
+// private getTopBoundary: (x: number) => number
+// private getBottomBoundary: (x: number) => number
+// let rightBoundary: number
+// let leftBoundary: number
 
-//   private updateCameraBoundaries = () => {
-//     const offsetX = (window.innerWidth / 2) - CAMERA_MOVEMENT_DISABLED_AREA_THRESHOLD
-//     const offsetY = (window.innerHeight / 2) - CAMERA_MOVEMENT_DISABLED_AREA_THRESHOLD
-    
-//     const leftTopPoint = {
-//       x: -(this.mapPoints[0].x + offsetX),
-//       y: -this.mapPoints[0].y,
-//     }
+let mapWidth = 0
+let mapHeight = 0
 
-//     const rightTopPoint = {
-//       x: -this.mapPoints[1].x,
-//       y: -(this.mapPoints[1].y + offsetY),
-//     }
+export function initMouseController(
+  // wasmModule: WasmModule,
+  // universeRepresentation: UniverseRepresentation,
+  _mapPoints: Point[],
+  _mapWidth: number,
+  _mapHeight: number,
+) {
+  window.addEventListener("mousemove", onMouseMove)
+  mapWidth = _mapWidth
+  mapHeight = _mapHeight
+  mapPoints = _mapPoints;
 
-//     const rightBottomPoint = {
-//       x: -(this.mapPoints[2].x - offsetX),
-//       y: -this.mapPoints[2].y,
-//     }
-
-//     const leftBottomPoint = {
-//       x: -this.mapPoints[3].x,
-//       y: -(this.mapPoints[3].y - offsetY),
-//     }
-
-//     const getRightBottomY = getCalcYFunc([leftTopPoint.x, leftTopPoint.y], [leftBottomPoint.x, leftBottomPoint.y])
-//     const getLeftBottomY = getCalcYFunc([rightBottomPoint.x, rightBottomPoint.y], [leftBottomPoint.x, leftBottomPoint.y])
-//     const getRightTopY = getCalcYFunc([leftTopPoint.x, leftTopPoint.y], [rightTopPoint.x, rightTopPoint.y])
-//     const getLeftTopY = getCalcYFunc([rightBottomPoint.x, rightBottomPoint.y], [rightTopPoint.x, rightTopPoint.y])
+  [sceneX, sceneY] = convertLogicToVisual(mapWidth / 2, mapHeight / 2)
+  translateWorldView(-sceneX + window.innerWidth / 2, -sceneY + window.innerHeight / 2)
+  // canvas.addEventListener('mousemove', (e: MouseEventInit) => {
+  //   const rect = canvas.getBoundingClientRect();
+  //   mouseX = (e.clientX as number) - rect.left;
+  //   mouseY = (e.clientY as number) - rect.top;
+}
 
 
-//     this.getTopBoundary = (x: number) => {
-//       if (x < rightTopPoint.x) {
-//         return getLeftTopY(x)
-//       }
-//       return getRightTopY(x)
-//     }
+  // private onMouseDown = () => {
+  //   this.selectionController.startSelection(this.absoluteMousePosition)
+  // }
 
-//     this.getBottomBoundary = (x: number) => {
-//       if (x < leftBottomPoint.x) {
-//         return getLeftBottomY(x)
-//       }
-//       return getRightBottomY(x)
-//     }
-//     this.rightBoundary = rightBottomPoint.x
-//     this.leftBoundary = leftTopPoint.x
+  // private onMouseRightBtnDown = () => {
+  //   this.selectionController.consumeSelection(this.absoluteMousePosition)
+  // }
 
-//     this.updateScenePosition()
-//     window.app.renderer.resize(window.innerWidth, window.innerHeight)
-//   }
+function onMouseMove(event: MouseEventInit) {
+  const mod = getCameraPositionModificators((event.clientX as number), (event.clientY as number))
+  modX = mod.modX
+  modY = mod.modY
+  // this.selectionController.updateSelection(this.absoluteMousePosition)
+}
 
-//   private onMouseDown = () => {
-//     this.selectionController.startSelection(this.absoluteMousePosition)
-//   }
+  // private onMouseUp = () => {
+  //   this.selectionController.endSelection()
+  // }
 
-//   private onMouseRightBtnDown = () => {
-//     this.selectionController.consumeSelection(this.absoluteMousePosition)
-//   }
+  // private onMouseLeave = () => {
+  //   this.modX = 0
+  //   this.modY = 0
+  // }
 
-//   private onMouseMove = (event: MouseEvent) => {
-//     this.mouseX = event.clientX
-//     this.mouseY = event.clientY
+  // private get absoluteMousePosition() {
+  //   return {
+  //     x: this.mouseX - this.sceneX - window.innerWidth / 2,
+  //     y: this.mouseY - this.sceneY - window.innerHeight / 2,
+  //   }
+  // }
 
-//     const { modX, modY } = getCameraPositionModificators(this.mouseX, this.mouseY)
-//     this.modX = modX
-//     this.modY = modY
-//     this.selectionController.updateSelection(this.absoluteMousePosition)
-//   }
+export function updateScenePosition() {
+  if (modX === 0 && modY === 0) return
 
-//   private onMouseUp = () => {
-//     this.selectionController.endSelection()
-//   }
+  const [cameraLogicX, cameraLogicY] = convertVisualToLogic(sceneX - modX, sceneY - modY)
 
-//   private onMouseLeave = () => {
-//     this.modX = 0
-//     this.modY = 0
-//   }
+  // TODO: limit camera movement, so you cannot go so far that edge of the map is in the middle of the screen
 
-//   private get absoluteMousePosition() {
-//     return {
-//       x: this.mouseX - this.sceneX - window.innerWidth / 2,
-//       y: this.mouseY - this.sceneY - window.innerHeight / 2,
-//     }
-//   }
+  const safeCameraLogicX = clamp(cameraLogicX, 0, mapWidth)
+  const safeCameraLogicY = clamp(cameraLogicY, 0, mapHeight);
 
-//   public updateScenePosition() {
-//     const x = Math.clamp(
-//       this.sceneX + this.modX,
-//       this.rightBoundary,
-//       this.leftBoundary,
-//     )
+  [sceneX, sceneY] = convertLogicToVisual(safeCameraLogicX, safeCameraLogicY)
 
-//     this.sceneX = x
-//     this.sceneY = Math.clamp(
-//       this.sceneY + this.modY,
-//       this.getBottomBoundary(x),
-//       this.getTopBoundary(x),
-//     )
-
-//     window.app.stage.x = this.sceneX + window.innerWidth / 2
-//     window.app.stage.y = this.sceneY + window.innerHeight / 2
-
-//     this.selectionController.updateSelection(this.absoluteMousePosition)
-//   }
-// }
-
-// export default MouseController
+  translateWorldView(-sceneX + window.innerWidth / 2, -sceneY + window.innerHeight / 2)
+}

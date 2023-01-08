@@ -13,7 +13,7 @@ import { instantiate } from "@assemblyscript/loader"
 import { WasmModule } from 'initGame'
 import setupRenderTarget from 'webgl/renders/setupRenderTarget'
 
-export default function setup() {
+export default function setupGUI() {
   mapCreator()
   return
   setupRenderTarget(null)
@@ -24,7 +24,7 @@ export default function setup() {
 
   drawSpritesProgram.setup({
     texUnitIndex: TEXTURES_CACHE.GUIdivider.bind(0),
-    position: TEXTURES_CACHE.GUIdivider.getPositionCenter(
+    position: TEXTURES_CACHE.GUIdivider.getPosition(
       window.gl.drawingBufferWidth * .5,
       window.gl.drawingBufferHeight * .5,
       window.gl.drawingBufferWidth * .025,
@@ -34,7 +34,7 @@ export default function setup() {
 
   drawSpritesProgram.setup({
     texUnitIndex: TEXTURES_CACHE.GUIstartBtn.bind(0),
-    position: TEXTURES_CACHE.GUIstartBtn.getPositionCenter(
+    position: TEXTURES_CACHE.GUIstartBtn.getPosition(
       window.gl.drawingBufferWidth * .22,
       window.gl.drawingBufferHeight * .3,
       window.gl.drawingBufferWidth * .3,
@@ -44,7 +44,7 @@ export default function setup() {
 
   drawSpritesProgram.setup({
     texUnitIndex: TEXTURES_CACHE.GUIdonateBtn.bind(0),
-    position: TEXTURES_CACHE.GUIdonateBtn.getPositionCenter(
+    position: TEXTURES_CACHE.GUIdonateBtn.getPosition(
       window.gl.drawingBufferWidth * .22,
       window.gl.drawingBufferHeight * .65,
       window.gl.drawingBufferWidth * .3,
