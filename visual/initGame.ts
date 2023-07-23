@@ -16,6 +16,7 @@ import { initMouseController, updateScenePosition } from 'mouseController'
 export type WasmModule = ASUtil & typeof ExportedWasmModule
 // // export type FactionsList = Map<number, FactionVisualDetails>
 
+// has not been used for now!
 const getMapPoints = (mapWidth: number, mapHeight: number) => {
   const leftTopCorner = convertLogicToVisual(0, 0)
   const rightTopCorner = convertLogicToVisual(mapWidth, 0)

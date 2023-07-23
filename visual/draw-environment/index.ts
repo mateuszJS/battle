@@ -60,21 +60,22 @@ export default function drawEnvironment(
     )
   )
 
-  platforms.forEach(platform => {
-    const [x, y] = convertLogicToVisual(platform.x, platform.y)
-
-    drawSpritesProgram.setup({
-      texUnitIndex: TEXTURES_CACHE.platform.bind(0),
-      position: TEXTURES_CACHE.platform.getPosition(
-        x,
-        y,
-        PLATFORM_RADIUS * 2.1,
-        0.5,
-        0.2,
-      ),
+  platforms
+    .map(platform => convertLogicToVisual(platform.x, platform.y))
+    .sort((a, b) => a[1] - b[1])
+    .forEach(([x, y]) => {
+      drawSpritesProgram.setup({
+        texUnitIndex: TEXTURES_CACHE.platform.bind(0),
+        position: TEXTURES_CACHE.platform.getPosition(
+          x,
+          y,
+          PLATFORM_RADIUS * 2.1,
+          0.5,
+          0.2,
+        ),
+      })
+      renderSprite()
     })
-    renderSprite()
-  })
 
 
   // const envItems = serializedMapInfo.nodes.map(node => {
