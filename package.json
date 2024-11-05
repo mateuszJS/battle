@@ -5,10 +5,10 @@
   "main": "webpack.config.js",
   "scripts": {
     "dev": "export NODE_ENV=development && webpack serve --open",
-    "build": "webpack --display-optimization-bailout --config webpack.prod.js",
-    "build-as": "asc -b logic/index.wasm -t logic/index.wat logic/index.ts",
-    "asbuild:untouched": "asc logic/index.ts --target debug",
-    "asbuild:optimized": "asc logic/index.ts --target release"
+    "build": "export NODE_ENV=production && webpack --display-optimization-bailout --config webpack.prod.js"
+  },
+  "scriptComments": {
+    "wasm-profiling": "same as wasm-release but flag --release provides info useful for debugging perofrmance issues"
   },
   "author": "",
   "license": "ISC",
@@ -24,6 +24,7 @@
     "ts-loader": "^8.2.0",
     "tslib": "^2.2.0",
     "typescript": "^4.2.4",
+    "wasm-pack": "^0.13.1",
     "webpack": "^5.96.1",
     "webpack-bundle-analyzer": "^4.10.2",
     "webpack-cli": "^5.1.4",
@@ -35,6 +36,7 @@
     "@assemblyscript/loader": "^0.19.16",
     "@babel/runtime": "^7.14.6",
     "@pixi/filter-drop-shadow": "^3.1.1",
+    "@wasm-tool/wasm-pack-plugin": "^1.7.0",
     "debounce": "^1.2.0",
     "lodash": "^4.17.21",
     "pixi-layers": "^0.2.2",
