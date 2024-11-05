@@ -1,0 +1,111 @@
+{"frames": {
+
+"ehi_0001":
+{
+	"frame": {"x":21,"y":45,"w":20,"h":15},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":2,"y":0,"w":20,"h":15},
+	"sourceSize": {"w":23,"h":15}
+},
+"ehi_0002":
+{
+	"frame": {"x":21,"y":26,"w":17,"h":15},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":6,"y":0,"w":17,"h":15},
+	"sourceSize": {"w":23,"h":15}
+},
+"ehi_0003":
+{
+	"frame": {"x":1,"y":41,"w":18,"h":15},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":5,"y":0,"w":18,"h":15},
+	"sourceSize": {"w":23,"h":15}
+},
+"ehi_0004":
+{
+	"frame": {"x":40,"y":14,"w":18,"h":13},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":5,"y":2,"w":18,"h":13},
+	"sourceSize": {"w":23,"h":15}
+},
+"ehi_0005":
+{
+	"frame": {"x":43,"y":1,"w":18,"h":11},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":5,"y":4,"w":18,"h":11},
+	"sourceSize": {"w":23,"h":15}
+},
+"ehi_0006":
+{
+	"frame": {"x":1,"y":1,"w":18,"h":10},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":5,"y":5,"w":18,"h":10},
+	"sourceSize": {"w":23,"h":15}
+},
+"ehi_0007":
+{
+	"frame": {"x":21,"y":1,"w":20,"h":10},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":1,"y":5,"w":20,"h":10},
+	"sourceSize": {"w":23,"h":15}
+},
+"ehi_0008":
+{
+	"frame": {"x":1,"y":13,"w":17,"h":11},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":0,"y":4,"w":17,"h":11},
+	"sourceSize": {"w":23,"h":15}
+},
+"ehi_0009":
+{
+	"frame": {"x":20,"y":13,"w":18,"h":11},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":0,"y":4,"w":18,"h":11},
+	"sourceSize": {"w":23,"h":15}
+},
+"ehi_0010":
+{
+	"frame": {"x":1,"y":26,"w":18,"h":13},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":0,"y":2,"w":18,"h":13},
+	"sourceSize": {"w":23,"h":15}
+},
+"ehi_0011":
+{
+	"frame": {"x":40,"y":29,"w":18,"h":14},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":0,"y":0,"w":18,"h":14},
+	"sourceSize": {"w":23,"h":15}
+},
+"ehi_0012":
+{
+	"frame": {"x":43,"y":45,"w":18,"h":15},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":0,"y":0,"w":18,"h":15},
+	"sourceSize": {"w":23,"h":15}
+}},
+"animations": {
+	"ehi": ["ehi_0001","ehi_0002","ehi_0003","ehi_0004","ehi_0005","ehi_0006","ehi_0007","ehi_0008","ehi_0009","ehi_0010","ehi_0011","ehi_0012"]
+},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "elephant-head-idle.png",
+	"format": "RGBA8888",
+	"size": {"w":62,"h":61},
+	"scale": "0.25",
+	"smartupdate": "$TexturePacker:SmartUpdate:2e383a697c6e36bc05c7318436efbdbd:fae139ae05d9e4c914f275f23b8d2c99:9cc745f7437b96aef32801dd0f1afc61$"
+}
+}

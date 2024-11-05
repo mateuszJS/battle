@@ -15,6 +15,7 @@ const getAngleOffsetInFrames = (angle: number, numberOfSides: number) => {
 
 export const getFrames = (numberOfIteration: number, getTextureName: (id: string) => string) => {
   const frames: PIXI.Texture[] = []
+  // for (let i = 0; i < numberOfIteration; i++) {
   for (let i = 1; i <= numberOfIteration; i++) {
     const formattedNumber = getFormattedNumber(i)
     const textureName = getTextureName(formattedNumber)

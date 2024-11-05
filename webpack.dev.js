@@ -1,7 +1,7 @@
 "use strict";
 const DashboardPlugin = require('webpack-dashboard/plugin');
 const merge = require('webpack-merge');
-const common = require('./webpack.common.js');
+const common = require('./webpack.config.js');
 
 const HOST = "127.0.0.1";
 const PORT = "7777";

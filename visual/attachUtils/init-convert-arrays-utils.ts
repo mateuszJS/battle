@@ -9,6 +9,7 @@ const initConvertArraysUtils = (wasmModule: WasmModule) => {
     Float32Array_ID,
     Uint32Array_ID,
     __newArray,
+    __collect,
   } = wasmModule;
 
   window.getUint32ArrayPointer = (array: Uint32Array) => (
@@ -22,12 +23,14 @@ const initConvertArraysUtils = (wasmModule: WasmModule) => {
     const data = __getUint32ArrayView(arrPtr)
     callback(data)
     __unpin(arrPtr)
+    __collect()
   }
   window.useFloat32ArrayData = (pointer: number, callback: (arr: Float32Array) => void) => {
     const arrPtr = __pin(pointer) 
     const data = __getFloat32ArrayView(arrPtr)
     callback(data)
     __unpin(arrPtr)
+    __collect()
   }
 }
 
