@@ -10,9 +10,6 @@ module.exports = {
   // node: {
   //   fs: "empty",
   // },
-	experiments: {
-    asyncWebAssembly: true,
-	},
 	entry: ['./visual/index.ts'],
 	output: {
 		path: path.resolve(__dirname, 'dist'),
@@ -21,6 +18,7 @@ module.exports = {
 	},
 	devtool: 'eval-source-map',
 	resolve: {
+    // extensions: ['.js', '.ts', '.vert', '.frag', '.asc'],
     extensions: ['.js', '.ts', '.wasm', '.vert', '.frag', '.asc'],
 		alias: {
 			
@@ -41,6 +39,11 @@ module.exports = {
 				test: /\.(ts|js)$/,
 				use: ['ts-loader']
 			},
+			// {
+			// 	// You can provide better regexp
+			// 	 test: /\.wasm$/,
+			// 	 type: "file-loader"
+			//  },
 			{
 				test: /\.(svg|png|jpg|woff|woff2|eot|ttf)$/,
 				use: [
