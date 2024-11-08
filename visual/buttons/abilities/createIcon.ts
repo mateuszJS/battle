@@ -1,5 +1,5 @@
-import { AbilityType } from '../../../logic/constants'
 import getTexture from '~/getTexture'
+import { AbilityType } from '~/logic-contants'
 
 const ICON_WIDTH = 62 * 0.9
 export const ICON_HEIGHT = 47 * 0.9

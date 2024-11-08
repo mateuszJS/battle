@@ -1,6 +1,6 @@
-import { CAMERA_MOVEMENT_DISABLED_AREA_THRESHOLD } from 'Constants'
 import getTexture from '~/getTexture'
 import getTilingClouds from "~/draw-environment/draw-clouds";
+import { CAMERA_MOVEMENT_DISABLED_AREA_THRESHOLD } from './logic-contants';
 
 let env = new PIXI.Container()
 let mapCoords = null

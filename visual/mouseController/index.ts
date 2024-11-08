@@ -1,7 +1,8 @@
-import { UniverseRepresentation, WasmModule } from '~/initGame'
+import { UniverseRepresentation } from '~/initGame'
 import SelectionController from './SelectionController'
 import getCameraPositionModificators from './get-camera-position-modificators'
-import { CAMERA_MOVEMENT_DISABLED_AREA_THRESHOLD } from 'Constants'
+import { CAMERA_MOVEMENT_DISABLED_AREA_THRESHOLD } from '~/logic-contants'
+import { Universe } from 'crate/pkg'
 
 const getCalcYFunc = (
   [x1, y1]: [number, number],
@@ -26,7 +27,7 @@ class MouseController {
   private leftBoundary: number
   private mapPoints: Point[]
 
-  constructor(wasmModule: WasmModule, universeRepresentation: UniverseRepresentation, mapPoints: Point[]) {
+  constructor(wasmModule: Universe, universeRepresentation: UniverseRepresentation, mapPoints: Point[]) {
     this.modX = 0
     this.modY = 0
     this.sceneX = 0

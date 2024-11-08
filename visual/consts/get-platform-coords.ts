@@ -1,4 +1,4 @@
-import { PLATFORM_RADIUS } from 'Constants'
+import { PLATFORM_RADIUS } from "~/logic-contants"
 
 const BRIDGE_ANGLE = 53 * Math.PI / 180
 const DIAGONALLY_ANGLE = 37 * Math.PI / 180

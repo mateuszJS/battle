@@ -3,10 +3,7 @@ import createItem from './createItem'
 import blendColorBurn from './blendColorBurn'
 import hoverMesh from './hoverMesh'
 import mapCreator from '../map-creator'
-
-import { instantiate } from "@assemblyscript/loader"
-import type * as ExportedWasmModule from '~/logic'
-import { WasmModule } from '~/initGame'
+import { Universe } from 'crate/pkg'
 
 const setup = () => {
   const backgroundTexture = PIXI.Texture.from('assets/pure_background_with_traced_images.jpg')
@@ -24,21 +21,22 @@ const setup = () => {
   const handleResize = debounce(onResize, 500, undefined)
   window.addEventListener('resize', handleResize)
 
-  const startGame = (wasmModule: WasmModule) => {
+  const startGame = (wasmModule: Universe) => {
     window.removeEventListener('resize', handleResize)
     mapCreator(wasmModule)
     menuContainer.visible = false
   }
 
   let startWhenLoaded = false
-  let wasmModule: null | WasmModule = null
+  let wasmModule: null | Universe = null
 
   const loadWasmModule = async () => {
-    const response = await instantiate<typeof ExportedWasmModule>(fetch("/logic-build/index.wasm"));
-    wasmModule = response.exports
-    if (startWhenLoaded) {
-      startGame(wasmModule)
-    }
+    import("../../crate/pkg/index.js").then(module => {
+      wasmModule = module.Universe as unknown as Universe
+      if (startWhenLoaded) {
+        startGame(wasmModule)
+      }
+    })
   }
 
   loadWasmModule()

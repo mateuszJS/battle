@@ -1,4 +1,4 @@
-import { Universe } from '../../crate/pkg/index'
+// import { Universe } from '../../crate/pkg/index'
 
 let graph = null
 
@@ -113,7 +113,7 @@ const getNewItems = (startPoint: Point, nextPoint: Point) => {
   return pointsInsideCollection
 }
 
-export const startDebug = (universe: Universe) => {
+export const startDebug = (universe: any) => {
   if (graph) return
   graph = new PIXI.Graphics()
 

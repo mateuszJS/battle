@@ -1,13 +1,11 @@
-import { RepresentationId, PRODUCTION_LINE_LENGTH } from '../../logic/constants'
-
 import * as representationUpdaters from './representationUpdaters'
 import { FactionsList, UniverseRepresentation } from '~/initGame'
 import Factory from '~/representation/Factory'
 import Unit from '~/representation/Unit'
 import UnitsFactory from '~/representation/UnitFactory'
-import { USER_FACTION_ID } from '../../logic/constants'
 import BulletFactory from '~/representation/BulletFactory'
 import StrategicPoint from '~/representation/StrategicPoint'
+import { PRODUCTION_LINE_LENGTH, RepresentationId, USER_FACTION_ID } from '~/logic-contants'
 
 
 
@@ -23,9 +21,9 @@ const render = (
 
   while (index < universeLength) {
     const nextItemType = universeData[index]
-
+    console.log('nextItemType', nextItemType)
     switch (nextItemType) {
-      case RepresentationId.FactionId: {
+      case RepresentationId.Faction: {
         const indexOfId = index + 1
         factionId = universeData[indexOfId]
         index = indexOfId + 1
@@ -34,6 +32,7 @@ const render = (
       case RepresentationId.EnemyFactory: {
         const indexOfId = index + 1
         const factoryId = universeData[indexOfId]
+        console.log('factoryId', factoryId)
         const factory = universeRepresentation.get(factoryId) as Factory
         representationUpdaters.updateFactory(
           factory,
@@ -71,7 +70,7 @@ const render = (
       }
       case RepresentationId.UserFactory: {
         const indexOfId = index + 1
-        const newIndexValue = indexOfId + 3 + PRODUCTION_LINE_LENGTH
+        const newIndexValue = indexOfId + 1 + PRODUCTION_LINE_LENGTH + 1 // id, progress, 5 items of production line
         const factoryId = universeData[indexOfId]
         const factory = universeRepresentation.get(factoryId) as Factory
         representationUpdaters.updateFactory(

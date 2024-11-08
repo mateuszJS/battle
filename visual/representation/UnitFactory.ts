@@ -1,4 +1,3 @@
-import { RepresentationId } from '../../logic/constants'
 import Unit from './Unit'
 import getMovieClipCreator from './get-movie-clip-creator'
 import getMySelection from './getMySelection'
@@ -7,6 +6,7 @@ import regularAccessoriesFramesData from './framesData/regular-accessories';
 import elephantHeadFramesData from './framesData/elephant-head';
 import rodionHeadFramesData from './framesData/rodion-head';
 import { FactionVisualDetails } from '~/map-creator/menu';
+import { RepresentationId } from '~/logic-contants';
 
 const MAX_JUMP_HEIGHT = 1200
 // the same constant exists in rust

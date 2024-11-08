@@ -9,8 +9,8 @@ import {
   INFLUENCE_MAP_SCALE_X,
   INFLUENCE_MAP_SCALE_Y,
 } from './consts'
-import { USER_FACTION_ID } from '../../logic/constants'
-import { Universe } from '../../crate/pkg/index'
+import { USER_FACTION_ID } from '~/logic-contants'
+// import { Universe } from '../../crate/pkg/index'
 
 let container: PIXI.Container
 let influenceGeometry: PIXI.Geometry
@@ -47,7 +47,7 @@ const scale: [number, number] = [
   /* eslint-enable prettier/prettier */
 ]
 
-export const updateInfluenceMap = (influence: Float32Array, universe: Universe) => {
+export const updateInfluenceMap = (influence: Float32Array, universe: any) => {
   if (!influence.length) return
 
   if (!influenceGeometry) {

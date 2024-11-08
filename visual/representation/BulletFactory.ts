@@ -1,6 +1,6 @@
-import { WeaponType } from '../../logic/constants'
 import { UniverseRepresentation } from '~/initGame'
 import Unit from './Unit'
+import { WeaponType } from '~/logic-contants'
 
 
 

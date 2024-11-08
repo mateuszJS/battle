@@ -1,4 +1,4 @@
-import { USER_FACTION_ID } from '../../logic/constants'
+import { USER_FACTION_ID } from '~/logic-contants'
 import getMySelection from './getMySelection'
 
 class StrategicPoint {

@@ -1,4 +1,4 @@
-import { Universe } from '../../crate/pkg/index'
+// import { Universe } from '../../crate/pkg/index'
 
 let graph = null
 let timer = 0
@@ -9,7 +9,7 @@ const drawCircle = (x, y) => {
   graph.endFill()
 }
 
-export const startDebug = (universe: Universe) => {
+export const startDebug = (universe: any) => {
   if (++timer > 30) {
     timer = 0
   } else {

@@ -2,11 +2,15 @@
 const path = require("path")
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
+const WasmPackPlugin = require("@wasm-tool/wasm-pack-plugin");
 
 module.exports = {
   // node: {
   //   fs: "empty",
   // },
+	experiments: {
+		asyncWebAssembly: true
+	},
 	entry: ['./visual/index.ts'],
 	output: {
 		path: path.resolve(__dirname, 'dist'),
@@ -58,6 +62,9 @@ module.exports = {
     }),
     new webpack.ProvidePlugin({ // FIX: pixi-layers.js throw error ReferenceError: PIXI is not defined
       PIXI: 'pixi.js'
+    }),
+		new WasmPackPlugin({
+      crateDirectory: path.resolve(__dirname, "crate"),
     }),
 	],
 }

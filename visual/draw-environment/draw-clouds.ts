@@ -1,4 +1,4 @@
-import { MAP_SKEW_ANGLE, MAP_VERTICAL_MOD } from '../../logic/constants'
+import { MAP_SKEW_ANGLE, MAP_VERTICAL_MOD } from "~/logic-contants"
 
 export default function drawClouds(mapPoints: Point[]): PIXI.Container {
   const container = new PIXI.Container()

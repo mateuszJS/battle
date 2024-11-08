@@ -1,11 +1,12 @@
-import { UniverseRepresentation, WasmModule } from '~/initGame'
+import { UniverseRepresentation } from '~/initGame'
 import Unit from '~/representation/Unit'
 import Factory from '~/representation/Factory'
 import updateAbilitiesButtons from '~/buttons/abilities'
 import { RepresentationId } from '~/buttons/abilities/createIcon'
 import StrategicPoint from '~/representation/StrategicPoint'
-import { UINT_DATA_SETS_DIVIDER } from '../../logic/constants'
 import { getFrames } from '~/representation/utils'
+import { UINT_DATA_SETS_DIVIDER } from '~/logic-contants'
+import { Universe } from 'crate/pkg'
 
 let debugContainer = null
 
@@ -15,7 +16,7 @@ class SelectionController {
   private startPoint: null | Point
   private selectionRectangle: PIXI.Graphics
   private indicatorsContainer: PIXI.Container
-  private wasmModule: WasmModule
+  private wasmModule: Universe
   private universeRepresentation: UniverseRepresentation
   private selectedUnits: Unit[]
   private selectedSquads: Uint32Array
@@ -23,7 +24,7 @@ class SelectionController {
   private selectionTimer: number
   private indicatorPositionFrames: PIXI.Texture[]
 
-  constructor(wasmModule: WasmModule, universeRepresentation: UniverseRepresentation) {
+  constructor(wasmModule: Universe, universeRepresentation: UniverseRepresentation) {
     this.wasmModule = wasmModule
     this.universeRepresentation = universeRepresentation
     this.selectedUnits = []
@@ -48,38 +49,36 @@ class SelectionController {
     // tracksDebug(tracks)
     if (this.selectedSquads.length === 0) return
 
-    const moveUnitsResultPoiner = this.wasmModule.moveUnits(
-      window.getUint32ArrayPointer(this.selectedSquads),
+    const moveUnitsResult = this.wasmModule.move_units(
+      this.selectedSquads,
       x,
       y,
     )
     
-    window.useFloat32ArrayData(moveUnitsResultPoiner, moveUnitsResult => {
-      const indexOfDivider = moveUnitsResult.indexOf(UINT_DATA_SETS_DIVIDER) // 0 -> divides between squads ids and units ids
-      const enemyUnitIds = moveUnitsResult.subarray(0, indexOfDivider)
-      const positions = moveUnitsResult.subarray(indexOfDivider + 1)
-      // so we should make a copy
-      if (enemyUnitIds.length > 0) {
-        const selectedEnemyUnits = Array.from(enemyUnitIds).map(id => (
-          this.universeRepresentation.get(id) //as Unit | Factory | StrategicPoint
-        ))
+    const indexOfDivider = moveUnitsResult.indexOf(UINT_DATA_SETS_DIVIDER) // 0 -> divides between squads ids and units ids
+    const enemyUnitIds = moveUnitsResult.subarray(0, indexOfDivider)
+    const positions = moveUnitsResult.subarray(indexOfDivider + 1)
+    // so we should make a copy
+    if (enemyUnitIds.length > 0) {
+      const selectedEnemyUnits = Array.from(enemyUnitIds).map(id => (
+        this.universeRepresentation.get(id) //as Unit | Factory | StrategicPoint
+      ))
+      selectedEnemyUnits.forEach(unit => {
+        unit.select()
+      })
+
+      setTimeout(() => {
         selectedEnemyUnits.forEach(unit => {
-          unit.select()
+          if (unit) {
+            unit.deselect()
+          }
         })
+      }, 2000)
+    }
 
-        setTimeout(() => {
-          selectedEnemyUnits.forEach(unit => {
-            if (unit) {
-              unit.deselect()
-            }
-          })
-        }, 2000)
-      }
-
-      for (let i = 0; i < positions.length; i += 2) {
-        this.createIndicator(positions[i], positions[i + 1])
-      }
-    })
+    for (let i = 0; i < positions.length; i += 2) {
+      this.createIndicator(positions[i], positions[i + 1])
+    }
   }
 
   private selectUnits(x1: number, y1: number, x2: number, y2: number) {
@@ -99,42 +98,36 @@ class SelectionController {
     //   },
     // )
 
-    window.useUint32ArrayData(
-      this.wasmModule.getSelectedUnitsIds(x1, y1, x2, y2),
-      (result) => {
-        if (result.length === 1) {
-          // there is only divider UINT_DATA_SETS_DIVIDER
-          this.selectedSquads = new Uint32Array()
+      const result = this.wasmModule.get_selected_units_ids(x1, y1, x2, y2);
+      if (result.length === 1) {
+        // there is only divider UINT_DATA_SETS_DIVIDER
+        this.selectedSquads = new Uint32Array()
+        return
+      }
+      const indexOfDivider = result.indexOf(UINT_DATA_SETS_DIVIDER) // 0 -> divides between squads ids and units ids
+      const unitsIds = result.subarray(0, indexOfDivider)
+      const squadsIds = result.subarray(indexOfDivider + 1)
+      this.selectedSquads = squadsIds.slice() // because wasm memory will be collected by Garbage collector
+      // so we should make a copy
+
+      const iconsPayload: number[][] = []
+      let collectedUnits: number[] = []
+  
+      unitsIds.forEach(id => {
+        if (id === 1) {
+          // 1 -> divider between each squad
+          iconsPayload.push(collectedUnits)
+          collectedUnits = []
           return
         }
-        const indexOfDivider = result.indexOf(UINT_DATA_SETS_DIVIDER) // 0 -> divides between squads ids and units ids
-        const unitsIds = result.subarray(0, indexOfDivider)
-        const squadsIds = result.subarray(indexOfDivider + 1)
-        this.selectedSquads = squadsIds.slice() // because wasm memory will be collected by Garbage collector
-        // so we should make a copy
-
-        const iconsPayload: number[][] = []
-        let collectedUnits: number[] = []
-    
-        unitsIds.forEach(id => {
-          if (id === 1) {
-            // 1 -> divider between each squad
-            iconsPayload.push(collectedUnits)
-            collectedUnits = []
-            return
-          }
-          const unit = this.universeRepresentation.get(id) as Unit
-          if (unit) {
-            // update wasn't called yet, with new unit
-            unit.select()
-          }
-          this.selectedUnits.push(unit)
-          collectedUnits.push(id)
-        })
-      }
-    )
-
-
+        const unit = this.universeRepresentation.get(id) as Unit
+        if (unit) {
+          // update wasn't called yet, with new unit
+          unit.select()
+        }
+        this.selectedUnits.push(unit)
+        collectedUnits.push(id)
+      })
   }
 
   private deselectAbility() {
@@ -150,18 +143,16 @@ class SelectionController {
   public startSelection(point: Point) {
     if (this.selectedAbilityType !== null) {
 
-      const useAbilityResultsPointer = this.wasmModule.useAbility(
-        window.getUint32ArrayPointer(this.selectedSquads),
+      const useAbilityResult = this.wasmModule.use_ability(
+        this.selectedSquads,
         this.selectedAbilityType,
         point.x,
         point.y,
       )
 
-      window.useFloat32ArrayData(useAbilityResultsPointer, useAbilityResult => {
-        for (let i = 0; i < useAbilityResult.length; i += 2) {
-          this.createIndicator(useAbilityResult[i], useAbilityResult[i + 1])
-        }
-      })
+      // for (let i = 0; i < useAbilityResult.length; i += 2) {
+      //   this.createIndicator(useAbilityResult[i], useAbilityResult[i + 1])
+      // }
 
       this.deselectAbility()
       return

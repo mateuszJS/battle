@@ -1,6 +1,7 @@
-import { Universe } from '../../crate/pkg/index'
-import { MAP_WIDTH, MAP_HEIGHT } from '../map-creator/constants'
-import { GRID_CELL } from 'Constants'
+// import { Universe } from '../../crate/pkg/index'
+
+import { GRID_CELL } from "~/logic-contants"
+import { MAP_HEIGHT, MAP_WIDTH } from "~/map-creator/constants"
 
 const GRID_MAP_SCALE = 1.0 / GRID_CELL
 const GRID_MAP_WIDTH = Math.ceil(MAP_WIDTH * GRID_MAP_SCALE)
@@ -86,7 +87,7 @@ const createNewFaction = (id?: number, color?: string, complementaryColor?: stri
   return addNewSquad
 }
 
-export const startDebug = (universe: Universe) => {
+export const startDebug = (universe: any) => {
   if (!window.debugAiMode) {
     const debugPanelNode = document.querySelector('#debug-panel') as HTMLDivElement
 

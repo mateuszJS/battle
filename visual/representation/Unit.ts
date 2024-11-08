@@ -1,8 +1,7 @@
 import EffectFactory from './EffectFactory'
 import type { FrameUpdaters } from './UnitFactory'
-import { RepresentationId } from '../../logic/constants'
 import { UpdateAbilityCallback } from './UnitFactory'
-import { UnitState } from '../../logic/constants'
+import { RepresentationId, UnitState } from '~/logic-contants'
 
 type PixiUnitStuff = {
   container: PIXI.Container

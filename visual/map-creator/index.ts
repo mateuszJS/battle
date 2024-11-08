@@ -1,9 +1,10 @@
-import initGame, { WasmModule } from '~/initGame'
+import initGame from '~/initGame'
 import { MAP_HEIGHT, MAP_WIDTH } from './constants'
 import getPlatformCoords from '~/consts/get-platform-coords'
 import getSerializedMapInfo from './get-serialized-map-info'
 import mapDetails from './map-details'
 import { createMenu, addNewFaction, FactionVisualDetails } from './menu'
+import { Universe } from 'crate/pkg'
 
 const platformCoords = getPlatformCoords()
 const bridgeWidth = (platformCoords[3].y - platformCoords[2].y) * mapDetails.scale
@@ -299,7 +300,7 @@ const createToolbar = () => {
     })
 }
 
-const mapCreator = (wasmModule: WasmModule) => {
+const mapCreator = (wasmModule: Universe) => {
   createBackground()
   createToolbar()
   const startGame = (factionVisualDetails: FactionVisualDetails[]) => {

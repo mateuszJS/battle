@@ -1,4 +1,4 @@
-import { RepresentationId } from '../../logic/constants'
+import { RepresentationId } from "~/logic-contants"
 
 const ICON_SIZE = 50
 

@@ -5,7 +5,7 @@ import * as gridDebug from './grid'
 import * as enemySecondaryAimDebug from './enemySecondaryAim'
 import * as getPointsInRectangleDebug from './getPointsInRectangle'
 import * as aiDebug from './ai'
-import { Universe } from '../../crate/pkg/index'
+// import { Universe } from '../../crate/pkg/index'
 
 const debugController = {
   tracks: false,
@@ -25,7 +25,7 @@ const debugController = {
   enemySecondaryAimDebug,
   getPointsInRectangleDebug,
   aiDebug,
-  update: (universe: Universe) => {
+  update: (universe: any) => {
     Object.keys(debugController).forEach(key => {
       if (
         typeof debugController[key] === 'boolean' &&

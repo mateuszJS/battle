@@ -1,6 +1,6 @@
+import { AbilityType } from '~/logic-contants'
 import createNewIcon, { Ability, RepresentationId, ICON_HEIGHT } from './createIcon'
-import { WasmModule } from '~/initGame'
-import { AbilityType } from '../../../logic/constants'
+import { Universe } from 'crate/pkg'
 
 const abilitiesIcons: {
   [key in RepresentationId]: Ability[]
@@ -39,12 +39,12 @@ const updateAbilityIcon = (
 
 const updateAbilitiesButtons = (
   selectedSquadsIds: Uint32Array,
-  wasmModule: WasmModule,
+  wasmModule: Universe,
   selectedAbility: RepresentationId,
   selectAbility: (ability: RepresentationId) => void,
 ) => {
-  const abilitiesDataPointer = wasmModule.getAbilitiesCoolDowns(
-    window.getUint32ArrayPointer(selectedSquadsIds),
+  const abilitiesColdownData = wasmModule.get_abilities_cool_downs(
+    new Uint32Array(selectedSquadsIds),
     selectedAbility || 0,
   )
 
@@ -53,34 +53,32 @@ const updateAbilitiesButtons = (
     [AbilityType.Jump]: 0,
   }
 
-  window.useFloat32ArrayData(abilitiesDataPointer, (abilitiesData) => {
-    for (let i = 0; i < abilitiesData.length; i += 5) {
-      const squadType = abilitiesData[i] as RepresentationId
-      // we need a type of the squad
-  
-      // create an icon, if there is no enough icons of certain type
-      if (abilitiesIndexes[squadType] == abilitiesIcons[squadType].length) {
-        const newIcon = createNewIcon(0, 0, squadType, () => {
-          selectAbility(squadType)
-        })
-        abilitiesIcons[squadType].push(newIcon)
-      }
-  
-      const indexOfIcon = abilitiesIndexes[squadType]
-      const ability = abilitiesIcons[squadType][indexOfIcon]
-      ability.container.visible = true
-  
-      updateAbilityIcon(
-        ability,
-        abilitiesData[i + 3],
-        abilitiesData[i + 4],
-        abilitiesData[i + 2],
-        abilitiesData[i + 1] > 0.5,
-        !!selectedAbility,
-      )
-      abilitiesIndexes[squadType]++
+  for (let i = 0; i < abilitiesColdownData.length; i += 5) {
+    const squadType = abilitiesColdownData[i] as RepresentationId
+    // we need a type of the squad
+
+    // create an icon, if there is no enough icons of certain type
+    if (abilitiesIndexes[squadType] == abilitiesIcons[squadType].length) {
+      const newIcon = createNewIcon(0, 0, squadType, () => {
+        selectAbility(squadType)
+      })
+      abilitiesIcons[squadType].push(newIcon)
     }
-  })
+
+    const indexOfIcon = abilitiesIndexes[squadType]
+    const ability = abilitiesIcons[squadType][indexOfIcon]
+    ability.container.visible = true
+
+    updateAbilityIcon(
+      ability,
+      abilitiesColdownData[i + 3],
+      abilitiesColdownData[i + 4],
+      abilitiesColdownData[i + 2],
+      abilitiesColdownData[i + 1] > 0.5,
+      !!selectedAbility,
+    )
+    abilitiesIndexes[squadType]++
+  }
 
   // hide rest of the icons
   ;[AbilityType.Grenade, AbilityType.Jump].forEach(squadType => {

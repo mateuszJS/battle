@@ -1,4 +1,4 @@
-import { MAP_SKEW_ANGLE, MAP_VERTICAL_MOD } from "../../logic/constants"
+import { MAP_SKEW_ANGLE, MAP_VERTICAL_MOD } from "~/logic-contants"
 
 const attachMethodToConvertLogicCoordsToVisual = (mapHeight) => {
   window.convertLogicCoordToVisual = (x: number, y: number): [number, number] => {

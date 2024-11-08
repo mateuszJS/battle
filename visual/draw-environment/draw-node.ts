@@ -1,7 +1,7 @@
 import drawRailingLine from './draw-railing'
 import getNodePlatformCoords from '~/consts/get-platform-coords'
-import { PLATFORM_RADIUS } from 'Constants'
 import { DrawEnvResult } from '.'
+import { PLATFORM_RADIUS } from '~/logic-contants'
 
 const platformCoords = getNodePlatformCoords()
 

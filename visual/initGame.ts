@@ -3,15 +3,12 @@ import Unit from '~/representation/Unit'
 import EffectsFactory from '~/representation/EffectFactory'
 import setAllLayers, { addItemToBackground, updateBackground } from './set-all-layers'
 import render from './render'
-import { Universe } from '../crate/pkg/index'
+// import { Universe } from 'crate/'
 import Factory from '~/representation/Factory'
 import StrategicPoint from '~/representation/StrategicPoint'
 import initializeMouseController from './mouseController'
 import { createFactoryButtons } from './buttons/factory'
-import { USER_FACTION_ID } from '../logic/constants'
 import debugController from '~/debug'
-import type * as ExportedWasmModule from './logic'
-import { ASUtil } from '@assemblyscript/loader'
 import drawEnvironment from './draw-environment'
 // import { startDebug as debugObstacles } from './debug/obstacles'
 import { startDebug as debugInnerTrack } from './debug/innerTrack'
@@ -19,7 +16,6 @@ import { startDebug as debugOuterTrack } from './debug/outerTrack'
 import { startDebug as startDebugObstacles } from './debug/obstacles'
 import { startDebug as gridDebug } from './debug/grid'
 // import { startDebug as startDebugObstaclesMap } from './debug/obstaclesMap'
-import initConvertArraysUtils from '~/attachUtils/init-convert-arrays-utils'
 import enhanceAnimatedSprites from '~/attachUtils/enhance-animated-sprites'
 import attachMethodToConvertLogicCoordsToVisual from '~/attachUtils/attach-method-covert-logic-coords-to-visual'
 import { SerializedMapInfo } from './map-creator/get-serialized-map-info'
@@ -27,9 +23,10 @@ import getSerializedWorldInfo from './serializedWorldInfo'
 import predefinedMap from './predefined-maps/test-bridges'
 import printPredefinedMap from './print-predefined-map'
 import { FactionVisualDetails } from './map-creator/menu'
+import { USER_FACTION_ID } from './logic-contants'
+import { Universe } from '../crate/pkg'
 
 export type UniverseRepresentation = Map<number, Factory | Unit | StrategicPoint>
-export type WasmModule = ASUtil & typeof ExportedWasmModule
 export type FactionsList = Map<number, FactionVisualDetails>
 
 const getMapPoints = (mapWidth: number, mapHeight: number) => {
@@ -48,23 +45,16 @@ const getMapPoints = (mapWidth: number, mapHeight: number) => {
 
 
 const initGame = (
-  wasmModule: WasmModule,
+  wasmModule: Universe,
   serializedMapInfo: SerializedMapInfo,
   mapWidth: number,
   mapHeight: number,
   factionVisualDetails: FactionVisualDetails[]
 ) => {
-  // serializedMapInfo = predefinedMap
-  console.log(printPredefinedMap(serializedMapInfo))
-  const {
-    initUniverse,
-    getUniverseRepresentation,
-    getFactoriesInitData,
-    createSquad,
-    debugGrid,
-  } = wasmModule;
+  serializedMapInfo = predefinedMap
 
-  initConvertArraysUtils(wasmModule)
+  // console.log(printPredefinedMap(serializedMapInfo))
+
   enhanceAnimatedSprites()
   attachMethodToConvertLogicCoordsToVisual(mapHeight)
   const mapPoints = getMapPoints(mapWidth, mapHeight)
@@ -84,41 +74,46 @@ const initGame = (
     unpinSerializedWorldInfo,
   } = getSerializedWorldInfo(serializedMapInfo, wasmModule)
 
-  initUniverse(
+  // this function to create unvierse is not compatible
+  const universe = Universe.new(
     serializedWorldInfo.factions,
     serializedWorldInfo.obstacles,
-    serializedWorldInfo.blockingTrackPoints,
-    serializedWorldInfo.rawTrackPoints,
-    serializedWorldInfo.bridgeSecondToLastPointIndex,
-    mapWidth,
-    mapHeight,
-    // serializedInfoAboutWorld.obstacles,
-    // serializedInfoAboutWorld.strategicPoints,
+    new Float32Array([])
   )
+  // initUniverse(
+  //   serializedWorldInfo.factions,
+  //   serializedWorldInfo.obstacles,
+  //   serializedWorldInfo.blockingTrackPoints,
+  //   serializedWorldInfo.rawTrackPoints,
+  //   serializedWorldInfo.bridgeSecondToLastPointIndex,
+  //   mapWidth,
+  //   mapHeight,
+  //   // serializedInfoAboutWorld.obstacles,
+  //   // serializedInfoAboutWorld.strategicPoints,
+  // )
   unpinSerializedWorldInfo()
 
   const factionsVisualDetails: FactionsList = new Map()
 
-  window.useFloat32ArrayData(getFactoriesInitData(), (factoriesData) => {
-    for (let i = 0; i < factoriesData.length; i += 5) {
-      const factoryId = factoriesData[i + 1]
-      const factionId = factoriesData[i]
-      const factoryRepresentation = new Factory(
-        factoriesData[i + 2], // x
-        factoriesData[i + 3], // y
-        factoriesData[i + 4], // angle
+  const factoriesData = universe.get_factories_init_data()
+  for (let i = 0; i < factoriesData.length; i += 5) {
+    const factoryId = factoriesData[i + 1]
+    const factionId = factoriesData[i]
+    const factoryRepresentation = new Factory(
+      factoriesData[i + 2], // x
+      factoriesData[i + 3], // y
+      factoriesData[i + 4], // angle
+    )
+    universeRepresentation.set(factoryId, factoryRepresentation)
+
+    if (factionId === USER_FACTION_ID) {
+      createFactoryButtons(factoriesData[i + 2], factoriesData[i + 3], type => universe.create_squad(type),
       )
-      universeRepresentation.set(factoryId, factoryRepresentation)
-  
-      if (factionId === USER_FACTION_ID) {
-        createFactoryButtons(factoriesData[i + 2], factoriesData[i + 3], type => createSquad(type),
-        )
-      }
-
-      factionsVisualDetails.set(factionId, factionVisualDetails.splice(0, 1)[0]) 
     }
-  })
 
+    factionsVisualDetails.set(factionId, factionVisualDetails.splice(0, 1)[0]) 
+  }
+  console.log('initial universeRepresentation', universeRepresentation)
   // const strategicPointsInitData = universe.get_strategic_points_init_data()
   // for (let i = 0; i < strategicPointsInitData.length; i += 3) {
   //   const strategicPointId = strategicPointsInitData[i]
@@ -129,7 +124,7 @@ const initGame = (
   //   universeRepresentation[strategicPointId] = factoryRepresentation
   // }
 
-  const mouseController = new initializeMouseController(wasmModule, universeRepresentation, mapPoints)
+  const mouseController = new initializeMouseController(universe, universeRepresentation, mapPoints)
 
   // debugController.init()
   // let timeToCreateEnemy = 0
@@ -164,14 +159,14 @@ const initGame = (
     //   timeToCreateEnemy--
     // }
     mouseController.updateScenePosition()
-    window.useFloat32ArrayData(getUniverseRepresentation(), (universeData) => {
-      render(
-        0,
-        universeData,
-        universeRepresentation,
-        factionsVisualDetails,
-      )
-    })
+    const universeData = universe.get_universe_data();
+    console.log('universeData', universeData)
+    render(
+      0,
+      universeData,
+      universeRepresentation,
+      factionsVisualDetails,
+    )
 
     updateBackground()
 

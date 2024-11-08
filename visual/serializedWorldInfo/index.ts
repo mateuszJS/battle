@@ -1,13 +1,13 @@
-import { NORMAL_SQUAD_RADIUS, USER_FACTION_ID } from "../../logic/constants"
+import { NORMAL_SQUAD_RADIUS, USER_FACTION_ID } from "~/logic-contants"
 import { SerializedMapInfo } from "../map-creator/get-serialized-map-info"
 import getBridgesInnerTrack from './get-bridges-inner-track'
 import getObstaclesInnerTrack from './get-obstacles-inner-track'
 import getSerializedObstacles from './get-serialized-obstacles'
-import { WasmModule } from "~/initGame"
+import { Universe } from "crate/pkg"
 
 const getSerializedWorldInfo = (
   serializedMapInfo: SerializedMapInfo,
-  wasmModule: WasmModule,
+  wasmModule: Universe,
 ) => {
   const serializedFactions = new Float32Array(
     serializedMapInfo.portals.map((portal, index) => 
@@ -44,18 +44,18 @@ const getSerializedWorldInfo = (
   )
 
   const serializedWorldInfo = {
-    factions: wasmModule.__pin(window.getFloat32ArrayPointer(serializedFactions)),
-    obstacles: wasmModule.__pin(window.getFloat32ArrayPointer(serializedObstacles)),
-    blockingTrackPoints: wasmModule.__pin(window.getFloat32ArrayPointer(serializedTrackOuter)),
-    rawTrackPoints: wasmModule.__pin(window.getFloat32ArrayPointer(serializedTrackInner)),
+    factions: serializedFactions,
+    obstacles: serializedObstacles,
+    blockingTrackPoints: serializedTrackOuter,
+    rawTrackPoints: serializedTrackInner,
     bridgeSecondToLastPointIndex: bridgesInnerTrack.length - 1,
   }
 
   const unpinSerializedWorldInfo = () => {
-    wasmModule.__unpin(serializedWorldInfo.factions)
-    wasmModule.__unpin(serializedWorldInfo.obstacles)
-    wasmModule.__unpin(serializedWorldInfo.blockingTrackPoints)
-    wasmModule.__unpin(serializedWorldInfo.rawTrackPoints)
+    // wasmModule.__unpin(serializedWorldInfo.factions)
+    // wasmModule.__unpin(serializedWorldInfo.obstacles)
+    // wasmModule.__unpin(serializedWorldInfo.blockingTrackPoints)
+    // wasmModule.__unpin(serializedWorldInfo.rawTrackPoints)
   }
 
   return {

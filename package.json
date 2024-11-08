@@ -4,15 +4,15 @@
   "description": "",
   "main": "webpack.config.js",
   "scripts": {
-    "dev": "export NODE_ENV=development && webpack serve --open",
-    "build": "webpack --display-optimization-bailout --config webpack.prod.js",
-    "build-as": "asc -b logic/index.wasm -t logic/index.wat logic/index.ts",
-    "asbuild:untouched": "asc logic/index.ts --target debug",
-    "asbuild:optimized": "asc logic/index.ts --target release"
+    "dev": "export NODE_ENV=development && webpack serve --open"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@wasm-tool/wasm-pack-plugin": "^1.7.0",
+    "@webassemblyjs/ast": "^1.14.1",
+    "@webassemblyjs/wasm-edit": "^1.14.1",
+    "@webassemblyjs/wasm-parser": "^1.14.1",
     "assemblyscript": "^0.19.16",
     "eslint": "^7.26.0",
     "eslint-config-prettier": "^8.3.0",
