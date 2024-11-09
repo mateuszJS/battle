@@ -167,13 +167,13 @@ class UnitsFactory {
     container.addChild(rodionHeadMovieClip)
 
     const bodyFilter = new PIXI.filters.ColorMatrixFilter();
-    bodyFilter.matrix = factionVisualDetails.bodyMatrixColorFilter
-    troopBodyMovieClip.filters = [bodyFilter]
-    regularAccessoriesMovieClip.filters = [bodyFilter]
+    bodyFilter.matrix = Array.from(factionVisualDetails.bodyMatrixColorFilter)
+    // troopBodyMovieClip.filters = [bodyFilter]
+    // regularAccessoriesMovieClip.filters = [bodyFilter]
 
     const headFilter = new PIXI.filters.ColorMatrixFilter();
-    headFilter.matrix = factionVisualDetails.headMatrixColorFilter
-    rodionHeadMovieClip.filters = [headFilter]
+    headFilter.matrix = Array.from(factionVisualDetails.headMatrixColorFilter)
+    // rodionHeadMovieClip.filters = [headFilter]
 
     const graphicParams = {
       container,

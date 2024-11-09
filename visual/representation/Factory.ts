@@ -22,13 +22,13 @@ const addPortalPart = (
   name: string,
   anchorX: number,
   anchorY: number | ((sprite: PIXI.Sprite) => number),
-  x: number | ((sprite: PIXI.Sprite) => number),
-  y: number | ((sprite: PIXI.Sprite) => number),
+  sourceX: number | ((sprite: PIXI.Sprite) => number),
+  sourceY: number | ((sprite: PIXI.Sprite) => number),
 ): PIXI.Sprite => {
   const sprite = new PIXI.Sprite(PIXI.Texture.from(name))
   sprite.anchor.set(anchorX, typeof anchorY === 'number' ? anchorY : anchorY(sprite))
-  sprite.x = typeof x === 'number' ? x : x(sprite)
-  sprite.y = typeof y === 'number' ? y : y(sprite)
+  sprite.x = typeof sourceX === 'number' ? sourceX : sourceX(sprite)
+  sprite.y = typeof sourceY === 'number' ? sourceY : sourceY(sprite)
 
   const graphics = new PIXI.Graphics()
   graphics.beginFill(0xff0000)
@@ -46,11 +46,12 @@ class Factory {
 
   constructor(
     // factionId: number,
-    x: number,
-    y: number,
-    angle: number,
+    logicCoordX: number,
+    logicCoordY: number,
+    logicAngle: number,
   ) {
-
+    const [x, y] = window.convertLogicCoordToVisual(logicCoordX, logicCoordY)
+    const angle = window.convertLogicAngleToVisual(logicAngle)
   
     const factor = 20 / (2 * Math.PI)
     const safeAngle = Math.round(

@@ -21,7 +21,6 @@ const render = (
 
   while (index < universeLength) {
     const nextItemType = universeData[index]
-    console.log('nextItemType', nextItemType)
     switch (nextItemType) {
       case RepresentationId.Faction: {
         const indexOfId = index + 1
@@ -32,14 +31,12 @@ const render = (
       case RepresentationId.EnemyFactory: {
         const indexOfId = index + 1
         const factoryId = universeData[indexOfId]
-        console.log('factoryId', factoryId)
         const factory = universeRepresentation.get(factoryId) as Factory
         representationUpdaters.updateFactory(
           factory,
-          universeData[indexOfId + 1], // factory hp
-          universeData[indexOfId + 2], // progress
+          universeData[indexOfId + 1], // progress
         )
-        index = indexOfId + 3
+        index = indexOfId + 2
         break
       }
       case RepresentationId.Solider: {
@@ -47,6 +44,7 @@ const render = (
         const newIndexValue = indexOfId + 6
         const unitId = universeData[indexOfId]
         const unit = universeRepresentation.get(unitId)
+
         if (unit) {
           representationUpdaters.updateUnit(
             unit as Unit,
@@ -54,12 +52,12 @@ const render = (
           )
         } else {
           const newUnit = UnitsFactory.createUnit(
-            unitId,
-            universeData[indexOfId + 1],
-            universeData[indexOfId + 2],
-            universeData[indexOfId + 3],
+            unitId, // id
+            universeData[indexOfId + 1], // x
+            universeData[indexOfId + 2], // y
+            universeData[indexOfId + 3], // angle
             factionId === USER_FACTION_ID,
-            universeData[indexOfId + 4],
+            universeData[indexOfId + 4], // state
             RepresentationId.Solider,
             factionDetails.get(factionId),
           )
@@ -76,8 +74,7 @@ const render = (
         representationUpdaters.updateFactory(
           factory,
           universeData[indexOfId + 1],
-          universeData[indexOfId + 2],
-          universeData.slice(indexOfId + 3, newIndexValue),
+          universeData.slice(indexOfId + 2, indexOfId + 2 + PRODUCTION_LINE_LENGTH),
         )
         index = newIndexValue
         break

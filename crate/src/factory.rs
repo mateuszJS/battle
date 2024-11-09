@@ -39,11 +39,14 @@ impl Factory {
     }
   }
   pub fn update(&mut self) -> Option<SquadType> {
+    log!("update");
     if self.production_line.len() > 0 {
       let production_item = &mut self.production_line[0];
       production_item.current_time -= 1;
+      log!("production_item.current_time {}", production_item.current_time);
       if production_item.current_time == 0 {
         let squad_type = self.production_line.remove(0).squad_type;
+        log!("squad creation of type");
         Some(squad_type)
       } else {
         None
@@ -67,6 +70,7 @@ impl Factory {
     let factory_representation = [factory_type, self.id as f32, progress];
 
     if self.owner_user {
+      log!("production line: {}", self.production_line.len());
       let production_line_representation: Vec<f32> = self
         .production_line
         .iter()
@@ -85,6 +89,7 @@ impl Factory {
   }
 
   pub fn add_squad_to_production_line(&mut self, squad_type_representation: u8) -> bool {
+    log!("squad_type_representation: {}", squad_type_representation);
     if self.production_line.len() < MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE {
       let squad_type = match squad_type_representation {
         SOLIDER_REPRESENTATION_ID_U8 => SquadType::Solider,

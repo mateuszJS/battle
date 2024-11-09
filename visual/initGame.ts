@@ -20,7 +20,7 @@ import enhanceAnimatedSprites from '~/attachUtils/enhance-animated-sprites'
 import attachMethodToConvertLogicCoordsToVisual from '~/attachUtils/attach-method-covert-logic-coords-to-visual'
 import { SerializedMapInfo } from './map-creator/get-serialized-map-info'
 import getSerializedWorldInfo from './serializedWorldInfo'
-import predefinedMap from './predefined-maps/test-bridges'
+import { PREDEFINED_FACTION_VISUAL_DETAILS, PREDEFINED_MAP } from './predefined-maps/test-bridges'
 import printPredefinedMap from './print-predefined-map'
 import { FactionVisualDetails } from './map-creator/menu'
 import { USER_FACTION_ID } from './logic-contants'
@@ -51,9 +51,8 @@ const initGame = (
   mapHeight: number,
   factionVisualDetails: FactionVisualDetails[]
 ) => {
-  serializedMapInfo = predefinedMap
-
-  // console.log(printPredefinedMap(serializedMapInfo))
+  serializedMapInfo = PREDEFINED_MAP
+  factionVisualDetails = PREDEFINED_FACTION_VISUAL_DETAILS
 
   enhanceAnimatedSprites()
   attachMethodToConvertLogicCoordsToVisual(mapHeight)
@@ -107,13 +106,15 @@ const initGame = (
     universeRepresentation.set(factoryId, factoryRepresentation)
 
     if (factionId === USER_FACTION_ID) {
-      createFactoryButtons(factoriesData[i + 2], factoriesData[i + 3], type => universe.create_squad(type),
+      createFactoryButtons(factoriesData[i + 2], factoriesData[i + 3], type => {
+        return universe.create_squad(type)
+      },
       )
     }
 
     factionsVisualDetails.set(factionId, factionVisualDetails.splice(0, 1)[0]) 
   }
-  console.log('initial universeRepresentation', universeRepresentation)
+  // console.log('initial universeRepresentation', universeRepresentation)
   // const strategicPointsInitData = universe.get_strategic_points_init_data()
   // for (let i = 0; i < strategicPointsInitData.length; i += 3) {
   //   const strategicPointId = strategicPointsInitData[i]
@@ -159,8 +160,9 @@ const initGame = (
     //   timeToCreateEnemy--
     // }
     mouseController.updateScenePosition()
+    universe.update();
     const universeData = universe.get_universe_data();
-    console.log('universeData', universeData)
+    // console.log('universeData', universeData)
     render(
       0,
       universeData,

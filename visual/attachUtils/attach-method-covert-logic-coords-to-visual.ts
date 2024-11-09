@@ -9,6 +9,12 @@ const attachMethodToConvertLogicCoordsToVisual = (mapHeight) => {
       (-Math.cos(angle) * distance + mapHeight) * MAP_VERTICAL_MOD,
     ]
   }
+
+  window.convertLogicAngleToVisual = (sourceAngle: number): number => {
+    const angle = sourceAngle + MAP_SKEW_ANGLE
+    return Math.atan2(Math.sin(angle), Math.cos(angle))
+    // return Math.atan2(Math.sin(angle), Math.cos(angle) * MAP_VERTICAL_MOD)
+  }
 }
 
 export default attachMethodToConvertLogicCoordsToVisual

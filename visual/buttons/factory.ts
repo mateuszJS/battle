@@ -78,10 +78,11 @@ const addItemToBuyList = (
 }
 
 export const createFactoryButtons = (
-  x: number,
-  y: number,
+  logicX: number,
+  logicY: number,
   createItemCallback: (representationId: RepresentationId) => void,
 ) => {
+  const [x, y] = window.convertLogicCoordToVisual(logicX, logicY)
   icons.buyListContainer.x = x
   icons.buyListContainer.y = y
   window.ui.addChild(icons.buyListContainer)
@@ -99,6 +100,7 @@ export const addItemToProductionLine = (index: number, type: number) => {
 
   const icon = addNewIcon(icons.productionList.length * ICON_SIZE, 0, type as RepresentationId)
   icons.productionList[index] = icon
+
   icons.productionListContainer.addChild(icon)
 }
 
@@ -110,5 +112,7 @@ export const removeItemFromProductionLine = (index: number) => {
 }
 
 export const updateItemInProductionLine = (progress: number) => {
-  icons.productionList[0].alpha = progress
+  if (icons.productionList[0]) {
+    icons.productionList[0].alpha = progress
+  }
 }
