@@ -18,5 +18,10 @@ declare global {
   interface Math {
     clamp: (value: number, min: number, max: number) => number
   }
+
+  type Point = {
+    x: number
+    y: number
+  }
 }
 

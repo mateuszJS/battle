@@ -10,5 +10,6 @@ export default (cornerIndex: number, rawOffset: number): Point => {
     case 5: return { x: offset, y: offset }
     case 6: return { x: -offset, y: -offset }
     case 7: return { x: -offset, y: offset }
+    default: throw Error("cornerIndex cannot be bigger than 7.")
   }
 }

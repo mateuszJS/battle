@@ -1,5 +1,5 @@
 import { Species } from "consts/species"
-import getFactionMenuItem from "./get-faction-menu-item"
+// import getFactionMenuItem from "./get-faction-menu-item"
 
 export interface FactionVisualDetails {
   bodyMatrixColorFilter: number[]
@@ -34,10 +34,10 @@ export const createMenu = (
 }
 
 export const addNewFaction = () => {
-  const listNode = document.getElementById(factionsListId)!
-  const { node, getFactionDetails } = getFactionMenuItem()
-  listNode.appendChild(node)
-  factionVisualDetailsGetters.push(getFactionDetails)
+  // const listNode = document.getElementById(factionsListId)!
+  // const { node, getFactionDetails } = getFactionMenuItem()
+  // listNode.appendChild(node)
+  // factionVisualDetailsGetters.push(getFactionDetails)
 }
 
 

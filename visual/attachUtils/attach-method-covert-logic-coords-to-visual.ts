@@ -1,6 +1,6 @@
-import { MAP_SKEW_ANGLE, MAP_VERTICAL_MOD } from "~/logic-contants"
+import { MAP_SKEW_ANGLE, MAP_VERTICAL_MOD } from "logic-contants"
 
-const attachMethodToConvertLogicCoordsToVisual = (mapHeight) => {
+const attachMethodToConvertLogicCoordsToVisual = (mapHeight: number) => {
   window.convertLogicCoordToVisual = (x: number, y: number): [number, number] => {
     const angle = Math.atan2(x, mapHeight - y) + MAP_SKEW_ANGLE
     const distance = Math.hypot(x, mapHeight - y)

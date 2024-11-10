@@ -3,6 +3,7 @@ import { SerializedMapInfo } from "map-creator/get-serialized-map-info";
 export default {
   connections: [],
   nodes: [{
+    id: 0,
     visited: Array(8).fill(false),
     x: 380.0479047277937,
     y: 323.0491135386819,

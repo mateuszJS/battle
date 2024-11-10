@@ -1,9 +1,9 @@
-import { NORMAL_SQUAD_RADIUS, USER_FACTION_ID } from "~/logic-contants"
+import { NORMAL_SQUAD_RADIUS, USER_FACTION_ID } from "logic-contants"
 import { SerializedMapInfo } from "../map-creator/get-serialized-map-info"
 import getBridgesInnerTrack from './get-bridges-inner-track'
 import getObstaclesInnerTrack from './get-obstacles-inner-track'
 import getSerializedObstacles from './get-serialized-obstacles'
-import { Universe } from "crate/pkg"
+import { Universe } from "Universe"
 
 const getSerializedWorldInfo = (
   serializedMapInfo: SerializedMapInfo,

@@ -3,6 +3,7 @@ const path = require("path")
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
 const WasmPackPlugin = require("@wasm-tool/wasm-pack-plugin");
+// const { compilerOptions } = require('./tsconfig.json');
 
 module.exports = {
 	experiments: {
@@ -17,9 +18,10 @@ module.exports = {
 	devtool: 'eval-source-map',
 	resolve: {
     extensions: ['.js', '.ts', '.wasm', '.wgsl', '.css'],
+		modules: [path.resolve(__dirname, 'visual'), 'node_modules'],
 		alias: {
-			'Universe': path.resolve(__dirname, '/crate/pkg/index.js'),
-		}
+			'Universe': path.resolve(__dirname, 'crate/pkg'),
+		},
   },
 	module: {
 		rules: [

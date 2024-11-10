@@ -14,7 +14,8 @@ const bridgeWidth = (platformCoords[3].y - platformCoords[2].y) * mapDetails.sca
 let activeElement = null
 let isJoiner = false
 let isPortalArrow = false
-let offset = { x: 0, y: 0 }
+const startOffset = { x: 0, y: 0 }
+let currDragElem: HTMLElement | null = null
 // let connections: Array<[PIXI.Graphics, PIXI.Graphics]> = []
 // const connectionsContainer = new PIXI.Graphics()
 // const activeConnectionContainer = new PIXI.Graphics()
@@ -292,23 +293,38 @@ let offset = { x: 0, y: 0 }
 function addStyles(): HTMLStyleElement {
   const htmlStyleElement = document.createElement('style')
   htmlStyleElement.textContent = MapCreatorCss
+  document.head.appendChild(htmlStyleElement)
   return htmlStyleElement
 }
 
-function addElement(parent: HTMLElement, rect: Rect | null, ...classNames: string[]) {
+function addDragableElement(parent: HTMLElement, className: string, width: number, height: number) {
   const element = document.createElement('div')
-  element.classList.add(...classNames)
-
-  if (rect) {
-    element.style.left = rect.x + 'px'
-    element.style.top = rect.y + 'px'
-    element.style.width = rect.width + 'px'
-    element.style.height = rect.height + 'px'
-  }
+  element.classList.add(className, 'dragable')
+  element.style.width = width + 'px'
+  element.style.height = height + 'px'
 
   parent.appendChild(element)
 
   return element
+}
+
+function updateDragElem(e: MouseEvent) {
+  if (!currDragElem) return
+
+  currDragElem.style.left = e.clientX + startOffset.x + 'px'
+  currDragElem.style.top = e.clientY + startOffset.y + 'px'
+}
+
+function attachDragEvents(element: HTMLElement) {
+  element.addEventListener('mousemove', (e) => {
+    updateDragElem(e)
+  })
+
+  window.document.body.addEventListener('mouseup', () => {
+    if (currDragElem) {
+      currDragElem = null
+    }
+  })
 }
 
 export default function openMapCreator(wasmModule: Universe) {
@@ -331,10 +347,33 @@ export default function openMapCreator(wasmModule: Universe) {
   document.body.appendChild(viewElem)
 
   /** Fill the toolbar */
-  const platform = addElement(toolbarElem, null, 'octagon-fill')
+  const platform = document.createElement('div')
+  platform.classList.add('octagon')
+  toolbarElem.appendChild(platform)
+
+  platform.addEventListener('mousedown', e => {
+    const { x: mapAreaX, y: mapAreaY } = mapAreaElem.getBoundingClientRect() 
+    const { x: toolX, y: toolY } = (e.currentTarget as HTMLElement).getBoundingClientRect()
+    startOffset.x = toolX - e.clientX - mapAreaX
+    startOffset.y = toolY - e.clientY - mapAreaY
+
+    currDragElem = addDragableElement(mapAreaElem, 'octagon', 100, 100)
+    updateDragElem(e)
+
+    currDragElem.addEventListener('mousedown', e => {
+      const { x: mapAreaX, y: mapAreaY } = mapAreaElem.getBoundingClientRect() 
+      const { x: toolX, y: toolY } = (e.currentTarget as HTMLElement).getBoundingClientRect()
+      startOffset.x = toolX - e.clientX - mapAreaX
+      startOffset.y = toolY - e.clientY - mapAreaY
+  
+      currDragElem = e.currentTarget as HTMLElement
+      updateDragElem(e)
+    })
+  })
+
   // portal, strategic point, platform, bridge
 
-  
+  attachDragEvents(mapAreaElem)
 
   const startGame = (factionVisualDetails: FactionVisualDetails[]) => {
     styleElem.remove()
@@ -348,6 +387,6 @@ export default function openMapCreator(wasmModule: Universe) {
     //   factionVisualDetails,
     // )
   }
-  createMenu(startGame)
+  // createMenu(startGame)
 }
 

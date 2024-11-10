@@ -4,7 +4,7 @@ const BRIDGE_ANGLE = 53 * Math.PI / 180
 const DIAGONALLY_ANGLE = 37 * Math.PI / 180
 const INITIAL_ANGLE_OFFSET = 0.035
 
-export default (offsetDistance: number = 0) => {
+export default function (offsetDistance: number = 0): Point[] {
   const radius = PLATFORM_RADIUS - offsetDistance
   let tempAngle = INITIAL_ANGLE_OFFSET - BRIDGE_ANGLE / 2 - DIAGONALLY_ANGLE
 

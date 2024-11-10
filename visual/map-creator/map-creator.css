@@ -1,8 +1,12 @@
 .map-creator {
+  background: #000;
   position: relative;
   width: 100%;
   height: 100%;
-  padding: 50px;
+  padding: 20px;
+  gap: 20px;
+  display: grid;
+  grid-template-columns: 100px 1fr;
 
   .dragable {
     position: absolute;
@@ -10,18 +14,28 @@
   }
 
   .toolbar {
-    background: 0x666;
-    width: 100px;
-    height: 100%;
+    background: #222;
+    display: flex;
+    flex-direction: column;
+
+    & > * {
+      cursor: pointer;
+    }
   }
 
   .map-area {
-    background: 0x666;
+    background: #222;
+    position: relative;
   }
 
-  .octagon-fill {
-    width: 200px;
+  .octagon, .octagon:before {
+    --border-width: 10px;
+    --border-color: rgb(255, 132, 71);
+    --fill-color: #ddaf30;
+
     aspect-ratio: 1;
+    padding: var(--border-width);
+
     --o:calc(50%*tan(-22.5deg));
     clip-path: polygon(
       var(--o) 50%,
@@ -29,31 +43,16 @@
       calc(100% - var(--o)) 50%,
       50% calc(100% - var(--o))
     );
-    background: #3B8686;
+    background: var(--fill-color);
   }
 
-  .octagon-border {
-    --b:10px; /* the border thickness */
+  .octagon:before {
+    content: "";
+    display: block;
+    background: var(--fill-color);
+  }
 
-    width: 200px;
-    aspect-ratio: 1;
-    --o:calc(50%*tan(-22.5deg));
-    --x:calc(var(--b)*cos(22.5deg));
-    --y:calc(var(--b)*sin(22.5deg));
-    clip-path: polygon(    
-      var(--o) 50%,50% var(--o),
-      calc(100% - var(--o)) 50%,    
-      50% calc(100% - var(--o)),var(--o) 50%,
-      calc(50% + var(--o) + var(--y)) var(--x),
-      var(--x) calc(50% + var(--o) + var(--y)),
-      var(--x) calc(50% - var(--o) - var(--y)),
-      calc(50% + var(--o) + var(--y)) calc(100% - var(--x)),
-      calc(50% - var(--o) - var(--y)) calc(100% - var(--x)),
-      calc(100% - var(--x)) calc(50% - var(--o) - var(--y)),
-      calc(100% - var(--x)) calc(50% + var(--o) + var(--y)),
-      calc(50% - var(--o) - var(--y)) var(--x),
-      calc(50% + var(--o) + var(--y)) var(--x)
-    );
-    background: #3B8686; 
+  .octagon:hover {
+    background: var(--border-color);
   }
 }

@@ -38,10 +38,10 @@ export const NORMAL_SQUAD_RADIUS = 50;
 export const OBSTACLES_DIVIDER = -1.0
 export const MAP_SKEW_ANGLE = -0.65
 export const MAP_VERTICAL_MOD = 0.52
-export const UPDATE_SQUAD_CENTER_PERIOD: usize = 15
-export const CHECK_SQUADS_CORRECTNESS_PERIOD: usize = 2 * UPDATE_SQUAD_CENTER_PERIOD
+export const UPDATE_SQUAD_CENTER_PERIOD = 15
+export const CHECK_SQUADS_CORRECTNESS_PERIOD = 2 * UPDATE_SQUAD_CENTER_PERIOD
 // always before search for enemies we should do squads correctness
-export const SEARCH_FOR_ENEMIES_PERIOD: usize = 2 * CHECK_SQUADS_CORRECTNESS_PERIOD
+export const SEARCH_FOR_ENEMIES_PERIOD = 2 * CHECK_SQUADS_CORRECTNESS_PERIOD
 export const USER_FACTION_ID = 0;
 export const UINT_DATA_SETS_DIVIDER = 0
 export const MATH_PI_HALF = Math.PI / 2
