@@ -1,12 +1,12 @@
-import { UniverseRepresentation } from '~/initGame'
-import Unit from '~/representation/Unit'
-import Factory from '~/representation/Factory'
-import updateAbilitiesButtons from '~/buttons/abilities'
-import { RepresentationId } from '~/buttons/abilities/createIcon'
-import StrategicPoint from '~/representation/StrategicPoint'
-import { getFrames } from '~/representation/utils'
-import { UINT_DATA_SETS_DIVIDER } from '~/logic-contants'
-import { Universe } from 'crate/pkg'
+import { UniverseRepresentation } from 'initGame'
+import Unit from 'representation/Unit'
+import Factory from 'representation/Factory'
+import updateAbilitiesButtons from 'buttons/abilities'
+import { RepresentationId } from 'buttons/abilities/createIcon'
+import StrategicPoint from 'representation/StrategicPoint'
+import { getFrames } from 'representation/utils'
+import { UINT_DATA_SETS_DIVIDER } from 'logic-contants'
+import { Universe } from 'Universe'
 
 let debugContainer = null
 

@@ -1,9 +1,6 @@
-import * as PIXI from 'pixi.js'
-import 'pixi-layers'
-import 'pixi-projection'
-
-import listOfAssets from './listOfAssets'
-import setup from './setup'
+import openMapCreator from './map-creator'
+import { Universe } from 'Universe'
+// import listOfAssets from './listOfAssets'
 
 const startGame = () => {
   document.oncontextmenu = document.body.oncontextmenu = function() {
@@ -14,24 +11,32 @@ const startGame = () => {
     Math.clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max)
   }
 
-  const app = new PIXI.Application({
-    width: window.innerWidth,
-    height: window.innerHeight,
+  // TODO: start downloading assets here
+
+  /** handle UI */
+  const goToMapCreatorBtn = document.createElement('button')
+  goToMapCreatorBtn.textContent = 'GO TO MAP CREATOR'
+  console.log('1 - create button')
+  const goToMapCreatorPromise = new Promise<void>(resolve => {
+    console.log('2 - attach event listener')
+    goToMapCreatorBtn.addEventListener('click', () => {
+      resolve()
+    })
   })
-  app.view.id = 'view'
-  document.body.appendChild(app.view)
-  window.app = app
+  console.log('3 - append btn to body')
+  document.body.appendChild(goToMapCreatorBtn)
 
-  const progressNode = document.querySelector('#dynamic-loader') as SVGPathElement
-  const loader = app.loader.add(listOfAssets).load(setup)
+  /** Handle wasm file loading */
+  const wasmModulePromise = import("../crate/pkg/index.js").then(module => (
+    module.Universe as unknown as Universe
+  ))
 
-  loader.onProgress.add((loader: PIXI.Loader) => {
-    const width = 50 + Math.round(loader.progress * 7)
-    progressNode.setAttribute('d', `M33 142h${width}v82h-${width}z`)
-  })
-
-  loader.onComplete.add(() => {
-    document.body.removeChild(document.querySelector('svg'))
+  Promise.all([
+    goToMapCreatorPromise,
+    wasmModulePromise
+  ]).then(([_, universe]) => {
+    goToMapCreatorBtn.remove()
+    openMapCreator(universe)
   })
 }
 

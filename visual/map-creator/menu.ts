@@ -1,4 +1,4 @@
-import { Species } from "~/representation/UnitFactory"
+import { Species } from "consts/species"
 import getFactionMenuItem from "./get-faction-menu-item"
 
 export interface FactionVisualDetails {
@@ -25,7 +25,7 @@ export const createMenu = (
   `
   document.body.appendChild(divNode)
 
-  const startGameBtn = document.getElementById(startGameBtnId)
+  const startGameBtn = document.getElementById(startGameBtnId)!
   startGameBtn.addEventListener('click', () => {
     const factionVisualDetails = factionVisualDetailsGetters.map(getter => getter())
     startGameCallback(factionVisualDetails)
@@ -34,7 +34,7 @@ export const createMenu = (
 }
 
 export const addNewFaction = () => {
-  const listNode = document.getElementById(factionsListId)
+  const listNode = document.getElementById(factionsListId)!
   const { node, getFactionDetails } = getFactionMenuItem()
   listNode.appendChild(node)
   factionVisualDetailsGetters.push(getFactionDetails)

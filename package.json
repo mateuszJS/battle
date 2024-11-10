@@ -13,32 +13,20 @@
     "@webassemblyjs/ast": "^1.14.1",
     "@webassemblyjs/wasm-edit": "^1.14.1",
     "@webassemblyjs/wasm-parser": "^1.14.1",
-    "assemblyscript": "^0.19.16",
-    "eslint": "^7.26.0",
-    "eslint-config-prettier": "^8.3.0",
-    "eslint-plugin-prettier": "^3.4.0",
-    "file-loader": "^0.11.2",
     "html-webpack-plugin": "^5.6.3",
-    "prettier": "^1.19.1",
-    "raw-loader": "^4.0.1",
-    "ts-loader": "^8.2.0",
-    "tslib": "^2.2.0",
-    "typescript": "^4.2.4",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.6.3",
     "webpack": "^5.96.1",
-    "webpack-bundle-analyzer": "^4.10.2",
     "webpack-cli": "^5.1.4",
-    "webpack-dashboard": "^3.3.8",
-    "webpack-dev-server": "^5.1.0",
-    "webpack-merge": "^4.1.0"
+    "webpack-dev-server": "^5.1.0"
+  },
+  "devDependenciesComments": {
+    "@webassemblyjs/ast": "only needed because of wasm-tool is not updated yet but works: https://github.com/webpack/webpack/issues/15566#issuecomment-2461005789",
+    "@webassemblyjs/wasm-edit": "only needed because of wasm-tool is not updated yet but works: https://github.com/webpack/webpack/issues/15566#issuecomment-2461005789",
+    "@webassemblyjs/wasm-parser": "only needed because of wasm-tool is not updated yet but works: https://github.com/webpack/webpack/issues/15566#issuecomment-2461005789"
   },
   "dependencies": {
-    "@assemblyscript/loader": "^0.19.16",
-    "@babel/runtime": "^7.14.6",
-    "@pixi/filter-drop-shadow": "^3.1.1",
     "debounce": "^1.2.0",
-    "lodash": "^4.17.21",
-    "pixi-layers": "^0.2.2",
-    "pixi-projection": "^0.3.13",
-    "pixi.js": "^5.3.3"
+    "lodash": "^4.17.21"
   }
 }

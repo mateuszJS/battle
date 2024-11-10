@@ -22,7 +22,7 @@ export interface SerializedMapInfo {
   portals: AdvancePoint[]
 }
 
-const getJoinIndex = (join: PIXI.Graphics) => {
+const getJoinIndex = (join: any) => {
   if (join.y < -1) return 0
   if (join.x > 1) return 1
   if (join.y > 1) return 2
@@ -31,9 +31,9 @@ const getJoinIndex = (join: PIXI.Graphics) => {
 }
 
 const getSerializedMapInfo = (
-  nodes: PIXI.Container[],
-  connections: Array<[PIXI.Graphics, PIXI.Graphics]>,
-  portals: PIXI.Container[],
+  nodes: any[],
+  connections: Array<[any, any]>,
+  portals: any[],
   ): SerializedMapInfo => {
   let id = 0;
   const serializedNodes: NodeDetails[] = nodes.map(node => ({

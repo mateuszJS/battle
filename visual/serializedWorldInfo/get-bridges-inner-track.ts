@@ -1,6 +1,6 @@
-import getPlatformCoords from '~/consts/get-platform-coords'
-import { ConnectionNode } from '~/map-creator/get-serialized-map-info'
-import getBridgeOffset from "~/consts/get-bridge-offset"
+import getPlatformCoords from 'consts/get-platform-coords'
+import { ConnectionNode } from 'map-creator/get-serialized-map-info'
+import getBridgeOffset from "consts/get-bridge-offset"
 
 const getBridgesInnerTrack = (
   connections: [ConnectionNode, ConnectionNode][],

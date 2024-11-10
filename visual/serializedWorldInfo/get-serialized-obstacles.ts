@@ -1,7 +1,7 @@
-import { AdvancePoint, ConnectionNode, NodeDetails } from "~/map-creator/get-serialized-map-info"
-import getPortalCoords from '~/consts/get-portal-coords'
-import getPlatformCoords from '~/consts/get-platform-coords'
-import getBridgeOffset from "~/consts/get-bridge-offset"
+import { AdvancePoint, ConnectionNode, NodeDetails } from "map-creator/get-serialized-map-info"
+import getPortalCoords from 'consts/get-portal-coords'
+import getPlatformCoords from 'consts/get-platform-coords'
+import getBridgeOffset from "consts/get-bridge-offset"
 
 
 const collectNextPoints = (
@@ -87,7 +87,7 @@ const getMapBoundaries = (
   nodes: NodeDetails[],
   connections: [ConnectionNode, ConnectionNode][],
   distanceOffset: number,
-): Point[] => {
+): Array<Point | null> => {
   const platformCoords = getPlatformCoords(distanceOffset)
   const safeCopyOfVisitedArrays = nodes.map(node => [...node.visited])
 
@@ -98,7 +98,7 @@ const getMapBoundaries = (
     }
   })
 
-  let startingNode: ConnectionNode = { node: nodeWithMinY, joinIndex: 0 }
+  let startingNode: ConnectionNode | null = { node: nodeWithMinY, joinIndex: 0 }
   let results: Array<Point | null> = []
 
   do {

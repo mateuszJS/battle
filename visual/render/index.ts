@@ -1,11 +1,11 @@
 import * as representationUpdaters from './representationUpdaters'
-import { FactionsList, UniverseRepresentation } from '~/initGame'
-import Factory from '~/representation/Factory'
-import Unit from '~/representation/Unit'
-import UnitsFactory from '~/representation/UnitFactory'
-import BulletFactory from '~/representation/BulletFactory'
-import StrategicPoint from '~/representation/StrategicPoint'
-import { PRODUCTION_LINE_LENGTH, RepresentationId, USER_FACTION_ID } from '~/logic-contants'
+import { FactionsList, UniverseRepresentation } from 'initGame'
+import Factory from 'representation/Factory'
+import Unit from 'representation/Unit'
+import UnitsFactory from 'representation/UnitFactory'
+import BulletFactory from 'representation/BulletFactory'
+import StrategicPoint from 'representation/StrategicPoint'
+import { PRODUCTION_LINE_LENGTH, RepresentationId, USER_FACTION_ID } from 'logic-contants'
 
 
 

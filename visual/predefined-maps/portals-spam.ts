@@ -1,4 +1,4 @@
-import { SerializedMapInfo } from "~/map-creator/get-serialized-map-info";
+import { SerializedMapInfo } from "map-creator/get-serialized-map-info";
 
 export default {
   connections: [],

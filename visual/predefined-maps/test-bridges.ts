@@ -1,6 +1,6 @@
-import { SerializedMapInfo } from "~/map-creator/get-serialized-map-info"
-import { FactionVisualDetails } from "~/map-creator/menu"
-import { Species } from "~/representation/UnitFactory"
+import { SerializedMapInfo } from "map-creator/get-serialized-map-info"
+import { FactionVisualDetails } from "map-creator/menu"
+import { Species } from "representation/UnitFactory"
 
 const nodes = [
   {

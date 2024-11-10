@@ -1,6 +1,6 @@
-import Factory from '~/representation/Factory'
-import StrategicPoint from '~/representation/StrategicPoint'
-import Unit from '~/representation/Unit'
+import Factory from 'representation/Factory'
+import StrategicPoint from 'representation/StrategicPoint'
+import Unit from 'representation/Unit'
 
 export const updateFactory = (factory: Factory, progress: number, productionLine?: Float32Array) => {
   if (progress !== 0) {

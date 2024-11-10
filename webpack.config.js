@@ -5,9 +5,6 @@ const webpack = require('webpack');
 const WasmPackPlugin = require("@wasm-tool/wasm-pack-plugin");
 
 module.exports = {
-  // node: {
-  //   fs: "empty",
-  // },
 	experiments: {
 		asyncWebAssembly: true
 	},
@@ -19,19 +16,10 @@ module.exports = {
 	},
 	devtool: 'eval-source-map',
 	resolve: {
-    extensions: ['.js', '.ts', '.wasm', '.vert', '.frag', '.asc'],
+    extensions: ['.js', '.ts', '.wasm', '.wgsl', '.css'],
 		alias: {
-			
-			'~': path.resolve(__dirname, '/visual'),
-			'Constants': path.resolve(__dirname, '/logic/constants'),
-			'Settings': path.resolve(__dirname, '/visual/modules/gameSettings'),
+			'Universe': path.resolve(__dirname, '/crate/pkg/index.js'),
 		}
-  },
-  stats: { // looks like the 'minimal', but with colors
-    all: false,
-    modules: false,
-    errors: true,
-    warnings: true
   },
 	module: {
 		rules: [
@@ -40,20 +28,18 @@ module.exports = {
 				use: ['ts-loader']
 			},
 			{
-				test: /\.(svg|png|jpg|woff|woff2|eot|ttf)$/,
-				use: [
-					{
-						loader: 'url-loader',
-						options: {
-							limit: 8192
-						}
+				test: /\.(png|jpg)$/,
+				type: "asset/resource",
+				parser: {
+					dataUrlCondition: {
+						maxSize: 8 * 1024, // 8 kB
 					}
-				]
+				}
       },
       {
-				test: /\.(vert|frag)$/,
-				use: 'raw-loader'
-			},
+        test: /\.(wgsl|css)$/,
+        type: "asset/source",
+      },
     ]
 	},
 	plugins: [

@@ -43,7 +43,6 @@ const getMapPoints = (mapWidth: number, mapHeight: number) => {
   ]
 }
 
-
 const initGame = (
   wasmModule: Universe,
   serializedMapInfo: SerializedMapInfo,
@@ -79,17 +78,6 @@ const initGame = (
     serializedWorldInfo.obstacles,
     new Float32Array([])
   )
-  // initUniverse(
-  //   serializedWorldInfo.factions,
-  //   serializedWorldInfo.obstacles,
-  //   serializedWorldInfo.blockingTrackPoints,
-  //   serializedWorldInfo.rawTrackPoints,
-  //   serializedWorldInfo.bridgeSecondToLastPointIndex,
-  //   mapWidth,
-  //   mapHeight,
-  //   // serializedInfoAboutWorld.obstacles,
-  //   // serializedInfoAboutWorld.strategicPoints,
-  // )
   unpinSerializedWorldInfo()
 
   const factionsVisualDetails: FactionsList = new Map()
@@ -114,55 +102,14 @@ const initGame = (
 
     factionsVisualDetails.set(factionId, factionVisualDetails.splice(0, 1)[0]) 
   }
-  // console.log('initial universeRepresentation', universeRepresentation)
-  // const strategicPointsInitData = universe.get_strategic_points_init_data()
-  // for (let i = 0; i < strategicPointsInitData.length; i += 3) {
-  //   const strategicPointId = strategicPointsInitData[i]
-  //   const factoryRepresentation = new StrategicPoint(
-  //     strategicPointsInitData[i + 1],
-  //     strategicPointsInitData[i + 2],
-  //   )
-  //   universeRepresentation[strategicPointId] = factoryRepresentation
-  // }
 
   const mouseController = new initializeMouseController(universe, universeRepresentation, mapPoints)
 
-  // debugController.init()
-  // let timeToCreateEnemy = 0
-  // let nextIsRaptor = false
-
-  // startDebugObstaclesMap(wasmModule)
-  // debugObstacles(wasmModule)
-
-
-  // debugInnerTrack(wasmModule)
-  // debugOuterTrack(wasmModule)
-  // startDebugObstacles(wasmModule)
-
   window.app.ticker.add((delta: number) => {
-    // gridDebug(wasmModule)
-
-    // startDebugGrid(wasmModule)
-
-    // gridDebug(universe)
-    // debugController.update(universe)
-
-    // if (window.debugAiMode) return
-
-    // if (timeToCreateEnemy == 0) {
-    //   universe.create_enemy_squad(
-    //     nextIsRaptor ? REPRESENTATION_RAPTOR : REPRESENTATION_SOLIDER,
-    //   )
-    //   nextIsRaptor = !nextIsRaptor
-
-    //   timeToCreateEnemy = 1500
-    // } else {
-    //   timeToCreateEnemy--
-    // }
     mouseController.updateScenePosition()
     universe.update();
     const universeData = universe.get_universe_data();
-    // console.log('universeData', universeData)
+
     render(
       0,
       universeData,

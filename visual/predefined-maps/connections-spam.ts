@@ -1,4 +1,4 @@
-import { SerializedMapInfo } from "~/map-creator/get-serialized-map-info"
+import { SerializedMapInfo } from "map-creator/get-serialized-map-info"
 
 const nodes = [
   {id: 0, x: 304.94709972782516, y: 304.94709972782516, visited: new Array(8).fill(false)},
