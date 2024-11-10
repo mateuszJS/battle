@@ -7,6 +7,7 @@ import { createMenu, addNewFaction, FactionVisualDetails } from './menu'
 import { Universe } from 'Universe'
 import Rect from 'Rect'
 import MapCreatorCss from './map-creator.css'
+import { applyTransform } from './css-transform-matrix3d'
 
 const platformCoords = getPlatformCoords()
 const bridgeWidth = (platformCoords[3].y - platformCoords[2].y) * mapDetails.scale
@@ -16,6 +17,8 @@ let isJoiner = false
 let isPortalArrow = false
 const startOffset = { x: 0, y: 0 }
 let currDragElem: HTMLElement | null = null
+let bridgeSource: HTMLElement | null = null
+let bridgePreviewEndSnap: HTMLElement | null = null
 // let connections: Array<[PIXI.Graphics, PIXI.Graphics]> = []
 // const connectionsContainer = new PIXI.Graphics()
 // const activeConnectionContainer = new PIXI.Graphics()
@@ -315,17 +318,7 @@ function updateDragElem(e: MouseEvent) {
   currDragElem.style.top = e.clientY + startOffset.y + 'px'
 }
 
-function attachDragEvents(element: HTMLElement) {
-  element.addEventListener('mousemove', (e) => {
-    updateDragElem(e)
-  })
 
-  window.document.body.addEventListener('mouseup', () => {
-    if (currDragElem) {
-      currDragElem = null
-    }
-  })
-}
 
 export default function openMapCreator(wasmModule: Universe) {
   /** Add styles and main wrapper, page wrapper, toolbar wrapper and map area wrapper where element are dragable */
@@ -348,8 +341,19 @@ export default function openMapCreator(wasmModule: Universe) {
 
   /** Fill the toolbar */
   const platform = document.createElement('div')
-  platform.classList.add('octagon')
+  platform.classList.add('platform')
+  platform.innerHTML = `
+  <div class="octagon"></div>
+  <div class="bridge-anchor"></div>
+  <div class="bridge-anchor"></div>
+  <div class="bridge-anchor"></div>
+  <div class="bridge-anchor"></div>
+`
   toolbarElem.appendChild(platform)
+
+  const bridgePreview = document.createElement('div')
+  bridgePreview.classList.add('bridge-preview')
+  mapAreaElem.appendChild(bridgePreview)
 
   platform.addEventListener('mousedown', e => {
     const { x: mapAreaX, y: mapAreaY } = mapAreaElem.getBoundingClientRect() 
@@ -357,21 +361,129 @@ export default function openMapCreator(wasmModule: Universe) {
     startOffset.x = toolX - e.clientX - mapAreaX
     startOffset.y = toolY - e.clientY - mapAreaY
 
-    currDragElem = addDragableElement(mapAreaElem, 'octagon', 100, 100)
-    updateDragElem(e)
+    currDragElem = addDragableElement(mapAreaElem, 'platform', 100, 100)
 
-    currDragElem.addEventListener('mousedown', e => {
+    const octagonElem = document.createElement('div')
+    octagonElem.classList.add('octagon')
+    currDragElem.appendChild(octagonElem)
+
+    const bridgeAnchorsContainer = document.createElement('div')
+    for(let i = 0; i < 4; i++) {
+      const bridgeAnchorElem = document.createElement('div')
+      bridgeAnchorElem.classList.add('bridge-anchor')
+      bridgeAnchorsContainer.appendChild(bridgeAnchorElem)
+    }
+
+    currDragElem.appendChild(bridgeAnchorsContainer)
+
+    octagonElem.addEventListener('mousedown', e => {
+      const platform = (e.currentTarget as HTMLElement).parentElement!
       const { x: mapAreaX, y: mapAreaY } = mapAreaElem.getBoundingClientRect() 
-      const { x: toolX, y: toolY } = (e.currentTarget as HTMLElement).getBoundingClientRect()
+      const { x: toolX, y: toolY } = platform.getBoundingClientRect()
       startOffset.x = toolX - e.clientX - mapAreaX
       startOffset.y = toolY - e.clientY - mapAreaY
   
-      currDragElem = e.currentTarget as HTMLElement
+      currDragElem = platform
       updateDragElem(e)
     })
+
+    const bridgeAnchors = Array.from(bridgeAnchorsContainer.children) as HTMLElement[]
+
+    bridgeAnchors.forEach(node => {
+      node.addEventListener('mousedown', e => {
+        const { x: mapAreaX, y: mapAreaY } = mapAreaElem.getBoundingClientRect()
+        const { x, y, width, height } = (e.currentTarget as HTMLElement).getBoundingClientRect()
+        startOffset.x = x - e.clientX - mapAreaX
+        startOffset.y = y - e.clientY - mapAreaY
+
+        currDragElem = addDragableElement(mapAreaElem, 'bridge-anchor', width, height)
+        currDragElem.classList.add('active')
+        updateDragElem(e)
+        bridgeSource = node
+        bridgePreview.classList.add('active')
+      })
+
+      node.addEventListener('mouseenter', e => {
+        const element = e.currentTarget as HTMLElement
+        if (!!bridgeSource && element !== currDragElem) {
+          element.classList.add('accept')
+          bridgePreviewEndSnap = element
+        }
+      })
+
+      node.addEventListener('mouseleave', e => {
+        const element = e.currentTarget as HTMLElement
+        element.classList.remove('accept')
+        bridgePreviewEndSnap = null
+      })
+
+    })
+
+    updateDragElem(e)
   })
 
   // portal, strategic point, platform, bridge
+
+  function attachDragEvents(element: HTMLElement) {
+    element.addEventListener('mousemove', (e) => {
+      updateDragElem(e)
+      if (bridgeSource) {
+        const { x: mapAreaX, y: mapAreaY } = mapAreaElem.getBoundingClientRect()
+        const { x: sourceAbsoluteX, y: sourceAbsoluteY, width, height } = bridgeSource.getBoundingClientRect()
+        const sourceX = sourceAbsoluteX - mapAreaX
+        const sourceY = sourceAbsoluteY - mapAreaY
+
+        const originalPos = [
+          [0, 0],
+          [100, 0],
+          [100, 100],
+          [0, 100]
+        ]
+        
+        let destX = e.clientX + startOffset.x
+        let destY = e.clientY + startOffset.y
+
+        if (bridgePreviewEndSnap) {
+          const { x, y } = bridgePreviewEndSnap.getBoundingClientRect()
+          destX = x - mapAreaX
+          destY = y - mapAreaY
+        }
+        // const [offsetX, offsetY] = width > height ? [width, 0] : [0, height]
+
+        let targetPos;
+        if (width > height) {
+          targetPos = [
+            [sourceX, sourceY],
+            [sourceX + width, sourceY],
+            [destX + width, destY],
+            [destX, destY],
+          ]
+        } else {
+          targetPos = [
+            [sourceX, sourceY],
+            [destX, destY],
+            [destX, destY + height],
+            [sourceX, sourceY + height],
+          ]
+        }
+
+        // order of points in targetPos needs to be same as originalPos
+        applyTransform(bridgePreview, originalPos, targetPos)
+      }
+    })
+  
+    window.document.body.addEventListener('mouseup', () => {
+      if (bridgeSource) {
+        bridgeSource = null
+        bridgePreview.classList.remove('active')
+      }
+
+      if (currDragElem) {
+        currDragElem.classList.remove('active') // for bridge we add active class
+        currDragElem = null
+      }
+    })
+  }
 
   attachDragEvents(mapAreaElem)
 

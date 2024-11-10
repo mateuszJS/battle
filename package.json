@@ -10,6 +10,7 @@
   "license": "ISC",
   "devDependencies": {
     "@types/lodash": "^4.17.13",
+    "@types/numeric": "^1.2.6",
     "@wasm-tool/wasm-pack-plugin": "^1.7.0",
     "@webassemblyjs/ast": "^1.14.1",
     "@webassemblyjs/wasm-edit": "^1.14.1",
@@ -28,6 +29,7 @@
   },
   "dependencies": {
     "debounce": "^1.2.0",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "numeric": "^1.2.6"
   }
 }
