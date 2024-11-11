@@ -6,7 +6,10 @@
   padding: 20px;
   gap: 20px;
   display: grid;
-  grid-template-columns: 100px 1fr;
+  grid-template: minmax(0, 1fr) / 100px minmax(0, 1fr);
+  /* same problem as flex minimum width/height: auto
+  instead of using min-width/height = 0 we can assign it here for grid-template*/
+  
 
   .dragable {
     position: absolute;
@@ -27,6 +30,8 @@
   .map-area {
     background: #222;
     position: relative;
+    max-width: 100%;
+    max-height: 100%;
   }
 
   .platform {

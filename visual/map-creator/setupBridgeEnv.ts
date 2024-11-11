@@ -78,7 +78,6 @@ export function updateBridgePreview(event: MouseEvent, mapAreaElem: HTMLElement)
   }
 }
 
-
 export default function setupBridgeEnv(mapAreaElem: HTMLElement) {
   window.document.body.addEventListener('mouseup', () => {
     if (bridgeSource && bridgePreview) {
@@ -107,6 +106,7 @@ export function attachPlatformListeners(
 
       bridgePreview = document.createElement('div')
       bridgePreview.classList.add('bridge-preview')
+      updateBridgePreview(e, mapAreaElem)
       mapAreaElem.appendChild(bridgePreview)
     })
 
