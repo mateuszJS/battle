@@ -6,9 +6,8 @@ import mapDetails from './map-details'
 import { createMenu, addNewFaction, FactionVisualDetails } from './menu'
 import { Universe } from 'Universe'
 import Rect from 'Rect'
-import { applyTransform } from './css-transform-matrix3d'
 import addStyles from './addStyles'
-import setupBridgeEnv, { attachPlatformListeners, createPlatformElem, updateBridgePreview } from './setupBridgeEnv'
+import setupBridgeEnv, { attachPlatformListeners, createPlatformElem, updateBridgePreview, updateBriges } from './setupBridgeEnv'
 
 const platformCoords = getPlatformCoords()
 const bridgeWidth = (platformCoords[3].y - platformCoords[2].y) * mapDetails.scale
@@ -16,9 +15,7 @@ const bridgeWidth = (platformCoords[3].y - platformCoords[2].y) * mapDetails.sca
 const startOffset = { x: 0, y: 0 }
 let currDragElem: HTMLElement | null = null
 
-function updateDragElem(e: MouseEvent) {
-  if (!currDragElem) return
-
+function updateDragElem(e: MouseEvent, currDragElem: HTMLElement) {
   currDragElem.style.left = e.clientX + startOffset.x + 'px'
   currDragElem.style.top = e.clientY + startOffset.y + 'px'
 }
@@ -53,7 +50,7 @@ export default function openMapCreator(wasmModule: Universe) {
     startOffset.y = toolY - event.clientY - mapAreaY
   
     currDragElem = elem
-    updateDragElem(event)
+    updateDragElem(event, elem)
   }
 
   platformToolElem.addEventListener('mousedown', e => {
@@ -63,20 +60,25 @@ export default function openMapCreator(wasmModule: Universe) {
     startOffset.y = toolY - e.clientY - mapAreaY
 
     const [newPlatform, dragTrigger] = createPlatformElem(mapAreaElem)
-    attachPlatformListeners(newPlatform, mapAreaElem)
+    attachPlatformListeners(newPlatform)
     dragTrigger.addEventListener('mousedown', e => {
       startDrag(newPlatform, e)
+      updateBriges(newPlatform)
     })
 
     currDragElem = newPlatform
-    updateDragElem(e)
+    updateDragElem(e, newPlatform)
   })
 
   // portal, strategic point, platform, bridge
 
   mapAreaElem.addEventListener('mousemove', (e) => {
-    updateDragElem(e)
-    updateBridgePreview(e, mapAreaElem)
+    if (currDragElem) {
+      updateDragElem(e, currDragElem)
+      updateBriges(currDragElem)
+    } else {
+      updateBridgePreview(e)
+    }
   })
 
   window.document.body.addEventListener('mouseup', () => {

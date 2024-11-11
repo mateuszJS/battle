@@ -25,72 +25,128 @@ export function createPlatformElem(parent: HTMLElement): [HTMLElement, HTMLEleme
   return [platformElem, octagonElem]
 }
 
-let bridgeSource: HTMLElement | null = null
+let mapAreaElem: HTMLElement
+let anchorSource: HTMLElement | null = null
 let bridgePreviewEndSnap: HTMLElement | null = null
 let bridgePreview: HTMLElement | null = null
 
-export function updateBridgePreview(event: MouseEvent, mapAreaElem: HTMLElement) {
-  if (bridgeSource && bridgePreview) { // actually one of those could be checked, but for TS safety...
-    const { x: mapAreaX, y: mapAreaY } = mapAreaElem.getBoundingClientRect()
-    const { x: sourceAbsoluteX, y: sourceAbsoluteY, width, height } = bridgeSource.getBoundingClientRect()
-    const sourceX = sourceAbsoluteX - mapAreaX
-    const sourceY = sourceAbsoluteY - mapAreaY
+interface BridgeAnchor {
+  base: HTMLElement // platform // durign creation we can fake it
+  anchor: HTMLElement // anchor
+}
+interface Bridge {
+  elem: HTMLElement
+  from: BridgeAnchor
+  to: BridgeAnchor
+}
+const bridges: Bridge[] = []
 
-    const originalPos = [
-      [0, 0],
-      [100, 0],
-      [100, 100],
-      [0, 100]
+export function updateBriges(updatedPlatform: HTMLElement) {
+  bridges.forEach(bridge => {
+    if (bridge.from.base === updatedPlatform || bridge.to.base === updatedPlatform) {
+      updateBridge(bridge.elem, bridge.from.anchor, bridge.to.anchor)
+    }
+  })
+}
+
+function updateBridge(bridgeElem: HTMLElement, fromElem: HTMLElement, to: HTMLElement | Point) {
+  const { x: mapAreaX, y: mapAreaY } = mapAreaElem.getBoundingClientRect()
+
+  const {
+    x: sourceAbsoluteX,
+    y: sourceAbsoluteY,
+    width: sourceWidth,
+    height: sourceHeight,
+  } = fromElem.getBoundingClientRect()
+
+  const sourceX = sourceAbsoluteX - mapAreaX
+  const sourceY = sourceAbsoluteY - mapAreaY
+
+  const originalPos = [
+    [0, 0],
+    [100, 0],
+    [100, 100],
+    [0, 100]
+  ]
+  
+  let destX; 
+  let destY;
+
+  if ('getBoundingClientRect' in to) {
+    const { x, y } = to.getBoundingClientRect()
+    destX = x
+    destY = y
+  } else {
+    destX = to.x - sourceWidth / 2
+    destY = to.y - sourceHeight / 2
+  }
+
+  destX -= mapAreaX
+  destY -= mapAreaY
+
+  // const [offsetX, offsetY] = width > height ? [width, 0] : [0, height]
+
+  let targetPos;
+  if (sourceWidth > sourceHeight) {
+    targetPos = [
+      [sourceX, sourceY],
+      [sourceX + sourceWidth, sourceY],
+      [destX + sourceWidth, destY],
+      [destX, destY],
     ]
-    
-    let destX = event.clientX - width / 2
-    let destY = event.clientY - height / 2
+  } else {
+    targetPos = [
+      [sourceX, sourceY],
+      [destX, destY],
+      [destX, destY + sourceHeight],
+      [sourceX, sourceY + sourceHeight],
+    ]
+  }
+  // order of points in targetPos needs to be same as originalPos
+  applyTransform(bridgeElem, originalPos, targetPos)
+}
 
-    if (bridgePreviewEndSnap) {
-      const { x, y } = bridgePreviewEndSnap.getBoundingClientRect()
-      destX = x
-      destY = y
-    }
-
-    destX -= mapAreaX
-    destY -= mapAreaY
-    // const [offsetX, offsetY] = width > height ? [width, 0] : [0, height]
-
-    let targetPos;
-    if (width > height) {
-      targetPos = [
-        [sourceX, sourceY],
-        [sourceX + width, sourceY],
-        [destX + width, destY],
-        [destX, destY],
-      ]
-    } else {
-      targetPos = [
-        [sourceX, sourceY],
-        [destX, destY],
-        [destX, destY + height],
-        [sourceX, sourceY + height],
-      ]
-    }
-
-    // order of points in targetPos needs to be same as originalPos
-    applyTransform(bridgePreview, originalPos, targetPos)
+export function updateBridgePreview(event: MouseEvent) {
+  if (anchorSource && bridgePreview) { // actually one of those could be checked, but for TS safety...
+      const to: Point = {
+        x: event.clientX,
+        y: event.clientY,
+      }
+      updateBridge(bridgePreview, anchorSource, to)
   }
 }
 
-export default function setupBridgeEnv(mapAreaElem: HTMLElement) {
+export default function setupBridgeEnv(mapAreaElement: HTMLElement) {
+  mapAreaElem = mapAreaElement
+
   window.document.body.addEventListener('mouseup', () => {
-    if (bridgeSource && bridgePreview) {
-      bridgeSource = null
-      bridgePreview.remove()
+    if (anchorSource && bridgePreview) {
+
+      if (bridgePreviewEndSnap) {
+        bridges.push({
+          elem: bridgePreview,
+          from: {
+            base: anchorSource.parentElement!.parentElement!,
+            anchor: anchorSource,
+          },
+          to: {
+            base: bridgePreviewEndSnap.parentElement!.parentElement!,
+            anchor: bridgePreviewEndSnap,
+          }
+        })
+      } else {
+        bridgePreview.remove()
+      }
+
+      anchorSource = null
       bridgePreview = null
+      bridgePreviewEndSnap = null
     }
   })
 }
 
 export function attachPlatformListeners(
   platform: HTMLElement,
-  mapAreaElem: HTMLElement
 ) {
   const octagonElem = platform.querySelector<HTMLElement>('.octagon')
   if (!octagonElem) throw Error('Invalid platform html element. No .octagon has been found within the element.')
@@ -102,17 +158,17 @@ export function attachPlatformListeners(
   bridgeAnchors.forEach(node => {
     node.addEventListener('mousedown', e => {
       const { width, height } = (e.currentTarget as HTMLElement).getBoundingClientRect()
-      bridgeSource = node
+      anchorSource = node
 
       bridgePreview = document.createElement('div')
       bridgePreview.classList.add('bridge-preview')
-      updateBridgePreview(e, mapAreaElem)
+      updateBridgePreview(e)
       mapAreaElem.appendChild(bridgePreview)
     })
 
     node.addEventListener('mouseenter', (e) => {
       const element = e.currentTarget as HTMLElement
-      if (!!bridgeSource) {
+      if (!!anchorSource) {
         element.classList.add('accept')
         bridgePreviewEndSnap = element
       }
