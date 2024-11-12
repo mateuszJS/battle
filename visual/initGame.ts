@@ -45,13 +45,11 @@
 
 // const initGame = (
 //   wasmModule: Universe,
-//   serializedMapInfo: SerializedMapInfo,
 //   mapWidth: number,
 //   mapHeight: number,
-//   factionVisualDetails: FactionVisualDetails[]
 // ) => {
-//   serializedMapInfo = PREDEFINED_MAP
-//   factionVisualDetails = PREDEFINED_FACTION_VISUAL_DETAILS
+//   const serializedMapInfo: SerializedMapInfo = PREDEFINED_MAP
+//   const factionVisualDetails: FactionVisualDetails[] = PREDEFINED_FACTION_VISUAL_DETAILS
 
 //   enhanceAnimatedSprites()
 //   attachMethodToConvertLogicCoordsToVisual(mapHeight)

@@ -1,4 +1,3 @@
-// import initGame from 'initGame'
 import { MAP_HEIGHT, MAP_WIDTH } from './constants'
 import getPlatformCoords from 'consts/get-platform-coords'
 import getSerializedMapInfo from './get-serialized-map-info'
@@ -8,6 +7,7 @@ import { Universe } from 'Universe'
 import Rect from 'Rect'
 import addStyles from './addStyles'
 import setupBridgeEnv, { attachPlatformListeners, createPlatformElem, updateBridgePreview, updateBriges } from './setupBridgeEnv'
+import getinitUniverse from 'getinitUniverse'
 
 const platformCoords = getPlatformCoords()
 const bridgeWidth = (platformCoords[3].y - platformCoords[2].y) * mapDetails.scale
@@ -35,6 +35,14 @@ export default function openMapCreator(wasmModule: Universe) {
   mapAreaElem.classList.add('map-area')
   mapAreaElem.style.aspectRatio = `${mapDetails.width / mapDetails.height}`
   viewElem.appendChild(mapAreaElem)
+
+
+  const startBtn = document.createElement('button')
+  startBtn.textContent = 'START'
+  const startBtnClickPromise = new Promise<void>(resolve => {
+    startBtn.addEventListener('click', () => resolve())
+  })
+  viewElem.appendChild(startBtn)
 
   document.body.appendChild(viewElem)
 
@@ -88,18 +96,21 @@ export default function openMapCreator(wasmModule: Universe) {
     }
   })
 
-  const startGame = (factionVisualDetails: FactionVisualDetails[]) => {
-    styleElem.remove()
-    viewElem.remove()
+  const canvas = document.createElement('canvas')
+  document.body.appendChild(canvas)
 
-    // initGame(
-    //   wasmModule,
-    //   getSerializedMapInfo(nodes, connections, portals),
-    //   MAP_WIDTH,
-    //   MAP_HEIGHT,
-    //   factionVisualDetails,
-    // )
-  }
-  // createMenu(startGame)
+  Promise.all([startBtnClickPromise, getinitUniverse()])
+    .then(([_, initUniverse]) => {
+      styleElem.remove()
+      viewElem.remove()
+
+      initUniverse(
+        wasmModule,
+        MAP_WIDTH,
+        MAP_HEIGHT,
+      //   getSerializedMapInfo(nodes, connections, portals),
+      //   factionVisualDetails,
+      )
+    })
 }
 

@@ -6,7 +6,7 @@
   padding: 20px;
   gap: 20px;
   display: grid;
-  grid-template: minmax(0, 1fr) / 100px minmax(0, 1fr);
+  grid-template: minmax(0, 1fr) / 100px minmax(0, 1fr) 100px;
   /* same problem as flex minimum width/height: auto
   instead of using min-width/height = 0 we can assign it here for grid-template*/
   
