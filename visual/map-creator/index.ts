@@ -7,7 +7,7 @@ import { Universe } from 'Universe'
 import Rect from 'Rect'
 import addStyles from './addStyles'
 import setupBridgeEnv, { attachPlatformListeners, createPlatformElem, updateBridgePreview, updateBriges } from './setupBridgeEnv'
-import getinitUniverse from 'getinitUniverse'
+import getinitUniverse from 'getInitUniverse'
 
 const platformCoords = getPlatformCoords()
 const bridgeWidth = (platformCoords[3].y - platformCoords[2].y) * mapDetails.scale

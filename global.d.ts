@@ -11,6 +11,8 @@ declare global {
 
     convertLogicCoordToVisual: (x: number, y: number) => [number, number]
     convertLogicAngleToVisual: (angle: number) => number
+
+    angle: number
   }
 
   type ValueOf<T> = T[keyof T]

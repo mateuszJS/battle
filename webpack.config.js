@@ -17,10 +17,11 @@ module.exports = {
 	},
 	devtool: 'eval-source-map',
 	resolve: {
-    extensions: ['.js', '.ts', '.wasm', '.wgsl', '.css'],
+    extensions: ['.js', '.ts', '.wasm', '.wgsl', '.css', '.json'],
 		modules: [path.resolve(__dirname, 'visual'), 'node_modules'],
 		alias: {
 			'Universe': path.resolve(__dirname, 'crate/pkg'),
+			'assets': path.resolve(__dirname, 'assets')
 		},
   },
 	module: {
@@ -30,7 +31,7 @@ module.exports = {
 				use: ['ts-loader']
 			},
 			{
-				test: /\.(png|jpg)$/,
+				test: /\.(png|jpg|json)$/,
 				type: "asset/resource",
 				parser: {
 					dataUrlCondition: {

@@ -5,10 +5,28 @@ import { PREDEFINED_FACTION_VISUAL_DETAILS, PREDEFINED_MAP } from "predefined-ma
 import { Universe } from "Universe";
 import canvasSizeObserver from "WebGPU/canvasSizeObserver";
 import setupWebGPU from "WebGPU/setupWebGPU";
-import { drawFullTexture } from "WebGPU/programs/initPrograms";
 import imageSrc from '../assets/Fire.png'
 import { createTextureFromImage } from "WebGPU/getTexture";
+import loadAssets from "WebGPU/loadAssets";
+import { getAssets } from "WebGPU/framesByState";
+import AnimatedSprite from "WebGPU/AnimatedSprite";
+import { UnitState } from "logic-contants";
+import mat3 from "WebGPU/m3";
 // import runCreator from "Creator/run";
+
+function getCanvasMatrix(canvas: HTMLCanvasElement) {
+  return mat3.projection(canvas.clientWidth, canvas.clientHeight)
+  // const projection = mat4.ortho(
+  //   0,                   // left
+  //   canvas.clientWidth,  // right
+  //   canvas.clientHeight, // bottom
+  //   0,                   // top
+  //   400,                 // near
+  //   -400,                // far
+  // );  
+
+  // return projection
+}
 
 export default async function getinitUniverse(): Promise<
   (
@@ -32,18 +50,29 @@ export default async function getinitUniverse(): Promise<
   // runCreator(state, canvas, context, device, presentationFormat)
 
   // initUI(state)
+  const assets = await getAssets(
+    device
+  )
+  // const assets = await loadAssets(
+  //   device,
+  //   (progress) => console.log(`assets loading progress: ${progress}`)
+  // )
 
-  const texture: GPUTexture = await createTextureFromImage(device, imageSrc, {})
+  // const texture: GPUTexture = await createTextureFromImage(device, imageSrc, {})
+
+  const animatedSprite = new AnimatedSprite()
+
+  window.angle = 0
 
   return function initUniverse (wasmModule, mapWidth, mapHeight) {
     const serializedMapInfo: SerializedMapInfo = PREDEFINED_MAP
     const factionVisualDetails: FactionVisualDetails[] = PREDEFINED_FACTION_VISUAL_DETAILS
+    const matrix = getCanvasMatrix(canvas)
 
     // const mapPoints = getMapPoints(mapWidth, mapHeight)
 
 
     function tick(now: DOMHighResTimeStamp) {
-      console.log('tick')
       // here we need to render that texture into canvas
       const canvasTexture = context.getCurrentTexture();
       const descriptor = {
@@ -61,7 +90,14 @@ export default async function getinitUniverse(): Promise<
       const encoder = device.createCommandEncoder()
       const pass = encoder.beginRenderPass(descriptor)
 
-      drawFullTexture(pass, texture)
+      animatedSprite.update(
+        pass,
+        assets,
+        matrix,
+        UnitState.RUN,
+        window.angle, // Math.PI * 0.75,
+        now,
+      )      
 
       pass.end()
       const commandBuffer = encoder.finish();

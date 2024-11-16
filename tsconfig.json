@@ -10,7 +10,8 @@
     "baseUrl": "./visual",
     "typeRoots": ["./node_modules/@webgpu/types", "./node_modules/@types"], // added because of WebGPU types. Also had to add node_modules/@types, because typeRoots override default typeRoots, not extends
     "paths": {
-      "Universe": ["../crate/pkg"]
+      "Universe": ["../crate/pkg"],
+      "assets": ["../assets"]
     },
 
     // everything below is just suggested by https://www.npmjs.com/package/@tsconfig/recommended
