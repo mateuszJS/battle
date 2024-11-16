@@ -28,4 +28,7 @@ struct VSOutput {
 
 @fragment fn fs(fsInput: VSOutput) -> @location(0) vec4f {
   return textureSample(ourTexture, ourSampler, fsInput.texcoord);
+  // let tex = textureSample(ourTexture, ourSampler, fsInput.texcoord);
+  // return vec4f(tex.g, tex.g, tex.g, tex.g);
+  // return vec4f(tex.rgb * tex.a, tex.a);
 }

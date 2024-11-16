@@ -31,7 +31,9 @@ function createTextureFromSource(device: GPUDevice, source: TextureSource, optio
 function copySourceToTexture(device: GPUDevice, texture: GPUTexture, source: TextureSource, {flipY}: Options = {}) {
   device.queue.copyExternalImageToTexture(
     { source, flipY, },
-    { texture },
+    { texture,
+      // premultipliedAlpha: true
+    },
     { width: source.width, height: source.height },
   );
 
@@ -43,7 +45,7 @@ function copySourceToTexture(device: GPUDevice, texture: GPUTexture, source: Tex
 async function loadImageBitmap(url: string) {
   const res = await fetch(url);
   const blob = await res.blob();
-  return await createImageBitmap(blob, { colorSpaceConversion: 'none' });
+  return await createImageBitmap(blob, { colorSpaceConversion: 'none', premultiplyAlpha: 'premultiply' });
 }
 
 export async function createTextureFromImage(device: GPUDevice, url: string, options: Options) {

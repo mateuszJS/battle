@@ -1,6 +1,5 @@
 import { UnitState } from "logic-contants"
 import { createTextureFromImage } from "./getTexture"
-import Rect from "Rect"
 
 const frameByState: Record<UnitState, {
   jsonUrl: URL,
@@ -119,22 +118,17 @@ export interface Asset {
   textureIndex: number
 }
 
-// type assetName = typeof assets[number][0]
-// type AssetsDictionary = Record<assetName, Asset>
-
 export async function getAssets(device: GPUDevice): Promise<Asset[]> {
   const promises = Object.entries(frameByState)
     .map<Promise<Asset>>(([state, assetDetail]) => {
       const assetPromises = [
-          state,
+          state, // useful only for debugging
           assetDetail.textureIndex,
           createTextureFromImage(device, assetDetail.imgUrl.toString(), {flipY: true}),
           fetch(assetDetail.jsonUrl.toString()).then(res => res.json() as unknown as SpriteSheetJson)
         ] as const
 
       return Promise.all(assetPromises).then(([state, textureIndex, texture, json]) => {
-        // numOfLoadedAssets++
-        // progressCallback(numOfLoadedAssets / assets.length)
         const texUVs = Object.values(json.frames).map(fd => {
           const {x, y, w, h} = fd.frame
           const frameWidth = fd.rotated ? h : w

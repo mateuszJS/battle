@@ -39,7 +39,19 @@ export default function getProgram(
     fragment: {
       module,
       entryPoint: 'fs',
-      targets: [{ format: presentationFormat }],
+      targets: [{
+        format: presentationFormat,
+        blend: {
+          color: {
+            srcFactor: 'one',
+            dstFactor: 'one-minus-src-alpha'
+          },
+          alpha: {
+            srcFactor: 'one',
+            dstFactor: 'one-minus-src-alpha'
+          },
+        },
+      }],
     },
   });
 
