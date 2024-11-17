@@ -8,10 +8,12 @@ import setupWebGPU from "WebGPU/setupWebGPU";
 import imageSrc from '../assets/Fire.png'
 import { createTextureFromImage } from "WebGPU/getTexture";
 import loadAssets from "WebGPU/loadAssets";
-import { getAssets } from "WebGPU/framesByState";
+import getSpriteSheetTexture from "WebGPU/getSpriteSheetTexture";
 import AnimatedSprite from "WebGPU/AnimatedSprite";
 import { UnitState } from "logic-contants";
 import mat3 from "WebGPU/m3";
+import { drawTexture } from "WebGPU/programs/initPrograms";
+import Rect from "Rect";
 // import runCreator from "Creator/run";
 
 function getCanvasMatrix(canvas: HTMLCanvasElement) {
@@ -50,7 +52,7 @@ export default async function getinitUniverse(): Promise<
   // runCreator(state, canvas, context, device, presentationFormat)
 
   // initUI(state)
-  const assets = await getAssets(
+  const texture2dArray = await getSpriteSheetTexture(
     device
   )
   // const assets = await loadAssets(
@@ -60,7 +62,7 @@ export default async function getinitUniverse(): Promise<
 
   // const texture: GPUTexture = await createTextureFromImage(device, imageSrc, {})
 
-  const animatedSprite = new AnimatedSprite()
+  const animatedSprite = new AnimatedSprite(texture2dArray)
 
   window.angle = 0
 
@@ -89,15 +91,10 @@ export default async function getinitUniverse(): Promise<
       }
       const encoder = device.createCommandEncoder()
       const pass = encoder.beginRenderPass(descriptor)
+      const position = new Rect(100, 100, 100, 100) // How do we get the default size?
+      const vertexData = animatedSprite.getVertexData(UnitState.RUN, window.angle, now, position)
 
-      animatedSprite.update(
-        pass,
-        assets,
-        matrix,
-        UnitState.RUN,
-        window.angle, // Math.PI * 0.75,
-        now,
-      )      
+      drawTexture(pass, matrix, vertexData, texture2dArray)
 
       pass.end()
       const commandBuffer = encoder.finish();

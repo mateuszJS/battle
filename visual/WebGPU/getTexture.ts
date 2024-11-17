@@ -2,6 +2,7 @@
 interface Options {
   mips?: boolean
   flipY?: boolean
+  depthOrArrayLayers?: number
 }
 
 type TextureSource =
@@ -14,6 +15,48 @@ const numMipLevels = (...sizes: number[]) => {
   const maxSize = Math.max(...sizes);
   return 1 + Math.log2(maxSize) | 0;
 };
+
+export function createTexture2dArrayFromSources(device: GPUDevice, sourceList: ImageBitmap[], options: Options = {}) {
+  const {width, height} = sourceList[0]
+
+  const textue2dArray = device.createTexture({
+    label: '2d array texture',
+    format: 'rgba8unorm',
+    mipLevelCount: 1,
+    size: [width, height, sourceList.length],
+    usage: GPUTextureUsage.TEXTURE_BINDING |
+           GPUTextureUsage.COPY_DST |
+           GPUTextureUsage.RENDER_ATTACHMENT, // not sure if this one is needed
+  });
+  sourceList.forEach((source, index) => {
+
+    device.queue.copyExternalImageToTexture(
+      { source, flipY: true },
+      { texture: textue2dArray, origin: { z: index } },
+      { width: source.width, height: source.height },
+    );
+
+    // mips.forEach(({data, width, height}, mipLevel) => {
+      // device.queue.writeTexture(
+      //     // { texture: textue2dArray },
+      //     { texture: textue2dArray, origin: { z: index } },
+      //     textureSource,
+      //     { bytesPerRow: width * 4 },
+      //     { width, height },
+      //     // { width, height, depthOrArrayLayers: index },
+      // );
+    // });
+
+
+  //   copySourceToTexture(device, textue2dArray, textureSource, {
+  //     ...options,
+  //     depthOrArrayLayers: index + 1
+  //   });
+
+  })
+  return textue2dArray;
+}
+
 
 function createTextureFromSource(device: GPUDevice, source: TextureSource, options: Options = {}) {
   const texture = device.createTexture({
@@ -28,13 +71,14 @@ function createTextureFromSource(device: GPUDevice, source: TextureSource, optio
   return texture;
 }
 
-function copySourceToTexture(device: GPUDevice, texture: GPUTexture, source: TextureSource, {flipY}: Options = {}) {
+function copySourceToTexture(device: GPUDevice, texture: GPUTexture, source: TextureSource, {flipY, depthOrArrayLayers}: Options = {}) {
+  console.log('depthOrArrayLayers', depthOrArrayLayers)
   device.queue.copyExternalImageToTexture(
     { source, flipY, },
     { texture,
       // premultipliedAlpha: true
     },
-    { width: source.width, height: source.height },
+    { width: source.width, height: source.height, depthOrArrayLayers },
   );
 
   // if (texture.mipLevelCount > 1) {
@@ -42,7 +86,7 @@ function copySourceToTexture(device: GPUDevice, texture: GPUTexture, source: Tex
   // }
 }
 
-async function loadImageBitmap(url: string) {
+export async function loadImageBitmap(url: string) {
   const res = await fetch(url);
   const blob = await res.blob();
   return await createImageBitmap(blob, { colorSpaceConversion: 'none', premultiplyAlpha: 'premultiply' });

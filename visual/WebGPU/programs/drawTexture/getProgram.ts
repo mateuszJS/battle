@@ -1,5 +1,6 @@
 import Rect from "Rect";
 import shaderCode from "./shader.wgsl"
+import { VertexData } from "WebGPU/AnimatedSprite";
 
 export default function getProgram(
   device: GPUDevice,
@@ -11,8 +12,8 @@ export default function getProgram(
   });
 
   const sampler = device.createSampler({
-    minFilter: 'linear',
-    magFilter: 'linear',
+    minFilter: 'nearest',
+    magFilter: 'nearest',
   });
 
   const pipeline = device.createRenderPipeline({
@@ -25,13 +26,19 @@ export default function getProgram(
         {
           arrayStride: (2) * 4, // (2) floats, 4 bytes each
           attributes: [
-            {shaderLocation: 0, offset: 0, format: 'float32x2'},  // position
+            {shaderLocation: 0, offset: 0, format: 'float32x2'},  // destination position
           ] as const,
         },
         {
           arrayStride: (2) * 4, // (2) floats, 4 bytes each
           attributes: [
-            {shaderLocation: 1, offset: 0, format: 'float32x2'},  // position
+            {shaderLocation: 1, offset: 0, format: 'float32x2'},  // source position
+          ] as const,
+        },
+        {
+          arrayStride: (1) * 4,
+          attributes: [
+            {shaderLocation: 2, offset: 0, format: 'uint32'},  // source texture layer
           ] as const,
         },
       ],
@@ -57,10 +64,9 @@ export default function getProgram(
 
   return function drawTexture(
     pass: GPURenderPassEncoder,
-    texture: GPUTexture,
     matrix: Float32Array,
-    textUVs: Float32Array,
-    textureOffset: Point,
+    vertexData: VertexData,
+    texture: GPUTexture,
   ) {
 
   // color, matrix
@@ -76,44 +82,37 @@ export default function getProgram(
   const kMatrixOffset = 0;
   const matrixValue = uniformValues.subarray(kMatrixOffset, kMatrixOffset + 12);
 
-  const width = 48
-  const height = 28
-  const x = 100 + textureOffset.x * width
-  const y = 100 + textureOffset.y * height
 
-  const vertexPositionData = new Float32Array([
-    x,          y,
-    x + width,  y,
-    x + width,  y + height,
-    x,          y + height
-  ])
+  const { destinationRect, sourceRect, index, layer } = vertexData.getBakedData()
+
   const vertexPositionBuffer = device.createBuffer({
     label: 'vertex buffer vertices',
-    size: vertexPositionData.byteLength,
+    size: destinationRect.byteLength,
     usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
   });
-  device.queue.writeBuffer(vertexPositionBuffer, 0, vertexPositionData);
+  device.queue.writeBuffer(vertexPositionBuffer, 0, destinationRect);
 
   const vertexTexCoordBuffer = device.createBuffer({
     label: 'vertex buffer vertices',
-    size: textUVs.byteLength,
+    size: sourceRect.byteLength,
     usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
   });
-  device.queue.writeBuffer(vertexTexCoordBuffer, 0, textUVs);
+  device.queue.writeBuffer(vertexTexCoordBuffer, 0, sourceRect);
 
+  const vertexLayerBuffer = device.createBuffer({
+    label: 'vertex buffer layer',
+    size: layer.byteLength,
+    usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
+  });
+  device.queue.writeBuffer(vertexLayerBuffer, 0, layer);
 
-
-  const indexData = new Uint32Array([
-    0, 1, 2,
-    0, 2, 3
-  ])
   const numVertices = 6
   const indexBuffer = device.createBuffer({
     label: 'index buffer',
-    size: indexData.byteLength,
+    size: index.byteLength,
     usage: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST,
   });
-  device.queue.writeBuffer(indexBuffer, 0, indexData);
+  device.queue.writeBuffer(indexBuffer, 0, index);
 
 
 
@@ -132,6 +131,7 @@ export default function getProgram(
     pass.setPipeline(pipeline);
     pass.setVertexBuffer(0, vertexPositionBuffer);
     pass.setVertexBuffer(1, vertexTexCoordBuffer);
+    pass.setVertexBuffer(2, vertexLayerBuffer);
     pass.setIndexBuffer(indexBuffer, 'uint32');
     // mat3.translate(matrixValue, [x, 0], matrixValue);
     matrixValue.set(matrix)

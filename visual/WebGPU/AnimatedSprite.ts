@@ -1,13 +1,46 @@
 import { UnitState } from "logic-contants"
-import frameByState, { Asset } from "./framesByState"
-import { drawTexture } from "./programs/initPrograms"
+import AssetsDescriptor, { AssetId } from "assetsData"
+import Rect from "Rect"
+
+export class VertexData {
+  private destinationRect: number[]
+  private sourceRect: number[]
+  private layer: number[]
+  private index: number[]
+
+  constructor({
+    destinationRect,
+    sourceRect,
+    layer,
+    index,
+  }: {
+    destinationRect: number[]
+    sourceRect: number[]
+    layer: number[]
+    index: number[]
+  }) {
+    this.destinationRect = destinationRect
+    this.sourceRect = sourceRect
+    this.layer = layer
+    this.index = index
+  }
+
+  getBakedData() {
+    return {
+      destinationRect: new Float32Array(this.destinationRect),
+      sourceRect: new Float32Array(this.sourceRect),
+      layer: new Uint32Array(this.layer),
+      index: new Uint32Array(this.index),
+    }
+  }
+}
 
 export default class AnimatedSprite {
   private currFrameOffset = 0
   private prevFootprint = 0
   private lastChangeTime = 0 // last registered time when frame was updated
 
-  constructor() {}
+  constructor(private texture2dArray: GPUTexture) {}
 
   // <0, 2 * Math.PI> -> <0, angles>
 
@@ -23,46 +56,76 @@ export default class AnimatedSprite {
   */
 
   private getNewFrame(state: UnitState, angle: number, time: number) {
+    const { timePerFrame, length, angles } = AssetsDescriptor[AssetId.ElephantHead][state]
+    const first = 0
+
     const footprint = getFootprint(state, angle)
     if (footprint === this.prevFootprint) {
 
-      if (time - this.lastChangeTime > frameByState[state].timePerFrame) {
-        this.currFrameOffset = (this.currFrameOffset + 1) % frameByState[state].length
+      if (time - this.lastChangeTime > timePerFrame) {
+        this.currFrameOffset = (this.currFrameOffset + 1) % length
         this.lastChangeTime = time
       }
 
-      return frameByState[state].first +
-        getAngleOffsetInFrames(angle, frameByState[state].angles) * frameByState[state].length +
+      return first +
+        getAngleOffsetInFrames(angle, angles) * length +
         this.currFrameOffset;
     } else {
 
       this.prevFootprint = footprint
       this.lastChangeTime = time
 
-      return frameByState[state].first +
-        getAngleOffsetInFrames(angle, frameByState[state].angles) * frameByState[state].length
+      return first +
+        getAngleOffsetInFrames(angle, angles) * length
     }
   }
 
   // write unit tests for it!
-  public update(pass: GPURenderPassEncoder, assets: Asset[], matrix: Float32Array, state: UnitState, angle: number, time: number) {
+  public getVertexData(state: UnitState, angle: number, time: number, position: Rect): VertexData {
     const newFrame = this.getNewFrame(state, angle, time)
-    const {
-      texture,
-      json,
-      texUVs,
-      texOffsets,
-    } = assets[frameByState[state].textureIndex]
+    const { frames } = AssetsDescriptor[AssetId.ElephantHead][state]
+    const frame = frames[newFrame]
 
-    // const integer = Math.floor(time * 0.001) % texCoords.length
-    const integer = newFrame
+    const { width, height } = position
+    const x = position.x + frame.destinationOffset.x * width
+    const y = position.y + frame.destinationOffset.y * height
 
-    drawTexture(pass, texture, matrix, texUVs[integer], texOffsets[integer])
+    const destinationRect = [
+      x,          y,
+      x + width,  y,
+      x + width,  y + height,
+      x,          y + height
+    ]
+
+    const layer = Array.from({ length: 4 }, () => frame.textureIndex)
+
+    const index = 
+      Array.from({ length: 4 }, () => [
+        0, 1, 2,
+        0, 2, 3
+      ]).flat()
+    
+
+    return new VertexData({
+      destinationRect,
+      sourceRect: frame.sourceRect,
+      layer,
+      index
+    })
   }
+  // // write unit tests for it!
+  // public update(pass: GPURenderPassEncoder, matrix: Float32Array, state: UnitState, angle: number, time: number) {
+  //   const newFrame = this.getNewFrame(state, angle, time)
+  //   const { frames } = AssetsDescriptor[AssetId.ElephantHead][state]
+  //   const frame = frames[newFrame]
+
+  //   drawTexture(pass, this.texture2dArray,  frame.textureIndex, matrix, frame.texSourcePoints, frame.destinationOffset)
+  // }
 }
 
 function getFootprint(state: UnitState, angle: number): number {
-  return state * 1000 + getAngleOffsetInFrames(angle, frameByState[state].angles) * frameByState[state].length
+  const { length, angles } = AssetsDescriptor[AssetId.ElephantHead][state]
+  return state * 1000 + getAngleOffsetInFrames(angle, angles) * length
 }
 
 const MATH_2_PI = Math.PI * 2
