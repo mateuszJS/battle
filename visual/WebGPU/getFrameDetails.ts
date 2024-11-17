@@ -1,4 +1,6 @@
+import Rect from "Rect"
 import { FrameDetailsWithName, SpriteSheetEntry } from "./getSpriteSheetTexture"
+import { centerPivot } from "assetsData"
 
 export default function getFrameDetails(
   fd: SpriteSheetEntry,
@@ -39,13 +41,17 @@ export default function getFrameDetails(
   texPoints[6] /= imgBitmap.width
   texPoints[7] /= imgBitmap.height
 
+  
+
   return {
     name,
     sourceRect: texPoints,
-    destinationOffset: {
-      x: fd.spriteSourceSize.x / imgBitmap.width,
-      y: fd.spriteSourceSize.y / imgBitmap.height,
-    },
+    destinationRect: new Rect(
+      fd.spriteSourceSize.x - centerPivot.x,
+      fd.spriteSourceSize.y - centerPivot.y,
+      fd.spriteSourceSize.w,
+      fd.spriteSourceSize.h
+    ),
     textureIndex,
   }
 }

@@ -19,7 +19,7 @@ TexturePacker
 --multipack
 --shape-padding 1
 --enable-rotation
---trim-mode Crop
+--trim-mode CropKeepPos
 --alpha-handling PremultiplyAlpha
 --scale 0.5
 --scale-mode Smooth

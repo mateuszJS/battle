@@ -1,46 +1,17 @@
 import { UnitState } from "logic-contants"
 import AssetsDescriptor, { AssetId } from "assetsData"
-import Rect from "Rect"
 
-export class VertexData {
-  private destinationRect: number[]
-  private sourceRect: number[]
-  private layer: number[]
-  private index: number[]
-
-  constructor({
-    destinationRect,
-    sourceRect,
-    layer,
-    index,
-  }: {
-    destinationRect: number[]
-    sourceRect: number[]
-    layer: number[]
-    index: number[]
-  }) {
-    this.destinationRect = destinationRect
-    this.sourceRect = sourceRect
-    this.layer = layer
-    this.index = index
-  }
-
-  getBakedData() {
-    return {
-      destinationRect: new Float32Array(this.destinationRect),
-      sourceRect: new Float32Array(this.sourceRect),
-      layer: new Uint32Array(this.layer),
-      index: new Uint32Array(this.index),
-    }
-  }
-}
-
-export default class AnimatedSprite {
-  private currFrameOffset = 0
+export default class UnitRepresentation {
+  public frameIndex = 0
   private prevFootprint = 0
   private lastChangeTime = 0 // last registered time when frame was updated
 
-  constructor(private texture2dArray: GPUTexture) {}
+  constructor(
+    public state: UnitState,
+    public angle: number,
+    public position: Point,
+    public assets: AssetId[],
+  ) {}
 
   // <0, 2 * Math.PI> -> <0, angles>
 
@@ -55,64 +26,39 @@ export default class AnimatedSprite {
     - position for arms & weapon & backpack, maybe rotation flag
   */
 
-  private getNewFrame(state: UnitState, angle: number, time: number) {
-    const { timePerFrame, length, angles } = AssetsDescriptor[AssetId.ElephantHead][state]
+  public update(time: DOMHighResTimeStamp) {
+    this.updateFrameIndex(time)
+  }
+
+  private updateFrameIndex(time: DOMHighResTimeStamp) {
+    // TODO: i nthe future assets might have different animations, so frame per asset will be needed
+    const { timePerFrame, length, angles } = AssetsDescriptor[this.assets[0]][this.state]
     const first = 0
 
-    const footprint = getFootprint(state, angle)
+    const footprint = getFootprint(this.state, this.angle)
     if (footprint === this.prevFootprint) {
 
       if (time - this.lastChangeTime > timePerFrame) {
-        this.currFrameOffset = (this.currFrameOffset + 1) % length
+        this.frameIndex = (this.frameIndex + 1) % length
         this.lastChangeTime = time
+      } else {
+        this.frameIndex =
+          first +
+          getAngleOffsetInFrames(this.angle, angles) * length +
+          this.frameIndex;
       }
-
-      return first +
-        getAngleOffsetInFrames(angle, angles) * length +
-        this.currFrameOffset;
     } else {
 
       this.prevFootprint = footprint
       this.lastChangeTime = time
 
-      return first +
-        getAngleOffsetInFrames(angle, angles) * length
+      this.frameIndex =
+        first +
+        getAngleOffsetInFrames(this.angle, angles) * length
     }
   }
 
-  // write unit tests for it!
-  public getVertexData(state: UnitState, angle: number, time: number, position: Rect): VertexData {
-    const newFrame = this.getNewFrame(state, angle, time)
-    const { frames } = AssetsDescriptor[AssetId.ElephantHead][state]
-    const frame = frames[newFrame]
 
-    const { width, height } = position
-    const x = position.x + frame.destinationOffset.x * width
-    const y = position.y + frame.destinationOffset.y * height
-
-    const destinationRect = [
-      x,          y,
-      x + width,  y,
-      x + width,  y + height,
-      x,          y + height
-    ]
-
-    const layer = Array.from({ length: 4 }, () => frame.textureIndex)
-
-    const index = 
-      Array.from({ length: 4 }, () => [
-        0, 1, 2,
-        0, 2, 3
-      ]).flat()
-    
-
-    return new VertexData({
-      destinationRect,
-      sourceRect: frame.sourceRect,
-      layer,
-      index
-    })
-  }
   // // write unit tests for it!
   // public update(pass: GPURenderPassEncoder, matrix: Float32Array, state: UnitState, angle: number, time: number) {
   //   const newFrame = this.getNewFrame(state, angle, time)

@@ -2,6 +2,7 @@ import { UnitState } from "logic-contants"
 import { createTexture2dArrayFromSources, createTextureFromImage, loadImageBitmap } from "./getTexture"
 import AssetsDescriptor, { AssetId } from "assetsData"
 import getFrameDetails from "./getFrameDetails"
+import Rect from "Rect"
 
 const sources = [
   {
@@ -47,7 +48,7 @@ export interface SpriteSheetEntry {
 
 export interface FrameDetails {
   sourceRect: number[]
-  destinationOffset: Point
+  destinationRect: Rect,
   textureIndex: number
 }
 

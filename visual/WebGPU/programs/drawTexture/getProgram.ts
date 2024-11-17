@@ -1,6 +1,6 @@
 import Rect from "Rect";
 import shaderCode from "./shader.wgsl"
-import { VertexData } from "WebGPU/AnimatedSprite";
+import { VertexData } from "WebGPU/getVertexData";
 
 export default function getProgram(
   device: GPUDevice,
@@ -106,7 +106,6 @@ export default function getProgram(
   });
   device.queue.writeBuffer(vertexLayerBuffer, 0, layer);
 
-  const numVertices = 6
   const indexBuffer = device.createBuffer({
     label: 'index buffer',
     size: index.byteLength,
@@ -139,6 +138,7 @@ export default function getProgram(
 
     pass.setBindGroup(0, bindGroup);
     // pass.draw(4);  // call our vertex shader 6 times
-    pass.drawIndexed(numVertices);
+    console.log(vertexData.instancesNum)
+    pass.drawIndexed(vertexData.instancesNum);
   }
 }

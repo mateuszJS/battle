@@ -14,6 +14,9 @@ import { UnitState } from "logic-contants";
 import mat3 from "WebGPU/m3";
 import { drawTexture } from "WebGPU/programs/initPrograms";
 import Rect from "Rect";
+import { AssetId } from "assetsData";
+import UnitRepresentation from "WebGPU/AnimatedSprite";
+import { getVertexData } from "WebGPU/getVertexData";
 // import runCreator from "Creator/run";
 
 function getCanvasMatrix(canvas: HTMLCanvasElement) {
@@ -61,10 +64,10 @@ export default async function getinitUniverse(): Promise<
   // )
 
   // const texture: GPUTexture = await createTextureFromImage(device, imageSrc, {})
-
-  const animatedSprite = new AnimatedSprite(texture2dArray)
-
   window.angle = 0
+
+
+
 
   return function initUniverse (wasmModule, mapWidth, mapHeight) {
     const serializedMapInfo: SerializedMapInfo = PREDEFINED_MAP
@@ -72,9 +75,21 @@ export default async function getinitUniverse(): Promise<
     const matrix = getCanvasMatrix(canvas)
 
     // const mapPoints = getMapPoints(mapWidth, mapHeight)
-
+    const units = [
+      new UnitRepresentation(
+        UnitState.RUN,
+        0,
+        { x: 1000, y: 1000 },
+        [AssetId.StandardBody, AssetId.StandardRifle, AssetId.ElephantHead]
+      )
+    ]
 
     function tick(now: DOMHighResTimeStamp) {
+      units.forEach(unit => {
+        unit.angle = window.angle % (Math.PI * 2)
+        unit.update(now)
+    })
+
       // here we need to render that texture into canvas
       const canvasTexture = context.getCurrentTexture();
       const descriptor = {
@@ -91,8 +106,7 @@ export default async function getinitUniverse(): Promise<
       }
       const encoder = device.createCommandEncoder()
       const pass = encoder.beginRenderPass(descriptor)
-      const position = new Rect(100, 100, 100, 100) // How do we get the default size?
-      const vertexData = animatedSprite.getVertexData(UnitState.RUN, window.angle, now, position)
+      const vertexData = getVertexData(units)
 
       drawTexture(pass, matrix, vertexData, texture2dArray)
 

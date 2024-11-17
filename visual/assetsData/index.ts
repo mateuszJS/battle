@@ -8,6 +8,11 @@ export enum AssetId {
   ElephantHead = '2',
 }
 
+export const centerPivot: Point = {
+  x: 995.7482,
+  y: 1155.8067,
+}
+
 export default {
   [AssetId.ElephantHead]: elephantHead,
   [AssetId.StandardBody]: regularBody,
