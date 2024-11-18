@@ -5,11 +5,13 @@
   "main": "webpack.config.js",
   "scripts": {
     "dev": "export NODE_ENV=development && webpack serve --open",
-    "build-assets": "node ./build-assets.js"
+    "build-assets": "node ./build-assets.js",
+    "test": "jest"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/jest": "^29.5.14",
     "@types/lodash": "^4.17.13",
     "@types/numeric": "^1.2.6",
     "@wasm-tool/wasm-pack-plugin": "^1.7.0",
@@ -18,7 +20,10 @@
     "@webassemblyjs/wasm-parser": "^1.14.1",
     "@webgpu/types": "^0.1.51",
     "html-webpack-plugin": "^5.6.3",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.5",
     "ts-loader": "^9.5.1",
+    "ts-node": "^10.9.2",
     "typescript": "^5.6.3",
     "webpack": "^5.96.1",
     "webpack-cli": "^5.1.4",
@@ -27,7 +32,8 @@
   "devDependenciesComments": {
     "@webassemblyjs/ast": "only needed because of wasm-tool is not updated yet but works: https://github.com/webpack/webpack/issues/15566#issuecomment-2461005789",
     "@webassemblyjs/wasm-edit": "only needed because of wasm-tool is not updated yet but works: https://github.com/webpack/webpack/issues/15566#issuecomment-2461005789",
-    "@webassemblyjs/wasm-parser": "only needed because of wasm-tool is not updated yet but works: https://github.com/webpack/webpack/issues/15566#issuecomment-2461005789"
+    "@webassemblyjs/wasm-parser": "only needed because of wasm-tool is not updated yet but works: https://github.com/webpack/webpack/issues/15566#issuecomment-2461005789",
+    "ts-node": "needed for jest to use typescript config"
   },
   "dependencies": {
     "debounce": "^1.2.0",

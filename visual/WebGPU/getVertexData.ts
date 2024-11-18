@@ -1,4 +1,4 @@
-import UnitRepresentation from "./AnimatedSprite"
+import UnitRepresentation from "./UnitRepresentation/UnitRepresentation"
 import AssetsDescriptor, { AssetId } from "assetsData"
 
 export class VertexData {

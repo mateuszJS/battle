@@ -9,13 +9,12 @@ import imageSrc from '../assets/Fire.png'
 import { createTextureFromImage } from "WebGPU/getTexture";
 import loadAssets from "WebGPU/loadAssets";
 import getSpriteSheetTexture from "WebGPU/getSpriteSheetTexture";
-import AnimatedSprite from "WebGPU/AnimatedSprite";
 import { UnitState } from "logic-contants";
 import mat3 from "WebGPU/m3";
 import { drawTexture } from "WebGPU/programs/initPrograms";
 import Rect from "Rect";
 import { AssetId } from "assetsData";
-import UnitRepresentation from "WebGPU/AnimatedSprite";
+import UnitRepresentation from "WebGPU/UnitRepresentation/UnitRepresentation";
 import { getVertexData } from "WebGPU/getVertexData";
 // import runCreator from "Creator/run";
 
@@ -83,7 +82,7 @@ export default async function getinitUniverse(): Promise<
         [AssetId.StandardBody, AssetId.StandardRifle, AssetId.ElephantHead]
       )
     ]
-
+    window.angle = Math.PI * 1.75
     function tick(now: DOMHighResTimeStamp) {
       units.forEach(unit => {
         unit.angle = window.angle % (Math.PI * 2)
