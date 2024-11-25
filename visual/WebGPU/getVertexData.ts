@@ -1,29 +1,29 @@
-import UnitRepresentation from "./UnitRepresentation/UnitRepresentation"
-import AssetsDescriptor, { AssetId } from "assetsData"
+import AssetsDescriptor from "AssetsDescriptor"
+import UnitRepresentation from "../UnitRepresentation/AnimatedSprite"
 
 export class VertexData {
   private destinationRect: number[]
   private sourceRect: number[]
-  private layer: number[]
+  private textureLayers: number[]
   private index: number[]
 
   constructor(
     {
       destinationRect,
       sourceRect,
-      layer,
+      textureLayers,
       index,
     }: {
       destinationRect: number[]
       sourceRect: number[]
-      layer: number[]
+      textureLayers: number[]
       index: number[]
     },
     public instancesNum: number
   ) {
     this.destinationRect = destinationRect
     this.sourceRect = sourceRect
-    this.layer = layer
+    this.textureLayers = textureLayers
     this.index = index
   }
 
@@ -31,14 +31,14 @@ export class VertexData {
     return {
       destinationRect: new Float32Array(this.destinationRect),
       sourceRect: new Float32Array(this.sourceRect),
-      layer: new Uint32Array(this.layer),
+      layer: new Uint32Array(this.textureLayers),
       index: new Uint32Array(this.index),
     }
   }
 }
 
 export function getVertexData(units: UnitRepresentation[]): VertexData {
-  const layer: number[] = []
+  const textureLayers: number[] = []
   const destinationRect: number[] = []
   const sourceRect: number[] = []
   let assetsNum = 0
@@ -46,7 +46,9 @@ export function getVertexData(units: UnitRepresentation[]): VertexData {
   units.forEach(({ state, position, assets, frameIndex }) => {
     assets.forEach(assetId => {
       assetsNum++
+
       const { frames } = AssetsDescriptor[assetId][state]
+
       const frame = frames[frameIndex]
   
       const { width, height } = frame.destinationRect
@@ -60,7 +62,7 @@ export function getVertexData(units: UnitRepresentation[]): VertexData {
         x,          y + height
       )
   
-      layer.push(...Array.from({ length: 4 }, () => frame.textureIndex))
+      textureLayers.push(...Array.from({ length: 4 }, () => frame.textureIndex))
 
       sourceRect.push(...frame.sourceRect)
     })
@@ -75,7 +77,7 @@ export function getVertexData(units: UnitRepresentation[]): VertexData {
   return new VertexData({
     destinationRect,
     sourceRect,
-    layer,
+    textureLayers,
     index
   }, assetsNum * 6)
 }

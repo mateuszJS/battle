@@ -22,7 +22,6 @@ export enum WeaponType {
   Non = 0,
 }
 
-
 export enum UnitState {
   CHASING = 9,
   ABILITY = 8,

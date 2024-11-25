@@ -7,15 +7,15 @@ import canvasSizeObserver from "WebGPU/canvasSizeObserver";
 import setupWebGPU from "WebGPU/setupWebGPU";
 import imageSrc from '../assets/Fire.png'
 import { createTextureFromImage } from "WebGPU/getTexture";
-import loadAssets from "WebGPU/loadAssets";
-import getSpriteSheetTexture from "WebGPU/getSpriteSheetTexture";
+import loadAssets from "loadAssetsIntoTextureArray/loadAssetsIntoTextureArray";
 import { UnitState } from "logic-contants";
 import mat3 from "WebGPU/m3";
 import { drawTexture } from "WebGPU/programs/initPrograms";
 import Rect from "Rect";
-import { AssetId } from "assetsData";
-import UnitRepresentation from "WebGPU/UnitRepresentation/UnitRepresentation";
+import UnitRepresentation from "UnitRepresentation/AnimatedSprite";
 import { getVertexData } from "WebGPU/getVertexData";
+import loadAssetsIntoTextureArray from "loadAssetsIntoTextureArray/loadAssetsIntoTextureArray";
+import AssetId from "AssetsDescriptor/AssetId";
 // import runCreator from "Creator/run";
 
 function getCanvasMatrix(canvas: HTMLCanvasElement) {
@@ -54,7 +54,7 @@ export default async function getinitUniverse(): Promise<
   // runCreator(state, canvas, context, device, presentationFormat)
 
   // initUI(state)
-  const texture2dArray = await getSpriteSheetTexture(
+  const texture2dArray = await loadAssetsIntoTextureArray(
     device
   )
   // const assets = await loadAssets(
@@ -79,13 +79,13 @@ export default async function getinitUniverse(): Promise<
         UnitState.RUN,
         0,
         { x: 1000, y: 1000 },
-        [AssetId.StandardBody, AssetId.StandardRifle, AssetId.ElephantHead]
+        [AssetId.RegularBody, AssetId.RegularAccesories, AssetId.ElephantHead]
       )
     ]
     window.angle = Math.PI * 1.75
     function tick(now: DOMHighResTimeStamp) {
       units.forEach(unit => {
-        unit.angle = window.angle % (Math.PI * 2)
+        unit.angle = window.angle
         unit.update(now)
     })
 

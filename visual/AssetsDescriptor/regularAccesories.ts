@@ -1,58 +1,58 @@
 import { UnitState } from "logic-contants"
-import { FrameByState } from "./frameByStateType"
+import { FrameByState } from "."
 
 const frameByState: FrameByState = {
   [UnitState.RUN]: {
-    prefix: 'elephant_head_run',
+    prefix: 'regular_rifle_run',
     length: 16,
     angles: 12,
-    timePerFrame: 50, // speed in seconds
+    timePerFrame: 50,
     frames: [],
   },
   [UnitState.SHOOT]: {
-    prefix: 'elephant_head_shoot',
+    prefix: 'regular_rifle_shoot',
     length: 6,
     angles: 16,
     timePerFrame: 60,
     frames: [],
   },
   [UnitState.ABILITY]: {
-    prefix: 'elephant_head_shoot',
+    prefix: 'regular_rifle_shoot',
     length: 6,
     angles: 16,
     timePerFrame: 60,
     frames: [],
   },
   [UnitState.CHASING]: {
-    prefix: 'elephant_head_shoot',
+    prefix: 'regular_rifle_shoot',
     length: 6,
     angles: 16,
     timePerFrame: 60,
     frames: [],
   },
   [UnitState.DIE]: {
-    prefix: 'elephant_head_shoot',
+    prefix: 'regular_rifle_shoot',
     length: 6,
     angles: 16,
     timePerFrame: 60,
     frames: [],
   },
   [UnitState.FLY]: {
-    prefix: 'elephant_head_shoot',
+    prefix: 'regular_rifle_shoot',
     length: 6,
     angles: 16,
     timePerFrame: 60,
     frames: [],
   },
   [UnitState.GETUP]: {
-    prefix: 'elephant_head_shoot',
+    prefix: 'regular_rifle_shoot',
     length: 6,
     angles: 16,
     timePerFrame: 60,
     frames: [],
   },
   [UnitState.IDLE]: {
-    prefix: 'elephant_head_shoot',
+    prefix: 'regular_rifle_shoot',
     length: 6,
     angles: 16,
     timePerFrame: 60,

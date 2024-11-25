@@ -1,5 +1,7 @@
 /** @type {import('ts-jest').JestConfigWithTsJest} **/
 import type {Config} from 'jest';
+import { createDefaultPreset, type JestConfigWithTsJest } from 'ts-jest'
+
 
 const config: Config = {
   verbose: true,
@@ -7,9 +9,12 @@ const config: Config = {
   moduleDirectories: ['node_modules', 'visual'],
 
   // below config was created when I ran npx ts-jest config:init
-  testEnvironment: "node",
+  testEnvironment: "jsdom",
+  
   transform: {
-    "^.+.tsx?$": ["ts-jest",{}],
+    "^.+.tsx?$": ["ts-jest", createDefaultPreset({
+      tsconfig: './tsconfig.json'
+    })],
   },
 };
 

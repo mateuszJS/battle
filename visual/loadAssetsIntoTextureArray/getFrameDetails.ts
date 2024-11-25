@@ -1,16 +1,19 @@
 import Rect from "Rect"
-import { FrameDetailsWithName, SpriteSheetEntry } from "./getSpriteSheetTexture"
-import { centerPivot } from "assetsData"
+import { SpriteSheetEntry } from "./loadAssetsIntoTextureArray"
+import { centerPivot } from "AssetsDescriptor"
+
+interface FrameDetails { 
+  sourceRect: number[]
+  destinationRect: Rect
+}
 
 export default function getFrameDetails(
-  fd: SpriteSheetEntry,
+  frameJson: SpriteSheetEntry,
   imgBitmap: ImageBitmap,
-  name: string,
-  textureIndex: number
-): FrameDetailsWithName {
-  const {x, y, w, h} = fd.frame
-  const frameWidth = fd.rotated ? h : w
-  const frameHeight = fd.rotated ? w : h
+): FrameDetails {
+  const {x, y, w, h} = frameJson.frame
+  const frameWidth = frameJson.rotated ? h : w
+  const frameHeight = frameJson.rotated ? w : h
 
   const texPoints = [
     0,               0,
@@ -19,7 +22,7 @@ export default function getFrameDetails(
     0,               0 + frameHeight
   ]
 
-  if (fd.rotated) {
+  if (frameJson.rotated) {
     texPoints.push(...texPoints.splice(0, 2))
   }
   
@@ -44,14 +47,12 @@ export default function getFrameDetails(
   
 
   return {
-    name,
     sourceRect: texPoints,
     destinationRect: new Rect(
-      fd.spriteSourceSize.x - centerPivot.x,
-      fd.spriteSourceSize.y - centerPivot.y,
-      fd.spriteSourceSize.w,
-      fd.spriteSourceSize.h
+      frameJson.spriteSourceSize.x - centerPivot.x,
+      frameJson.spriteSourceSize.y - centerPivot.y,
+      frameJson.spriteSourceSize.w,
+      frameJson.spriteSourceSize.h
     ),
-    textureIndex,
   }
 }

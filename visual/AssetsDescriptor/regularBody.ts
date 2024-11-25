@@ -1,5 +1,5 @@
 import { UnitState } from "logic-contants"
-import { FrameByState } from "./frameByStateType"
+import { FrameByState } from "."
 
 const frameByState: FrameByState = {
   [UnitState.RUN]: {

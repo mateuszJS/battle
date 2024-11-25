@@ -138,7 +138,6 @@ export default function getProgram(
 
     pass.setBindGroup(0, bindGroup);
     // pass.draw(4);  // call our vertex shader 6 times
-    console.log(vertexData.instancesNum)
     pass.drawIndexed(vertexData.instancesNum);
   }
 }
