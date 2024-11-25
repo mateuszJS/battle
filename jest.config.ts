@@ -12,9 +12,7 @@ const config: Config = {
   testEnvironment: "jsdom",
   
   transform: {
-    "^.+.tsx?$": ["ts-jest", createDefaultPreset({
-      tsconfig: './tsconfig.json'
-    })],
+    "^.+.tsx?$": ["ts-jest", {}],
   },
 };
 
