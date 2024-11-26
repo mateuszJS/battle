@@ -12,10 +12,10 @@ import { UnitState } from "logic-contants";
 import mat3 from "WebGPU/m3";
 import { drawTexture } from "WebGPU/programs/initPrograms";
 import Rect from "Rect";
-import UnitRepresentation from "UnitRepresentation/AnimatedSprite";
 import { getVertexData } from "WebGPU/getVertexData";
 import loadAssetsIntoTextureArray from "loadAssetsIntoTextureArray/loadAssetsIntoTextureArray";
 import AssetId from "AssetsDescriptor/AssetId";
+import UnitRepresentation from "UnitRepresentation/UnitRepresentation";
 // import runCreator from "Creator/run";
 
 function getCanvasMatrix(canvas: HTMLCanvasElement) {
@@ -74,12 +74,14 @@ export default async function getinitUniverse(): Promise<
     const matrix = getCanvasMatrix(canvas)
 
     // const mapPoints = getMapPoints(mapWidth, mapHeight)
+
     const units = [
       new UnitRepresentation(
         UnitState.RUN,
         0,
         { x: 1000, y: 1000 },
-        [AssetId.RegularBody, AssetId.RegularAccesories, AssetId.ElephantHead]
+        [AssetId.RegularBody, AssetId.RegularAccesories, AssetId.ElephantHead],
+        0
       )
     ]
     window.angle = Math.PI * 1.75

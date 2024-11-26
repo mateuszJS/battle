@@ -2,7 +2,7 @@ import { UnitState } from "logic-contants"
 import AssetsDescriptor from "AssetsDescriptor"
 import mapAngleToIndex from "./mapAngleToIndex"
 import AssetId from "AssetsDescriptor/AssetId"
-import AnimatedSprite from "./AnimatedSprite"
+import AnimatedSprite from "../WebGPU/AnimatedSprite/AnimatedSprite"
 
 export default class UnitRepresentation {
   private aSprites: AnimatedSprite[];
@@ -37,26 +37,52 @@ export default class UnitRepresentation {
   */
 
   public update(time: DOMHighResTimeStamp) {
-    this.updateFrameIndex(time)
+    this.aSprites.forEach(aSprite => aSprite.update(time))
   }
 
-  private updateFrameIndex(time: DOMHighResTimeStamp) {
-    this.aSprites.forEach(aSprite => aSprite.update(time))
-    // // TODO: i nthe future assets might have different animations, so frame per asset will be needed
-    // const { timePerFrame, length, angles } = AssetsDescriptor[this.assets[0]][this.state]
+  /**
+   * @param textureLayers each asset adds it's own texture index
+   * @param destinationRect each asset adds it's own position where should land on the durign render
+   * @param sourcRect each asset adds it's source position from texture indicated by textureLayers
+   */
+  public addBufferData(
+    textureLayersData: number[],
+    destinationData: number[],
+    sourceData: number[],
+    indiciesData: number[],
+  ) {
+    this.aSprites.forEach((aSprite, index) => {
+      const lastUsedIndex = destinationData.length / 2
+      // each point has x and y component so that's why divided by 2
+      const nextIndicies = 
+      [
+        0, 1, 2,
+        0, 2, 3
+      ].map(i => lastUsedIndex + i)
+      indiciesData.push(...nextIndicies)
 
-    // const isStillSameAnimation = this.currAnimationFirstFrame === mapAngleToIndex(this.angle, angles) * length
 
-    // if (isStillSameAnimation) {
-    //   if (time - this.lastChangeTime > timePerFrame) {
-    //     this.animationFrameIndex = (this.animationFrameIndex + 1) % length
-    //     this.lastChangeTime = time
-    //   }
-    // } else {
-    //   this.currAnimationFirstFrame = mapAngleToIndex(this.angle, angles) * length
-    //   this.lastChangeTime = time
-    //   this.animationFrameIndex = 0
-    // }
+
+      const assetId = this.assets[index]
+      const { frames } = AssetsDescriptor[assetId][this.state] // what if state is different for each asset??
+      const frame = frames[aSprite.frameIndex]
+
+      textureLayersData.push(...Array(4).fill(frame.textureIndex))
+
+      sourceData.push(...frame.sourceRect)
+
+  
+      const { width, height } = frame.destinationRect
+      const x = this.position.x + frame.destinationRect.x
+      const y = this.position.y + frame.destinationRect.y
+  
+      destinationData.push(
+        x,          y,
+        x + width,  y,
+        x + width,  y + height,
+        x,          y + height
+      )
+    })
   }
 }
 

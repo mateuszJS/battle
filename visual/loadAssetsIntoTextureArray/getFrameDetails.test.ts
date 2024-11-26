@@ -17,8 +17,6 @@ const bitmap = {
 // Bitmaps are currently not supproted by jsdom
 // https://github.com/Automattic/node-canvas/issues/876
 
-// specify the size of the bitmap
-
 test('extracts correct informations from a single entry of Sprite Sheet Json file', () => {
   const frameOffset = getFrameDetails(spriteSheetSample, bitmap)
   expect(frameOffset).toEqual({

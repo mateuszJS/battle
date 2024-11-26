@@ -26,15 +26,9 @@ export default class AnimatedSprite {
   }
 
   public update(time: DOMHighResTimeStamp) {
-
     this.frameLocalIndex = Math.floor(
       (time - this.configUpdateTime) / this.timePerFrame
     ) % this.animationLength
-
-    // if (time - this.lastChangeTime >= this.timePerFrame) {
-    //   this.frameLocalIndex = (this.frameLocalIndex + 1) % this.animationLength
-    //   this.lastChangeTime = time
-    // }
   }
 }
 

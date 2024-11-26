@@ -1,5 +1,4 @@
-import AssetsDescriptor from "AssetsDescriptor"
-import UnitRepresentation from "../UnitRepresentation/AnimatedSprite"
+import UnitRepresentation from "UnitRepresentation/UnitRepresentation"
 
 export class VertexData {
   private destinationRect: number[]
@@ -38,46 +37,20 @@ export class VertexData {
 }
 
 export function getVertexData(units: UnitRepresentation[]): VertexData {
-  const textureLayers: number[] = []
-  const destinationRect: number[] = []
-  const sourceRect: number[] = []
-  let assetsNum = 0
+  const textureLayersData: number[] = []
+  const destinationData: number[] = []
+  const sourceData: number[] = []
+  const indiciesData: number[] = []
 
-  units.forEach(({ state, position, assets, frameIndex }) => {
-    assets.forEach(assetId => {
-      assetsNum++
-
-      const { frames } = AssetsDescriptor[assetId][state]
-
-      const frame = frames[frameIndex]
-  
-      const { width, height } = frame.destinationRect
-      const x = position.x + frame.destinationRect.x
-      const y = position.y + frame.destinationRect.y
-  
-      destinationRect.push(
-        x,          y,
-        x + width,  y,
-        x + width,  y + height,
-        x,          y + height
-      )
-  
-      textureLayers.push(...Array.from({ length: 4 }, () => frame.textureIndex))
-
-      sourceRect.push(...frame.sourceRect)
-    })
+  units.forEach((unit) => {
+    unit.addBufferData(textureLayersData, destinationData, sourceData, indiciesData)
   })
 
-  const index = 
-    Array.from({ length: assetsNum }, (_, instanceIndex) => [
-      0, 1, 2,
-      0, 2, 3
-    ].map(i => instanceIndex * 4 + i)).flat()
   // console.log(index)
   return new VertexData({
-    destinationRect,
-    sourceRect,
-    textureLayers,
-    index
-  }, assetsNum * 6)
+    destinationRect: destinationData,
+    sourceRect: sourceData,
+    textureLayers: textureLayersData,
+    index: indiciesData
+  }, indiciesData.length)
 }
