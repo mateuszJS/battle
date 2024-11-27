@@ -1,12 +1,9 @@
 export default class AnimatedSprite {
   private frameLocalIndex = 0
-
-  constructor(
-    private firstFrame: number,
-    private animationLength: number,
-    private timePerFrame: number,
-    private configUpdateTime: DOMHighResTimeStamp
-  ) {}
+  private firstFrame = 0
+  private animationLength = 0
+  private timePerFrame = 0
+  private configUpdateTime = 0
 
   public updateConfig(
     firstFrame: number,
@@ -25,7 +22,7 @@ export default class AnimatedSprite {
     return this.firstFrame + this.frameLocalIndex
   }
 
-  public update(time: DOMHighResTimeStamp) {
+  public tick(time: DOMHighResTimeStamp) {
     this.frameLocalIndex = Math.floor(
       (time - this.configUpdateTime) / this.timePerFrame
     ) % this.animationLength

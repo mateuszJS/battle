@@ -8,19 +8,14 @@ export default class UnitRepresentation {
   private aSprites: AnimatedSprite[];
 
   constructor(
-    public state: UnitState,
-    public angle: number,
-    public position: Point,
-    public assets: AssetId[],
+    private state: UnitState,
+    private angle: number,
+    private position: Point,
+    private assets: AssetId[],
     now: DOMHighResTimeStamp
   ) {
-    this.aSprites = assets.map(asset => {
-      const { timePerFrame, length, angles } = AssetsDescriptor[asset][this.state]
-      const firstFrame = mapAngleToIndex(this.angle, angles) * length
-
-      return new AnimatedSprite(firstFrame, length, timePerFrame, now)
-    })
-    // create AnimatedSprites
+    this.aSprites = assets.map(() =>  new AnimatedSprite())
+    this.updateSpritesConfig(now)
   }
 
   // <0, 2 * Math.PI> -> <0, angles>
@@ -36,8 +31,24 @@ export default class UnitRepresentation {
     - position for arms & weapon & backpack, maybe rotation flag
   */
 
-  public update(time: DOMHighResTimeStamp) {
-    this.aSprites.forEach(aSprite => aSprite.update(time))
+  private updateSpritesConfig(now: DOMHighResTimeStamp) {
+    this.aSprites.forEach((sprite, index) => {
+      const asset = this.assets[index]
+      const { timePerFrame, length, angles } = AssetsDescriptor[asset][this.state]
+      const firstFrame = mapAngleToIndex(this.angle, angles) * length
+
+      sprite.updateConfig(firstFrame, length, timePerFrame, now)
+    })
+  }
+
+  public update(angle: number, state: UnitState, now: DOMHighResTimeStamp) {
+    if (this.angle === angle && this.state === state) {
+      this.aSprites.forEach(aSprite => aSprite.tick(now))
+    } else {
+      this.angle = angle
+      this.state = state
+      this.updateSpritesConfig(now)
+    }
   }
 
   /**

@@ -1,4 +1,6 @@
+import AssetId from "AssetsDescriptor/AssetId"
 import initPRNG from "initPRNG"
+import { UnitState } from "logic-contants"
 import Rect from "Rect"
 
 const prng = initPRNG(2850771051)
@@ -13,15 +15,15 @@ function getFrames(namePrefix: string, length: number) {
 }
 
 export default {
-  "2": {
-    6: {
+  [AssetId.ElephantHead]: {
+    [UnitState.RUN]: {
       prefix: 'elephant_head_run',
       length: 6,
       angles: 4,
       timePerFrame: 50, // speed in seconds
       frames: getFrames('elephant_head_run', 4 * 6),
     },
-    5: {
+    [UnitState.SHOOT]: {
       prefix: 'elephant_head_shoot',
       length: 4,
       angles: 8,
@@ -29,15 +31,15 @@ export default {
       frames: getFrames('elephant_head_shoot', 4 * 8),
     },
   },
-  "0": {
-    6: {
+  [AssetId.RegularBody]: {
+    [UnitState.RUN]: {
       prefix: 'regular_body_run',
       length: 5,
       angles: 4,
       timePerFrame: 50, // speed in seconds
       frames: getFrames('regular_body_run', 5 * 4),
     },
-    5: {
+    [UnitState.SHOOT]: {
       prefix: 'regular_body_shoot',
       length: 3,
       angles: 8,
