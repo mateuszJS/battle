@@ -88,7 +88,7 @@ test('when time passes, the addBufferData adds correct data with new frames', ()
 })
 
 
-test.only('when angle changes, addBufferData adds correct data', () => {
+test('when angle changes, addBufferData adds correct data', () => {
   const { unit } = getClearState()
   unit.update(Math.PI * 1.5, UnitState.RUN, 0)
 
