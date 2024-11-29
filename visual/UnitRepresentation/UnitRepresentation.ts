@@ -33,6 +33,12 @@ export default class UnitRepresentation {
 
   private updateSpritesConfig(now: DOMHighResTimeStamp) {
     this.aSprites.forEach((sprite, index) => {
+
+      /*
+        if current unit state is RUN, then do normal animation
+        if it's FLY, GETUP, then make animation depend on progress!
+        UnitState.SHOOT should be also determien by progres <0, 1>!!!
+      */
       const asset = this.assets[index]
       const { timePerFrame, animationLength, angles } = AssetsDescriptor[asset][this.state]
       const firstFrame = mapAngleToIndex(this.angle, angles) * animationLength
@@ -41,57 +47,11 @@ export default class UnitRepresentation {
         {
           firstFrame,
           animationLength, 
-          timePerFrame
+          timePerFrame,
         },
-        now
       )
     })
   }
-
-
-  /*
-  How to do shootign naimation what we need:
-    - animation normaly goes forward
-    - once is looping, isntead of coming back to last frame we should
-      come back to seocnd to last frame and keep going backward
-    - also the time time offset might be different
-
-
-    - for UnitState.FLY we need to start normal animation,
-      then slow it down a lot for osme time, and again go forward once lande(this one can be also be achieved by changing timePerFrame)
-    (loopBack: boolean) => {
-      if its about to loop back
-    }
-
-    During UnitState.FLY just pass max frames you want to achieve "stopAt"
-    until? how would to play it once it has been stopped?
-    pass it with config a callback to determine 
-    REMEMBER to pass loop boolean, or isLast boolean because
-    you dont need to switch from last frame to frame 0, time might go so fast
-    that you go to frame with index 1
-
-
-    Callback is not goign to wor kso easily, because AnimatedSprite calculated current time, so
-    once callback will "allow" frames ot mvoe forward, it iwll jump A LOT OF frames ahead, not ot the next frame
-
-    Maybe we should mvoe to dt(delta time)?
-
-
-    In other words:
-    can we somehow unify all custom logic that comes from UnitResperentation?
-    Is it a good idea ot mvoe that logic to AnimateSprite?
-
-    For UnitState.SHOOT 
-
-    But do we want a callback? And callback should just receive next and previous frame as params?
-    
-    Solutions:
-    1. Manipulate timePerFrame - i'm nto sure how it suppsoe ot work yet
-      - most promising one
-      - add events to AnimatedSprtie config related to 
-    2. If statement, check if now we have last frame and we are about to change to first one
-      a) Update timePerFrame to quicker one, and go back, and then check whe nwe hit first frame
-  */
 
   public update(angle: number, state: UnitState, now: DOMHighResTimeStamp) {
     if (this.angle === angle && this.state === state) {

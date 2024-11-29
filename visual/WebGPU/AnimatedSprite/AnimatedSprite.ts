@@ -1,7 +1,7 @@
 interface AnimSpriteCnfig {
   firstFrame: number
   animationLength: number
-  timePerFrame: number
+  timePerFrame: number | null
 }
 
 /** 
@@ -16,25 +16,43 @@ const defaultConfig = new Proxy({} as AnimSpriteCnfig, {
 export default class AnimatedSprite {
   private config = defaultConfig
   private frameLocalIndex = 0
-  private configUpdateTime = 0
+  private prevDtSum = 0 // result of module from all dt / timePerFrame
 
   public updateConfig(
     config: AnimSpriteCnfig,
-    time: DOMHighResTimeStamp // consider providign time in a different way
   ) {
     this.config = config
-    this.configUpdateTime = time
     this.frameLocalIndex = 0
+    this.prevDtSum = 0
   }
 
   public get frameIndex() {
     return this.config.firstFrame + this.frameLocalIndex
   }
 
-  public tick(time: DOMHighResTimeStamp) {
-    this.frameLocalIndex = Math.floor(
-      (time - this.configUpdateTime) / this.config.timePerFrame
-    ) % this.config.animationLength
+  public progress(amountOfProgress: number /* ∈ <0, 1>*/): void {
+    if (typeof this.config.timePerFrame === 'number') {
+      throw Error('This animation should only be updated by tick(), NOT progress()!')
+    }
+
+    this.frameLocalIndex = amountOfProgress === 0
+      ? 0
+      : Math.ceil(amountOfProgress * this.config.animationLength) - 1
+  }
+
+  public tick(dt: DOMHighResTimeStamp) {
+    const { timePerFrame, animationLength } = this.config
+
+    if (typeof timePerFrame !== 'number') {
+      throw Error('This animation should only be updated by progress(), NOT tick()!')
+    }
+
+    const dtSum = this.prevDtSum + dt
+    this.prevDtSum = dtSum % timePerFrame
+
+    if (dtSum >= timePerFrame) {
+      const advanceBy = Math.floor(dtSum / timePerFrame)
+      this.frameLocalIndex = (this.frameLocalIndex + advanceBy) % animationLength
+    }
   }
 }
-

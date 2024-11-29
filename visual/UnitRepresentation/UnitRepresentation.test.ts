@@ -2,7 +2,6 @@ import { UnitState } from "logic-contants"
 import AssetId from "AssetsDescriptor/AssetId"
 import UnitRepresentation from "./UnitRepresentation"
 import AssetsDescriptor from "AssetsDescriptor"
-import mapAngleToIndex from "./mapAngleToIndex"
 
 jest.mock('AssetsDescriptor')
 
