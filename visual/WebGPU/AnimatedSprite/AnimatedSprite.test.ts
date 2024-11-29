@@ -11,17 +11,15 @@ const initialConfig = {
 const animatedSprite = new AnimatedSprite()
 
 animatedSprite.updateConfig(
-  initialConfig.firstFrame,
-  initialConfig.animationLength,
-  initialConfig.timePerFrame,
+  initialConfig,
   0
 )
 
-test('frame is the first frame at the beggining', () => {
+test('at the beggining the frame is the first frame', () => {
   expect(animatedSprite.frameIndex).toBe(initialConfig.firstFrame)
 })
 
-test('frame is not changed in the right amount on time has not passed', () => {
+test('when not enough of time has passed, the frame is not changing', () => {
   animatedSprite.tick(initialConfig.timePerFrame - 1)
   expect(animatedSprite.frameIndex).toBe(initialConfig.firstFrame)
 })
@@ -58,12 +56,7 @@ const updatedConfig = {
 }
 
 test('after config update the frame is update to new initial frame', () => {
-  animatedSprite.updateConfig(
-    updatedConfig.firstFrame,
-    updatedConfig.animationLength,
-    updatedConfig.timePerFrame,
-    0
-  )
+  animatedSprite.updateConfig(updatedConfig, 0)
 
   expect(animatedSprite.frameIndex).toBe(updatedConfig.firstFrame)
 })
@@ -79,3 +72,12 @@ test('after config update the frame correctly loop to first frame', () => {
   expect(animatedSprite.frameIndex).toBe(updatedConfig.firstFrame)
 })
 
+test('Animated Sprite handles special events', () => {
+  const animatedSprite = new AnimatedSprite()
+  const config = {
+    firstFrame: 0,
+    animationLength: 3,
+    timePerFrame: 100,
+  }
+  animatedSprite.updateConfig(config, 0)
+})

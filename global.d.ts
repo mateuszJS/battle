@@ -13,7 +13,9 @@ declare global {
     convertLogicAngleToVisual: (angle: number) => number
 
     angle: number
+    length: never
   }
+  declare var length: never;
 
   type ValueOf<T> = T[keyof T]
 

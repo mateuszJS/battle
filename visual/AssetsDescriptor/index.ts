@@ -7,7 +7,7 @@ import AssetId from './AssetId'
 
 export type FrameByState = Record<UnitState, {
   prefix: string
-  length: number
+  animationLength: number
   angles: number
   timePerFrame: number
   frames: FrameDetails[]

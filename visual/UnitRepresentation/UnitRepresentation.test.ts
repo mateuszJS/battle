@@ -91,13 +91,13 @@ test('when time passes, the addBufferData adds correct data with new frames', ()
 test('when angle changes, addBufferData adds correct data', () => {
   const { unit } = getClearState()
   unit.update(Math.PI * 1.5, UnitState.RUN, 0)
+  const radiansToAngles = 3
 
   const headRun = AssetsDescriptor[AssetId.ElephantHead][UnitState.RUN]
-  const radiansToAngles = 3
-  const headExpectFrameIdx = radiansToAngles * headRun.length
+  const headExpectFrameIdx = radiansToAngles * headRun.animationLength
 
   const bodyRun = AssetsDescriptor[AssetId.RegularBody][UnitState.RUN]
-  const bodyExpectFrameIdx = radiansToAngles * bodyRun.length
+  const bodyExpectFrameIdx = radiansToAngles * bodyRun.animationLength
 
   const sourceData: number[] = []
 

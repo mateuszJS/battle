@@ -87,7 +87,7 @@ export default async function getinitUniverse(): Promise<
     window.angle = Math.PI * 1.75
     function tick(now: DOMHighResTimeStamp) {
       units.forEach(unit => {
-        unit.update(window.angle, now)
+        unit.update(window.angle, UnitState.SHOOT, now)
     })
 
       // here we need to render that texture into canvas

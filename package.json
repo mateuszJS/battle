@@ -4,7 +4,7 @@
   "description": "",
   "main": "webpack.config.js",
   "scripts": {
-    "dev": "export NODE_ENV=development && webpack serve --open",
+    "start": "export NODE_ENV=development && webpack serve --open",
     "build-assets": "node ./build-assets.js",
     "test": "jest"
   },
