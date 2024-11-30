@@ -63,7 +63,6 @@ export default async function getinitUniverse(): Promise<
   // )
 
   // const texture: GPUTexture = await createTextureFromImage(device, imageSrc, {})
-  window.angle = 0
 
 
 
@@ -80,15 +79,24 @@ export default async function getinitUniverse(): Promise<
         UnitState.RUN,
         0,
         { x: 1000, y: 1000 },
-        [AssetId.RegularBody, AssetId.RegularAccesories, AssetId.ElephantHead],
+        [AssetId.RegularBody],
+        // [AssetId.RegularBody, AssetId.RegularAccesories, AssetId.ElephantHead],
         0
       )
     ]
-    window.angle = Math.PI * 1.75
+    window.angle = Math.PI * 0.1
+    // window.angle = Math.PI * 0
+    // Error, make sure to write test for it, and then fix it!
+
+    let lastFrameTime = document.timeline.currentTime as number
+    /* not sure if type in TS is correct and and if nay browser supposrt currrentTime as CSSNumericValue */ 
+
     function tick(now: DOMHighResTimeStamp) {
+      const dt = now - lastFrameTime
+      lastFrameTime = now
       units.forEach(unit => {
-        unit.update(window.angle, UnitState.SHOOT, now)
-    })
+        unit.update(window.angle, UnitState.SHOOT, dt)
+      })
 
       // here we need to render that texture into canvas
       const canvasTexture = context.getCurrentTexture();

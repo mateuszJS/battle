@@ -11,7 +11,7 @@ const frameByState: FrameByState = {
   },
   [UnitState.SHOOT]: {
     prefix: 'body_shoot',
-    animationLength: 6,
+    animationLength: 7,
     angles: 16,
     timePerFrame: 60,
     frames: [],
