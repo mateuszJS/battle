@@ -6,9 +6,9 @@
     "moduleResolution": "node", // to fix above comment, no pixi is resolved correctly
     // ^ also with that we don't have to import PIXI in each file
     "importHelpers": true,
-    "allowJs": true, // to import web assembly module
+    // "allowJs": true, // to import web assembly module
     "baseUrl": "./visual",
-    "typeRoots": ["./node_modules/@webgpu/types", "./node_modules/@types"], // added because of WebGPU types. Also had to add node_modules/@types, because typeRoots override default typeRoots, not extends
+    "typeRoots": ["./node_modules/@webgpu/types", "./node_modules/@types", "./global.d.ts"], // added because of WebGPU types. Also had to add node_modules/@types, because typeRoots override default typeRoots, not extends
     "paths": {
       "Universe": ["../crate/pkg"],
       "assets": ["../assets"]
@@ -20,6 +20,13 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
+  "exclude": [
+    "eslint.config.mjs",
+    "./crate/**/*",
+    "./pkg/**/*",
+    "build-assets.js",
+    "webpack.config.js",
+  ],
   "$schema": "https://json.schemastore.org/tsconfig", // @tsconfig/recommended
   "display": "Recommended", // @tsconfig/recommended
 }

@@ -79,12 +79,12 @@ export default async function getinitUniverse(): Promise<
         UnitState.RUN,
         0,
         { x: 1000, y: 1000 },
-        [AssetId.RegularBody],
-        // [AssetId.RegularBody, AssetId.RegularAccesories, AssetId.ElephantHead],
+        // [AssetId.RegularBody],
+        [AssetId.RegularBody, AssetId.RegularAccesories, AssetId.ElephantHead],
         0
       )
     ]
-    window.angle = Math.PI * 0.1
+    window.angle = Math.PI * 1
     // window.angle = Math.PI * 0
     // Error, make sure to write test for it, and then fix it!
 
