@@ -1,6 +1,10 @@
-import Rect from "Rect";
 import shaderCode from "./shader.wgsl"
 import { VertexData } from "WebGPU/getVertexData";
+import {
+  makeShaderDataDefinitions,
+  makeStructuredView,
+} from 'webgpu-utils';
+ 
 
 export default function getProgram(
   device: GPUDevice,
@@ -62,25 +66,38 @@ export default function getProgram(
     },
   });
 
+  const defs = makeShaderDataDefinitions(shaderCode);
+
   return function drawTexture(
     pass: GPURenderPassEncoder,
     matrix: Float32Array,
     vertexData: VertexData,
     texture: GPUTexture,
+    colorMatrix: Float32Array
   ) {
+    const myUniformValues = makeStructuredView(defs.uniforms.u);
 
   // color, matrix
-  const uniformBufferSize = (12/*matrix*/) * 4;
+  // const uniformBufferSize = (12/*projection matrix*/ + 12/*color matrix*/) * 4;
+  // const uniformBuffer = device.createBuffer({
+  //   label: 'uniforms',
+  //   size: uniformBufferSize,
+  //   usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+  // });
+
   const uniformBuffer = device.createBuffer({
-    label: 'uniforms',
-    size: uniformBufferSize,
+    size: myUniformValues.arrayBuffer.byteLength,
     usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
   });
 
-  const uniformValues = new Float32Array(uniformBufferSize / 4);
-  // offsets to the various uniform values in float32 indices
-  const kMatrixOffset = 0;
-  const matrixValue = uniformValues.subarray(kMatrixOffset, kMatrixOffset + 12);
+  // const uniformValues = new Float32Array(uniformBufferSize / 4);
+  // // offsets to the various uniform values in float32 indices
+  // const kMatrixOffset = 0;
+  // const matrixValue = uniformValues.subarray(kMatrixOffset, kMatrixOffset + 12);
+
+
+  // const kColorMatrixOffset = 12;
+  // const colorMatrixValue = uniformValues.subarray(kColorMatrixOffset, kColorMatrixOffset + 12);
 
 
   const { destinationRect, sourceRect, index, layer } = vertexData.getBakedData()
@@ -133,8 +150,29 @@ export default function getProgram(
     pass.setVertexBuffer(2, vertexLayerBuffer);
     pass.setIndexBuffer(indexBuffer, 'uint32');
     // mat3.translate(matrixValue, [x, 0], matrixValue);
-    matrixValue.set(matrix)
-    device.queue.writeBuffer(uniformBuffer, 0, uniformValues);
+    // matrixValue.set(matrix)
+    // colorMatrixValue.set(colorMatrix)
+
+
+
+  myUniformValues.set({
+    matrix,
+    colorMatricies: [colorMatrix, colorMatrix],
+    // orientation: [1, 0, -1],
+    // size: 2,
+    // direction: [0, 1, 0],
+    // scale: 1.5,
+    // info: {
+    //   velocity: [2, 3, 4],
+    // },
+    // friction: 0.1,
+  });
+
+  // matrix: mat3x3f,
+  // colorMatrix: mat3x3f,
+
+    // device.queue.writeBuffer(uniformBuffer, 0, uniformValues);
+    device.queue.writeBuffer(uniformBuffer, 0, myUniformValues.arrayBuffer);
 
     pass.setBindGroup(0, bindGroup);
     // pass.draw(4);  // call our vertex shader 6 times

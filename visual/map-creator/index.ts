@@ -8,6 +8,7 @@ import Rect from 'Rect'
 import addStyles from './addStyles'
 import setupBridgeEnv, { attachPlatformListeners, createPlatformElem, updateBridgePreview, updateBriges } from './setupBridgeEnv'
 import getinitUniverse from 'getInitUniverse'
+import hexToRGB from './hexToRgb'
 
 const platformCoords = getPlatformCoords()
 const bridgeWidth = (platformCoords[3].y - platformCoords[2].y) * mapDetails.scale
@@ -36,13 +37,14 @@ export default function openMapCreator(wasmModule: Universe) {
   mapAreaElem.style.aspectRatio = `${mapDetails.width / mapDetails.height}`
   viewElem.appendChild(mapAreaElem)
 
+  const rightControlPanel = document.createElement('section')
 
   const startBtn = document.createElement('button')
   startBtn.textContent = 'START'
   const startBtnClickPromise = new Promise<void>(resolve => {
     startBtn.addEventListener('click', () => resolve())
   })
-  viewElem.appendChild(startBtn)
+  rightControlPanel.appendChild(startBtn)
 
   document.body.appendChild(viewElem)
 
@@ -96,6 +98,55 @@ export default function openMapCreator(wasmModule: Universe) {
     }
   })
 
+  const colorMatrix = Array(12).fill(0) // it's matrix3x3 but because of the webgpu memory layout...
+  const colorInputs = ['#ff0000', '#00ff00', '#0000ff'].map((initialColor, i) => {
+    const node = document.createElement('input')
+    node.type = 'color'
+    node.value = initialColor
+
+    const { r, g, b } = hexToRGB(initialColor)
+    colorMatrix[0 + i] = r
+    colorMatrix[4 + i] = g
+    colorMatrix[8 + i] = b
+
+    rightControlPanel.appendChild(node)
+    node.addEventListener('input', () => {
+      // console.log(e.target!.value)
+      // index = 1
+      const { r, g, b } = hexToRGB(node.value)
+      colorMatrix[0 + i] = r
+      colorMatrix[4 + i] = g
+      colorMatrix[8 + i] = b
+
+      // let colorMatrix = mat3x3f(
+      //   // r, g, b
+      //   0, 1, 0, //
+      //   0, 0, 1, //
+      //   1, 0, 0 //
+      // );
+
+      // let colorMatrix = mat3x3f(
+      //   1, 0, 0, // 
+      //   0, 1, 0, // 
+      //   0, 0, 1 // 
+      // );
+
+
+
+      console.log(node.value)
+    })
+    // no
+    // <input type="color" id="body" name="body" value="#ff0000" />
+    // <label for="body">Body</label>
+  })
+  viewElem.appendChild(rightControlPanel)
+
+  // <div>
+  //   <input type="color" id="body" name="body" value="#f6b73c" />
+  //   <label for="body">Body</label>
+  // </div>
+
+
   const canvas = document.createElement('canvas')
   document.body.appendChild(canvas)
 
@@ -108,6 +159,7 @@ export default function openMapCreator(wasmModule: Universe) {
         wasmModule,
         MAP_WIDTH,
         MAP_HEIGHT,
+        new Float32Array(colorMatrix),
       //   getSerializedMapInfo(nodes, connections, portals),
       //   factionVisualDetails,
       )

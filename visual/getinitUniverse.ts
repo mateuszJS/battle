@@ -37,6 +37,7 @@ export default async function getinitUniverse(): Promise<
     wasmModule: Universe,
     mapWidth: number,
     mapHeight: number,
+    colorMatrix: Float32Array
   ) => void
 > {
   // const state = new State()
@@ -67,7 +68,7 @@ export default async function getinitUniverse(): Promise<
 
 
 
-  return function initUniverse (wasmModule, mapWidth, mapHeight) {
+  return function initUniverse (wasmModule, mapWidth, mapHeight, colorMatrix) {
     const serializedMapInfo: SerializedMapInfo = PREDEFINED_MAP
     const factionVisualDetails: FactionVisualDetails[] = PREDEFINED_FACTION_VISUAL_DETAILS
     const matrix = getCanvasMatrix(canvas)
@@ -116,7 +117,7 @@ export default async function getinitUniverse(): Promise<
       const pass = encoder.beginRenderPass(descriptor)
       const vertexData = getVertexData(units)
 
-      drawTexture(pass, matrix, vertexData, texture2dArray)
+      drawTexture(pass, matrix, vertexData, texture2dArray, colorMatrix)
 
       pass.end()
       const commandBuffer = encoder.finish();

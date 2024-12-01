@@ -5,7 +5,7 @@
   "main": "webpack.config.js",
   "scripts": {
     "start": "export NODE_ENV=development && webpack serve --open",
-    "build-sprite-sheet": "node ./build-assets.js",
+    "build-sprite-sheet": "node ./build-sprite-sheets.js",
     "test": "jest"
   },
   "author": "",
@@ -41,6 +41,7 @@
   "dependencies": {
     "debounce": "^1.2.0",
     "lodash": "^4.17.21",
-    "numeric": "^1.2.6"
+    "numeric": "^1.2.6",
+    "webgpu-utils": "^1.9.3"
   }
 }

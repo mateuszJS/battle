@@ -16,14 +16,13 @@ const startGame = () => {
   /** handle UI */
   const goToMapCreatorBtn = document.createElement('button')
   goToMapCreatorBtn.textContent = 'GO TO MAP CREATOR'
-  console.log('1 - create button')
+
   const goToMapCreatorPromise = new Promise<void>(resolve => {
-    console.log('2 - attach event listener')
+
     goToMapCreatorBtn.addEventListener('click', () => {
       resolve()
     })
   })
-  console.log('3 - append btn to body')
   document.body.appendChild(goToMapCreatorBtn)
 
   /** Handle wasm file loading */

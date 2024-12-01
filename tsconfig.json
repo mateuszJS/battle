@@ -6,7 +6,7 @@
     "moduleResolution": "node", // to fix above comment, no pixi is resolved correctly
     // ^ also with that we don't have to import PIXI in each file
     "importHelpers": true,
-    // "allowJs": true, // to import web assembly module
+    "allowJs": true, // numeric librayr uses js, also WebAssembly might need it
     "baseUrl": "./visual",
     "typeRoots": ["./node_modules/@webgpu/types", "./node_modules/@types", "./global.d.ts"], // added because of WebGPU types. Also had to add node_modules/@types, because typeRoots override default typeRoots, not extends
     "paths": {
@@ -24,7 +24,7 @@
     "eslint.config.mjs",
     "./crate/**/*",
     "./pkg/**/*",
-    "build-assets.js",
+    "build-sprite-sheets.js",
     "webpack.config.js",
   ],
   "$schema": "https://json.schemastore.org/tsconfig", // @tsconfig/recommended
