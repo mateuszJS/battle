@@ -1,1396 +1,1581 @@
 {"frames": {
 
-"body_run0018.png":
+"elephant_head_fly_0329.png":
 {
-	"frame": {"x":1313,"y":708,"w":135,"h":230},
+	"frame": {"x":264,"y":594,"w":42,"h":65},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":416,"y":378,"w":135,"h":230},
-	"sourceSize": {"w":135,"h":230}
+	"spriteSourceSize": {"x":362,"y":452,"w":42,"h":65},
+	"sourceSize": {"w":42,"h":65}
 },
-"body_run0019.png":
+"elephant_head_fly_0347.png":
 {
-	"frame": {"x":1010,"y":1,"w":150,"h":237},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":401,"y":377,"w":150,"h":237},
-	"sourceSize": {"w":150,"h":237}
-},
-"body_run0020.png":
-{
-	"frame": {"x":922,"y":243,"w":153,"h":237},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":397,"y":376,"w":153,"h":237},
-	"sourceSize": {"w":153,"h":237}
-},
-"body_run0021.png":
-{
-	"frame": {"x":1312,"y":949,"w":154,"h":230},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":394,"y":376,"w":154,"h":230},
-	"sourceSize": {"w":154,"h":230}
-},
-"body_run0029.png":
-{
-	"frame": {"x":1608,"y":1166,"w":173,"h":210},
+	"frame": {"x":1235,"y":969,"w":66,"h":47},
 	"rotated": true,
 	"trimmed": false,
-	"spriteSourceSize": {"x":384,"y":380,"w":173,"h":210},
-	"sourceSize": {"w":173,"h":210}
+	"spriteSourceSize": {"x":466,"y":371,"w":66,"h":47},
+	"sourceSize": {"w":66,"h":47}
 },
-"body_run0033.png":
+"elephant_head_fly_0351.png":
 {
-	"frame": {"x":799,"y":487,"w":101,"h":239},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":448,"y":372,"w":101,"h":239},
-	"sourceSize": {"w":101,"h":239}
-},
-"body_run0034.png":
-{
-	"frame": {"x":410,"y":1,"w":109,"h":245},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":439,"y":372,"w":109,"h":245},
-	"sourceSize": {"w":109,"h":245}
-},
-"body_run0035.png":
-{
-	"frame": {"x":79,"y":1593,"w":121,"h":253},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":427,"y":371,"w":121,"h":253},
-	"sourceSize": {"w":121,"h":253}
-},
-"body_run0036.png":
-{
-	"frame": {"x":98,"y":268,"w":123,"h":256},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":424,"y":371,"w":123,"h":256},
-	"sourceSize": {"w":123,"h":256}
-},
-"body_run0037.png":
-{
-	"frame": {"x":299,"y":1576,"w":123,"h":250},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":422,"y":371,"w":123,"h":250},
-	"sourceSize": {"w":123,"h":250}
-},
-"body_run0038.png":
-{
-	"frame": {"x":672,"y":740,"w":115,"h":240},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":426,"y":372,"w":115,"h":240},
-	"sourceSize": {"w":115,"h":240}
-},
-"body_run0039.png":
-{
-	"frame": {"x":1287,"y":1187,"w":97,"h":231},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":441,"y":372,"w":97,"h":231},
-	"sourceSize": {"w":97,"h":231}
-},
-"body_run0041.png":
-{
-	"frame": {"x":1178,"y":1203,"w":106,"h":233},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":429,"y":373,"w":106,"h":233},
-	"sourceSize": {"w":106,"h":233}
-},
-"body_run0042.png":
-{
-	"frame": {"x":990,"y":728,"w":120,"h":236},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":413,"y":373,"w":120,"h":236},
-	"sourceSize": {"w":120,"h":236}
-},
-"body_run0043.png":
-{
-	"frame": {"x":521,"y":1569,"w":142,"h":241},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":403,"y":374,"w":142,"h":241},
-	"sourceSize": {"w":142,"h":241}
-},
-"body_run0044.png":
-{
-	"frame": {"x":728,"y":1,"w":153,"h":241},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":401,"y":374,"w":153,"h":241},
-	"sourceSize": {"w":153,"h":241}
-},
-"body_run0045.png":
-{
-	"frame": {"x":633,"y":1813,"w":148,"h":234},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":403,"y":374,"w":148,"h":234},
-	"sourceSize": {"w":148,"h":234}
-},
-"body_run0047.png":
-{
-	"frame": {"x":1821,"y":624,"w":122,"h":226},
+	"frame": {"x":917,"y":385,"w":68,"h":59},
 	"rotated": true,
 	"trimmed": false,
-	"spriteSourceSize": {"x":422,"y":374,"w":122,"h":226},
-	"sourceSize": {"w":122,"h":226}
+	"spriteSourceSize": {"x":428,"y":366,"w":68,"h":59},
+	"sourceSize": {"w":68,"h":59}
 },
-"body_run0048.png":
+"elephant_head_fly_0365.png":
 {
-	"frame": {"x":1064,"y":1204,"w":111,"h":233},
+	"frame": {"x":915,"y":596,"w":66,"h":61},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":420,"y":578,"w":66,"h":61},
+	"sourceSize": {"w":66,"h":61}
+},
+"elephant_head_fly_0381.png":
+{
+	"frame": {"x":915,"y":665,"w":61,"h":61},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":436,"y":373,"w":111,"h":233},
-	"sourceSize": {"w":111,"h":233}
+	"spriteSourceSize": {"x":491,"y":366,"w":61,"h":61},
+	"sourceSize": {"w":61,"h":61}
 },
-"body_run0049.png":
+"elephant_head_fly_0400.png":
 {
-	"frame": {"x":425,"y":1573,"w":93,"h":248},
+	"frame": {"x":1231,"y":1523,"w":68,"h":51},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":485,"y":595,"w":68,"h":51},
+	"sourceSize": {"w":68,"h":51}
+},
+"elephant_head_fly_0411.png":
+{
+	"frame": {"x":1235,"y":900,"w":47,"h":66},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":453,"y":366,"w":93,"h":248},
-	"sourceSize": {"w":93,"h":248}
+	"spriteSourceSize": {"x":554,"y":347,"w":47,"h":66},
+	"sourceSize": {"w":47,"h":66}
 },
-"body_run0050.png":
+"elephant_head_fly_0415.png":
 {
-	"frame": {"x":176,"y":527,"w":92,"h":256},
+	"frame": {"x":586,"y":338,"w":62,"h":69},
 	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":556,"y":377,"w":62,"h":69},
+	"sourceSize": {"w":62,"h":69}
+},
+"elephant_head_fly_0416.png":
+{
+	"frame": {"x":586,"y":410,"w":62,"h":69},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":556,"y":400,"w":62,"h":69},
+	"sourceSize": {"w":62,"h":69}
+},
+"elephant_head_fly_0419.png":
+{
+	"frame": {"x":917,"y":313,"w":59,"h":69},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":540,"y":483,"w":59,"h":69},
+	"sourceSize": {"w":59,"h":69}
+},
+"elephant_head_fly_0423.png":
+{
+	"frame": {"x":917,"y":456,"w":59,"h":66},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":542,"y":560,"w":59,"h":66},
+	"sourceSize": {"w":59,"h":66}
+},
+"elephant_head_fly_0438.png":
+{
+	"frame": {"x":1554,"y":152,"w":36,"h":68},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":550,"y":293,"w":36,"h":68},
+	"sourceSize": {"w":36,"h":68}
+},
+"elephant_head_fly_0439.png":
+{
+	"frame": {"x":1236,"y":829,"w":46,"h":68},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":568,"y":283,"w":46,"h":68},
+	"sourceSize": {"w":46,"h":68}
+},
+"elephant_head_fly_0440.png":
+{
+	"frame": {"x":1238,"y":758,"w":44,"h":68},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":588,"y":280,"w":44,"h":68},
+	"sourceSize": {"w":44,"h":68}
+},
+"elephant_head_fly_0479.png":
+{
+	"frame": {"x":862,"y":1705,"w":65,"h":38},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":498,"y":387,"w":65,"h":38},
+	"sourceSize": {"w":65,"h":38}
+},
+"elephant_head_fly_0505.png":
+{
+	"frame": {"x":1247,"y":196,"w":69,"h":35},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":436,"y":256,"w":69,"h":35},
+	"sourceSize": {"w":69,"h":35}
+},
+"elephant_head_fly_0506.png":
+{
+	"frame": {"x":1553,"y":293,"w":69,"h":37},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":437,"y":275,"w":69,"h":37},
+	"sourceSize": {"w":69,"h":37}
+},
+"elephant_head_fly_0507.png":
+{
+	"frame": {"x":862,"y":1634,"w":68,"h":38},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":438,"y":308,"w":68,"h":38},
+	"sourceSize": {"w":68,"h":38}
+},
+"elephant_head_fly_0508.png":
+{
+	"frame": {"x":1244,"y":546,"w":69,"h":38},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":439,"y":343,"w":69,"h":38},
+	"sourceSize": {"w":69,"h":38}
+},
+"elephant_head_fly_0513.png":
+{
+	"frame": {"x":1232,"y":1380,"w":69,"h":50},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":448,"y":435,"w":69,"h":50},
+	"sourceSize": {"w":69,"h":50}
+},
+"elephant_head_fly_0514.png":
+{
+	"frame": {"x":258,"y":1304,"w":69,"h":48},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":445,"y":436,"w":69,"h":48},
+	"sourceSize": {"w":69,"h":48}
+},
+"elephant_head_getup_0568.png":
+{
+	"frame": {"x":1246,"y":340,"w":36,"h":66},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":362,"y":532,"w":36,"h":66},
+	"sourceSize": {"w":36,"h":66}
+},
+"elephant_head_getup_0571.png":
+{
+	"frame": {"x":263,"y":802,"w":66,"h":43},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":350,"y":550,"w":66,"h":43},
+	"sourceSize": {"w":66,"h":43}
+},
+"elephant_head_getup_0595.png":
+{
+	"frame": {"x":1247,"y":268,"w":69,"h":35},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":427,"y":609,"w":69,"h":35},
+	"sourceSize": {"w":69,"h":35}
+},
+"elephant_head_getup_0596.png":
+{
+	"frame": {"x":1244,"y":618,"w":69,"h":38},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":428,"y":605,"w":69,"h":38},
+	"sourceSize": {"w":69,"h":38}
+},
+"elephant_head_getup_0597.png":
+{
+	"frame": {"x":259,"y":1160,"w":70,"h":47},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":425,"y":583,"w":70,"h":47},
+	"sourceSize": {"w":70,"h":47}
+},
+"elephant_head_getup_0599.png":
+{
+	"frame": {"x":258,"y":1376,"w":67,"h":48},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":410,"y":511,"w":67,"h":48},
+	"sourceSize": {"w":67,"h":48}
+},
+"elephant_head_getup_0602.png":
+{
+	"frame": {"x":1235,"y":1038,"w":66,"h":47},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":473,"y":420,"w":66,"h":47},
+	"sourceSize": {"w":66,"h":47}
+},
+"elephant_head_getup_0607.png":
+{
+	"frame": {"x":1232,"y":1452,"w":68,"h":50},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":479,"y":598,"w":68,"h":50},
+	"sourceSize": {"w":68,"h":50}
+},
+"elephant_head_getup_0624.png":
+{
+	"frame": {"x":258,"y":1446,"w":66,"h":48},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":461,"y":519,"w":66,"h":48},
+	"sourceSize": {"w":66,"h":48}
+},
+"elephant_head_getup_0628.png":
+{
+	"frame": {"x":1245,"y":409,"w":66,"h":37},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":477,"y":403,"w":66,"h":37},
+	"sourceSize": {"w":66,"h":37}
+},
+"elephant_head_getup_0631.png":
+{
+	"frame": {"x":1880,"y":2012,"w":68,"h":35},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":469,"y":380,"w":68,"h":35},
+	"sourceSize": {"w":68,"h":35}
+},
+"elephant_head_getup_0647.png":
+{
+	"frame": {"x":1233,"y":1176,"w":65,"h":49},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":527,"y":570,"w":65,"h":49},
+	"sourceSize": {"w":65,"h":49}
+},
+"elephant_head_getup_0652.png":
+{
+	"frame": {"x":261,"y":944,"w":69,"h":45},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":476,"y":412,"w":69,"h":45},
+	"sourceSize": {"w":69,"h":45}
+},
+"elephant_head_getup_0653.png":
+{
+	"frame": {"x":1808,"y":2012,"w":69,"h":35},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":477,"y":401,"w":69,"h":35},
+	"sourceSize": {"w":69,"h":35}
+},
+"elephant_head_getup_0671.png":
+{
+	"frame": {"x":1240,"y":690,"w":65,"h":42},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":580,"y":533,"w":65,"h":42},
+	"sourceSize": {"w":65,"h":42}
+},
+"elephant_head_getup_0678.png":
+{
+	"frame": {"x":934,"y":174,"w":67,"h":42},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":457,"y":395,"w":67,"h":42},
+	"sourceSize": {"w":67,"h":42}
+},
+"elephant_head_getup_0681.png":
+{
+	"frame": {"x":934,"y":103,"w":68,"h":42},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":458,"y":374,"w":68,"h":42},
+	"sourceSize": {"w":68,"h":42}
+},
+"elephant_head_getup_0694.png":
+{
+	"frame": {"x":279,"y":314,"w":25,"h":33},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":543,"y":480,"w":25,"h":33},
+	"sourceSize": {"w":25,"h":33}
+},
+"elephant_head_getup_0695.png":
+{
+	"frame": {"x":259,"y":1233,"w":47,"h":68},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":521,"y":466,"w":47,"h":68},
+	"sourceSize": {"w":47,"h":68}
+},
+"elephant_head_getup_0696.png":
+{
+	"frame": {"x":279,"y":256,"w":55,"h":27},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":513,"y":499,"w":55,"h":27},
+	"sourceSize": {"w":55,"h":27}
+},
+"elephant_head_getup_0697.png":
+{
+	"frame": {"x":279,"y":350,"w":25,"h":22},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":545,"y":490,"w":25,"h":22},
+	"sourceSize": {"w":25,"h":22}
+},
+"elephant_head_getup_0719.png":
+{
+	"frame": {"x":309,"y":107,"w":12,"h":38},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":450,"y":484,"w":12,"h":38},
+	"sourceSize": {"w":12,"h":38}
+},
+"elephant_head_getup_0721.png":
+{
+	"frame": {"x":1813,"y":365,"w":47,"h":18},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":454,"y":507,"w":47,"h":18},
+	"sourceSize": {"w":47,"h":18}
+},
+"elephant_head_getup_0722.png":
+{
+	"frame": {"x":309,"y":148,"w":3,"h":3},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":3,"h":3},
+	"sourceSize": {"w":3,"h":3}
+},
+"elephant_head_getup_0725.png":
+{
+	"frame": {"x":1554,"y":223,"w":67,"h":36},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":466,"y":395,"w":67,"h":36},
+	"sourceSize": {"w":67,"h":36}
+},
+"elephant_head_getup_0751.png":
+{
+	"frame": {"x":1951,"y":2012,"w":68,"h":35},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":447,"y":413,"w":68,"h":35},
+	"sourceSize": {"w":68,"h":35}
+},
+"elephant_head_getup_0752.png":
+{
+	"frame": {"x":260,"y":1016,"w":69,"h":46},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":451,"y":413,"w":69,"h":46},
+	"sourceSize": {"w":69,"h":46}
+},
+"elephant_head_idle_0308.png":
+{
+	"frame": {"x":260,"y":1088,"w":69,"h":46},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":459,"y":354,"w":69,"h":46},
+	"sourceSize": {"w":69,"h":46}
+},
+"elephant_head_idle_0314.png":
+{
+	"frame": {"x":261,"y":871,"w":70,"h":45},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":467,"y":341,"w":70,"h":45},
+	"sourceSize": {"w":70,"h":45}
+},
+"elephant_head_run_0003.png":
+{
+	"frame": {"x":258,"y":1515,"w":65,"h":48},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":521,"y":374,"w":65,"h":48},
+	"sourceSize": {"w":65,"h":48}
+},
+"elephant_head_run_0004.png":
+{
+	"frame": {"x":1233,"y":1244,"w":65,"h":49},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":519,"y":372,"w":65,"h":49},
+	"sourceSize": {"w":65,"h":49}
+},
+"elephant_head_run_0015.png":
+{
+	"frame": {"x":263,"y":662,"w":67,"h":43},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":516,"y":377,"w":67,"h":43},
+	"sourceSize": {"w":67,"h":43}
+},
+"elephant_head_run_0016.png":
+{
+	"frame": {"x":263,"y":732,"w":67,"h":43},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":519,"y":377,"w":67,"h":43},
+	"sourceSize": {"w":67,"h":43}
+},
+"elephant_head_run_0049.png":
+{
+	"frame": {"x":273,"y":375,"w":70,"h":33},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":462,"y":352,"w":70,"h":33},
+	"sourceSize": {"w":70,"h":33}
+},
+"elephant_head_run_0050.png":
+{
+	"frame": {"x":272,"y":521,"w":70,"h":34},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":460,"y":352,"w":70,"h":34},
+	"sourceSize": {"w":70,"h":34}
+},
+"elephant_head_run_0051.png":
+{
+	"frame": {"x":273,"y":448,"w":70,"h":33},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":459,"y":352,"w":70,"h":33},
+	"sourceSize": {"w":70,"h":33}
+},
+"elephant_head_run_0083.png":
+{
+	"frame": {"x":1245,"y":478,"w":65,"h":37},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":428,"y":360,"w":65,"h":37},
+	"sourceSize": {"w":65,"h":37}
+},
+"elephant_head_run_0102.png":
+{
+	"frame": {"x":934,"y":244,"w":66,"h":42},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":416,"y":381,"w":66,"h":42},
+	"sourceSize": {"w":66,"h":42}
+},
+"elephant_head_run_0126.png":
+{
+	"frame": {"x":1233,"y":1312,"w":65,"h":49},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":430,"y":391,"w":65,"h":49},
+	"sourceSize": {"w":65,"h":49}
+},
+"elephant_head_run_0127.png":
+{
+	"frame": {"x":1233,"y":1107,"w":66,"h":49},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":430,"y":392,"w":66,"h":49},
+	"sourceSize": {"w":66,"h":49}
+},
+"elephant_head_run_0146.png":
+{
+	"frame": {"x":592,"y":192,"w":70,"h":56},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":466,"y":403,"w":70,"h":56},
+	"sourceSize": {"w":70,"h":56}
+},
+"elephant_head_run_0150.png":
+{
+	"frame": {"x":592,"y":265,"w":70,"h":56},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":471,"y":397,"w":70,"h":56},
+	"sourceSize": {"w":70,"h":56}
+},
+"elephant_head_shoot_0199.png":
+{
+	"frame": {"x":915,"y":525,"w":68,"h":61},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":446,"y":358,"w":68,"h":61},
+	"sourceSize": {"w":68,"h":61}
+},
+"regular_body_fly_0317.png":
+{
+	"frame": {"x":172,"y":1370,"w":83,"h":238},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":443,"y":363,"w":83,"h":238},
+	"sourceSize": {"w":83,"h":238}
+},
+"regular_body_fly_0345.png":
+{
+	"frame": {"x":309,"y":1281,"w":249,"h":148},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":373,"y":458,"w":249,"h":148},
+	"sourceSize": {"w":249,"h":148}
+},
+"regular_body_fly_0346.png":
+{
+	"frame": {"x":1285,"y":888,"w":252,"h":144},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":372,"y":461,"w":252,"h":144},
+	"sourceSize": {"w":252,"h":144}
+},
+"regular_body_fly_0357.png":
+{
+	"frame": {"x":1061,"y":1836,"w":153,"h":211},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":428,"y":303,"w":153,"h":211},
+	"sourceSize": {"w":153,"h":211}
+},
+"regular_body_fly_0369.png":
+{
+	"frame": {"x":1863,"y":1,"w":216,"h":184},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":374,"y":445,"w":216,"h":184},
+	"sourceSize": {"w":216,"h":184}
+},
+"regular_body_fly_0374.png":
+{
+	"frame": {"x":1285,"y":1462,"w":223,"h":176},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":392,"y":459,"w":223,"h":176},
+	"sourceSize": {"w":223,"h":176}
+},
+"regular_body_fly_0385.png":
+{
+	"frame": {"x":1,"y":1836,"w":211,"h":168},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":409,"y":294,"w":211,"h":168},
+	"sourceSize": {"w":211,"h":168}
+},
+"regular_body_fly_0388.png":
+{
+	"frame": {"x":1380,"y":1641,"w":179,"h":192},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":412,"y":338,"w":179,"h":192},
+	"sourceSize": {"w":179,"h":192}
+},
+"regular_body_fly_0399.png":
+{
+	"frame": {"x":305,"y":1850,"w":236,"h":197},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":370,"y":434,"w":236,"h":197},
+	"sourceSize": {"w":236,"h":197}
+},
+"regular_body_fly_0400.png":
+{
+	"frame": {"x":1813,"y":416,"w":234,"h":200},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":365,"y":435,"w":234,"h":200},
+	"sourceSize": {"w":234,"h":200}
+},
+"regular_body_fly_0403.png":
+{
+	"frame": {"x":1538,"y":1410,"w":228,"h":197},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":354,"y":437,"w":228,"h":197},
+	"sourceSize": {"w":228,"h":197}
+},
+"regular_body_fly_0425.png":
+{
+	"frame": {"x":1,"y":1570,"w":181,"h":168},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":458,"y":462,"w":181,"h":168},
+	"sourceSize": {"w":181,"h":168}
+},
+"regular_body_fly_0438.png":
+{
+	"frame": {"x":309,"y":1659,"w":100,"h":249},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":471,"y":324,"w":100,"h":249},
+	"sourceSize": {"w":100,"h":249}
+},
+"regular_body_fly_0439.png":
+{
+	"frame": {"x":172,"y":1611,"w":134,"h":229},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":464,"y":314,"w":134,"h":229},
+	"sourceSize": {"w":134,"h":229}
+},
+"regular_body_fly_0440.png":
+{
+	"frame": {"x":651,"y":1634,"w":162,"h":208},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":455,"y":311,"w":162,"h":208},
+	"sourceSize": {"w":162,"h":208}
+},
+"regular_body_fly_0445.png":
+{
+	"frame": {"x":1738,"y":1410,"w":228,"h":169},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":422,"y":250,"w":228,"h":169},
+	"sourceSize": {"w":228,"h":169}
+},
+"regular_body_fly_0460.png":
+{
+	"frame": {"x":1,"y":1370,"w":168,"h":197},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":460,"y":388,"w":168,"h":197},
+	"sourceSize": {"w":168,"h":197}
+},
+"regular_body_fly_0465.png":
+{
+	"frame": {"x":651,"y":1350,"w":249,"h":145},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":374,"y":490,"w":249,"h":145},
+	"sourceSize": {"w":249,"h":145}
+},
+"regular_body_fly_0466.png":
+{
+	"frame": {"x":1540,"y":899,"w":252,"h":134},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":372,"y":503,"w":252,"h":134},
+	"sourceSize": {"w":252,"h":134}
+},
+"regular_body_fly_0467.png":
+{
+	"frame": {"x":1551,"y":365,"w":102,"h":259},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":452,"y":326,"w":102,"h":259},
+	"sourceSize": {"w":102,"h":259}
+},
+"regular_body_fly_0468.png":
+{
+	"frame": {"x":1593,"y":157,"w":104,"h":266},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":445,"y":301,"w":104,"h":266},
+	"sourceSize": {"w":104,"h":266}
+},
+"regular_body_fly_0469.png":
+{
+	"frame": {"x":1285,"y":360,"w":119,"h":263},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":427,"y":279,"w":119,"h":263},
+	"sourceSize": {"w":119,"h":263}
+},
+"regular_body_fly_0470.png":
+{
+	"frame": {"x":1285,"y":482,"w":144,"h":258},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":410,"y":266,"w":144,"h":258},
+	"sourceSize": {"w":144,"h":258}
+},
+"regular_body_fly_0471.png":
+{
+	"frame": {"x":979,"y":897,"w":167,"h":253},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":391,"y":255,"w":167,"h":253},
+	"sourceSize": {"w":167,"h":253}
+},
+"regular_body_fly_0472.png":
+{
+	"frame": {"x":1805,"y":619,"w":183,"h":242},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":380,"y":244,"w":183,"h":242},
+	"sourceSize": {"w":183,"h":242}
+},
+"regular_body_fly_0498.png":
+{
+	"frame": {"x":1544,"y":698,"w":117,"h":254},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":436,"y":303,"w":117,"h":254},
+	"sourceSize": {"w":117,"h":254}
+},
+"regular_body_fly_0499.png":
+{
+	"frame": {"x":1,"y":1243,"w":124,"h":254},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":428,"y":281,"w":124,"h":254},
+	"sourceSize": {"w":124,"h":254}
+},
+"regular_body_fly_0500.png":
+{
+	"frame": {"x":1285,"y":1035,"w":134,"h":252},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":417,"y":266,"w":134,"h":252},
+	"sourceSize": {"w":134,"h":252}
+},
+"regular_body_fly_0501.png":
+{
+	"frame": {"x":979,"y":1357,"w":150,"h":250},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":403,"y":254,"w":150,"h":250},
+	"sourceSize": {"w":150,"h":250}
+},
+"regular_body_fly_0505.png":
+{
+	"frame": {"x":1371,"y":1836,"w":211,"h":146},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":376,"y":271,"w":211,"h":146},
+	"sourceSize": {"w":211,"h":146}
+},
+"regular_body_fly_0529.png":
+{
+	"frame": {"x":651,"y":1498,"w":133,"h":249},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":421,"y":294,"w":133,"h":249},
+	"sourceSize": {"w":133,"h":249}
+},
+"regular_body_getup_0558.png":
+{
+	"frame": {"x":1,"y":654,"w":259,"h":155},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":382,"y":450,"w":259,"h":155},
+	"sourceSize": {"w":259,"h":155}
+},
+"regular_body_getup_0632.png":
+{
+	"frame": {"x":1808,"y":1836,"w":239,"h":173},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":338,"y":455,"w":239,"h":173},
+	"sourceSize": {"w":239,"h":173}
+},
+"regular_body_getup_0657.png":
+{
+	"frame": {"x":561,"y":1799,"w":248,"h":132},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":367,"y":503,"w":248,"h":132},
+	"sourceSize": {"w":248,"h":132}
+},
+"regular_body_getup_0658.png":
+{
+	"frame": {"x":309,"y":646,"w":259,"h":114},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":355,"y":507,"w":259,"h":114},
+	"sourceSize": {"w":259,"h":114}
+},
+"regular_body_getup_0730.png":
+{
+	"frame": {"x":172,"y":1843,"w":130,"h":204},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":432,"y":393,"w":130,"h":204},
+	"sourceSize": {"w":130,"h":204}
+},
+"regular_body_idle_0307.png":
+{
+	"frame": {"x":561,"y":1563,"w":87,"h":233},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":451,"y":374,"w":87,"h":233},
+	"sourceSize": {"w":87,"h":233}
+},
+"regular_body_idle_0312.png":
+{
+	"frame": {"x":569,"y":966,"w":79,"h":249},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":472,"y":357,"w":79,"h":249},
+	"sourceSize": {"w":79,"h":249}
+},
+"regular_body_idle_0313.png":
+{
+	"frame": {"x":561,"y":1312,"w":87,"h":248},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":458,"y":354,"w":87,"h":248},
+	"sourceSize": {"w":87,"h":248}
+},
+"regular_body_run_0004.png":
+{
+	"frame": {"x":1181,"y":1641,"w":192,"h":196},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":376,"y":388,"w":192,"h":196},
+	"sourceSize": {"w":192,"h":196}
+},
+"regular_body_run_0019.png":
+{
+	"frame": {"x":1540,"y":1110,"w":125,"h":251},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":424,"y":372,"w":125,"h":251},
+	"sourceSize": {"w":125,"h":251}
+},
+"regular_body_run_0020.png":
+{
+	"frame": {"x":651,"y":937,"w":128,"h":255},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":420,"y":371,"w":128,"h":255},
+	"sourceSize": {"w":128,"h":255}
+},
+"regular_body_run_0021.png":
+{
+	"frame": {"x":979,"y":1510,"w":128,"h":249},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":418,"y":371,"w":128,"h":249},
+	"sourceSize": {"w":128,"h":249}
+},
+"regular_body_run_0034.png":
+{
+	"frame": {"x":309,"y":1190,"w":88,"h":255},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":453,"y":368,"w":88,"h":255},
+	"sourceSize": {"w":88,"h":255}
+},
+"regular_body_run_0035.png":
+{
+	"frame": {"x":309,"y":553,"w":90,"h":262},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":452,"y":368,"w":90,"h":262},
+	"sourceSize": {"w":90,"h":262}
+},
+"regular_body_run_0036.png":
+{
+	"frame": {"x":1,"y":464,"w":91,"h":268},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":451,"y":367,"w":91,"h":268},
+	"sourceSize": {"w":91,"h":268}
+},
+"regular_body_run_0037.png":
+{
+	"frame": {"x":979,"y":395,"w":89,"h":263},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":451,"y":368,"w":89,"h":263},
+	"sourceSize": {"w":89,"h":263}
+},
+"regular_body_run_0038.png":
+{
+	"frame": {"x":979,"y":1266,"w":88,"h":251},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":449,"y":370,"w":88,"h":251},
+	"sourceSize": {"w":88,"h":251}
+},
+"regular_body_run_0042.png":
+{
+	"frame": {"x":1793,"y":1243,"w":89,"h":250},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":444,"y":371,"w":89,"h":250},
+	"sourceSize": {"w":89,"h":250}
+},
+"regular_body_run_0043.png":
+{
+	"frame": {"x":309,"y":867,"w":97,"h":257},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":438,"y":371,"w":97,"h":257},
+	"sourceSize": {"w":97,"h":257}
+},
+"regular_body_run_0044.png":
+{
+	"frame": {"x":979,"y":620,"w":103,"h":258},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":436,"y":371,"w":103,"h":258},
+	"sourceSize": {"w":103,"h":258}
+},
+"regular_body_run_0045.png":
+{
+	"frame": {"x":1795,"y":968,"w":102,"h":252},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":436,"y":371,"w":102,"h":252},
+	"sourceSize": {"w":102,"h":252}
+},
+"regular_body_run_0050.png":
+{
+	"frame": {"x":1285,"y":629,"w":92,"h":256},
+	"rotated": true,
 	"trimmed": false,
 	"spriteSourceSize": {"x":454,"y":367,"w":92,"h":256},
 	"sourceSize": {"w":92,"h":256}
 },
-"body_run0051.png":
+"regular_body_run_0051.png":
 {
-	"frame": {"x":1,"y":807,"w":92,"h":262},
-	"rotated": false,
+	"frame": {"x":309,"y":458,"w":92,"h":262},
+	"rotated": true,
 	"trimmed": false,
 	"spriteSourceSize": {"x":453,"y":367,"w":92,"h":262},
 	"sourceSize": {"w":92,"h":262}
 },
-"body_run0052.png":
+"regular_body_run_0052.png":
 {
-	"frame": {"x":1,"y":1,"w":92,"h":269},
-	"rotated": false,
+	"frame": {"x":1,"y":369,"w":92,"h":269},
+	"rotated": true,
 	"trimmed": false,
 	"spriteSourceSize": {"x":453,"y":367,"w":92,"h":269},
 	"sourceSize": {"w":92,"h":269}
 },
-"body_run0053.png":
+"regular_body_run_0053.png":
 {
-	"frame": {"x":1,"y":541,"w":93,"h":263},
-	"rotated": false,
+	"frame": {"x":651,"y":402,"w":93,"h":263},
+	"rotated": true,
 	"trimmed": false,
 	"spriteSourceSize": {"x":452,"y":368,"w":93,"h":263},
 	"sourceSize": {"w":93,"h":263}
 },
-"body_run0054.png":
+"regular_body_run_0054.png":
 {
-	"frame": {"x":203,"y":1577,"w":93,"h":251},
-	"rotated": false,
+	"frame": {"x":979,"y":1170,"w":93,"h":251},
+	"rotated": true,
 	"trimmed": false,
 	"spriteSourceSize": {"x":452,"y":370,"w":93,"h":251},
 	"sourceSize": {"w":93,"h":251}
 },
-"body_run0055.png":
+"regular_body_run_0057.png":
 {
-	"frame": {"x":1130,"y":1809,"w":93,"h":237},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":451,"y":371,"w":93,"h":237},
-	"sourceSize": {"w":93,"h":237}
-},
-"body_run0056.png":
-{
-	"frame": {"x":702,"y":492,"w":94,"h":240},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":450,"y":371,"w":94,"h":240},
-	"sourceSize": {"w":94,"h":240}
-},
-"body_run0057.png":
-{
-	"frame": {"x":271,"y":519,"w":95,"h":250},
-	"rotated": false,
+	"frame": {"x":651,"y":1156,"w":95,"h":250},
+	"rotated": true,
 	"trimmed": false,
 	"spriteSourceSize": {"x":449,"y":371,"w":95,"h":250},
 	"sourceSize": {"w":95,"h":250}
 },
-"body_run0058.png":
+"regular_body_run_0058.png":
 {
-	"frame": {"x":1,"y":1335,"w":95,"h":255},
-	"rotated": false,
+	"frame": {"x":309,"y":1092,"w":95,"h":255},
+	"rotated": true,
 	"trimmed": false,
 	"spriteSourceSize": {"x":449,"y":371,"w":95,"h":255},
 	"sourceSize": {"w":95,"h":255}
 },
-"body_run0059.png":
+"regular_body_run_0059.png":
 {
-	"frame": {"x":96,"y":1,"w":95,"h":264},
-	"rotated": false,
+	"frame": {"x":979,"y":297,"w":95,"h":264},
+	"rotated": true,
 	"trimmed": false,
 	"spriteSourceSize": {"x":449,"y":370,"w":95,"h":264},
 	"sourceSize": {"w":95,"h":264}
 },
-"body_run0060.png":
+"regular_body_run_0060.png":
 {
-	"frame": {"x":1,"y":273,"w":94,"h":265},
-	"rotated": false,
+	"frame": {"x":1285,"y":263,"w":94,"h":265},
+	"rotated": true,
 	"trimmed": false,
 	"spriteSourceSize": {"x":450,"y":370,"w":94,"h":265},
 	"sourceSize": {"w":94,"h":265}
 },
-"body_run0061.png":
+"regular_body_run_0061.png":
 {
-	"frame": {"x":1,"y":1072,"w":93,"h":260},
-	"rotated": false,
+	"frame": {"x":1,"y":558,"w":93,"h":260},
+	"rotated": true,
 	"trimmed": false,
 	"spriteSourceSize": {"x":451,"y":369,"w":93,"h":260},
 	"sourceSize": {"w":93,"h":260}
 },
-"body_run0062.png":
+"regular_body_run_0066.png":
 {
-	"frame": {"x":431,"y":764,"w":91,"h":245},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":453,"y":368,"w":91,"h":245},
-	"sourceSize": {"w":91,"h":245}
-},
-"body_run0063.png":
-{
-	"frame": {"x":902,"y":970,"w":91,"h":237},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":453,"y":367,"w":91,"h":237},
-	"sourceSize": {"w":91,"h":237}
-},
-"body_run0064.png":
-{
-	"frame": {"x":633,"y":1,"w":92,"h":243},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":453,"y":366,"w":92,"h":243},
-	"sourceSize": {"w":92,"h":243}
-},
-"body_run0065.png":
-{
-	"frame": {"x":1419,"y":1804,"w":114,"h":232},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":449,"y":370,"w":114,"h":232},
-	"sourceSize": {"w":114,"h":232}
-},
-"body_run0066.png":
-{
-	"frame": {"x":861,"y":1225,"w":125,"h":237},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":450,"y":371,"w":125,"h":237},
-	"sourceSize": {"w":125,"h":237}
-},
-"body_run0067.png":
-{
-	"frame": {"x":525,"y":748,"w":144,"h":242},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":443,"y":372,"w":144,"h":242},
-	"sourceSize": {"w":144,"h":242}
-},
-"body_run0068.png":
-{
-	"frame": {"x":390,"y":253,"w":160,"h":245},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":434,"y":372,"w":160,"h":245},
-	"sourceSize": {"w":160,"h":245}
-},
-"body_run0069.png":
-{
-	"frame": {"x":759,"y":245,"w":160,"h":239},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":437,"y":373,"w":160,"h":239},
-	"sourceSize": {"w":160,"h":239}
-},
-"body_run0070.png":
-{
-	"frame": {"x":1821,"y":1,"w":143,"h":226},
+	"frame": {"x":979,"y":1067,"w":100,"h":251},
 	"rotated": true,
 	"trimmed": false,
-	"spriteSourceSize": {"x":451,"y":375,"w":143,"h":226},
-	"sourceSize": {"w":143,"h":226}
+	"spriteSourceSize": {"x":456,"y":368,"w":100,"h":251},
+	"sourceSize": {"w":100,"h":251}
 },
-"body_run0071.png":
+"regular_body_run_0067.png":
 {
-	"frame": {"x":1821,"y":1623,"w":126,"h":225},
+	"frame": {"x":309,"y":763,"w":101,"h":257},
 	"rotated": true,
 	"trimmed": false,
-	"spriteSourceSize": {"x":453,"y":377,"w":126,"h":225},
-	"sourceSize": {"w":126,"h":225}
+	"spriteSourceSize": {"x":455,"y":368,"w":101,"h":257},
+	"sourceSize": {"w":101,"h":257}
 },
-"body_run0072.png":
+"regular_body_run_0068.png":
 {
-	"frame": {"x":1226,"y":1806,"w":115,"h":233},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":451,"y":377,"w":115,"h":233},
-	"sourceSize": {"w":115,"h":233}
-},
-"body_run0073.png":
-{
-	"frame": {"x":538,"y":993,"w":109,"h":241},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":450,"y":376,"w":109,"h":241},
-	"sourceSize": {"w":109,"h":241}
-},
-"body_run0074.png":
-{
-	"frame": {"x":359,"y":1322,"w":111,"h":248},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":450,"y":375,"w":111,"h":248},
-	"sourceSize": {"w":111,"h":248}
-},
-"body_run0075.png":
-{
-	"frame": {"x":194,"y":1,"w":118,"h":256},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":451,"y":374,"w":118,"h":256},
-	"sourceSize": {"w":118,"h":256}
-},
-"body_run0076.png":
-{
-	"frame": {"x":96,"y":807,"w":119,"h":257},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":451,"y":373,"w":119,"h":257},
-	"sourceSize": {"w":119,"h":257}
-},
-"body_run0077.png":
-{
-	"frame": {"x":218,"y":786,"w":115,"h":250},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":452,"y":372,"w":115,"h":250},
-	"sourceSize": {"w":115,"h":250}
-},
-"body_run0078.png":
-{
-	"frame": {"x":1033,"y":1569,"w":106,"h":237},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":452,"y":370,"w":106,"h":237},
-	"sourceSize": {"w":106,"h":237}
-},
-"body_run0079.png":
-{
-	"frame": {"x":1368,"y":1,"w":108,"h":231},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":451,"y":370,"w":108,"h":231},
-	"sourceSize": {"w":108,"h":231}
-},
-"body_run0080.png":
-{
-	"frame": {"x":1531,"y":468,"w":110,"h":229},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":450,"y":369,"w":110,"h":229},
-	"sourceSize": {"w":110,"h":229}
-},
-"body_run0082.png":
-{
-	"frame": {"x":1601,"y":1483,"w":145,"h":217},
+	"frame": {"x":651,"y":293,"w":106,"h":263},
 	"rotated": true,
 	"trimmed": false,
-	"spriteSourceSize": {"x":446,"y":378,"w":145,"h":217},
-	"sourceSize": {"w":145,"h":217}
+	"spriteSourceSize": {"x":451,"y":368,"w":106,"h":263},
+	"sourceSize": {"w":106,"h":263}
 },
-"body_run0083.png":
+"regular_body_run_0069.png":
 {
-	"frame": {"x":461,"y":1824,"w":169,"h":223},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":439,"y":378,"w":169,"h":223},
-	"sourceSize": {"w":169,"h":223}
-},
-"body_run0090.png":
-{
-	"frame": {"x":1142,"y":1569,"w":135,"h":234},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":451,"y":380,"w":135,"h":234},
-	"sourceSize": {"w":135,"h":234}
-},
-"body_run0091.png":
-{
-	"frame": {"x":473,"y":1260,"w":148,"h":241},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":449,"y":378,"w":148,"h":241},
-	"sourceSize": {"w":148,"h":241}
-},
-"body_run0092.png":
-{
-	"frame": {"x":754,"y":1569,"w":150,"h":240},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":448,"y":378,"w":150,"h":240},
-	"sourceSize": {"w":150,"h":240}
-},
-"body_run0093.png":
-{
-	"frame": {"x":1368,"y":1569,"w":146,"h":232},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":448,"y":376,"w":146,"h":232},
-	"sourceSize": {"w":146,"h":232}
-},
-"body_run0095.png":
-{
-	"frame": {"x":1055,"y":1448,"w":118,"h":219},
+	"frame": {"x":651,"y":670,"w":107,"h":257},
 	"rotated": true,
 	"trimmed": false,
-	"spriteSourceSize": {"x":449,"y":374,"w":118,"h":219},
-	"sourceSize": {"w":118,"h":219}
+	"spriteSourceSize": {"x":452,"y":369,"w":107,"h":257},
+	"sourceSize": {"w":107,"h":257}
 },
-"body_run0098.png":
+"regular_body_run_0074.png":
 {
-	"frame": {"x":1,"y":1850,"w":158,"h":197},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":439,"y":390,"w":158,"h":197},
-	"sourceSize": {"w":158,"h":197}
-},
-"body_run0104.png":
-{
-	"frame": {"x":1277,"y":1439,"w":127,"h":202},
+	"frame": {"x":1,"y":1142,"w":98,"h":255},
 	"rotated": true,
 	"trimmed": false,
-	"spriteSourceSize": {"x":449,"y":392,"w":127,"h":202},
-	"sourceSize": {"w":127,"h":202}
+	"spriteSourceSize": {"x":454,"y":372,"w":98,"h":255},
+	"sourceSize": {"w":98,"h":255}
 },
-"body_run0117.png":
+"regular_body_run_0075.png":
 {
-	"frame": {"x":162,"y":1849,"w":154,"h":197},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":448,"y":401,"w":154,"h":197},
-	"sourceSize": {"w":154,"h":197}
-},
-"body_run0140.png":
-{
-	"frame": {"x":1894,"y":1752,"w":153,"h":187},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":442,"y":397,"w":153,"h":187},
-	"sourceSize": {"w":153,"h":187}
-},
-"body_run0181.png":
-{
-	"frame": {"x":1636,"y":1631,"w":186,"h":182},
+	"frame": {"x":979,"y":196,"w":98,"h":265},
 	"rotated": true,
 	"trimmed": false,
-	"spriteSourceSize": {"x":379,"y":397,"w":186,"h":182},
-	"sourceSize": {"w":186,"h":182}
+	"spriteSourceSize": {"x":454,"y":371,"w":98,"h":265},
+	"sourceSize": {"w":98,"h":265}
 },
-"body_shoot0193.png":
+"regular_body_run_0076.png":
 {
-	"frame": {"x":319,"y":1829,"w":139,"h":218},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":423,"y":382,"w":139,"h":218},
-	"sourceSize": {"w":139,"h":218}
-},
-"body_shoot0200.png":
-{
-	"frame": {"x":1768,"y":1820,"w":123,"h":227},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":428,"y":382,"w":123,"h":227},
-	"sourceSize": {"w":123,"h":227}
-},
-"body_shoot0202.png":
-{
-	"frame": {"x":1821,"y":498,"w":123,"h":226},
+	"frame": {"x":1593,"y":264,"w":98,"h":266},
 	"rotated": true,
 	"trimmed": false,
-	"spriteSourceSize": {"x":428,"y":383,"w":123,"h":226},
-	"sourceSize": {"w":123,"h":226}
+	"spriteSourceSize": {"x":454,"y":370,"w":98,"h":266},
+	"sourceSize": {"w":98,"h":266}
 },
-"body_shoot0207.png":
+"regular_body_run_0077.png":
 {
-	"frame": {"x":1273,"y":1,"w":92,"h":232},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":442,"y":382,"w":92,"h":232},
-	"sourceSize": {"w":92,"h":232}
-},
-"body_shoot0208.png":
-{
-	"frame": {"x":1217,"y":952,"w":92,"h":232},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":442,"y":382,"w":92,"h":232},
-	"sourceSize": {"w":92,"h":232}
-},
-"body_shoot0209.png":
-{
-	"frame": {"x":1479,"y":1,"w":92,"h":230},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":442,"y":384,"w":92,"h":230},
-	"sourceSize": {"w":92,"h":230}
-},
-"body_shoot0210.png":
-{
-	"frame": {"x":1651,"y":1,"w":92,"h":229},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":442,"y":385,"w":92,"h":229},
-	"sourceSize": {"w":92,"h":229}
-},
-"body_shoot0211.png":
-{
-	"frame": {"x":1584,"y":700,"w":92,"h":228},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":442,"y":386,"w":92,"h":228},
-	"sourceSize": {"w":92,"h":228}
-},
-"body_shoot0212.png":
-{
-	"frame": {"x":1821,"y":749,"w":92,"h":226},
+	"frame": {"x":1551,"y":470,"w":98,"h":259},
 	"rotated": true,
 	"trimmed": false,
-	"spriteSourceSize": {"x":442,"y":388,"w":92,"h":226},
-	"sourceSize": {"w":92,"h":226}
+	"spriteSourceSize": {"x":455,"y":370,"w":98,"h":259},
+	"sourceSize": {"w":98,"h":259}
 },
-"body_shoot0214.png":
+"regular_body_run_0091.png":
 {
-	"frame": {"x":1080,"y":479,"w":72,"h":235},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":451,"y":381,"w":72,"h":235},
-	"sourceSize": {"w":72,"h":235}
-},
-"body_shoot0215.png":
-{
-	"frame": {"x":989,"y":1210,"w":72,"h":235},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":451,"y":381,"w":72,"h":235},
-	"sourceSize": {"w":72,"h":235}
-},
-"body_shoot0216.png":
-{
-	"frame": {"x":1344,"y":1805,"w":72,"h":233},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":451,"y":383,"w":72,"h":233},
-	"sourceSize": {"w":72,"h":233}
-},
-"body_shoot0217.png":
-{
-	"frame": {"x":1574,"y":1,"w":74,"h":230},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":449,"y":386,"w":74,"h":230},
-	"sourceSize": {"w":74,"h":230}
-},
-"body_shoot0218.png":
-{
-	"frame": {"x":1469,"y":935,"w":75,"h":229},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":448,"y":387,"w":75,"h":229},
-	"sourceSize": {"w":75,"h":229}
-},
-"body_shoot0219.png":
-{
-	"frame": {"x":1821,"y":844,"w":76,"h":226},
+	"frame": {"x":309,"y":967,"w":122,"h":255},
 	"rotated": true,
 	"trimmed": false,
-	"spriteSourceSize": {"x":447,"y":390,"w":76,"h":226},
-	"sourceSize": {"w":76,"h":226}
+	"spriteSourceSize": {"x":450,"y":374,"w":122,"h":255},
+	"sourceSize": {"w":122,"h":255}
 },
-"body_shoot0221.png":
+"regular_body_run_0092.png":
 {
-	"frame": {"x":901,"y":729,"w":86,"h":238},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":454,"y":380,"w":86,"h":238},
-	"sourceSize": {"w":86,"h":238}
-},
-"body_shoot0222.png":
-{
-	"frame": {"x":903,"y":487,"w":86,"h":238},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":454,"y":380,"w":86,"h":238},
-	"sourceSize": {"w":86,"h":238}
-},
-"body_shoot0223.png":
-{
-	"frame": {"x":992,"y":483,"w":85,"h":236},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":455,"y":382,"w":85,"h":236},
-	"sourceSize": {"w":85,"h":236}
-},
-"body_shoot0224.png":
-{
-	"frame": {"x":1280,"y":1569,"w":85,"h":233},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":455,"y":385,"w":85,"h":233},
-	"sourceSize": {"w":85,"h":233}
-},
-"body_shoot0225.png":
-{
-	"frame": {"x":1224,"y":714,"w":86,"h":232},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":454,"y":386,"w":86,"h":232},
-	"sourceSize": {"w":86,"h":232}
-},
-"body_shoot0226.png":
-{
-	"frame": {"x":1387,"y":1182,"w":86,"h":229},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":454,"y":389,"w":86,"h":229},
-	"sourceSize": {"w":86,"h":229}
-},
-"body_shoot0227.png":
-{
-	"frame": {"x":1644,"y":466,"w":86,"h":228},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":454,"y":390,"w":86,"h":228},
-	"sourceSize": {"w":86,"h":228}
-},
-"body_shoot0228.png":
-{
-	"frame": {"x":910,"y":1809,"w":107,"h":237},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":449,"y":378,"w":107,"h":237},
-	"sourceSize": {"w":107,"h":237}
-},
-"body_shoot0229.png":
-{
-	"frame": {"x":1020,"y":1809,"w":107,"h":237},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":449,"y":378,"w":107,"h":237},
-	"sourceSize": {"w":107,"h":237}
-},
-"body_shoot0230.png":
-{
-	"frame": {"x":1163,"y":1,"w":107,"h":235},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":449,"y":380,"w":107,"h":235},
-	"sourceSize": {"w":107,"h":235}
-},
-"body_shoot0231.png":
-{
-	"frame": {"x":1107,"y":967,"w":107,"h":233},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":449,"y":382,"w":107,"h":233},
-	"sourceSize": {"w":107,"h":233}
-},
-"body_shoot0232.png":
-{
-	"frame": {"x":1204,"y":239,"w":107,"h":232},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":449,"y":383,"w":107,"h":232},
-	"sourceSize": {"w":107,"h":232}
-},
-"body_shoot0233.png":
-{
-	"frame": {"x":1578,"y":234,"w":107,"h":229},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":449,"y":386,"w":107,"h":229},
-	"sourceSize": {"w":107,"h":229}
-},
-"body_shoot0234.png":
-{
-	"frame": {"x":1547,"y":935,"w":107,"h":228},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":449,"y":387,"w":107,"h":228},
-	"sourceSize": {"w":107,"h":228}
-},
-"body_shoot0235.png":
-{
-	"frame": {"x":1266,"y":474,"w":129,"h":231},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":436,"y":376,"w":129,"h":231},
-	"sourceSize": {"w":129,"h":231}
-},
-"body_shoot0236.png":
-{
-	"frame": {"x":1314,"y":236,"w":129,"h":231},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":436,"y":376,"w":129,"h":231},
-	"sourceSize": {"w":129,"h":231}
-},
-"body_shoot0237.png":
-{
-	"frame": {"x":1446,"y":235,"w":129,"h":230},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":436,"y":377,"w":129,"h":230},
-	"sourceSize": {"w":129,"h":230}
-},
-"body_shoot0238.png":
-{
-	"frame": {"x":1476,"y":1167,"w":129,"h":228},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":436,"y":379,"w":129,"h":228},
-	"sourceSize": {"w":129,"h":228}
-},
-"body_shoot0239.png":
-{
-	"frame": {"x":1636,"y":1820,"w":129,"h":227},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":436,"y":380,"w":129,"h":227},
-	"sourceSize": {"w":129,"h":227}
-},
-"body_shoot0240.png":
-{
-	"frame": {"x":1821,"y":366,"w":129,"h":226},
+	"frame": {"x":1546,"y":571,"w":124,"h":256},
 	"rotated": true,
 	"trimmed": false,
-	"spriteSourceSize": {"x":436,"y":381,"w":129,"h":226},
-	"sourceSize": {"w":129,"h":226}
+	"spriteSourceSize": {"x":450,"y":373,"w":124,"h":256},
+	"sourceSize": {"w":124,"h":256}
 },
-"body_shoot0241.png":
+"regular_body_run_0093.png":
 {
-	"frame": {"x":1821,"y":1491,"w":129,"h":225},
+	"frame": {"x":309,"y":1432,"w":119,"h":249},
 	"rotated": true,
 	"trimmed": false,
-	"spriteSourceSize": {"x":436,"y":382,"w":129,"h":225},
-	"sourceSize": {"w":129,"h":225}
+	"spriteSourceSize": {"x":451,"y":372,"w":119,"h":249},
+	"sourceSize": {"w":119,"h":249}
 },
-"body_shoot0251.png":
+"regular_body_run_0100.png":
 {
-	"frame": {"x":1679,"y":761,"w":139,"h":225},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":434,"y":370,"w":139,"h":225},
-	"sourceSize": {"w":139,"h":225}
-},
-"body_shoot0252.png":
-{
-	"frame": {"x":1821,"y":923,"w":139,"h":225},
+	"frame": {"x":979,"y":1641,"w":192,"h":199},
 	"rotated": true,
 	"trimmed": false,
-	"spriteSourceSize": {"x":434,"y":370,"w":139,"h":225},
-	"sourceSize": {"w":139,"h":225}
+	"spriteSourceSize": {"x":428,"y":389,"w":192,"h":199},
+	"sourceSize": {"w":192,"h":199}
 },
-"body_shoot0253.png":
+"regular_body_shoot_0210.png":
 {
-	"frame": {"x":1821,"y":1065,"w":139,"h":225},
+	"frame": {"x":1791,"y":1335,"w":72,"h":230},
 	"rotated": true,
 	"trimmed": false,
-	"spriteSourceSize": {"x":434,"y":370,"w":139,"h":225},
-	"sourceSize": {"w":139,"h":225}
+	"spriteSourceSize": {"x":448,"y":386,"w":72,"h":230},
+	"sourceSize": {"w":72,"h":230}
 },
-"body_shoot0254.png":
+"regular_body_shoot_0211.png":
 {
-	"frame": {"x":1821,"y":1207,"w":139,"h":225},
+	"frame": {"x":903,"y":1389,"w":73,"h":229},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":447,"y":387,"w":73,"h":229},
+	"sourceSize": {"w":73,"h":229}
+},
+"regular_body_shoot_0212.png":
+{
+	"frame": {"x":574,"y":482,"w":74,"h":226},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":446,"y":390,"w":74,"h":226},
+	"sourceSize": {"w":74,"h":226}
+},
+"regular_body_shoot_0262.png":
+{
+	"frame": {"x":309,"y":1554,"w":102,"h":249},
 	"rotated": true,
 	"trimmed": false,
-	"spriteSourceSize": {"x":434,"y":370,"w":139,"h":225},
-	"sourceSize": {"w":139,"h":225}
+	"spriteSourceSize": {"x":457,"y":360,"w":102,"h":249},
+	"sourceSize": {"w":102,"h":249}
 },
-"body_shoot0255.png":
+"regular_body_shoot_0263.png":
 {
-	"frame": {"x":1821,"y":1349,"w":139,"h":225},
+	"frame": {"x":907,"y":1141,"w":69,"h":245},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":476,"y":369,"w":69,"h":245},
+	"sourceSize": {"w":69,"h":245}
+},
+"regular_body_shoot_0266.png":
+{
+	"frame": {"x":1540,"y":1036,"w":71,"h":252},
 	"rotated": true,
 	"trimmed": false,
-	"spriteSourceSize": {"x":434,"y":370,"w":139,"h":225},
-	"sourceSize": {"w":139,"h":225}
+	"spriteSourceSize": {"x":476,"y":362,"w":71,"h":252},
+	"sourceSize": {"w":71,"h":252}
 },
-"body_shoot0256.png":
+"regular_body_shoot_0267.png":
 {
-	"frame": {"x":784,"y":1812,"w":123,"h":235},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":445,"y":369,"w":123,"h":235},
-	"sourceSize": {"w":123,"h":235}
-},
-"body_shoot0257.png":
-{
-	"frame": {"x":1078,"y":241,"w":123,"h":235},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":445,"y":369,"w":123,"h":235},
-	"sourceSize": {"w":123,"h":235}
-},
-"body_shoot0258.png":
-{
-	"frame": {"x":907,"y":1569,"w":123,"h":237},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":445,"y":367,"w":123,"h":237},
-	"sourceSize": {"w":123,"h":237}
-},
-"body_shoot0259.png":
-{
-	"frame": {"x":884,"y":1,"w":123,"h":239},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":445,"y":365,"w":123,"h":239},
-	"sourceSize": {"w":123,"h":239}
-},
-"body_shoot0260.png":
-{
-	"frame": {"x":776,"y":983,"w":123,"h":239},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":445,"y":365,"w":123,"h":239},
-	"sourceSize": {"w":123,"h":239}
-},
-"body_shoot0261.png":
-{
-	"frame": {"x":650,"y":993,"w":123,"h":240},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":445,"y":364,"w":123,"h":240},
-	"sourceSize": {"w":123,"h":240}
-},
-"body_shoot0262.png":
-{
-	"frame": {"x":735,"y":1236,"w":123,"h":240},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":445,"y":364,"w":123,"h":240},
-	"sourceSize": {"w":123,"h":240}
-},
-"body_shoot0263.png":
-{
-	"frame": {"x":607,"y":495,"w":92,"h":242},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":462,"y":369,"w":92,"h":242},
-	"sourceSize": {"w":92,"h":242}
-},
-"body_shoot0264.png":
-{
-	"frame": {"x":664,"y":247,"w":92,"h":242},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":462,"y":369,"w":92,"h":242},
-	"sourceSize": {"w":92,"h":242}
-},
-"body_shoot0265.png":
-{
-	"frame": {"x":368,"y":1023,"w":92,"h":245},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":462,"y":366,"w":92,"h":245},
-	"sourceSize": {"w":92,"h":245}
-},
-"body_shoot0266.png":
-{
-	"frame": {"x":336,"y":772,"w":92,"h":248},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":462,"y":363,"w":92,"h":248},
-	"sourceSize": {"w":92,"h":248}
-},
-"body_shoot0267.png":
-{
-	"frame": {"x":315,"y":1,"w":92,"h":249},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":462,"y":362,"w":92,"h":249},
-	"sourceSize": {"w":92,"h":249}
-},
-"body_shoot0268.png":
-{
-	"frame": {"x":264,"y":1322,"w":92,"h":251},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":462,"y":360,"w":92,"h":251},
-	"sourceSize": {"w":92,"h":251}
-},
-"body_shoot0269.png":
-{
-	"frame": {"x":185,"y":1067,"w":92,"h":252},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":462,"y":359,"w":92,"h":252},
-	"sourceSize": {"w":92,"h":252}
-},
-"body_shoot0270.png":
-{
-	"frame": {"x":463,"y":1012,"w":72,"h":245},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":473,"y":369,"w":72,"h":245},
-	"sourceSize": {"w":72,"h":245}
-},
-"body_shoot0271.png":
-{
-	"frame": {"x":444,"y":501,"w":72,"h":245},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":473,"y":369,"w":72,"h":245},
-	"sourceSize": {"w":72,"h":245}
-},
-"body_shoot0272.png":
-{
-	"frame": {"x":369,"y":513,"w":72,"h":248},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":473,"y":366,"w":72,"h":248},
-	"sourceSize": {"w":72,"h":248}
-},
-"body_shoot0273.png":
-{
-	"frame": {"x":187,"y":1322,"w":74,"h":252},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":473,"y":362,"w":74,"h":252},
-	"sourceSize": {"w":74,"h":252}
-},
-"body_shoot0274.png":
-{
-	"frame": {"x":1,"y":1593,"w":75,"h":254},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":473,"y":360,"w":75,"h":254},
-	"sourceSize": {"w":75,"h":254}
-},
-"body_shoot0275.png":
-{
-	"frame": {"x":224,"y":260,"w":75,"h":256},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":473,"y":358,"w":75,"h":256},
-	"sourceSize": {"w":75,"h":256}
-},
-"body_shoot0276.png":
-{
-	"frame": {"x":97,"y":541,"w":76,"h":257},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":473,"y":357,"w":76,"h":257},
-	"sourceSize": {"w":76,"h":257}
-},
-"body_shoot0277.png":
-{
-	"frame": {"x":633,"y":1481,"w":85,"h":241},
+	"frame": {"x":1285,"y":812,"w":73,"h":254},
 	"rotated": true,
 	"trimmed": false,
-	"spriteSourceSize": {"x":456,"y":371,"w":85,"h":241},
-	"sourceSize": {"w":85,"h":241}
+	"spriteSourceSize": {"x":476,"y":360,"w":73,"h":254},
+	"sourceSize": {"w":73,"h":254}
 },
-"body_shoot0278.png":
+"regular_body_shoot_0268.png":
 {
-	"frame": {"x":666,"y":1569,"w":85,"h":241},
+	"frame": {"x":651,"y":861,"w":73,"h":256},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":476,"y":358,"w":73,"h":256},
+	"sourceSize": {"w":73,"h":256}
+},
+"regular_body_shoot_0269.png":
+{
+	"frame": {"x":1,"y":893,"w":73,"h":257},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":476,"y":357,"w":73,"h":257},
+	"sourceSize": {"w":73,"h":257}
+},
+"regular_body_shoot_0273.png":
+{
+	"frame": {"x":571,"y":711,"w":77,"h":252},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":456,"y":371,"w":85,"h":241},
-	"sourceSize": {"w":85,"h":241}
+	"spriteSourceSize": {"x":467,"y":362,"w":77,"h":252},
+	"sourceSize": {"w":77,"h":252}
 },
-"body_shoot0279.png":
+"regular_body_shoot_0274.png":
 {
-	"frame": {"x":519,"y":501,"w":85,"h":244},
-	"rotated": false,
+	"frame": {"x":1542,"y":818,"w":78,"h":253},
+	"rotated": true,
 	"trimmed": false,
-	"spriteSourceSize": {"x":456,"y":368,"w":85,"h":244},
-	"sourceSize": {"w":85,"h":244}
+	"spriteSourceSize": {"x":467,"y":361,"w":78,"h":253},
+	"sourceSize": {"w":78,"h":253}
 },
-"body_shoot0280.png":
+"regular_body_shoot_0275.png":
 {
-	"frame": {"x":280,"y":1039,"w":85,"h":249},
-	"rotated": false,
+	"frame": {"x":651,"y":780,"w":78,"h":256},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":467,"y":358,"w":78,"h":256},
+	"sourceSize": {"w":78,"h":256}
+},
+"regular_body_shoot_0276.png":
+{
+	"frame": {"x":1,"y":812,"w":78,"h":257},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":467,"y":357,"w":78,"h":257},
+	"sourceSize": {"w":78,"h":257}
+},
+"regular_body_shoot_0280.png":
+{
+	"frame": {"x":309,"y":1762,"w":85,"h":249},
+	"rotated": true,
 	"trimmed": false,
 	"spriteSourceSize": {"x":456,"y":363,"w":85,"h":249},
 	"sourceSize": {"w":85,"h":249}
 },
-"body_shoot0281.png":
+"regular_body_shoot_0281.png":
 {
-	"frame": {"x":302,"y":260,"w":85,"h":250},
-	"rotated": false,
+	"frame": {"x":1538,"y":1322,"w":85,"h":250},
+	"rotated": true,
 	"trimmed": false,
 	"spriteSourceSize": {"x":456,"y":362,"w":85,"h":250},
 	"sourceSize": {"w":85,"h":250}
 },
-"body_shoot0282.png":
+"regular_body_shoot_0282.png":
 {
-	"frame": {"x":99,"y":1324,"w":85,"h":253},
-	"rotated": false,
+	"frame": {"x":651,"y":1068,"w":85,"h":253},
+	"rotated": true,
 	"trimmed": false,
 	"spriteSourceSize": {"x":456,"y":359,"w":85,"h":253},
 	"sourceSize": {"w":85,"h":253}
 },
-"body_shoot0283.png":
+"regular_body_shoot_0283.png":
 {
-	"frame": {"x":97,"y":1067,"w":85,"h":254},
-	"rotated": false,
+	"frame": {"x":1285,"y":724,"w":85,"h":254},
+	"rotated": true,
 	"trimmed": false,
 	"spriteSourceSize": {"x":456,"y":358,"w":85,"h":254},
 	"sourceSize": {"w":85,"h":254}
 },
-"body_shoot0284.png":
+"regular_body_shoot_0290.png":
 {
-	"frame": {"x":1113,"y":717,"w":108,"h":232},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":439,"y":374,"w":108,"h":232},
-	"sourceSize": {"w":108,"h":232}
-},
-"body_shoot0285.png":
-{
-	"frame": {"x":1155,"y":479,"w":108,"h":232},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":439,"y":374,"w":108,"h":232},
-	"sourceSize": {"w":108,"h":232}
-},
-"body_shoot0286.png":
-{
-	"frame": {"x":996,"y":967,"w":108,"h":234},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":439,"y":372,"w":108,"h":234},
-	"sourceSize": {"w":108,"h":234}
-},
-"body_shoot0287.png":
-{
-	"frame": {"x":790,"y":735,"w":108,"h":239},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":439,"y":367,"w":108,"h":239},
-	"sourceSize": {"w":108,"h":239}
-},
-"body_shoot0288.png":
-{
-	"frame": {"x":624,"y":1237,"w":108,"h":241},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":439,"y":365,"w":108,"h":241},
-	"sourceSize": {"w":108,"h":241}
-},
-"body_shoot0289.png":
-{
-	"frame": {"x":553,"y":249,"w":108,"h":243},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":439,"y":363,"w":108,"h":243},
-	"sourceSize": {"w":108,"h":243}
-},
-"body_shoot0290.png":
-{
-	"frame": {"x":522,"y":1,"w":108,"h":245},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":439,"y":361,"w":108,"h":245},
-	"sourceSize": {"w":108,"h":245}
-},
-"body_shoot0294.png":
-{
-	"frame": {"x":1821,"y":233,"w":130,"h":226},
+	"frame": {"x":651,"y":1254,"w":93,"h":250},
 	"rotated": true,
 	"trimmed": false,
-	"spriteSourceSize": {"x":430,"y":371,"w":130,"h":226},
-	"sourceSize": {"w":130,"h":226}
+	"spriteSourceSize": {"x":446,"y":359,"w":93,"h":250},
+	"sourceSize": {"w":93,"h":250}
 },
-"body_shoot0295.png":
+"regular_rifle_fly_0349.png":
 {
-	"frame": {"x":1688,"y":233,"w":130,"h":227},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":430,"y":370,"w":130,"h":227},
-	"sourceSize": {"w":130,"h":227}
-},
-"body_shoot0296.png":
-{
-	"frame": {"x":1451,"y":703,"w":130,"h":229},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":430,"y":368,"w":130,"h":229},
-	"sourceSize": {"w":130,"h":229}
-},
-"body_shoot0297.png":
-{
-	"frame": {"x":1398,"y":470,"w":130,"h":230},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":430,"y":367,"w":130,"h":230},
-	"sourceSize": {"w":130,"h":230}
-},
-"body_shoot0300.png":
-{
-	"frame": {"x":1608,"y":1342,"w":138,"h":210},
+	"frame": {"x":567,"y":1218,"w":91,"h":81},
 	"rotated": true,
 	"trimmed": false,
-	"spriteSourceSize": {"x":427,"y":378,"w":138,"h":210},
-	"sourceSize": {"w":138,"h":210}
+	"spriteSourceSize": {"x":442,"y":368,"w":91,"h":81},
+	"sourceSize": {"w":91,"h":81}
 },
-"elephant_head_run0033.png":
+"regular_rifle_fly_0400.png":
 {
-	"frame": {"x":1570,"y":2013,"w":59,"h":34},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":500,"y":359,"w":59,"h":34},
-	"sourceSize": {"w":59,"h":34}
-},
-"elephant_head_run0049.png":
-{
-	"frame": {"x":1746,"y":1,"w":62,"h":30},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":466,"y":353,"w":62,"h":30},
-	"sourceSize": {"w":62,"h":30}
-},
-"elephant_head_run0050.png":
-{
-	"frame": {"x":1536,"y":1979,"w":62,"h":31},
+	"frame": {"x":909,"y":975,"w":163,"h":67},
 	"rotated": true,
 	"trimmed": false,
-	"spriteSourceSize": {"x":464,"y":353,"w":62,"h":31},
-	"sourceSize": {"w":62,"h":31}
+	"spriteSourceSize": {"x":437,"y":581,"w":163,"h":67},
+	"sourceSize": {"w":163,"h":67}
 },
-"elephant_head_run0054.png":
+"regular_rifle_fly_0435.png":
 {
-	"frame": {"x":1746,"y":34,"w":62,"h":30},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":459,"y":356,"w":62,"h":30},
-	"sourceSize": {"w":62,"h":30}
-},
-"elephant_head_run0055.png":
-{
-	"frame": {"x":1746,"y":67,"w":62,"h":30},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":457,"y":358,"w":62,"h":30},
-	"sourceSize": {"w":62,"h":30}
-},
-"elephant_head_run0064.png":
-{
-	"frame": {"x":1570,"y":1979,"w":62,"h":31},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":467,"y":353,"w":62,"h":31},
-	"sourceSize": {"w":62,"h":31}
-},
-"elephant_head_run0137.png":
-{
-	"frame": {"x":1746,"y":100,"w":58,"h":44},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":446,"y":396,"w":58,"h":44},
-	"sourceSize": {"w":58,"h":44}
-},
-"elephant_head_run0145.png":
-{
-	"frame": {"x":1710,"y":1099,"w":62,"h":49},
+	"frame": {"x":903,"y":1621,"w":212,"h":73},
 	"rotated": true,
 	"trimmed": false,
-	"spriteSourceSize": {"x":468,"y":405,"w":62,"h":49},
-	"sourceSize": {"w":62,"h":49}
+	"spriteSourceSize": {"x":486,"y":575,"w":212,"h":73},
+	"sourceSize": {"w":212,"h":73}
 },
-"elephant_head_run0146.png":
+"regular_rifle_fly_0481.png":
 {
-	"frame": {"x":527,"y":1504,"w":62,"h":50},
+	"frame": {"x":1801,"y":805,"w":160,"h":246},
 	"rotated": true,
 	"trimmed": false,
-	"spriteSourceSize": {"x":470,"y":405,"w":62,"h":50},
-	"sourceSize": {"w":62,"h":50}
+	"spriteSourceSize": {"x":473,"y":330,"w":160,"h":246},
+	"sourceSize": {"w":160,"h":246}
 },
-"elephant_head_run0147.png":
+"regular_rifle_fly_0484.png":
 {
-	"frame": {"x":473,"y":1504,"w":62,"h":51},
-	"rotated": true,
-	"trimmed": false,
-	"spriteSourceSize": {"x":471,"y":404,"w":62,"h":51},
-	"sourceSize": {"w":62,"h":51}
-},
-"elephant_head_run0148.png":
-{
-	"frame": {"x":1679,"y":697,"w":61,"h":51},
-	"rotated": true,
-	"trimmed": false,
-	"spriteSourceSize": {"x":472,"y":402,"w":61,"h":51},
-	"sourceSize": {"w":61,"h":51}
-},
-"elephant_head_run0149.png":
-{
-	"frame": {"x":580,"y":1504,"w":62,"h":50},
-	"rotated": true,
-	"trimmed": false,
-	"spriteSourceSize": {"x":472,"y":401,"w":62,"h":50},
-	"sourceSize": {"w":62,"h":50}
-},
-"elephant_head_run0150.png":
-{
-	"frame": {"x":1657,"y":1099,"w":62,"h":50},
-	"rotated": true,
-	"trimmed": false,
-	"spriteSourceSize": {"x":475,"y":399,"w":62,"h":50},
-	"sourceSize": {"w":62,"h":50}
-},
-"elephant_head_run0151.png":
-{
-	"frame": {"x":1821,"y":1752,"w":62,"h":49},
-	"rotated": true,
-	"trimmed": false,
-	"spriteSourceSize": {"x":477,"y":399,"w":62,"h":49},
-	"sourceSize": {"w":62,"h":49}
-},
-"elephant_head_run0160.png":
-{
-	"frame": {"x":408,"y":1271,"w":62,"h":48},
+	"frame": {"x":1910,"y":1410,"w":137,"h":225},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":467,"y":403,"w":62,"h":48},
-	"sourceSize": {"w":62,"h":48}
+	"spriteSourceSize": {"x":470,"y":354,"w":137,"h":225},
+	"sourceSize": {"w":137,"h":225}
 },
-"elephant_head_shoot0204.png":
+"regular_rifle_fly_0515.png":
 {
-	"frame": {"x":1517,"y":1569,"w":59,"h":55},
+	"frame": {"x":1217,"y":1836,"w":151,"h":211},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":396,"y":360,"w":151,"h":211},
+	"sourceSize": {"w":151,"h":211}
+},
+"regular_rifle_fly_0521.png":
+{
+	"frame": {"x":1562,"y":1641,"w":163,"h":192},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":395,"y":382,"w":163,"h":192},
+	"sourceSize": {"w":163,"h":192}
+},
+"regular_rifle_fly_0522.png":
+{
+	"frame": {"x":1728,"y":1641,"w":163,"h":192},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":394,"y":384,"w":163,"h":192},
+	"sourceSize": {"w":163,"h":192}
+},
+"regular_rifle_fly_0539.png":
+{
+	"frame": {"x":1862,"y":220,"w":193,"h":185},
 	"rotated": true,
 	"trimmed": false,
-	"spriteSourceSize": {"x":463,"y":366,"w":59,"h":55},
-	"sourceSize": {"w":59,"h":55}
+	"spriteSourceSize": {"x":321,"y":339,"w":193,"h":185},
+	"sourceSize": {"w":193,"h":185}
 },
-"elephant_head_shoot0207.png":
+"regular_rifle_fly_0547.png":
 {
-	"frame": {"x":1762,"y":1099,"w":56,"h":51},
+	"frame": {"x":1894,"y":1641,"w":152,"h":192},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":482,"y":366,"w":56,"h":51},
-	"sourceSize": {"w":56,"h":51}
+	"spriteSourceSize": {"x":349,"y":388,"w":152,"h":192},
+	"sourceSize": {"w":152,"h":192}
 },
-"elephant_head_shoot0252.png":
+"regular_rifle_getup_0574.png":
 {
-	"frame": {"x":280,"y":1291,"w":61,"h":28},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":476,"y":357,"w":61,"h":28},
-	"sourceSize": {"w":61,"h":28}
-},
-"elephant_head_shoot0262.png":
-{
-	"frame": {"x":344,"y":1291,"w":61,"h":28},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":480,"y":352,"w":61,"h":28},
-	"sourceSize": {"w":61,"h":28}
-},
-"regular_rifle_run0051.png":
-{
-	"frame": {"x":1896,"y":147,"w":146,"h":83},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":401,"y":390,"w":146,"h":83},
-	"sourceSize": {"w":146,"h":83}
-},
-"regular_rifle_run0053.png":
-{
-	"frame": {"x":1746,"y":147,"w":147,"h":83},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":396,"y":391,"w":147,"h":83},
-	"sourceSize": {"w":147,"h":83}
-},
-"regular_rifle_run0055.png":
-{
-	"frame": {"x":1733,"y":463,"w":143,"h":85},
+	"frame": {"x":979,"y":819,"w":75,"h":254},
 	"rotated": true,
 	"trimmed": false,
-	"spriteSourceSize": {"x":407,"y":394,"w":143,"h":85},
-	"sourceSize": {"w":143,"h":85}
+	"spriteSourceSize": {"x":376,"y":392,"w":75,"h":254},
+	"sourceSize": {"w":75,"h":254}
 },
-"regular_rifle_run0056.png":
+"regular_rifle_getup_0587.png":
 {
-	"frame": {"x":1733,"y":609,"w":140,"h":85},
+	"frame": {"x":1,"y":1754,"w":148,"h":79},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":399,"y":564,"w":148,"h":79},
+	"sourceSize": {"w":148,"h":79}
+},
+"regular_rifle_getup_0599.png":
+{
+	"frame": {"x":309,"y":276,"w":274,"h":179},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":339,"y":469,"w":274,"h":179},
+	"sourceSize": {"w":274,"h":179}
+},
+"regular_rifle_getup_0600.png":
+{
+	"frame": {"x":1593,"y":1,"w":267,"h":153},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":387,"y":457,"w":267,"h":153},
+	"sourceSize": {"w":267,"h":153}
+},
+"regular_rifle_getup_0608.png":
+{
+	"frame": {"x":911,"y":729,"w":243,"h":65},
 	"rotated": true,
 	"trimmed": false,
-	"spriteSourceSize": {"x":415,"y":394,"w":140,"h":85},
-	"sourceSize": {"w":140,"h":85}
+	"spriteSourceSize": {"x":389,"y":584,"w":243,"h":65},
+	"sourceSize": {"w":243,"h":65}
 },
-"regular_rifle_run0071.png":
+"regular_rifle_getup_0609.png":
 {
-	"frame": {"x":1536,"y":1804,"w":172,"h":97},
+	"frame": {"x":309,"y":192,"w":280,"h":81},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":391,"y":569,"w":280,"h":81},
+	"sourceSize": {"w":280,"h":81}
+},
+"regular_rifle_getup_0610.png":
+{
+	"frame": {"x":1539,"y":1238,"w":251,"h":81},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":402,"y":568,"w":251,"h":81},
+	"sourceSize": {"w":251,"h":81}
+},
+"regular_rifle_getup_0624.png":
+{
+	"frame": {"x":1,"y":1,"w":325,"h":103},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":364,"y":504,"w":325,"h":103},
+	"sourceSize": {"w":325,"h":103}
+},
+"regular_rifle_getup_0625.png":
+{
+	"frame": {"x":329,"y":85,"w":319,"h":104},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":374,"y":486,"w":319,"h":104},
+	"sourceSize": {"w":319,"h":104}
+},
+"regular_rifle_getup_0626.png":
+{
+	"frame": {"x":979,"y":726,"w":256,"h":90},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":404,"y":486,"w":256,"h":90},
+	"sourceSize": {"w":256,"h":90}
+},
+"regular_rifle_getup_0633.png":
+{
+	"frame": {"x":1285,"y":1172,"w":251,"h":88},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":458,"y":558,"w":251,"h":88},
+	"sourceSize": {"w":251,"h":88}
+},
+"regular_rifle_getup_0634.png":
+{
+	"frame": {"x":979,"y":487,"w":262,"h":130},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":460,"y":517,"w":262,"h":130},
+	"sourceSize": {"w":262,"h":130}
+},
+"regular_rifle_getup_0649.png":
+{
+	"frame": {"x":979,"y":1,"w":305,"h":82},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":417,"y":505,"w":305,"h":82},
+	"sourceSize": {"w":305,"h":82}
+},
+"regular_rifle_getup_0650.png":
+{
+	"frame": {"x":979,"y":86,"w":303,"h":107},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":387,"y":483,"w":303,"h":107},
+	"sourceSize": {"w":303,"h":107}
+},
+"regular_rifle_getup_0657.png":
+{
+	"frame": {"x":1520,"y":1836,"w":211,"h":146},
 	"rotated": true,
 	"trimmed": false,
-	"spriteSourceSize": {"x":382,"y":386,"w":172,"h":97},
-	"sourceSize": {"w":172,"h":97}
+	"spriteSourceSize": {"x":511,"y":468,"w":211,"h":146},
+	"sourceSize": {"w":211,"h":146}
 },
-"regular_rifle_run0086.png":
+"regular_rifle_getup_0699.png":
 {
-	"frame": {"x":1657,"y":989,"w":161,"h":107},
+	"frame": {"x":1,"y":256,"w":275,"h":110},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":394,"y":380,"w":161,"h":107},
-	"sourceSize": {"w":161,"h":107}
+	"spriteSourceSize": {"x":382,"y":417,"w":275,"h":110},
+	"sourceSize": {"w":275,"h":110}
 },
-"regular_rifle_run0161.png":
+"regular_rifle_getup_0700.png":
 {
-	"frame": {"x":1517,"y":1631,"w":170,"h":116},
+	"frame": {"x":1285,"y":152,"w":266,"h":108},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":342,"y":427,"w":266,"h":108},
+	"sourceSize": {"w":266,"h":108}
+},
+"regular_rifle_getup_0708.png":
+{
+	"frame": {"x":696,"y":1799,"w":243,"h":204},
 	"rotated": true,
 	"trimmed": false,
-	"spriteSourceSize": {"x":448,"y":387,"w":170,"h":116},
-	"sourceSize": {"w":170,"h":116}
+	"spriteSourceSize": {"x":364,"y":387,"w":243,"h":204},
+	"sourceSize": {"w":243,"h":204}
 },
-"regular_rifle_shoot0196.png":
+"regular_rifle_getup_0709.png":
 {
-	"frame": {"x":877,"y":1465,"w":175,"h":101},
+	"frame": {"x":651,"y":103,"w":280,"h":187},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":418,"y":369,"w":175,"h":101},
-	"sourceSize": {"w":175,"h":101}
+	"spriteSourceSize": {"x":325,"y":402,"w":280,"h":187},
+	"sourceSize": {"w":280,"h":187}
 },
-"regular_rifle_shoot0221.png":
+"regular_rifle_getup_0710.png":
 {
-	"frame": {"x":1482,"y":1398,"w":116,"h":168},
+	"frame": {"x":1285,"y":1263,"w":250,"h":196},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":441,"y":330,"w":116,"h":168},
-	"sourceSize": {"w":116,"h":168}
+	"spriteSourceSize": {"x":343,"y":391,"w":250,"h":196},
+	"sourceSize": {"w":250,"h":196}
 },
-"regular_rifle_shoot0300.png":
+"regular_rifle_getup_0712.png":
 {
-	"frame": {"x":1894,"y":1942,"w":153,"h":98},
+	"frame": {"x":903,"y":1836,"w":155,"h":211},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":431,"y":364,"w":153,"h":98},
-	"sourceSize": {"w":153,"h":98}
+	"spriteSourceSize": {"x":399,"y":374,"w":155,"h":211},
+	"sourceSize": {"w":155,"h":211}
+},
+"regular_rifle_getup_0724.png":
+{
+	"frame": {"x":329,"y":1,"w":324,"h":81},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":307,"y":412,"w":324,"h":81},
+	"sourceSize": {"w":324,"h":81}
+},
+"regular_rifle_getup_0725.png":
+{
+	"frame": {"x":656,"y":1,"w":320,"h":99},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":302,"y":425,"w":320,"h":99},
+	"sourceSize": {"w":320,"h":99}
+},
+"regular_rifle_getup_0726.png":
+{
+	"frame": {"x":1,"y":969,"w":256,"h":170},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":336,"y":419,"w":256,"h":170},
+	"sourceSize": {"w":256,"h":170}
+},
+"regular_rifle_getup_0727.png":
+{
+	"frame": {"x":1669,"y":1836,"w":136,"h":211},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":410,"y":409,"w":136,"h":211},
+	"sourceSize": {"w":136,"h":211}
+},
+"regular_rifle_getup_0733.png":
+{
+	"frame": {"x":1795,"y":1073,"w":251,"h":167},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":287,"y":432,"w":251,"h":167},
+	"sourceSize": {"w":251,"h":167}
+},
+"regular_rifle_getup_0734.png":
+{
+	"frame": {"x":651,"y":498,"w":261,"h":169},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":274,"y":427,"w":261,"h":169},
+	"sourceSize": {"w":261,"h":169}
+},
+"regular_rifle_getup_0749.png":
+{
+	"frame": {"x":1,"y":107,"w":305,"h":146},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":274,"y":385,"w":305,"h":146},
+	"sourceSize": {"w":305,"h":146}
+},
+"regular_rifle_getup_0750.png":
+{
+	"frame": {"x":1287,"y":1,"w":303,"h":148},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":306,"y":424,"w":303,"h":148},
+	"sourceSize": {"w":303,"h":148}
 }},
 "animations": {
-	"body_run": ["body_run0001.png","body_run0002.png","body_run0003.png","body_run0004.png","body_run0005.png","body_run0006.png","body_run0007.png","body_run0008.png","body_run0009.png","body_run0010.png","body_run0011.png","body_run0012.png","body_run0013.png","body_run0014.png","body_run0015.png","body_run0016.png","body_run0017.png","body_run0018.png","body_run0019.png","body_run0020.png","body_run0021.png","body_run0022.png","body_run0023.png","body_run0024.png","body_run0025.png","body_run0026.png","body_run0027.png","body_run0028.png","body_run0029.png","body_run0030.png","body_run0031.png","body_run0032.png","body_run0033.png","body_run0034.png","body_run0035.png","body_run0036.png","body_run0037.png","body_run0038.png","body_run0039.png","body_run0040.png","body_run0041.png","body_run0042.png","body_run0043.png","body_run0044.png","body_run0045.png","body_run0046.png","body_run0047.png","body_run0048.png","body_run0049.png","body_run0050.png","body_run0051.png","body_run0052.png","body_run0053.png","body_run0054.png","body_run0055.png","body_run0056.png","body_run0057.png","body_run0058.png","body_run0059.png","body_run0060.png","body_run0061.png","body_run0062.png","body_run0063.png","body_run0064.png","body_run0065.png","body_run0066.png","body_run0067.png","body_run0068.png","body_run0069.png","body_run0070.png","body_run0071.png","body_run0072.png","body_run0073.png","body_run0074.png","body_run0075.png","body_run0076.png","body_run0077.png","body_run0078.png","body_run0079.png","body_run0080.png","body_run0081.png","body_run0082.png","body_run0083.png","body_run0084.png","body_run0085.png","body_run0086.png","body_run0087.png","body_run0088.png","body_run0089.png","body_run0090.png","body_run0091.png","body_run0092.png","body_run0093.png","body_run0094.png","body_run0095.png","body_run0096.png","body_run0097.png","body_run0098.png","body_run0099.png","body_run0100.png","body_run0101.png","body_run0102.png","body_run0103.png","body_run0104.png","body_run0105.png","body_run0106.png","body_run0107.png","body_run0108.png","body_run0109.png","body_run0110.png","body_run0111.png","body_run0112.png","body_run0113.png","body_run0114.png","body_run0115.png","body_run0116.png","body_run0117.png","body_run0118.png","body_run0119.png","body_run0120.png","body_run0121.png","body_run0122.png","body_run0123.png","body_run0124.png","body_run0125.png","body_run0126.png","body_run0127.png","body_run0128.png","body_run0129.png","body_run0130.png","body_run0131.png","body_run0132.png","body_run0133.png","body_run0134.png","body_run0135.png","body_run0136.png","body_run0137.png","body_run0138.png","body_run0139.png","body_run0140.png","body_run0141.png","body_run0142.png","body_run0143.png","body_run0144.png","body_run0145.png","body_run0146.png","body_run0147.png","body_run0148.png","body_run0149.png","body_run0150.png","body_run0151.png","body_run0152.png","body_run0153.png","body_run0154.png","body_run0155.png","body_run0156.png","body_run0157.png","body_run0158.png","body_run0159.png","body_run0160.png","body_run0161.png","body_run0162.png","body_run0163.png","body_run0164.png","body_run0165.png","body_run0166.png","body_run0167.png","body_run0168.png","body_run0169.png","body_run0170.png","body_run0171.png","body_run0172.png","body_run0173.png","body_run0174.png","body_run0175.png","body_run0176.png","body_run0177.png","body_run0178.png","body_run0179.png","body_run0180.png","body_run0181.png","body_run0182.png","body_run0183.png","body_run0184.png","body_run0185.png","body_run0186.png","body_run0187.png","body_run0188.png","body_run0189.png","body_run0190.png","body_run0191.png","body_run0192.png"],
-	"body_shoot": ["body_shoot0193.png","body_shoot0194.png","body_shoot0195.png","body_shoot0196.png","body_shoot0197.png","body_shoot0198.png","body_shoot0199.png","body_shoot0200.png","body_shoot0201.png","body_shoot0202.png","body_shoot0203.png","body_shoot0204.png","body_shoot0205.png","body_shoot0206.png","body_shoot0207.png","body_shoot0208.png","body_shoot0209.png","body_shoot0210.png","body_shoot0211.png","body_shoot0212.png","body_shoot0213.png","body_shoot0214.png","body_shoot0215.png","body_shoot0216.png","body_shoot0217.png","body_shoot0218.png","body_shoot0219.png","body_shoot0220.png","body_shoot0221.png","body_shoot0222.png","body_shoot0223.png","body_shoot0224.png","body_shoot0225.png","body_shoot0226.png","body_shoot0227.png","body_shoot0228.png","body_shoot0229.png","body_shoot0230.png","body_shoot0231.png","body_shoot0232.png","body_shoot0233.png","body_shoot0234.png","body_shoot0235.png","body_shoot0236.png","body_shoot0237.png","body_shoot0238.png","body_shoot0239.png","body_shoot0240.png","body_shoot0241.png","body_shoot0242.png","body_shoot0243.png","body_shoot0244.png","body_shoot0245.png","body_shoot0246.png","body_shoot0247.png","body_shoot0248.png","body_shoot0249.png","body_shoot0250.png","body_shoot0251.png","body_shoot0252.png","body_shoot0253.png","body_shoot0254.png","body_shoot0255.png","body_shoot0256.png","body_shoot0257.png","body_shoot0258.png","body_shoot0259.png","body_shoot0260.png","body_shoot0261.png","body_shoot0262.png","body_shoot0263.png","body_shoot0264.png","body_shoot0265.png","body_shoot0266.png","body_shoot0267.png","body_shoot0268.png","body_shoot0269.png","body_shoot0270.png","body_shoot0271.png","body_shoot0272.png","body_shoot0273.png","body_shoot0274.png","body_shoot0275.png","body_shoot0276.png","body_shoot0277.png","body_shoot0278.png","body_shoot0279.png","body_shoot0280.png","body_shoot0281.png","body_shoot0282.png","body_shoot0283.png","body_shoot0284.png","body_shoot0285.png","body_shoot0286.png","body_shoot0287.png","body_shoot0288.png","body_shoot0289.png","body_shoot0290.png","body_shoot0291.png","body_shoot0292.png","body_shoot0293.png","body_shoot0294.png","body_shoot0295.png","body_shoot0296.png","body_shoot0297.png","body_shoot0298.png","body_shoot0299.png","body_shoot0300.png","body_shoot0301.png","body_shoot0302.png","body_shoot0303.png","body_shoot0304.png"],
-	"elephant_head_run": ["elephant_head_run0001.png","elephant_head_run0002.png","elephant_head_run0003.png","elephant_head_run0004.png","elephant_head_run0005.png","elephant_head_run0006.png","elephant_head_run0007.png","elephant_head_run0008.png","elephant_head_run0009.png","elephant_head_run0010.png","elephant_head_run0011.png","elephant_head_run0012.png","elephant_head_run0013.png","elephant_head_run0014.png","elephant_head_run0015.png","elephant_head_run0016.png","elephant_head_run0017.png","elephant_head_run0018.png","elephant_head_run0019.png","elephant_head_run0020.png","elephant_head_run0021.png","elephant_head_run0022.png","elephant_head_run0023.png","elephant_head_run0024.png","elephant_head_run0025.png","elephant_head_run0026.png","elephant_head_run0027.png","elephant_head_run0028.png","elephant_head_run0029.png","elephant_head_run0030.png","elephant_head_run0031.png","elephant_head_run0032.png","elephant_head_run0033.png","elephant_head_run0034.png","elephant_head_run0035.png","elephant_head_run0036.png","elephant_head_run0037.png","elephant_head_run0038.png","elephant_head_run0039.png","elephant_head_run0040.png","elephant_head_run0041.png","elephant_head_run0042.png","elephant_head_run0043.png","elephant_head_run0044.png","elephant_head_run0045.png","elephant_head_run0046.png","elephant_head_run0047.png","elephant_head_run0048.png","elephant_head_run0049.png","elephant_head_run0050.png","elephant_head_run0051.png","elephant_head_run0052.png","elephant_head_run0053.png","elephant_head_run0054.png","elephant_head_run0055.png","elephant_head_run0056.png","elephant_head_run0057.png","elephant_head_run0058.png","elephant_head_run0059.png","elephant_head_run0060.png","elephant_head_run0061.png","elephant_head_run0062.png","elephant_head_run0063.png","elephant_head_run0064.png","elephant_head_run0065.png","elephant_head_run0066.png","elephant_head_run0067.png","elephant_head_run0068.png","elephant_head_run0069.png","elephant_head_run0070.png","elephant_head_run0071.png","elephant_head_run0072.png","elephant_head_run0073.png","elephant_head_run0074.png","elephant_head_run0075.png","elephant_head_run0076.png","elephant_head_run0077.png","elephant_head_run0078.png","elephant_head_run0079.png","elephant_head_run0080.png","elephant_head_run0081.png","elephant_head_run0082.png","elephant_head_run0083.png","elephant_head_run0084.png","elephant_head_run0085.png","elephant_head_run0086.png","elephant_head_run0087.png","elephant_head_run0088.png","elephant_head_run0089.png","elephant_head_run0090.png","elephant_head_run0091.png","elephant_head_run0092.png","elephant_head_run0093.png","elephant_head_run0094.png","elephant_head_run0095.png","elephant_head_run0096.png","elephant_head_run0097.png","elephant_head_run0098.png","elephant_head_run0099.png","elephant_head_run0100.png","elephant_head_run0101.png","elephant_head_run0102.png","elephant_head_run0103.png","elephant_head_run0104.png","elephant_head_run0105.png","elephant_head_run0106.png","elephant_head_run0107.png","elephant_head_run0108.png","elephant_head_run0109.png","elephant_head_run0110.png","elephant_head_run0111.png","elephant_head_run0112.png","elephant_head_run0113.png","elephant_head_run0114.png","elephant_head_run0115.png","elephant_head_run0116.png","elephant_head_run0117.png","elephant_head_run0118.png","elephant_head_run0119.png","elephant_head_run0120.png","elephant_head_run0121.png","elephant_head_run0122.png","elephant_head_run0123.png","elephant_head_run0124.png","elephant_head_run0125.png","elephant_head_run0126.png","elephant_head_run0127.png","elephant_head_run0128.png","elephant_head_run0129.png","elephant_head_run0130.png","elephant_head_run0131.png","elephant_head_run0132.png","elephant_head_run0133.png","elephant_head_run0134.png","elephant_head_run0135.png","elephant_head_run0136.png","elephant_head_run0137.png","elephant_head_run0138.png","elephant_head_run0139.png","elephant_head_run0140.png","elephant_head_run0141.png","elephant_head_run0142.png","elephant_head_run0143.png","elephant_head_run0144.png","elephant_head_run0145.png","elephant_head_run0146.png","elephant_head_run0147.png","elephant_head_run0148.png","elephant_head_run0149.png","elephant_head_run0150.png","elephant_head_run0151.png","elephant_head_run0152.png","elephant_head_run0153.png","elephant_head_run0154.png","elephant_head_run0155.png","elephant_head_run0156.png","elephant_head_run0157.png","elephant_head_run0158.png","elephant_head_run0159.png","elephant_head_run0160.png","elephant_head_run0161.png","elephant_head_run0162.png","elephant_head_run0163.png","elephant_head_run0164.png","elephant_head_run0165.png","elephant_head_run0166.png","elephant_head_run0167.png","elephant_head_run0168.png","elephant_head_run0169.png","elephant_head_run0170.png","elephant_head_run0171.png","elephant_head_run0172.png","elephant_head_run0173.png","elephant_head_run0174.png","elephant_head_run0175.png","elephant_head_run0176.png","elephant_head_run0177.png","elephant_head_run0178.png","elephant_head_run0179.png","elephant_head_run0180.png","elephant_head_run0181.png","elephant_head_run0182.png","elephant_head_run0183.png","elephant_head_run0184.png","elephant_head_run0185.png","elephant_head_run0186.png","elephant_head_run0187.png","elephant_head_run0188.png","elephant_head_run0189.png","elephant_head_run0190.png","elephant_head_run0191.png","elephant_head_run0192.png"],
-	"elephant_head_shoot": ["elephant_head_shoot0193.png","elephant_head_shoot0194.png","elephant_head_shoot0195.png","elephant_head_shoot0196.png","elephant_head_shoot0197.png","elephant_head_shoot0198.png","elephant_head_shoot0199.png","elephant_head_shoot0200.png","elephant_head_shoot0201.png","elephant_head_shoot0202.png","elephant_head_shoot0203.png","elephant_head_shoot0204.png","elephant_head_shoot0205.png","elephant_head_shoot0206.png","elephant_head_shoot0207.png","elephant_head_shoot0208.png","elephant_head_shoot0209.png","elephant_head_shoot0210.png","elephant_head_shoot0211.png","elephant_head_shoot0212.png","elephant_head_shoot0213.png","elephant_head_shoot0214.png","elephant_head_shoot0215.png","elephant_head_shoot0216.png","elephant_head_shoot0217.png","elephant_head_shoot0218.png","elephant_head_shoot0219.png","elephant_head_shoot0220.png","elephant_head_shoot0221.png","elephant_head_shoot0222.png","elephant_head_shoot0223.png","elephant_head_shoot0224.png","elephant_head_shoot0225.png","elephant_head_shoot0226.png","elephant_head_shoot0227.png","elephant_head_shoot0228.png","elephant_head_shoot0229.png","elephant_head_shoot0230.png","elephant_head_shoot0231.png","elephant_head_shoot0232.png","elephant_head_shoot0233.png","elephant_head_shoot0234.png","elephant_head_shoot0235.png","elephant_head_shoot0236.png","elephant_head_shoot0237.png","elephant_head_shoot0238.png","elephant_head_shoot0239.png","elephant_head_shoot0240.png","elephant_head_shoot0241.png","elephant_head_shoot0242.png","elephant_head_shoot0243.png","elephant_head_shoot0244.png","elephant_head_shoot0245.png","elephant_head_shoot0246.png","elephant_head_shoot0247.png","elephant_head_shoot0248.png","elephant_head_shoot0249.png","elephant_head_shoot0250.png","elephant_head_shoot0251.png","elephant_head_shoot0252.png","elephant_head_shoot0253.png","elephant_head_shoot0254.png","elephant_head_shoot0255.png","elephant_head_shoot0256.png","elephant_head_shoot0257.png","elephant_head_shoot0258.png","elephant_head_shoot0259.png","elephant_head_shoot0260.png","elephant_head_shoot0261.png","elephant_head_shoot0262.png","elephant_head_shoot0263.png","elephant_head_shoot0264.png","elephant_head_shoot0265.png","elephant_head_shoot0266.png","elephant_head_shoot0267.png","elephant_head_shoot0268.png","elephant_head_shoot0269.png","elephant_head_shoot0270.png","elephant_head_shoot0271.png","elephant_head_shoot0272.png","elephant_head_shoot0273.png","elephant_head_shoot0274.png","elephant_head_shoot0275.png","elephant_head_shoot0276.png","elephant_head_shoot0277.png","elephant_head_shoot0278.png","elephant_head_shoot0279.png","elephant_head_shoot0280.png","elephant_head_shoot0281.png","elephant_head_shoot0282.png","elephant_head_shoot0283.png","elephant_head_shoot0284.png","elephant_head_shoot0285.png","elephant_head_shoot0286.png","elephant_head_shoot0287.png","elephant_head_shoot0288.png","elephant_head_shoot0289.png","elephant_head_shoot0290.png","elephant_head_shoot0291.png","elephant_head_shoot0292.png","elephant_head_shoot0293.png","elephant_head_shoot0294.png","elephant_head_shoot0295.png","elephant_head_shoot0296.png","elephant_head_shoot0297.png","elephant_head_shoot0298.png","elephant_head_shoot0299.png","elephant_head_shoot0300.png","elephant_head_shoot0301.png","elephant_head_shoot0302.png","elephant_head_shoot0303.png","elephant_head_shoot0304.png"],
-	"regular_rifle_run": ["regular_rifle_run0001.png","regular_rifle_run0002.png","regular_rifle_run0003.png","regular_rifle_run0004.png","regular_rifle_run0005.png","regular_rifle_run0006.png","regular_rifle_run0007.png","regular_rifle_run0008.png","regular_rifle_run0009.png","regular_rifle_run0010.png","regular_rifle_run0011.png","regular_rifle_run0012.png","regular_rifle_run0013.png","regular_rifle_run0014.png","regular_rifle_run0015.png","regular_rifle_run0016.png","regular_rifle_run0017.png","regular_rifle_run0018.png","regular_rifle_run0019.png","regular_rifle_run0020.png","regular_rifle_run0021.png","regular_rifle_run0022.png","regular_rifle_run0023.png","regular_rifle_run0024.png","regular_rifle_run0025.png","regular_rifle_run0026.png","regular_rifle_run0027.png","regular_rifle_run0028.png","regular_rifle_run0029.png","regular_rifle_run0030.png","regular_rifle_run0031.png","regular_rifle_run0032.png","regular_rifle_run0033.png","regular_rifle_run0034.png","regular_rifle_run0035.png","regular_rifle_run0036.png","regular_rifle_run0037.png","regular_rifle_run0038.png","regular_rifle_run0039.png","regular_rifle_run0040.png","regular_rifle_run0041.png","regular_rifle_run0042.png","regular_rifle_run0043.png","regular_rifle_run0044.png","regular_rifle_run0045.png","regular_rifle_run0046.png","regular_rifle_run0047.png","regular_rifle_run0048.png","regular_rifle_run0049.png","regular_rifle_run0050.png","regular_rifle_run0051.png","regular_rifle_run0052.png","regular_rifle_run0053.png","regular_rifle_run0054.png","regular_rifle_run0055.png","regular_rifle_run0056.png","regular_rifle_run0057.png","regular_rifle_run0058.png","regular_rifle_run0059.png","regular_rifle_run0060.png","regular_rifle_run0061.png","regular_rifle_run0062.png","regular_rifle_run0063.png","regular_rifle_run0064.png","regular_rifle_run0065.png","regular_rifle_run0066.png","regular_rifle_run0067.png","regular_rifle_run0068.png","regular_rifle_run0069.png","regular_rifle_run0070.png","regular_rifle_run0071.png","regular_rifle_run0072.png","regular_rifle_run0073.png","regular_rifle_run0074.png","regular_rifle_run0075.png","regular_rifle_run0076.png","regular_rifle_run0077.png","regular_rifle_run0078.png","regular_rifle_run0079.png","regular_rifle_run0080.png","regular_rifle_run0081.png","regular_rifle_run0082.png","regular_rifle_run0083.png","regular_rifle_run0084.png","regular_rifle_run0085.png","regular_rifle_run0086.png","regular_rifle_run0087.png","regular_rifle_run0088.png","regular_rifle_run0089.png","regular_rifle_run0090.png","regular_rifle_run0091.png","regular_rifle_run0092.png","regular_rifle_run0093.png","regular_rifle_run0094.png","regular_rifle_run0095.png","regular_rifle_run0096.png","regular_rifle_run0097.png","regular_rifle_run0098.png","regular_rifle_run0099.png","regular_rifle_run0100.png","regular_rifle_run0101.png","regular_rifle_run0102.png","regular_rifle_run0103.png","regular_rifle_run0104.png","regular_rifle_run0105.png","regular_rifle_run0106.png","regular_rifle_run0107.png","regular_rifle_run0108.png","regular_rifle_run0109.png","regular_rifle_run0110.png","regular_rifle_run0111.png","regular_rifle_run0112.png","regular_rifle_run0113.png","regular_rifle_run0114.png","regular_rifle_run0115.png","regular_rifle_run0116.png","regular_rifle_run0117.png","regular_rifle_run0118.png","regular_rifle_run0119.png","regular_rifle_run0120.png","regular_rifle_run0121.png","regular_rifle_run0122.png","regular_rifle_run0123.png","regular_rifle_run0124.png","regular_rifle_run0125.png","regular_rifle_run0126.png","regular_rifle_run0127.png","regular_rifle_run0128.png","regular_rifle_run0129.png","regular_rifle_run0130.png","regular_rifle_run0131.png","regular_rifle_run0132.png","regular_rifle_run0133.png","regular_rifle_run0134.png","regular_rifle_run0135.png","regular_rifle_run0136.png","regular_rifle_run0137.png","regular_rifle_run0138.png","regular_rifle_run0139.png","regular_rifle_run0140.png","regular_rifle_run0141.png","regular_rifle_run0142.png","regular_rifle_run0143.png","regular_rifle_run0144.png","regular_rifle_run0145.png","regular_rifle_run0146.png","regular_rifle_run0147.png","regular_rifle_run0148.png","regular_rifle_run0149.png","regular_rifle_run0150.png","regular_rifle_run0151.png","regular_rifle_run0152.png","regular_rifle_run0153.png","regular_rifle_run0154.png","regular_rifle_run0155.png","regular_rifle_run0156.png","regular_rifle_run0157.png","regular_rifle_run0158.png","regular_rifle_run0159.png","regular_rifle_run0160.png","regular_rifle_run0161.png","regular_rifle_run0162.png","regular_rifle_run0163.png","regular_rifle_run0164.png","regular_rifle_run0165.png","regular_rifle_run0166.png","regular_rifle_run0167.png","regular_rifle_run0168.png","regular_rifle_run0169.png","regular_rifle_run0170.png","regular_rifle_run0171.png","regular_rifle_run0172.png","regular_rifle_run0173.png","regular_rifle_run0174.png","regular_rifle_run0175.png","regular_rifle_run0176.png","regular_rifle_run0177.png","regular_rifle_run0178.png","regular_rifle_run0179.png","regular_rifle_run0180.png","regular_rifle_run0181.png","regular_rifle_run0182.png","regular_rifle_run0183.png","regular_rifle_run0184.png","regular_rifle_run0185.png","regular_rifle_run0186.png","regular_rifle_run0187.png","regular_rifle_run0188.png","regular_rifle_run0189.png","regular_rifle_run0190.png","regular_rifle_run0191.png","regular_rifle_run0192.png"],
-	"regular_rifle_shoot": ["regular_rifle_shoot0193.png","regular_rifle_shoot0194.png","regular_rifle_shoot0195.png","regular_rifle_shoot0196.png","regular_rifle_shoot0197.png","regular_rifle_shoot0198.png","regular_rifle_shoot0199.png","regular_rifle_shoot0200.png","regular_rifle_shoot0201.png","regular_rifle_shoot0202.png","regular_rifle_shoot0203.png","regular_rifle_shoot0204.png","regular_rifle_shoot0205.png","regular_rifle_shoot0206.png","regular_rifle_shoot0207.png","regular_rifle_shoot0208.png","regular_rifle_shoot0209.png","regular_rifle_shoot0210.png","regular_rifle_shoot0211.png","regular_rifle_shoot0212.png","regular_rifle_shoot0213.png","regular_rifle_shoot0214.png","regular_rifle_shoot0215.png","regular_rifle_shoot0216.png","regular_rifle_shoot0217.png","regular_rifle_shoot0218.png","regular_rifle_shoot0219.png","regular_rifle_shoot0220.png","regular_rifle_shoot0221.png","regular_rifle_shoot0222.png","regular_rifle_shoot0223.png","regular_rifle_shoot0224.png","regular_rifle_shoot0225.png","regular_rifle_shoot0226.png","regular_rifle_shoot0227.png","regular_rifle_shoot0228.png","regular_rifle_shoot0229.png","regular_rifle_shoot0230.png","regular_rifle_shoot0231.png","regular_rifle_shoot0232.png","regular_rifle_shoot0233.png","regular_rifle_shoot0234.png","regular_rifle_shoot0235.png","regular_rifle_shoot0236.png","regular_rifle_shoot0237.png","regular_rifle_shoot0238.png","regular_rifle_shoot0239.png","regular_rifle_shoot0240.png","regular_rifle_shoot0241.png","regular_rifle_shoot0242.png","regular_rifle_shoot0243.png","regular_rifle_shoot0244.png","regular_rifle_shoot0245.png","regular_rifle_shoot0246.png","regular_rifle_shoot0247.png","regular_rifle_shoot0248.png","regular_rifle_shoot0249.png","regular_rifle_shoot0250.png","regular_rifle_shoot0251.png","regular_rifle_shoot0252.png","regular_rifle_shoot0253.png","regular_rifle_shoot0254.png","regular_rifle_shoot0255.png","regular_rifle_shoot0256.png","regular_rifle_shoot0257.png","regular_rifle_shoot0258.png","regular_rifle_shoot0259.png","regular_rifle_shoot0260.png","regular_rifle_shoot0261.png","regular_rifle_shoot0262.png","regular_rifle_shoot0263.png","regular_rifle_shoot0264.png","regular_rifle_shoot0265.png","regular_rifle_shoot0266.png","regular_rifle_shoot0267.png","regular_rifle_shoot0268.png","regular_rifle_shoot0269.png","regular_rifle_shoot0270.png","regular_rifle_shoot0271.png","regular_rifle_shoot0272.png","regular_rifle_shoot0273.png","regular_rifle_shoot0274.png","regular_rifle_shoot0275.png","regular_rifle_shoot0276.png","regular_rifle_shoot0277.png","regular_rifle_shoot0278.png","regular_rifle_shoot0279.png","regular_rifle_shoot0280.png","regular_rifle_shoot0281.png","regular_rifle_shoot0282.png","regular_rifle_shoot0283.png","regular_rifle_shoot0284.png","regular_rifle_shoot0285.png","regular_rifle_shoot0286.png","regular_rifle_shoot0287.png","regular_rifle_shoot0288.png","regular_rifle_shoot0289.png","regular_rifle_shoot0290.png","regular_rifle_shoot0291.png","regular_rifle_shoot0292.png","regular_rifle_shoot0293.png","regular_rifle_shoot0294.png","regular_rifle_shoot0295.png","regular_rifle_shoot0296.png","regular_rifle_shoot0297.png","regular_rifle_shoot0298.png","regular_rifle_shoot0299.png","regular_rifle_shoot0300.png","regular_rifle_shoot0301.png","regular_rifle_shoot0302.png","regular_rifle_shoot0303.png","regular_rifle_shoot0304.png"]
+	"elephant_head_fly": ["elephant_head_fly_0317.png","elephant_head_fly_0318.png","elephant_head_fly_0319.png","elephant_head_fly_0320.png","elephant_head_fly_0321.png","elephant_head_fly_0322.png","elephant_head_fly_0323.png","elephant_head_fly_0324.png","elephant_head_fly_0325.png","elephant_head_fly_0326.png","elephant_head_fly_0327.png","elephant_head_fly_0328.png","elephant_head_fly_0329.png","elephant_head_fly_0330.png","elephant_head_fly_0331.png","elephant_head_fly_0332.png","elephant_head_fly_0333.png","elephant_head_fly_0334.png","elephant_head_fly_0335.png","elephant_head_fly_0336.png","elephant_head_fly_0337.png","elephant_head_fly_0338.png","elephant_head_fly_0339.png","elephant_head_fly_0340.png","elephant_head_fly_0341.png","elephant_head_fly_0342.png","elephant_head_fly_0343.png","elephant_head_fly_0344.png","elephant_head_fly_0345.png","elephant_head_fly_0346.png","elephant_head_fly_0347.png","elephant_head_fly_0348.png","elephant_head_fly_0349.png","elephant_head_fly_0350.png","elephant_head_fly_0351.png","elephant_head_fly_0352.png","elephant_head_fly_0353.png","elephant_head_fly_0354.png","elephant_head_fly_0355.png","elephant_head_fly_0356.png","elephant_head_fly_0357.png","elephant_head_fly_0358.png","elephant_head_fly_0359.png","elephant_head_fly_0360.png","elephant_head_fly_0361.png","elephant_head_fly_0362.png","elephant_head_fly_0363.png","elephant_head_fly_0364.png","elephant_head_fly_0365.png","elephant_head_fly_0366.png","elephant_head_fly_0367.png","elephant_head_fly_0368.png","elephant_head_fly_0369.png","elephant_head_fly_0370.png","elephant_head_fly_0371.png","elephant_head_fly_0372.png","elephant_head_fly_0373.png","elephant_head_fly_0374.png","elephant_head_fly_0375.png","elephant_head_fly_0376.png","elephant_head_fly_0377.png","elephant_head_fly_0378.png","elephant_head_fly_0379.png","elephant_head_fly_0380.png","elephant_head_fly_0381.png","elephant_head_fly_0382.png","elephant_head_fly_0383.png","elephant_head_fly_0384.png","elephant_head_fly_0385.png","elephant_head_fly_0386.png","elephant_head_fly_0387.png","elephant_head_fly_0388.png","elephant_head_fly_0389.png","elephant_head_fly_0390.png","elephant_head_fly_0391.png","elephant_head_fly_0392.png","elephant_head_fly_0393.png","elephant_head_fly_0394.png","elephant_head_fly_0395.png","elephant_head_fly_0396.png","elephant_head_fly_0397.png","elephant_head_fly_0398.png","elephant_head_fly_0399.png","elephant_head_fly_0400.png","elephant_head_fly_0401.png","elephant_head_fly_0402.png","elephant_head_fly_0403.png","elephant_head_fly_0404.png","elephant_head_fly_0405.png","elephant_head_fly_0406.png","elephant_head_fly_0407.png","elephant_head_fly_0408.png","elephant_head_fly_0409.png","elephant_head_fly_0410.png","elephant_head_fly_0411.png","elephant_head_fly_0412.png","elephant_head_fly_0413.png","elephant_head_fly_0414.png","elephant_head_fly_0415.png","elephant_head_fly_0416.png","elephant_head_fly_0417.png","elephant_head_fly_0418.png","elephant_head_fly_0419.png","elephant_head_fly_0420.png","elephant_head_fly_0421.png","elephant_head_fly_0422.png","elephant_head_fly_0423.png","elephant_head_fly_0424.png","elephant_head_fly_0425.png","elephant_head_fly_0426.png","elephant_head_fly_0427.png","elephant_head_fly_0428.png","elephant_head_fly_0429.png","elephant_head_fly_0430.png","elephant_head_fly_0431.png","elephant_head_fly_0432.png","elephant_head_fly_0433.png","elephant_head_fly_0434.png","elephant_head_fly_0435.png","elephant_head_fly_0436.png","elephant_head_fly_0437.png","elephant_head_fly_0438.png","elephant_head_fly_0439.png","elephant_head_fly_0440.png","elephant_head_fly_0441.png","elephant_head_fly_0442.png","elephant_head_fly_0443.png","elephant_head_fly_0444.png","elephant_head_fly_0445.png","elephant_head_fly_0446.png","elephant_head_fly_0447.png","elephant_head_fly_0448.png","elephant_head_fly_0449.png","elephant_head_fly_0450.png","elephant_head_fly_0451.png","elephant_head_fly_0452.png","elephant_head_fly_0453.png","elephant_head_fly_0454.png","elephant_head_fly_0455.png","elephant_head_fly_0456.png","elephant_head_fly_0457.png","elephant_head_fly_0458.png","elephant_head_fly_0459.png","elephant_head_fly_0460.png","elephant_head_fly_0461.png","elephant_head_fly_0462.png","elephant_head_fly_0463.png","elephant_head_fly_0464.png","elephant_head_fly_0465.png","elephant_head_fly_0466.png","elephant_head_fly_0467.png","elephant_head_fly_0468.png","elephant_head_fly_0469.png","elephant_head_fly_0470.png","elephant_head_fly_0471.png","elephant_head_fly_0472.png","elephant_head_fly_0473.png","elephant_head_fly_0474.png","elephant_head_fly_0475.png","elephant_head_fly_0476.png","elephant_head_fly_0477.png","elephant_head_fly_0478.png","elephant_head_fly_0479.png","elephant_head_fly_0480.png","elephant_head_fly_0481.png","elephant_head_fly_0482.png","elephant_head_fly_0483.png","elephant_head_fly_0484.png","elephant_head_fly_0485.png","elephant_head_fly_0486.png","elephant_head_fly_0487.png","elephant_head_fly_0488.png","elephant_head_fly_0489.png","elephant_head_fly_0490.png","elephant_head_fly_0491.png","elephant_head_fly_0492.png","elephant_head_fly_0493.png","elephant_head_fly_0494.png","elephant_head_fly_0495.png","elephant_head_fly_0496.png","elephant_head_fly_0497.png","elephant_head_fly_0498.png","elephant_head_fly_0499.png","elephant_head_fly_0500.png","elephant_head_fly_0501.png","elephant_head_fly_0502.png","elephant_head_fly_0503.png","elephant_head_fly_0504.png","elephant_head_fly_0505.png","elephant_head_fly_0506.png","elephant_head_fly_0507.png","elephant_head_fly_0508.png","elephant_head_fly_0509.png","elephant_head_fly_0510.png","elephant_head_fly_0511.png","elephant_head_fly_0512.png","elephant_head_fly_0513.png","elephant_head_fly_0514.png","elephant_head_fly_0515.png","elephant_head_fly_0516.png","elephant_head_fly_0517.png","elephant_head_fly_0518.png","elephant_head_fly_0519.png","elephant_head_fly_0520.png","elephant_head_fly_0521.png","elephant_head_fly_0522.png","elephant_head_fly_0523.png","elephant_head_fly_0524.png","elephant_head_fly_0525.png","elephant_head_fly_0526.png","elephant_head_fly_0527.png","elephant_head_fly_0528.png","elephant_head_fly_0529.png","elephant_head_fly_0530.png","elephant_head_fly_0531.png","elephant_head_fly_0532.png","elephant_head_fly_0533.png","elephant_head_fly_0534.png","elephant_head_fly_0535.png","elephant_head_fly_0536.png","elephant_head_fly_0537.png","elephant_head_fly_0538.png","elephant_head_fly_0539.png","elephant_head_fly_0540.png","elephant_head_fly_0541.png","elephant_head_fly_0542.png","elephant_head_fly_0543.png","elephant_head_fly_0544.png","elephant_head_fly_0545.png","elephant_head_fly_0546.png","elephant_head_fly_0547.png","elephant_head_fly_0548.png","elephant_head_fly_0549.png","elephant_head_fly_0550.png","elephant_head_fly_0551.png","elephant_head_fly_0552.png","elephant_head_fly_0553.png","elephant_head_fly_0554.png","elephant_head_fly_0555.png","elephant_head_fly_0556.png"],
+	"elephant_head_getup": ["elephant_head_getup_0557.png","elephant_head_getup_0558.png","elephant_head_getup_0559.png","elephant_head_getup_0560.png","elephant_head_getup_0561.png","elephant_head_getup_0562.png","elephant_head_getup_0563.png","elephant_head_getup_0564.png","elephant_head_getup_0565.png","elephant_head_getup_0566.png","elephant_head_getup_0567.png","elephant_head_getup_0568.png","elephant_head_getup_0569.png","elephant_head_getup_0570.png","elephant_head_getup_0571.png","elephant_head_getup_0572.png","elephant_head_getup_0573.png","elephant_head_getup_0574.png","elephant_head_getup_0575.png","elephant_head_getup_0576.png","elephant_head_getup_0577.png","elephant_head_getup_0578.png","elephant_head_getup_0579.png","elephant_head_getup_0580.png","elephant_head_getup_0581.png","elephant_head_getup_0582.png","elephant_head_getup_0583.png","elephant_head_getup_0584.png","elephant_head_getup_0585.png","elephant_head_getup_0586.png","elephant_head_getup_0587.png","elephant_head_getup_0588.png","elephant_head_getup_0589.png","elephant_head_getup_0590.png","elephant_head_getup_0591.png","elephant_head_getup_0592.png","elephant_head_getup_0593.png","elephant_head_getup_0594.png","elephant_head_getup_0595.png","elephant_head_getup_0596.png","elephant_head_getup_0597.png","elephant_head_getup_0598.png","elephant_head_getup_0599.png","elephant_head_getup_0600.png","elephant_head_getup_0601.png","elephant_head_getup_0602.png","elephant_head_getup_0603.png","elephant_head_getup_0604.png","elephant_head_getup_0605.png","elephant_head_getup_0606.png","elephant_head_getup_0607.png","elephant_head_getup_0608.png","elephant_head_getup_0609.png","elephant_head_getup_0610.png","elephant_head_getup_0611.png","elephant_head_getup_0612.png","elephant_head_getup_0613.png","elephant_head_getup_0614.png","elephant_head_getup_0615.png","elephant_head_getup_0616.png","elephant_head_getup_0617.png","elephant_head_getup_0618.png","elephant_head_getup_0619.png","elephant_head_getup_0620.png","elephant_head_getup_0621.png","elephant_head_getup_0622.png","elephant_head_getup_0623.png","elephant_head_getup_0624.png","elephant_head_getup_0625.png","elephant_head_getup_0626.png","elephant_head_getup_0627.png","elephant_head_getup_0628.png","elephant_head_getup_0629.png","elephant_head_getup_0630.png","elephant_head_getup_0631.png","elephant_head_getup_0632.png","elephant_head_getup_0633.png","elephant_head_getup_0634.png","elephant_head_getup_0635.png","elephant_head_getup_0636.png","elephant_head_getup_0637.png","elephant_head_getup_0638.png","elephant_head_getup_0639.png","elephant_head_getup_0640.png","elephant_head_getup_0641.png","elephant_head_getup_0642.png","elephant_head_getup_0643.png","elephant_head_getup_0644.png","elephant_head_getup_0645.png","elephant_head_getup_0646.png","elephant_head_getup_0647.png","elephant_head_getup_0648.png","elephant_head_getup_0649.png","elephant_head_getup_0650.png","elephant_head_getup_0651.png","elephant_head_getup_0652.png","elephant_head_getup_0653.png","elephant_head_getup_0654.png","elephant_head_getup_0655.png","elephant_head_getup_0656.png","elephant_head_getup_0657.png","elephant_head_getup_0658.png","elephant_head_getup_0659.png","elephant_head_getup_0660.png","elephant_head_getup_0661.png","elephant_head_getup_0662.png","elephant_head_getup_0663.png","elephant_head_getup_0664.png","elephant_head_getup_0665.png","elephant_head_getup_0666.png","elephant_head_getup_0667.png","elephant_head_getup_0668.png","elephant_head_getup_0669.png","elephant_head_getup_0670.png","elephant_head_getup_0671.png","elephant_head_getup_0672.png","elephant_head_getup_0673.png","elephant_head_getup_0674.png","elephant_head_getup_0675.png","elephant_head_getup_0676.png","elephant_head_getup_0677.png","elephant_head_getup_0678.png","elephant_head_getup_0679.png","elephant_head_getup_0680.png","elephant_head_getup_0681.png","elephant_head_getup_0682.png","elephant_head_getup_0683.png","elephant_head_getup_0684.png","elephant_head_getup_0685.png","elephant_head_getup_0686.png","elephant_head_getup_0687.png","elephant_head_getup_0688.png","elephant_head_getup_0689.png","elephant_head_getup_0690.png","elephant_head_getup_0691.png","elephant_head_getup_0692.png","elephant_head_getup_0693.png","elephant_head_getup_0694.png","elephant_head_getup_0695.png","elephant_head_getup_0696.png","elephant_head_getup_0697.png","elephant_head_getup_0698.png","elephant_head_getup_0699.png","elephant_head_getup_0700.png","elephant_head_getup_0701.png","elephant_head_getup_0702.png","elephant_head_getup_0703.png","elephant_head_getup_0704.png","elephant_head_getup_0705.png","elephant_head_getup_0706.png","elephant_head_getup_0707.png","elephant_head_getup_0708.png","elephant_head_getup_0709.png","elephant_head_getup_0710.png","elephant_head_getup_0711.png","elephant_head_getup_0712.png","elephant_head_getup_0713.png","elephant_head_getup_0714.png","elephant_head_getup_0715.png","elephant_head_getup_0716.png","elephant_head_getup_0717.png","elephant_head_getup_0718.png","elephant_head_getup_0719.png","elephant_head_getup_0720.png","elephant_head_getup_0721.png","elephant_head_getup_0722.png","elephant_head_getup_0723.png","elephant_head_getup_0724.png","elephant_head_getup_0725.png","elephant_head_getup_0726.png","elephant_head_getup_0727.png","elephant_head_getup_0728.png","elephant_head_getup_0729.png","elephant_head_getup_0730.png","elephant_head_getup_0731.png","elephant_head_getup_0732.png","elephant_head_getup_0733.png","elephant_head_getup_0734.png","elephant_head_getup_0735.png","elephant_head_getup_0736.png","elephant_head_getup_0737.png","elephant_head_getup_0738.png","elephant_head_getup_0739.png","elephant_head_getup_0740.png","elephant_head_getup_0741.png","elephant_head_getup_0742.png","elephant_head_getup_0743.png","elephant_head_getup_0744.png","elephant_head_getup_0745.png","elephant_head_getup_0746.png","elephant_head_getup_0747.png","elephant_head_getup_0748.png","elephant_head_getup_0749.png","elephant_head_getup_0750.png","elephant_head_getup_0751.png","elephant_head_getup_0752.png","elephant_head_getup_0753.png","elephant_head_getup_0754.png","elephant_head_getup_0755.png","elephant_head_getup_0756.png"],
+	"elephant_head_idle": ["elephant_head_idle_0305.png","elephant_head_idle_0306.png","elephant_head_idle_0307.png","elephant_head_idle_0308.png","elephant_head_idle_0309.png","elephant_head_idle_0310.png","elephant_head_idle_0311.png","elephant_head_idle_0312.png","elephant_head_idle_0313.png","elephant_head_idle_0314.png","elephant_head_idle_0315.png","elephant_head_idle_0316.png"],
+	"elephant_head_run": ["elephant_head_run_0001.png","elephant_head_run_0002.png","elephant_head_run_0003.png","elephant_head_run_0004.png","elephant_head_run_0005.png","elephant_head_run_0006.png","elephant_head_run_0007.png","elephant_head_run_0008.png","elephant_head_run_0009.png","elephant_head_run_0010.png","elephant_head_run_0011.png","elephant_head_run_0012.png","elephant_head_run_0013.png","elephant_head_run_0014.png","elephant_head_run_0015.png","elephant_head_run_0016.png","elephant_head_run_0017.png","elephant_head_run_0018.png","elephant_head_run_0019.png","elephant_head_run_0020.png","elephant_head_run_0021.png","elephant_head_run_0022.png","elephant_head_run_0023.png","elephant_head_run_0024.png","elephant_head_run_0025.png","elephant_head_run_0026.png","elephant_head_run_0027.png","elephant_head_run_0028.png","elephant_head_run_0029.png","elephant_head_run_0030.png","elephant_head_run_0031.png","elephant_head_run_0032.png","elephant_head_run_0033.png","elephant_head_run_0034.png","elephant_head_run_0035.png","elephant_head_run_0036.png","elephant_head_run_0037.png","elephant_head_run_0038.png","elephant_head_run_0039.png","elephant_head_run_0040.png","elephant_head_run_0041.png","elephant_head_run_0042.png","elephant_head_run_0043.png","elephant_head_run_0044.png","elephant_head_run_0045.png","elephant_head_run_0046.png","elephant_head_run_0047.png","elephant_head_run_0048.png","elephant_head_run_0049.png","elephant_head_run_0050.png","elephant_head_run_0051.png","elephant_head_run_0052.png","elephant_head_run_0053.png","elephant_head_run_0054.png","elephant_head_run_0055.png","elephant_head_run_0056.png","elephant_head_run_0057.png","elephant_head_run_0058.png","elephant_head_run_0059.png","elephant_head_run_0060.png","elephant_head_run_0061.png","elephant_head_run_0062.png","elephant_head_run_0063.png","elephant_head_run_0064.png","elephant_head_run_0065.png","elephant_head_run_0066.png","elephant_head_run_0067.png","elephant_head_run_0068.png","elephant_head_run_0069.png","elephant_head_run_0070.png","elephant_head_run_0071.png","elephant_head_run_0072.png","elephant_head_run_0073.png","elephant_head_run_0074.png","elephant_head_run_0075.png","elephant_head_run_0076.png","elephant_head_run_0077.png","elephant_head_run_0078.png","elephant_head_run_0079.png","elephant_head_run_0080.png","elephant_head_run_0081.png","elephant_head_run_0082.png","elephant_head_run_0083.png","elephant_head_run_0084.png","elephant_head_run_0085.png","elephant_head_run_0086.png","elephant_head_run_0087.png","elephant_head_run_0088.png","elephant_head_run_0089.png","elephant_head_run_0090.png","elephant_head_run_0091.png","elephant_head_run_0092.png","elephant_head_run_0093.png","elephant_head_run_0094.png","elephant_head_run_0095.png","elephant_head_run_0096.png","elephant_head_run_0097.png","elephant_head_run_0098.png","elephant_head_run_0099.png","elephant_head_run_0100.png","elephant_head_run_0101.png","elephant_head_run_0102.png","elephant_head_run_0103.png","elephant_head_run_0104.png","elephant_head_run_0105.png","elephant_head_run_0106.png","elephant_head_run_0107.png","elephant_head_run_0108.png","elephant_head_run_0109.png","elephant_head_run_0110.png","elephant_head_run_0111.png","elephant_head_run_0112.png","elephant_head_run_0113.png","elephant_head_run_0114.png","elephant_head_run_0115.png","elephant_head_run_0116.png","elephant_head_run_0117.png","elephant_head_run_0118.png","elephant_head_run_0119.png","elephant_head_run_0120.png","elephant_head_run_0121.png","elephant_head_run_0122.png","elephant_head_run_0123.png","elephant_head_run_0124.png","elephant_head_run_0125.png","elephant_head_run_0126.png","elephant_head_run_0127.png","elephant_head_run_0128.png","elephant_head_run_0129.png","elephant_head_run_0130.png","elephant_head_run_0131.png","elephant_head_run_0132.png","elephant_head_run_0133.png","elephant_head_run_0134.png","elephant_head_run_0135.png","elephant_head_run_0136.png","elephant_head_run_0137.png","elephant_head_run_0138.png","elephant_head_run_0139.png","elephant_head_run_0140.png","elephant_head_run_0141.png","elephant_head_run_0142.png","elephant_head_run_0143.png","elephant_head_run_0144.png","elephant_head_run_0145.png","elephant_head_run_0146.png","elephant_head_run_0147.png","elephant_head_run_0148.png","elephant_head_run_0149.png","elephant_head_run_0150.png","elephant_head_run_0151.png","elephant_head_run_0152.png","elephant_head_run_0153.png","elephant_head_run_0154.png","elephant_head_run_0155.png","elephant_head_run_0156.png","elephant_head_run_0157.png","elephant_head_run_0158.png","elephant_head_run_0159.png","elephant_head_run_0160.png","elephant_head_run_0161.png","elephant_head_run_0162.png","elephant_head_run_0163.png","elephant_head_run_0164.png","elephant_head_run_0165.png","elephant_head_run_0166.png","elephant_head_run_0167.png","elephant_head_run_0168.png","elephant_head_run_0169.png","elephant_head_run_0170.png","elephant_head_run_0171.png","elephant_head_run_0172.png","elephant_head_run_0173.png","elephant_head_run_0174.png","elephant_head_run_0175.png","elephant_head_run_0176.png","elephant_head_run_0177.png","elephant_head_run_0178.png","elephant_head_run_0179.png","elephant_head_run_0180.png","elephant_head_run_0181.png","elephant_head_run_0182.png","elephant_head_run_0183.png","elephant_head_run_0184.png","elephant_head_run_0185.png","elephant_head_run_0186.png","elephant_head_run_0187.png","elephant_head_run_0188.png","elephant_head_run_0189.png","elephant_head_run_0190.png","elephant_head_run_0191.png","elephant_head_run_0192.png"],
+	"elephant_head_shoot": ["elephant_head_shoot_0193.png","elephant_head_shoot_0194.png","elephant_head_shoot_0195.png","elephant_head_shoot_0196.png","elephant_head_shoot_0197.png","elephant_head_shoot_0198.png","elephant_head_shoot_0199.png","elephant_head_shoot_0200.png","elephant_head_shoot_0201.png","elephant_head_shoot_0202.png","elephant_head_shoot_0203.png","elephant_head_shoot_0204.png","elephant_head_shoot_0205.png","elephant_head_shoot_0206.png","elephant_head_shoot_0207.png","elephant_head_shoot_0208.png","elephant_head_shoot_0209.png","elephant_head_shoot_0210.png","elephant_head_shoot_0211.png","elephant_head_shoot_0212.png","elephant_head_shoot_0213.png","elephant_head_shoot_0214.png","elephant_head_shoot_0215.png","elephant_head_shoot_0216.png","elephant_head_shoot_0217.png","elephant_head_shoot_0218.png","elephant_head_shoot_0219.png","elephant_head_shoot_0220.png","elephant_head_shoot_0221.png","elephant_head_shoot_0222.png","elephant_head_shoot_0223.png","elephant_head_shoot_0224.png","elephant_head_shoot_0225.png","elephant_head_shoot_0226.png","elephant_head_shoot_0227.png","elephant_head_shoot_0228.png","elephant_head_shoot_0229.png","elephant_head_shoot_0230.png","elephant_head_shoot_0231.png","elephant_head_shoot_0232.png","elephant_head_shoot_0233.png","elephant_head_shoot_0234.png","elephant_head_shoot_0235.png","elephant_head_shoot_0236.png","elephant_head_shoot_0237.png","elephant_head_shoot_0238.png","elephant_head_shoot_0239.png","elephant_head_shoot_0240.png","elephant_head_shoot_0241.png","elephant_head_shoot_0242.png","elephant_head_shoot_0243.png","elephant_head_shoot_0244.png","elephant_head_shoot_0245.png","elephant_head_shoot_0246.png","elephant_head_shoot_0247.png","elephant_head_shoot_0248.png","elephant_head_shoot_0249.png","elephant_head_shoot_0250.png","elephant_head_shoot_0251.png","elephant_head_shoot_0252.png","elephant_head_shoot_0253.png","elephant_head_shoot_0254.png","elephant_head_shoot_0255.png","elephant_head_shoot_0256.png","elephant_head_shoot_0257.png","elephant_head_shoot_0258.png","elephant_head_shoot_0259.png","elephant_head_shoot_0260.png","elephant_head_shoot_0261.png","elephant_head_shoot_0262.png","elephant_head_shoot_0263.png","elephant_head_shoot_0264.png","elephant_head_shoot_0265.png","elephant_head_shoot_0266.png","elephant_head_shoot_0267.png","elephant_head_shoot_0268.png","elephant_head_shoot_0269.png","elephant_head_shoot_0270.png","elephant_head_shoot_0271.png","elephant_head_shoot_0272.png","elephant_head_shoot_0273.png","elephant_head_shoot_0274.png","elephant_head_shoot_0275.png","elephant_head_shoot_0276.png","elephant_head_shoot_0277.png","elephant_head_shoot_0278.png","elephant_head_shoot_0279.png","elephant_head_shoot_0280.png","elephant_head_shoot_0281.png","elephant_head_shoot_0282.png","elephant_head_shoot_0283.png","elephant_head_shoot_0284.png","elephant_head_shoot_0285.png","elephant_head_shoot_0286.png","elephant_head_shoot_0287.png","elephant_head_shoot_0288.png","elephant_head_shoot_0289.png","elephant_head_shoot_0290.png","elephant_head_shoot_0291.png","elephant_head_shoot_0292.png","elephant_head_shoot_0293.png","elephant_head_shoot_0294.png","elephant_head_shoot_0295.png","elephant_head_shoot_0296.png","elephant_head_shoot_0297.png","elephant_head_shoot_0298.png","elephant_head_shoot_0299.png","elephant_head_shoot_0300.png","elephant_head_shoot_0301.png","elephant_head_shoot_0302.png","elephant_head_shoot_0303.png","elephant_head_shoot_0304.png"],
+	"regular_body_fly": ["regular_body_fly_0317.png","regular_body_fly_0318.png","regular_body_fly_0319.png","regular_body_fly_0320.png","regular_body_fly_0321.png","regular_body_fly_0322.png","regular_body_fly_0323.png","regular_body_fly_0324.png","regular_body_fly_0325.png","regular_body_fly_0326.png","regular_body_fly_0327.png","regular_body_fly_0328.png","regular_body_fly_0329.png","regular_body_fly_0330.png","regular_body_fly_0331.png","regular_body_fly_0332.png","regular_body_fly_0333.png","regular_body_fly_0334.png","regular_body_fly_0335.png","regular_body_fly_0336.png","regular_body_fly_0337.png","regular_body_fly_0338.png","regular_body_fly_0339.png","regular_body_fly_0340.png","regular_body_fly_0341.png","regular_body_fly_0342.png","regular_body_fly_0343.png","regular_body_fly_0344.png","regular_body_fly_0345.png","regular_body_fly_0346.png","regular_body_fly_0347.png","regular_body_fly_0348.png","regular_body_fly_0349.png","regular_body_fly_0350.png","regular_body_fly_0351.png","regular_body_fly_0352.png","regular_body_fly_0353.png","regular_body_fly_0354.png","regular_body_fly_0355.png","regular_body_fly_0356.png","regular_body_fly_0357.png","regular_body_fly_0358.png","regular_body_fly_0359.png","regular_body_fly_0360.png","regular_body_fly_0361.png","regular_body_fly_0362.png","regular_body_fly_0363.png","regular_body_fly_0364.png","regular_body_fly_0365.png","regular_body_fly_0366.png","regular_body_fly_0367.png","regular_body_fly_0368.png","regular_body_fly_0369.png","regular_body_fly_0370.png","regular_body_fly_0371.png","regular_body_fly_0372.png","regular_body_fly_0373.png","regular_body_fly_0374.png","regular_body_fly_0375.png","regular_body_fly_0376.png","regular_body_fly_0377.png","regular_body_fly_0378.png","regular_body_fly_0379.png","regular_body_fly_0380.png","regular_body_fly_0381.png","regular_body_fly_0382.png","regular_body_fly_0383.png","regular_body_fly_0384.png","regular_body_fly_0385.png","regular_body_fly_0386.png","regular_body_fly_0387.png","regular_body_fly_0388.png","regular_body_fly_0389.png","regular_body_fly_0390.png","regular_body_fly_0391.png","regular_body_fly_0392.png","regular_body_fly_0393.png","regular_body_fly_0394.png","regular_body_fly_0395.png","regular_body_fly_0396.png","regular_body_fly_0397.png","regular_body_fly_0398.png","regular_body_fly_0399.png","regular_body_fly_0400.png","regular_body_fly_0401.png","regular_body_fly_0402.png","regular_body_fly_0403.png","regular_body_fly_0404.png","regular_body_fly_0405.png","regular_body_fly_0406.png","regular_body_fly_0407.png","regular_body_fly_0408.png","regular_body_fly_0409.png","regular_body_fly_0410.png","regular_body_fly_0411.png","regular_body_fly_0412.png","regular_body_fly_0413.png","regular_body_fly_0414.png","regular_body_fly_0415.png","regular_body_fly_0416.png","regular_body_fly_0417.png","regular_body_fly_0418.png","regular_body_fly_0419.png","regular_body_fly_0420.png","regular_body_fly_0421.png","regular_body_fly_0422.png","regular_body_fly_0423.png","regular_body_fly_0424.png","regular_body_fly_0425.png","regular_body_fly_0426.png","regular_body_fly_0427.png","regular_body_fly_0428.png","regular_body_fly_0429.png","regular_body_fly_0430.png","regular_body_fly_0431.png","regular_body_fly_0432.png","regular_body_fly_0433.png","regular_body_fly_0434.png","regular_body_fly_0435.png","regular_body_fly_0436.png","regular_body_fly_0437.png","regular_body_fly_0438.png","regular_body_fly_0439.png","regular_body_fly_0440.png","regular_body_fly_0441.png","regular_body_fly_0442.png","regular_body_fly_0443.png","regular_body_fly_0444.png","regular_body_fly_0445.png","regular_body_fly_0446.png","regular_body_fly_0447.png","regular_body_fly_0448.png","regular_body_fly_0449.png","regular_body_fly_0450.png","regular_body_fly_0451.png","regular_body_fly_0452.png","regular_body_fly_0453.png","regular_body_fly_0454.png","regular_body_fly_0455.png","regular_body_fly_0456.png","regular_body_fly_0457.png","regular_body_fly_0458.png","regular_body_fly_0459.png","regular_body_fly_0460.png","regular_body_fly_0461.png","regular_body_fly_0462.png","regular_body_fly_0463.png","regular_body_fly_0464.png","regular_body_fly_0465.png","regular_body_fly_0466.png","regular_body_fly_0467.png","regular_body_fly_0468.png","regular_body_fly_0469.png","regular_body_fly_0470.png","regular_body_fly_0471.png","regular_body_fly_0472.png","regular_body_fly_0473.png","regular_body_fly_0474.png","regular_body_fly_0475.png","regular_body_fly_0476.png","regular_body_fly_0477.png","regular_body_fly_0478.png","regular_body_fly_0479.png","regular_body_fly_0480.png","regular_body_fly_0481.png","regular_body_fly_0482.png","regular_body_fly_0483.png","regular_body_fly_0484.png","regular_body_fly_0485.png","regular_body_fly_0486.png","regular_body_fly_0487.png","regular_body_fly_0488.png","regular_body_fly_0489.png","regular_body_fly_0490.png","regular_body_fly_0491.png","regular_body_fly_0492.png","regular_body_fly_0493.png","regular_body_fly_0494.png","regular_body_fly_0495.png","regular_body_fly_0496.png","regular_body_fly_0497.png","regular_body_fly_0498.png","regular_body_fly_0499.png","regular_body_fly_0500.png","regular_body_fly_0501.png","regular_body_fly_0502.png","regular_body_fly_0503.png","regular_body_fly_0504.png","regular_body_fly_0505.png","regular_body_fly_0506.png","regular_body_fly_0507.png","regular_body_fly_0508.png","regular_body_fly_0509.png","regular_body_fly_0510.png","regular_body_fly_0511.png","regular_body_fly_0512.png","regular_body_fly_0513.png","regular_body_fly_0514.png","regular_body_fly_0515.png","regular_body_fly_0516.png","regular_body_fly_0517.png","regular_body_fly_0518.png","regular_body_fly_0519.png","regular_body_fly_0520.png","regular_body_fly_0521.png","regular_body_fly_0522.png","regular_body_fly_0523.png","regular_body_fly_0524.png","regular_body_fly_0525.png","regular_body_fly_0526.png","regular_body_fly_0527.png","regular_body_fly_0528.png","regular_body_fly_0529.png","regular_body_fly_0530.png","regular_body_fly_0531.png","regular_body_fly_0532.png","regular_body_fly_0533.png","regular_body_fly_0534.png","regular_body_fly_0535.png","regular_body_fly_0536.png","regular_body_fly_0537.png","regular_body_fly_0538.png","regular_body_fly_0539.png","regular_body_fly_0540.png","regular_body_fly_0541.png","regular_body_fly_0542.png","regular_body_fly_0543.png","regular_body_fly_0544.png","regular_body_fly_0545.png","regular_body_fly_0546.png","regular_body_fly_0547.png","regular_body_fly_0548.png","regular_body_fly_0549.png","regular_body_fly_0550.png","regular_body_fly_0551.png","regular_body_fly_0552.png","regular_body_fly_0553.png","regular_body_fly_0554.png","regular_body_fly_0555.png","regular_body_fly_0556.png"],
+	"regular_body_getup": ["regular_body_getup_0557.png","regular_body_getup_0558.png","regular_body_getup_0559.png","regular_body_getup_0560.png","regular_body_getup_0561.png","regular_body_getup_0562.png","regular_body_getup_0563.png","regular_body_getup_0564.png","regular_body_getup_0565.png","regular_body_getup_0566.png","regular_body_getup_0567.png","regular_body_getup_0568.png","regular_body_getup_0569.png","regular_body_getup_0570.png","regular_body_getup_0571.png","regular_body_getup_0572.png","regular_body_getup_0573.png","regular_body_getup_0574.png","regular_body_getup_0575.png","regular_body_getup_0576.png","regular_body_getup_0577.png","regular_body_getup_0578.png","regular_body_getup_0579.png","regular_body_getup_0580.png","regular_body_getup_0581.png","regular_body_getup_0582.png","regular_body_getup_0583.png","regular_body_getup_0584.png","regular_body_getup_0585.png","regular_body_getup_0586.png","regular_body_getup_0587.png","regular_body_getup_0588.png","regular_body_getup_0589.png","regular_body_getup_0590.png","regular_body_getup_0591.png","regular_body_getup_0592.png","regular_body_getup_0593.png","regular_body_getup_0594.png","regular_body_getup_0595.png","regular_body_getup_0596.png","regular_body_getup_0597.png","regular_body_getup_0598.png","regular_body_getup_0599.png","regular_body_getup_0600.png","regular_body_getup_0601.png","regular_body_getup_0602.png","regular_body_getup_0603.png","regular_body_getup_0604.png","regular_body_getup_0605.png","regular_body_getup_0606.png","regular_body_getup_0607.png","regular_body_getup_0608.png","regular_body_getup_0609.png","regular_body_getup_0610.png","regular_body_getup_0611.png","regular_body_getup_0612.png","regular_body_getup_0613.png","regular_body_getup_0614.png","regular_body_getup_0615.png","regular_body_getup_0616.png","regular_body_getup_0617.png","regular_body_getup_0618.png","regular_body_getup_0619.png","regular_body_getup_0620.png","regular_body_getup_0621.png","regular_body_getup_0622.png","regular_body_getup_0623.png","regular_body_getup_0624.png","regular_body_getup_0625.png","regular_body_getup_0626.png","regular_body_getup_0627.png","regular_body_getup_0628.png","regular_body_getup_0629.png","regular_body_getup_0630.png","regular_body_getup_0631.png","regular_body_getup_0632.png","regular_body_getup_0633.png","regular_body_getup_0634.png","regular_body_getup_0635.png","regular_body_getup_0636.png","regular_body_getup_0637.png","regular_body_getup_0638.png","regular_body_getup_0639.png","regular_body_getup_0640.png","regular_body_getup_0641.png","regular_body_getup_0642.png","regular_body_getup_0643.png","regular_body_getup_0644.png","regular_body_getup_0645.png","regular_body_getup_0646.png","regular_body_getup_0647.png","regular_body_getup_0648.png","regular_body_getup_0649.png","regular_body_getup_0650.png","regular_body_getup_0651.png","regular_body_getup_0652.png","regular_body_getup_0653.png","regular_body_getup_0654.png","regular_body_getup_0655.png","regular_body_getup_0656.png","regular_body_getup_0657.png","regular_body_getup_0658.png","regular_body_getup_0659.png","regular_body_getup_0660.png","regular_body_getup_0661.png","regular_body_getup_0662.png","regular_body_getup_0663.png","regular_body_getup_0664.png","regular_body_getup_0665.png","regular_body_getup_0666.png","regular_body_getup_0667.png","regular_body_getup_0668.png","regular_body_getup_0669.png","regular_body_getup_0670.png","regular_body_getup_0671.png","regular_body_getup_0672.png","regular_body_getup_0673.png","regular_body_getup_0674.png","regular_body_getup_0675.png","regular_body_getup_0676.png","regular_body_getup_0677.png","regular_body_getup_0678.png","regular_body_getup_0679.png","regular_body_getup_0680.png","regular_body_getup_0681.png","regular_body_getup_0682.png","regular_body_getup_0683.png","regular_body_getup_0684.png","regular_body_getup_0685.png","regular_body_getup_0686.png","regular_body_getup_0687.png","regular_body_getup_0688.png","regular_body_getup_0689.png","regular_body_getup_0690.png","regular_body_getup_0691.png","regular_body_getup_0692.png","regular_body_getup_0693.png","regular_body_getup_0694.png","regular_body_getup_0695.png","regular_body_getup_0696.png","regular_body_getup_0697.png","regular_body_getup_0698.png","regular_body_getup_0699.png","regular_body_getup_0700.png","regular_body_getup_0701.png","regular_body_getup_0702.png","regular_body_getup_0703.png","regular_body_getup_0704.png","regular_body_getup_0705.png","regular_body_getup_0706.png","regular_body_getup_0707.png","regular_body_getup_0708.png","regular_body_getup_0709.png","regular_body_getup_0710.png","regular_body_getup_0711.png","regular_body_getup_0712.png","regular_body_getup_0713.png","regular_body_getup_0714.png","regular_body_getup_0715.png","regular_body_getup_0716.png","regular_body_getup_0717.png","regular_body_getup_0718.png","regular_body_getup_0719.png","regular_body_getup_0720.png","regular_body_getup_0721.png","regular_body_getup_0722.png","regular_body_getup_0723.png","regular_body_getup_0724.png","regular_body_getup_0725.png","regular_body_getup_0726.png","regular_body_getup_0727.png","regular_body_getup_0728.png","regular_body_getup_0729.png","regular_body_getup_0730.png","regular_body_getup_0731.png","regular_body_getup_0732.png","regular_body_getup_0733.png","regular_body_getup_0734.png","regular_body_getup_0735.png","regular_body_getup_0736.png","regular_body_getup_0737.png","regular_body_getup_0738.png","regular_body_getup_0739.png","regular_body_getup_0740.png","regular_body_getup_0741.png","regular_body_getup_0742.png","regular_body_getup_0743.png","regular_body_getup_0744.png","regular_body_getup_0745.png","regular_body_getup_0746.png","regular_body_getup_0747.png","regular_body_getup_0748.png","regular_body_getup_0749.png","regular_body_getup_0750.png","regular_body_getup_0751.png","regular_body_getup_0752.png","regular_body_getup_0753.png","regular_body_getup_0754.png","regular_body_getup_0755.png","regular_body_getup_0756.png"],
+	"regular_body_idle": ["regular_body_idle_0305.png","regular_body_idle_0306.png","regular_body_idle_0307.png","regular_body_idle_0308.png","regular_body_idle_0309.png","regular_body_idle_0310.png","regular_body_idle_0311.png","regular_body_idle_0312.png","regular_body_idle_0313.png","regular_body_idle_0314.png","regular_body_idle_0315.png","regular_body_idle_0316.png"],
+	"regular_body_run": ["regular_body_run_0001.png","regular_body_run_0002.png","regular_body_run_0003.png","regular_body_run_0004.png","regular_body_run_0005.png","regular_body_run_0006.png","regular_body_run_0007.png","regular_body_run_0008.png","regular_body_run_0009.png","regular_body_run_0010.png","regular_body_run_0011.png","regular_body_run_0012.png","regular_body_run_0013.png","regular_body_run_0014.png","regular_body_run_0015.png","regular_body_run_0016.png","regular_body_run_0017.png","regular_body_run_0018.png","regular_body_run_0019.png","regular_body_run_0020.png","regular_body_run_0021.png","regular_body_run_0022.png","regular_body_run_0023.png","regular_body_run_0024.png","regular_body_run_0025.png","regular_body_run_0026.png","regular_body_run_0027.png","regular_body_run_0028.png","regular_body_run_0029.png","regular_body_run_0030.png","regular_body_run_0031.png","regular_body_run_0032.png","regular_body_run_0033.png","regular_body_run_0034.png","regular_body_run_0035.png","regular_body_run_0036.png","regular_body_run_0037.png","regular_body_run_0038.png","regular_body_run_0039.png","regular_body_run_0040.png","regular_body_run_0041.png","regular_body_run_0042.png","regular_body_run_0043.png","regular_body_run_0044.png","regular_body_run_0045.png","regular_body_run_0046.png","regular_body_run_0047.png","regular_body_run_0048.png","regular_body_run_0049.png","regular_body_run_0050.png","regular_body_run_0051.png","regular_body_run_0052.png","regular_body_run_0053.png","regular_body_run_0054.png","regular_body_run_0055.png","regular_body_run_0056.png","regular_body_run_0057.png","regular_body_run_0058.png","regular_body_run_0059.png","regular_body_run_0060.png","regular_body_run_0061.png","regular_body_run_0062.png","regular_body_run_0063.png","regular_body_run_0064.png","regular_body_run_0065.png","regular_body_run_0066.png","regular_body_run_0067.png","regular_body_run_0068.png","regular_body_run_0069.png","regular_body_run_0070.png","regular_body_run_0071.png","regular_body_run_0072.png","regular_body_run_0073.png","regular_body_run_0074.png","regular_body_run_0075.png","regular_body_run_0076.png","regular_body_run_0077.png","regular_body_run_0078.png","regular_body_run_0079.png","regular_body_run_0080.png","regular_body_run_0081.png","regular_body_run_0082.png","regular_body_run_0083.png","regular_body_run_0084.png","regular_body_run_0085.png","regular_body_run_0086.png","regular_body_run_0087.png","regular_body_run_0088.png","regular_body_run_0089.png","regular_body_run_0090.png","regular_body_run_0091.png","regular_body_run_0092.png","regular_body_run_0093.png","regular_body_run_0094.png","regular_body_run_0095.png","regular_body_run_0096.png","regular_body_run_0097.png","regular_body_run_0098.png","regular_body_run_0099.png","regular_body_run_0100.png","regular_body_run_0101.png","regular_body_run_0102.png","regular_body_run_0103.png","regular_body_run_0104.png","regular_body_run_0105.png","regular_body_run_0106.png","regular_body_run_0107.png","regular_body_run_0108.png","regular_body_run_0109.png","regular_body_run_0110.png","regular_body_run_0111.png","regular_body_run_0112.png","regular_body_run_0113.png","regular_body_run_0114.png","regular_body_run_0115.png","regular_body_run_0116.png","regular_body_run_0117.png","regular_body_run_0118.png","regular_body_run_0119.png","regular_body_run_0120.png","regular_body_run_0121.png","regular_body_run_0122.png","regular_body_run_0123.png","regular_body_run_0124.png","regular_body_run_0125.png","regular_body_run_0126.png","regular_body_run_0127.png","regular_body_run_0128.png","regular_body_run_0129.png","regular_body_run_0130.png","regular_body_run_0131.png","regular_body_run_0132.png","regular_body_run_0133.png","regular_body_run_0134.png","regular_body_run_0135.png","regular_body_run_0136.png","regular_body_run_0137.png","regular_body_run_0138.png","regular_body_run_0139.png","regular_body_run_0140.png","regular_body_run_0141.png","regular_body_run_0142.png","regular_body_run_0143.png","regular_body_run_0144.png","regular_body_run_0145.png","regular_body_run_0146.png","regular_body_run_0147.png","regular_body_run_0148.png","regular_body_run_0149.png","regular_body_run_0150.png","regular_body_run_0151.png","regular_body_run_0152.png","regular_body_run_0153.png","regular_body_run_0154.png","regular_body_run_0155.png","regular_body_run_0156.png","regular_body_run_0157.png","regular_body_run_0158.png","regular_body_run_0159.png","regular_body_run_0160.png","regular_body_run_0161.png","regular_body_run_0162.png","regular_body_run_0163.png","regular_body_run_0164.png","regular_body_run_0165.png","regular_body_run_0166.png","regular_body_run_0167.png","regular_body_run_0168.png","regular_body_run_0169.png","regular_body_run_0170.png","regular_body_run_0171.png","regular_body_run_0172.png","regular_body_run_0173.png","regular_body_run_0174.png","regular_body_run_0175.png","regular_body_run_0176.png","regular_body_run_0177.png","regular_body_run_0178.png","regular_body_run_0179.png","regular_body_run_0180.png","regular_body_run_0181.png","regular_body_run_0182.png","regular_body_run_0183.png","regular_body_run_0184.png","regular_body_run_0185.png","regular_body_run_0186.png","regular_body_run_0187.png","regular_body_run_0188.png","regular_body_run_0189.png","regular_body_run_0190.png","regular_body_run_0191.png","regular_body_run_0192.png"],
+	"regular_body_shoot": ["regular_body_shoot_0193.png","regular_body_shoot_0194.png","regular_body_shoot_0195.png","regular_body_shoot_0196.png","regular_body_shoot_0197.png","regular_body_shoot_0198.png","regular_body_shoot_0199.png","regular_body_shoot_0200.png","regular_body_shoot_0201.png","regular_body_shoot_0202.png","regular_body_shoot_0203.png","regular_body_shoot_0204.png","regular_body_shoot_0205.png","regular_body_shoot_0206.png","regular_body_shoot_0207.png","regular_body_shoot_0208.png","regular_body_shoot_0209.png","regular_body_shoot_0210.png","regular_body_shoot_0211.png","regular_body_shoot_0212.png","regular_body_shoot_0213.png","regular_body_shoot_0214.png","regular_body_shoot_0215.png","regular_body_shoot_0216.png","regular_body_shoot_0217.png","regular_body_shoot_0218.png","regular_body_shoot_0219.png","regular_body_shoot_0220.png","regular_body_shoot_0221.png","regular_body_shoot_0222.png","regular_body_shoot_0223.png","regular_body_shoot_0224.png","regular_body_shoot_0225.png","regular_body_shoot_0226.png","regular_body_shoot_0227.png","regular_body_shoot_0228.png","regular_body_shoot_0229.png","regular_body_shoot_0230.png","regular_body_shoot_0231.png","regular_body_shoot_0232.png","regular_body_shoot_0233.png","regular_body_shoot_0234.png","regular_body_shoot_0235.png","regular_body_shoot_0236.png","regular_body_shoot_0237.png","regular_body_shoot_0238.png","regular_body_shoot_0239.png","regular_body_shoot_0240.png","regular_body_shoot_0241.png","regular_body_shoot_0242.png","regular_body_shoot_0243.png","regular_body_shoot_0244.png","regular_body_shoot_0245.png","regular_body_shoot_0246.png","regular_body_shoot_0247.png","regular_body_shoot_0248.png","regular_body_shoot_0249.png","regular_body_shoot_0250.png","regular_body_shoot_0251.png","regular_body_shoot_0252.png","regular_body_shoot_0253.png","regular_body_shoot_0254.png","regular_body_shoot_0255.png","regular_body_shoot_0256.png","regular_body_shoot_0257.png","regular_body_shoot_0258.png","regular_body_shoot_0259.png","regular_body_shoot_0260.png","regular_body_shoot_0261.png","regular_body_shoot_0262.png","regular_body_shoot_0263.png","regular_body_shoot_0264.png","regular_body_shoot_0265.png","regular_body_shoot_0266.png","regular_body_shoot_0267.png","regular_body_shoot_0268.png","regular_body_shoot_0269.png","regular_body_shoot_0270.png","regular_body_shoot_0271.png","regular_body_shoot_0272.png","regular_body_shoot_0273.png","regular_body_shoot_0274.png","regular_body_shoot_0275.png","regular_body_shoot_0276.png","regular_body_shoot_0277.png","regular_body_shoot_0278.png","regular_body_shoot_0279.png","regular_body_shoot_0280.png","regular_body_shoot_0281.png","regular_body_shoot_0282.png","regular_body_shoot_0283.png","regular_body_shoot_0284.png","regular_body_shoot_0285.png","regular_body_shoot_0286.png","regular_body_shoot_0287.png","regular_body_shoot_0288.png","regular_body_shoot_0289.png","regular_body_shoot_0290.png","regular_body_shoot_0291.png","regular_body_shoot_0292.png","regular_body_shoot_0293.png","regular_body_shoot_0294.png","regular_body_shoot_0295.png","regular_body_shoot_0296.png","regular_body_shoot_0297.png","regular_body_shoot_0298.png","regular_body_shoot_0299.png","regular_body_shoot_0300.png","regular_body_shoot_0301.png","regular_body_shoot_0302.png","regular_body_shoot_0303.png","regular_body_shoot_0304.png"],
+	"regular_rifle_fly": ["regular_rifle_fly_0317.png","regular_rifle_fly_0318.png","regular_rifle_fly_0319.png","regular_rifle_fly_0320.png","regular_rifle_fly_0321.png","regular_rifle_fly_0322.png","regular_rifle_fly_0323.png","regular_rifle_fly_0324.png","regular_rifle_fly_0325.png","regular_rifle_fly_0326.png","regular_rifle_fly_0327.png","regular_rifle_fly_0328.png","regular_rifle_fly_0329.png","regular_rifle_fly_0330.png","regular_rifle_fly_0331.png","regular_rifle_fly_0332.png","regular_rifle_fly_0333.png","regular_rifle_fly_0334.png","regular_rifle_fly_0335.png","regular_rifle_fly_0336.png","regular_rifle_fly_0337.png","regular_rifle_fly_0338.png","regular_rifle_fly_0339.png","regular_rifle_fly_0340.png","regular_rifle_fly_0341.png","regular_rifle_fly_0342.png","regular_rifle_fly_0343.png","regular_rifle_fly_0344.png","regular_rifle_fly_0345.png","regular_rifle_fly_0346.png","regular_rifle_fly_0347.png","regular_rifle_fly_0348.png","regular_rifle_fly_0349.png","regular_rifle_fly_0350.png","regular_rifle_fly_0351.png","regular_rifle_fly_0352.png","regular_rifle_fly_0353.png","regular_rifle_fly_0354.png","regular_rifle_fly_0355.png","regular_rifle_fly_0356.png","regular_rifle_fly_0357.png","regular_rifle_fly_0358.png","regular_rifle_fly_0359.png","regular_rifle_fly_0360.png","regular_rifle_fly_0361.png","regular_rifle_fly_0362.png","regular_rifle_fly_0363.png","regular_rifle_fly_0364.png","regular_rifle_fly_0365.png","regular_rifle_fly_0366.png","regular_rifle_fly_0367.png","regular_rifle_fly_0368.png","regular_rifle_fly_0369.png","regular_rifle_fly_0370.png","regular_rifle_fly_0371.png","regular_rifle_fly_0372.png","regular_rifle_fly_0373.png","regular_rifle_fly_0374.png","regular_rifle_fly_0375.png","regular_rifle_fly_0376.png","regular_rifle_fly_0377.png","regular_rifle_fly_0378.png","regular_rifle_fly_0379.png","regular_rifle_fly_0380.png","regular_rifle_fly_0381.png","regular_rifle_fly_0382.png","regular_rifle_fly_0383.png","regular_rifle_fly_0384.png","regular_rifle_fly_0385.png","regular_rifle_fly_0386.png","regular_rifle_fly_0387.png","regular_rifle_fly_0388.png","regular_rifle_fly_0389.png","regular_rifle_fly_0390.png","regular_rifle_fly_0391.png","regular_rifle_fly_0392.png","regular_rifle_fly_0393.png","regular_rifle_fly_0394.png","regular_rifle_fly_0395.png","regular_rifle_fly_0396.png","regular_rifle_fly_0397.png","regular_rifle_fly_0398.png","regular_rifle_fly_0399.png","regular_rifle_fly_0400.png","regular_rifle_fly_0401.png","regular_rifle_fly_0402.png","regular_rifle_fly_0403.png","regular_rifle_fly_0404.png","regular_rifle_fly_0405.png","regular_rifle_fly_0406.png","regular_rifle_fly_0407.png","regular_rifle_fly_0408.png","regular_rifle_fly_0409.png","regular_rifle_fly_0410.png","regular_rifle_fly_0411.png","regular_rifle_fly_0412.png","regular_rifle_fly_0413.png","regular_rifle_fly_0414.png","regular_rifle_fly_0415.png","regular_rifle_fly_0416.png","regular_rifle_fly_0417.png","regular_rifle_fly_0418.png","regular_rifle_fly_0419.png","regular_rifle_fly_0420.png","regular_rifle_fly_0421.png","regular_rifle_fly_0422.png","regular_rifle_fly_0423.png","regular_rifle_fly_0424.png","regular_rifle_fly_0425.png","regular_rifle_fly_0426.png","regular_rifle_fly_0427.png","regular_rifle_fly_0428.png","regular_rifle_fly_0429.png","regular_rifle_fly_0430.png","regular_rifle_fly_0431.png","regular_rifle_fly_0432.png","regular_rifle_fly_0433.png","regular_rifle_fly_0434.png","regular_rifle_fly_0435.png","regular_rifle_fly_0436.png","regular_rifle_fly_0437.png","regular_rifle_fly_0438.png","regular_rifle_fly_0439.png","regular_rifle_fly_0440.png","regular_rifle_fly_0441.png","regular_rifle_fly_0442.png","regular_rifle_fly_0443.png","regular_rifle_fly_0444.png","regular_rifle_fly_0445.png","regular_rifle_fly_0446.png","regular_rifle_fly_0447.png","regular_rifle_fly_0448.png","regular_rifle_fly_0449.png","regular_rifle_fly_0450.png","regular_rifle_fly_0451.png","regular_rifle_fly_0452.png","regular_rifle_fly_0453.png","regular_rifle_fly_0454.png","regular_rifle_fly_0455.png","regular_rifle_fly_0456.png","regular_rifle_fly_0457.png","regular_rifle_fly_0458.png","regular_rifle_fly_0459.png","regular_rifle_fly_0460.png","regular_rifle_fly_0461.png","regular_rifle_fly_0462.png","regular_rifle_fly_0463.png","regular_rifle_fly_0464.png","regular_rifle_fly_0465.png","regular_rifle_fly_0466.png","regular_rifle_fly_0467.png","regular_rifle_fly_0468.png","regular_rifle_fly_0469.png","regular_rifle_fly_0470.png","regular_rifle_fly_0471.png","regular_rifle_fly_0472.png","regular_rifle_fly_0473.png","regular_rifle_fly_0474.png","regular_rifle_fly_0475.png","regular_rifle_fly_0476.png","regular_rifle_fly_0477.png","regular_rifle_fly_0478.png","regular_rifle_fly_0479.png","regular_rifle_fly_0480.png","regular_rifle_fly_0481.png","regular_rifle_fly_0482.png","regular_rifle_fly_0483.png","regular_rifle_fly_0484.png","regular_rifle_fly_0485.png","regular_rifle_fly_0486.png","regular_rifle_fly_0487.png","regular_rifle_fly_0488.png","regular_rifle_fly_0489.png","regular_rifle_fly_0490.png","regular_rifle_fly_0491.png","regular_rifle_fly_0492.png","regular_rifle_fly_0493.png","regular_rifle_fly_0494.png","regular_rifle_fly_0495.png","regular_rifle_fly_0496.png","regular_rifle_fly_0497.png","regular_rifle_fly_0498.png","regular_rifle_fly_0499.png","regular_rifle_fly_0500.png","regular_rifle_fly_0501.png","regular_rifle_fly_0502.png","regular_rifle_fly_0503.png","regular_rifle_fly_0504.png","regular_rifle_fly_0505.png","regular_rifle_fly_0506.png","regular_rifle_fly_0507.png","regular_rifle_fly_0508.png","regular_rifle_fly_0509.png","regular_rifle_fly_0510.png","regular_rifle_fly_0511.png","regular_rifle_fly_0512.png","regular_rifle_fly_0513.png","regular_rifle_fly_0514.png","regular_rifle_fly_0515.png","regular_rifle_fly_0516.png","regular_rifle_fly_0517.png","regular_rifle_fly_0518.png","regular_rifle_fly_0519.png","regular_rifle_fly_0520.png","regular_rifle_fly_0521.png","regular_rifle_fly_0522.png","regular_rifle_fly_0523.png","regular_rifle_fly_0524.png","regular_rifle_fly_0525.png","regular_rifle_fly_0526.png","regular_rifle_fly_0527.png","regular_rifle_fly_0528.png","regular_rifle_fly_0529.png","regular_rifle_fly_0530.png","regular_rifle_fly_0531.png","regular_rifle_fly_0532.png","regular_rifle_fly_0533.png","regular_rifle_fly_0534.png","regular_rifle_fly_0535.png","regular_rifle_fly_0536.png","regular_rifle_fly_0537.png","regular_rifle_fly_0538.png","regular_rifle_fly_0539.png","regular_rifle_fly_0540.png","regular_rifle_fly_0541.png","regular_rifle_fly_0542.png","regular_rifle_fly_0543.png","regular_rifle_fly_0544.png","regular_rifle_fly_0545.png","regular_rifle_fly_0546.png","regular_rifle_fly_0547.png","regular_rifle_fly_0548.png","regular_rifle_fly_0549.png","regular_rifle_fly_0550.png","regular_rifle_fly_0551.png","regular_rifle_fly_0552.png","regular_rifle_fly_0553.png","regular_rifle_fly_0554.png","regular_rifle_fly_0555.png","regular_rifle_fly_0556.png"],
+	"regular_rifle_getup": ["regular_rifle_getup_0557.png","regular_rifle_getup_0558.png","regular_rifle_getup_0559.png","regular_rifle_getup_0560.png","regular_rifle_getup_0561.png","regular_rifle_getup_0562.png","regular_rifle_getup_0563.png","regular_rifle_getup_0564.png","regular_rifle_getup_0565.png","regular_rifle_getup_0566.png","regular_rifle_getup_0567.png","regular_rifle_getup_0568.png","regular_rifle_getup_0569.png","regular_rifle_getup_0570.png","regular_rifle_getup_0571.png","regular_rifle_getup_0572.png","regular_rifle_getup_0573.png","regular_rifle_getup_0574.png","regular_rifle_getup_0575.png","regular_rifle_getup_0576.png","regular_rifle_getup_0577.png","regular_rifle_getup_0578.png","regular_rifle_getup_0579.png","regular_rifle_getup_0580.png","regular_rifle_getup_0581.png","regular_rifle_getup_0582.png","regular_rifle_getup_0583.png","regular_rifle_getup_0584.png","regular_rifle_getup_0585.png","regular_rifle_getup_0586.png","regular_rifle_getup_0587.png","regular_rifle_getup_0588.png","regular_rifle_getup_0589.png","regular_rifle_getup_0590.png","regular_rifle_getup_0591.png","regular_rifle_getup_0592.png","regular_rifle_getup_0593.png","regular_rifle_getup_0594.png","regular_rifle_getup_0595.png","regular_rifle_getup_0596.png","regular_rifle_getup_0597.png","regular_rifle_getup_0598.png","regular_rifle_getup_0599.png","regular_rifle_getup_0600.png","regular_rifle_getup_0601.png","regular_rifle_getup_0602.png","regular_rifle_getup_0603.png","regular_rifle_getup_0604.png","regular_rifle_getup_0605.png","regular_rifle_getup_0606.png","regular_rifle_getup_0607.png","regular_rifle_getup_0608.png","regular_rifle_getup_0609.png","regular_rifle_getup_0610.png","regular_rifle_getup_0611.png","regular_rifle_getup_0612.png","regular_rifle_getup_0613.png","regular_rifle_getup_0614.png","regular_rifle_getup_0615.png","regular_rifle_getup_0616.png","regular_rifle_getup_0617.png","regular_rifle_getup_0618.png","regular_rifle_getup_0619.png","regular_rifle_getup_0620.png","regular_rifle_getup_0621.png","regular_rifle_getup_0622.png","regular_rifle_getup_0623.png","regular_rifle_getup_0624.png","regular_rifle_getup_0625.png","regular_rifle_getup_0626.png","regular_rifle_getup_0627.png","regular_rifle_getup_0628.png","regular_rifle_getup_0629.png","regular_rifle_getup_0630.png","regular_rifle_getup_0631.png","regular_rifle_getup_0632.png","regular_rifle_getup_0633.png","regular_rifle_getup_0634.png","regular_rifle_getup_0635.png","regular_rifle_getup_0636.png","regular_rifle_getup_0637.png","regular_rifle_getup_0638.png","regular_rifle_getup_0639.png","regular_rifle_getup_0640.png","regular_rifle_getup_0641.png","regular_rifle_getup_0642.png","regular_rifle_getup_0643.png","regular_rifle_getup_0644.png","regular_rifle_getup_0645.png","regular_rifle_getup_0646.png","regular_rifle_getup_0647.png","regular_rifle_getup_0648.png","regular_rifle_getup_0649.png","regular_rifle_getup_0650.png","regular_rifle_getup_0651.png","regular_rifle_getup_0652.png","regular_rifle_getup_0653.png","regular_rifle_getup_0654.png","regular_rifle_getup_0655.png","regular_rifle_getup_0656.png","regular_rifle_getup_0657.png","regular_rifle_getup_0658.png","regular_rifle_getup_0659.png","regular_rifle_getup_0660.png","regular_rifle_getup_0661.png","regular_rifle_getup_0662.png","regular_rifle_getup_0663.png","regular_rifle_getup_0664.png","regular_rifle_getup_0665.png","regular_rifle_getup_0666.png","regular_rifle_getup_0667.png","regular_rifle_getup_0668.png","regular_rifle_getup_0669.png","regular_rifle_getup_0670.png","regular_rifle_getup_0671.png","regular_rifle_getup_0672.png","regular_rifle_getup_0673.png","regular_rifle_getup_0674.png","regular_rifle_getup_0675.png","regular_rifle_getup_0676.png","regular_rifle_getup_0677.png","regular_rifle_getup_0678.png","regular_rifle_getup_0679.png","regular_rifle_getup_0680.png","regular_rifle_getup_0681.png","regular_rifle_getup_0682.png","regular_rifle_getup_0683.png","regular_rifle_getup_0684.png","regular_rifle_getup_0685.png","regular_rifle_getup_0686.png","regular_rifle_getup_0687.png","regular_rifle_getup_0688.png","regular_rifle_getup_0689.png","regular_rifle_getup_0690.png","regular_rifle_getup_0691.png","regular_rifle_getup_0692.png","regular_rifle_getup_0693.png","regular_rifle_getup_0694.png","regular_rifle_getup_0695.png","regular_rifle_getup_0696.png","regular_rifle_getup_0697.png","regular_rifle_getup_0698.png","regular_rifle_getup_0699.png","regular_rifle_getup_0700.png","regular_rifle_getup_0701.png","regular_rifle_getup_0702.png","regular_rifle_getup_0703.png","regular_rifle_getup_0704.png","regular_rifle_getup_0705.png","regular_rifle_getup_0706.png","regular_rifle_getup_0707.png","regular_rifle_getup_0708.png","regular_rifle_getup_0709.png","regular_rifle_getup_0710.png","regular_rifle_getup_0711.png","regular_rifle_getup_0712.png","regular_rifle_getup_0713.png","regular_rifle_getup_0714.png","regular_rifle_getup_0715.png","regular_rifle_getup_0716.png","regular_rifle_getup_0717.png","regular_rifle_getup_0718.png","regular_rifle_getup_0719.png","regular_rifle_getup_0720.png","regular_rifle_getup_0721.png","regular_rifle_getup_0722.png","regular_rifle_getup_0723.png","regular_rifle_getup_0724.png","regular_rifle_getup_0725.png","regular_rifle_getup_0726.png","regular_rifle_getup_0727.png","regular_rifle_getup_0728.png","regular_rifle_getup_0729.png","regular_rifle_getup_0730.png","regular_rifle_getup_0731.png","regular_rifle_getup_0732.png","regular_rifle_getup_0733.png","regular_rifle_getup_0734.png","regular_rifle_getup_0735.png","regular_rifle_getup_0736.png","regular_rifle_getup_0737.png","regular_rifle_getup_0738.png","regular_rifle_getup_0739.png","regular_rifle_getup_0740.png","regular_rifle_getup_0741.png","regular_rifle_getup_0742.png","regular_rifle_getup_0743.png","regular_rifle_getup_0744.png","regular_rifle_getup_0745.png","regular_rifle_getup_0746.png","regular_rifle_getup_0747.png","regular_rifle_getup_0748.png","regular_rifle_getup_0749.png","regular_rifle_getup_0750.png","regular_rifle_getup_0751.png","regular_rifle_getup_0752.png","regular_rifle_getup_0753.png","regular_rifle_getup_0754.png","regular_rifle_getup_0755.png","regular_rifle_getup_0756.png"],
+	"regular_rifle_idle": ["regular_rifle_idle_0305.png","regular_rifle_idle_0306.png","regular_rifle_idle_0307.png","regular_rifle_idle_0308.png","regular_rifle_idle_0309.png","regular_rifle_idle_0310.png","regular_rifle_idle_0311.png","regular_rifle_idle_0312.png","regular_rifle_idle_0313.png","regular_rifle_idle_0314.png","regular_rifle_idle_0315.png","regular_rifle_idle_0316.png"],
+	"regular_rifle_run": ["regular_rifle_run_0001.png","regular_rifle_run_0002.png","regular_rifle_run_0003.png","regular_rifle_run_0004.png","regular_rifle_run_0005.png","regular_rifle_run_0006.png","regular_rifle_run_0007.png","regular_rifle_run_0008.png","regular_rifle_run_0009.png","regular_rifle_run_0010.png","regular_rifle_run_0011.png","regular_rifle_run_0012.png","regular_rifle_run_0013.png","regular_rifle_run_0014.png","regular_rifle_run_0015.png","regular_rifle_run_0016.png","regular_rifle_run_0017.png","regular_rifle_run_0018.png","regular_rifle_run_0019.png","regular_rifle_run_0020.png","regular_rifle_run_0021.png","regular_rifle_run_0022.png","regular_rifle_run_0023.png","regular_rifle_run_0024.png","regular_rifle_run_0025.png","regular_rifle_run_0026.png","regular_rifle_run_0027.png","regular_rifle_run_0028.png","regular_rifle_run_0029.png","regular_rifle_run_0030.png","regular_rifle_run_0031.png","regular_rifle_run_0032.png","regular_rifle_run_0033.png","regular_rifle_run_0034.png","regular_rifle_run_0035.png","regular_rifle_run_0036.png","regular_rifle_run_0037.png","regular_rifle_run_0038.png","regular_rifle_run_0039.png","regular_rifle_run_0040.png","regular_rifle_run_0041.png","regular_rifle_run_0042.png","regular_rifle_run_0043.png","regular_rifle_run_0044.png","regular_rifle_run_0045.png","regular_rifle_run_0046.png","regular_rifle_run_0047.png","regular_rifle_run_0048.png","regular_rifle_run_0049.png","regular_rifle_run_0050.png","regular_rifle_run_0051.png","regular_rifle_run_0052.png","regular_rifle_run_0053.png","regular_rifle_run_0054.png","regular_rifle_run_0055.png","regular_rifle_run_0056.png","regular_rifle_run_0057.png","regular_rifle_run_0058.png","regular_rifle_run_0059.png","regular_rifle_run_0060.png","regular_rifle_run_0061.png","regular_rifle_run_0062.png","regular_rifle_run_0063.png","regular_rifle_run_0064.png","regular_rifle_run_0065.png","regular_rifle_run_0066.png","regular_rifle_run_0067.png","regular_rifle_run_0068.png","regular_rifle_run_0069.png","regular_rifle_run_0070.png","regular_rifle_run_0071.png","regular_rifle_run_0072.png","regular_rifle_run_0073.png","regular_rifle_run_0074.png","regular_rifle_run_0075.png","regular_rifle_run_0076.png","regular_rifle_run_0077.png","regular_rifle_run_0078.png","regular_rifle_run_0079.png","regular_rifle_run_0080.png","regular_rifle_run_0081.png","regular_rifle_run_0082.png","regular_rifle_run_0083.png","regular_rifle_run_0084.png","regular_rifle_run_0085.png","regular_rifle_run_0086.png","regular_rifle_run_0087.png","regular_rifle_run_0088.png","regular_rifle_run_0089.png","regular_rifle_run_0090.png","regular_rifle_run_0091.png","regular_rifle_run_0092.png","regular_rifle_run_0093.png","regular_rifle_run_0094.png","regular_rifle_run_0095.png","regular_rifle_run_0096.png","regular_rifle_run_0097.png","regular_rifle_run_0098.png","regular_rifle_run_0099.png","regular_rifle_run_0100.png","regular_rifle_run_0101.png","regular_rifle_run_0102.png","regular_rifle_run_0103.png","regular_rifle_run_0104.png","regular_rifle_run_0105.png","regular_rifle_run_0106.png","regular_rifle_run_0107.png","regular_rifle_run_0108.png","regular_rifle_run_0109.png","regular_rifle_run_0110.png","regular_rifle_run_0111.png","regular_rifle_run_0112.png","regular_rifle_run_0113.png","regular_rifle_run_0114.png","regular_rifle_run_0115.png","regular_rifle_run_0116.png","regular_rifle_run_0117.png","regular_rifle_run_0118.png","regular_rifle_run_0119.png","regular_rifle_run_0120.png","regular_rifle_run_0121.png","regular_rifle_run_0122.png","regular_rifle_run_0123.png","regular_rifle_run_0124.png","regular_rifle_run_0125.png","regular_rifle_run_0126.png","regular_rifle_run_0127.png","regular_rifle_run_0128.png","regular_rifle_run_0129.png","regular_rifle_run_0130.png","regular_rifle_run_0131.png","regular_rifle_run_0132.png","regular_rifle_run_0133.png","regular_rifle_run_0134.png","regular_rifle_run_0135.png","regular_rifle_run_0136.png","regular_rifle_run_0137.png","regular_rifle_run_0138.png","regular_rifle_run_0139.png","regular_rifle_run_0140.png","regular_rifle_run_0141.png","regular_rifle_run_0142.png","regular_rifle_run_0143.png","regular_rifle_run_0144.png","regular_rifle_run_0145.png","regular_rifle_run_0146.png","regular_rifle_run_0147.png","regular_rifle_run_0148.png","regular_rifle_run_0149.png","regular_rifle_run_0150.png","regular_rifle_run_0151.png","regular_rifle_run_0152.png","regular_rifle_run_0153.png","regular_rifle_run_0154.png","regular_rifle_run_0155.png","regular_rifle_run_0156.png","regular_rifle_run_0157.png","regular_rifle_run_0158.png","regular_rifle_run_0159.png","regular_rifle_run_0160.png","regular_rifle_run_0161.png","regular_rifle_run_0162.png","regular_rifle_run_0163.png","regular_rifle_run_0164.png","regular_rifle_run_0165.png","regular_rifle_run_0166.png","regular_rifle_run_0167.png","regular_rifle_run_0168.png","regular_rifle_run_0169.png","regular_rifle_run_0170.png","regular_rifle_run_0171.png","regular_rifle_run_0172.png","regular_rifle_run_0173.png","regular_rifle_run_0174.png","regular_rifle_run_0175.png","regular_rifle_run_0176.png","regular_rifle_run_0177.png","regular_rifle_run_0178.png","regular_rifle_run_0179.png","regular_rifle_run_0180.png","regular_rifle_run_0181.png","regular_rifle_run_0182.png","regular_rifle_run_0183.png","regular_rifle_run_0184.png","regular_rifle_run_0185.png","regular_rifle_run_0186.png","regular_rifle_run_0187.png","regular_rifle_run_0188.png","regular_rifle_run_0189.png","regular_rifle_run_0190.png","regular_rifle_run_0191.png","regular_rifle_run_0192.png"],
+	"regular_rifle_shoot": ["regular_rifle_shoot_0193.png","regular_rifle_shoot_0194.png","regular_rifle_shoot_0195.png","regular_rifle_shoot_0196.png","regular_rifle_shoot_0197.png","regular_rifle_shoot_0198.png","regular_rifle_shoot_0199.png","regular_rifle_shoot_0200.png","regular_rifle_shoot_0201.png","regular_rifle_shoot_0202.png","regular_rifle_shoot_0203.png","regular_rifle_shoot_0204.png","regular_rifle_shoot_0205.png","regular_rifle_shoot_0206.png","regular_rifle_shoot_0207.png","regular_rifle_shoot_0208.png","regular_rifle_shoot_0209.png","regular_rifle_shoot_0210.png","regular_rifle_shoot_0211.png","regular_rifle_shoot_0212.png","regular_rifle_shoot_0213.png","regular_rifle_shoot_0214.png","regular_rifle_shoot_0215.png","regular_rifle_shoot_0216.png","regular_rifle_shoot_0217.png","regular_rifle_shoot_0218.png","regular_rifle_shoot_0219.png","regular_rifle_shoot_0220.png","regular_rifle_shoot_0221.png","regular_rifle_shoot_0222.png","regular_rifle_shoot_0223.png","regular_rifle_shoot_0224.png","regular_rifle_shoot_0225.png","regular_rifle_shoot_0226.png","regular_rifle_shoot_0227.png","regular_rifle_shoot_0228.png","regular_rifle_shoot_0229.png","regular_rifle_shoot_0230.png","regular_rifle_shoot_0231.png","regular_rifle_shoot_0232.png","regular_rifle_shoot_0233.png","regular_rifle_shoot_0234.png","regular_rifle_shoot_0235.png","regular_rifle_shoot_0236.png","regular_rifle_shoot_0237.png","regular_rifle_shoot_0238.png","regular_rifle_shoot_0239.png","regular_rifle_shoot_0240.png","regular_rifle_shoot_0241.png","regular_rifle_shoot_0242.png","regular_rifle_shoot_0243.png","regular_rifle_shoot_0244.png","regular_rifle_shoot_0245.png","regular_rifle_shoot_0246.png","regular_rifle_shoot_0247.png","regular_rifle_shoot_0248.png","regular_rifle_shoot_0249.png","regular_rifle_shoot_0250.png","regular_rifle_shoot_0251.png","regular_rifle_shoot_0252.png","regular_rifle_shoot_0253.png","regular_rifle_shoot_0254.png","regular_rifle_shoot_0255.png","regular_rifle_shoot_0256.png","regular_rifle_shoot_0257.png","regular_rifle_shoot_0258.png","regular_rifle_shoot_0259.png","regular_rifle_shoot_0260.png","regular_rifle_shoot_0261.png","regular_rifle_shoot_0262.png","regular_rifle_shoot_0263.png","regular_rifle_shoot_0264.png","regular_rifle_shoot_0265.png","regular_rifle_shoot_0266.png","regular_rifle_shoot_0267.png","regular_rifle_shoot_0268.png","regular_rifle_shoot_0269.png","regular_rifle_shoot_0270.png","regular_rifle_shoot_0271.png","regular_rifle_shoot_0272.png","regular_rifle_shoot_0273.png","regular_rifle_shoot_0274.png","regular_rifle_shoot_0275.png","regular_rifle_shoot_0276.png","regular_rifle_shoot_0277.png","regular_rifle_shoot_0278.png","regular_rifle_shoot_0279.png","regular_rifle_shoot_0280.png","regular_rifle_shoot_0281.png","regular_rifle_shoot_0282.png","regular_rifle_shoot_0283.png","regular_rifle_shoot_0284.png","regular_rifle_shoot_0285.png","regular_rifle_shoot_0286.png","regular_rifle_shoot_0287.png","regular_rifle_shoot_0288.png","regular_rifle_shoot_0289.png","regular_rifle_shoot_0290.png","regular_rifle_shoot_0291.png","regular_rifle_shoot_0292.png","regular_rifle_shoot_0293.png","regular_rifle_shoot_0294.png","regular_rifle_shoot_0295.png","regular_rifle_shoot_0296.png","regular_rifle_shoot_0297.png","regular_rifle_shoot_0298.png","regular_rifle_shoot_0299.png","regular_rifle_shoot_0300.png","regular_rifle_shoot_0301.png","regular_rifle_shoot_0302.png","regular_rifle_shoot_0303.png","regular_rifle_shoot_0304.png"]
 },
 "meta": {
 	"app": "https://www.codeandweb.com/texturepacker",
@@ -1399,7 +1584,7 @@
 	"format": "RGBA8888",
 	"size": {"w":2048,"h":2048},
 	"scale": "0.5",
-	"related_multi_packs": [ "sprites_i1.json", "sprites_i2.json", "sprites_i3.json" ],
-	"smartupdate": "$TexturePacker:SmartUpdate:a8b827b1f3a227c66651a470c9e35a37:75406336c832e508afa11015628ef61c:5079c55ef91e6a37b895b6814dee8ef2$"
+	"related_multi_packs": [ "sprites_i1.json", "sprites_i2.json", "sprites_i3.json", "sprites_i4.json", "sprites_i5.json", "sprites_i6.json", "sprites_i7.json", "sprites_i8.json", "sprites_i9.json" ],
+	"smartupdate": "$TexturePacker:SmartUpdate:9eacd6cf97ecd83af009542410ccab34:62cff5323dd7939730093e7faaa55ae4:ca64bd5be2b7c23051ece8cbb60c5d59$"
 }
 }

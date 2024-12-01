@@ -19,6 +19,30 @@ const sources = [
     imgUrl:  new URL('assets/sprite_sheets/sprites_i3.png', import.meta.url),
     jsonUrl: new URL('assets/sprite_sheets/sprites_i3.json', import.meta.url),
   },
+  {
+    imgUrl:  new URL('assets/sprite_sheets/sprites_i4.png', import.meta.url),
+    jsonUrl: new URL('assets/sprite_sheets/sprites_i4.json', import.meta.url),
+  },
+  {
+    imgUrl:  new URL('assets/sprite_sheets/sprites_i5.png', import.meta.url),
+    jsonUrl: new URL('assets/sprite_sheets/sprites_i5.json', import.meta.url),
+  },
+  {
+    imgUrl:  new URL('assets/sprite_sheets/sprites_i6.png', import.meta.url),
+    jsonUrl: new URL('assets/sprite_sheets/sprites_i6.json', import.meta.url),
+  },
+  {
+    imgUrl:  new URL('assets/sprite_sheets/sprites_i7.png', import.meta.url),
+    jsonUrl: new URL('assets/sprite_sheets/sprites_i7.json', import.meta.url),
+  },
+  {
+    imgUrl:  new URL('assets/sprite_sheets/sprites_i8.png', import.meta.url),
+    jsonUrl: new URL('assets/sprite_sheets/sprites_i8.json', import.meta.url),
+  },
+  {
+    imgUrl:  new URL('assets/sprite_sheets/sprites_i9.png', import.meta.url),
+    jsonUrl: new URL('assets/sprite_sheets/sprites_i9.json', import.meta.url),
+  },
 ] as const
 
 

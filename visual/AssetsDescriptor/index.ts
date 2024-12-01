@@ -36,7 +36,7 @@ const AssetsDescriptor = {
 export default AssetsDescriptor
 
 function getFrameNamePrefix(fullName: string) {
-  return fullName.slice(0, fullName.length - 8)
+  return fullName.slice(0, -9)
 }
 
 export function initializeAssetsDescriptor(frames: FrameDetails[]) {
@@ -53,6 +53,9 @@ export function initializeAssetsDescriptor(frames: FrameDetails[]) {
 
   Object.values(AssetsDescriptor).forEach(assetDescriptor => {
     Object.values(assetDescriptor).forEach(stateDescriptor => {
+      if (!framesByPrefix[stateDescriptor.prefix]) {
+        throw Error(`No asset with prefix ${stateDescriptor.prefix} was found in sprite sheets`)
+      }
       const frames = [...framesByPrefix[stateDescriptor.prefix]]
       frames.sort((a, b) => a.name > b.name ? 1 : -1) // they are never equal
 

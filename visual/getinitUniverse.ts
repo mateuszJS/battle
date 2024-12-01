@@ -95,7 +95,7 @@ export default async function getinitUniverse(): Promise<
       const dt = now - lastFrameTime
       lastFrameTime = now
       units.forEach(unit => {
-        unit.update(window.angle, UnitState.SHOOT, dt)
+        unit.update(window.angle, UnitState.FLY, dt)
       })
 
       // here we need to render that texture into canvas
