@@ -10,6 +10,12 @@
   /* same problem as flex minimum width/height: auto
   instead of using min-width/height = 0 we can assign it here for grid-template*/
   
+  .platform {
+    position: relative;
+    --size: 100px;
+    --half-size: calc(var(--size) / 2);
+    --o:calc(var(--half-size) * tan(-22.5deg));
+  }
 
   .dragable {
     position: absolute;
@@ -24,6 +30,8 @@
 
     & > * {
       cursor: pointer;
+      aspect-ratio: 1;
+      width: 100%;
     }
   }
 
@@ -34,12 +42,6 @@
     max-height: 100%;
   }
 
-  .platform {
-    aspect-ratio: 1;
-    position: absolute;
-    width: 100%;
-  }
-
   .octagon, .octagon:before {
     --border-width: 10px;
     --border-color: rgb(255, 132, 71);
@@ -48,62 +50,72 @@
     height: 100%;
     width: 100%;
     padding: var(--border-width);
-
-    --o:calc(50%*tan(-22.5deg));
+    
     clip-path: polygon(
-      var(--o) 50%,
-      50% var(--o),
-      calc(100% - var(--o)) 50%,
-      50% calc(100% - var(--o))
+      var(--o) var(--half-size),
+      var(--half-size) var(--o),
+      calc(100% - var(--o)) var(--half-size),
+      var(--half-size) calc(100% - var(--o))
     );
     background: var(--fill-color);
   }
 
-  .octagon:before {
+  .octagon-inner {
+    --size: 80px;
+    --half-size: calc(var(--size) / 2);
+    --o:calc(var(--half-size) * tan(-22.5deg));
+    pointer-events: none;
+  }
+
+  /* .octagon:before {
+    --size: 80px;
+    --half-size: calc(var(--size) / 2);
+    --o:calc(var(--half-size) * tan(-22.5deg));
     content: "";
     display: block;
     background: var(--fill-color);
-  }
+  } */
 
   .octagon:hover {
     background: var(--border-color);
   }
 
   .bridge-anchor {
+    --offset: calc(var(--half-size) + var(--o));
+    /* --thickness: 10px; */
+
     position: absolute;
-    color: rgb(148, 0, 185);
-    background: currentColor;
-    --length: 40px;
-    --thickness: 10px;
+    /* top: calc((var(--size) - var(--thickness)) / 2); */
+    top: calc(var(--size) / 2);
+    left: var(--offset);
 
-    &:nth-of-type(odd) {
-      width: var(--length);
-      height: var(--thickness);
-      left: calc(50% - var(--length) / 2);
-    }
+    display: flex;
+    justify-content: space-between;
 
-    &:nth-of-type(even) {
-      width: var(--thickness);
-      height: var(--length);
-      top: calc(50% - var(--length) / 2);
-    }
+    width: calc(var(--size) - 2* var(--offset));
+    /* height: var(--thickness); */
+    height: 0;
+    background: white;
+    /* transform:
+      rotate(var(--angle))
+      translate(0, calc(((var(--size) + var(--thickness)) / -2))); */
+    transform:
+      rotate(var(--angle))
+      translate(0, calc((var(--size) / -2)));
 
     &:nth-of-type(1) {
-      top: 0;
+      --angle: 0;
     }
     &:nth-of-type(2) {
-      right: 0;
+      --angle: 90deg;
     }
     &:nth-of-type(3) {
-      bottom: 0;
+      --angle: 180deg;
     }
     &:nth-of-type(4) {
-      left: 0;
+      --angle: 270deg;
     }
 
-    &:hover {
-      outline: 5px solid currentColor;
-    }
     &.active {
       pointer-events: none;
       outline: 5px solid red;
@@ -121,5 +133,35 @@
     width: 100px;
     background: tomato;
     pointer-events: none;
+  }
+
+  .headquarter {
+    background: lime;
+  }
+
+  .bridge-anchor-point {
+    width: 10px;
+    height: 10px;
+    margin: -5px;
+    border-radius: 50%;
+    background: rgb(220, 82, 255);
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .bridge-anchor-cursor-catcher {
+    --color: 148, 0, 185;
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 14px;
+    margin: -7px;
+    border-radius: 7px;
+    color: rgb(var(--color));
+    background: currentColor;
+
+    &:hover {
+      outline: solid 5px rgba(var(--color), 0.5);
+    }
   }
 }

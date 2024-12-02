@@ -6,12 +6,16 @@ import { createMenu, addNewFaction, FactionVisualDetails } from './menu'
 import { Universe } from 'Universe'
 import Rect from 'Rect'
 import addStyles from './addStyles'
-import setupBridgeEnv, { attachPlatformListeners, createPlatformElem, updateBridgePreview, updateBriges } from './setupBridgeEnv'
+import setupBridgeEnv, { attachPlatformListeners, updateBridgePreview, updateBriges } from './setupBridgeEnv'
+import { createInteractivePlatformElem, createStaticPlatformElem } from './platform'
 import getinitUniverse from 'getInitUniverse'
 import hexToRGB from './hexToRgb'
+import { createHQ, createInteractiveHQElem } from './headquarters'
 
 const platformCoords = getPlatformCoords()
 const bridgeWidth = (platformCoords[3].y - platformCoords[2].y) * mapDetails.scale
+let mapAreaX = 0
+let mapAreaY = 0
 
 const startOffset = { x: 0, y: 0 }
 let currDragElem: HTMLElement | null = null
@@ -19,6 +23,28 @@ let currDragElem: HTMLElement | null = null
 function updateDragElem(e: MouseEvent, currDragElem: HTMLElement) {
   currDragElem.style.left = e.clientX + startOffset.x + 'px'
   currDragElem.style.top = e.clientY + startOffset.y + 'px'
+}
+
+function attachCreateEvent(node: HTMLElement, createCallback: () => HTMLElement) {
+  node.addEventListener('mousedown', e => {
+    const { x: toolX, y: toolY } = (e.currentTarget as HTMLElement).getBoundingClientRect()
+    startOffset.x = toolX - e.clientX - mapAreaX
+    startOffset.y = toolY - e.clientY - mapAreaY
+
+    const newElement = createCallback()
+
+    currDragElem = newElement
+    updateDragElem(e, newElement)
+  })
+}
+
+function startDrag(elem: HTMLElement, event: MouseEvent) {
+  const { x: toolX, y: toolY } = elem.getBoundingClientRect()
+  startOffset.x = toolX - event.clientX - mapAreaX
+  startOffset.y = toolY - event.clientY - mapAreaY
+
+  currDragElem = elem
+  updateDragElem(event, elem)
 }
 
 export default function openMapCreator(wasmModule: Universe) {
@@ -37,50 +63,20 @@ export default function openMapCreator(wasmModule: Universe) {
   mapAreaElem.style.aspectRatio = `${mapDetails.width / mapDetails.height}`
   viewElem.appendChild(mapAreaElem)
 
-  const rightControlPanel = document.createElement('section')
-
-  const startBtn = document.createElement('button')
-  startBtn.textContent = 'START'
-  const startBtnClickPromise = new Promise<void>(resolve => {
-    startBtn.addEventListener('click', () => resolve())
-  })
-  rightControlPanel.appendChild(startBtn)
-
   document.body.appendChild(viewElem)
+
+  const mapAreaElemRect = mapAreaElem.getBoundingClientRect() 
+  mapAreaX = mapAreaElemRect.x
+  mapAreaY = mapAreaElemRect.y
 
   setupBridgeEnv(mapAreaElem)
 
   /** Fill the toolbar */
-  const [platformToolElem] = createPlatformElem(toolbarElem)
-
-  function startDrag(elem: HTMLElement, event: MouseEvent) {
-    const { x: mapAreaX, y: mapAreaY } = mapAreaElem.getBoundingClientRect() 
-    const { x: toolX, y: toolY } = elem.getBoundingClientRect()
-    startOffset.x = toolX - event.clientX - mapAreaX
-    startOffset.y = toolY - event.clientY - mapAreaY
+  const [platformToolElem] = createStaticPlatformElem(toolbarElem)
+  attachCreateEvent(platformToolElem, () => createInteractivePlatformElem(mapAreaElem, startDrag))
   
-    currDragElem = elem
-    updateDragElem(event, elem)
-  }
-
-  platformToolElem.addEventListener('mousedown', e => {
-    const { x: mapAreaX, y: mapAreaY } = mapAreaElem.getBoundingClientRect() 
-    const { x: toolX, y: toolY } = (e.currentTarget as HTMLElement).getBoundingClientRect()
-    startOffset.x = toolX - e.clientX - mapAreaX
-    startOffset.y = toolY - e.clientY - mapAreaY
-
-    const [newPlatform, dragTrigger] = createPlatformElem(mapAreaElem)
-    attachPlatformListeners(newPlatform)
-    dragTrigger.addEventListener('mousedown', e => {
-      startDrag(newPlatform, e)
-      updateBriges(newPlatform)
-    })
-
-    currDragElem = newPlatform
-    updateDragElem(e, newPlatform)
-  })
-
-  // portal, strategic point, platform, bridge
+  const triggerCreateHQ = createHQ(toolbarElem)
+  attachCreateEvent(triggerCreateHQ, () => createInteractiveHQElem(mapAreaElem, startDrag))
 
   mapAreaElem.addEventListener('mousemove', (e) => {
     if (currDragElem) {
@@ -97,59 +93,25 @@ export default function openMapCreator(wasmModule: Universe) {
       currDragElem = null
     }
   })
+ 
+  /* eveyrthing right pane related */
+  const rightControlPanel = document.createElement('section')
 
-  const colorMatrix = Array(12).fill(0) // it's matrix3x3 but because of the webgpu memory layout...
-  const colorInputs = ['#ff0000', '#00ff00', '#0000ff'].map((initialColor, i) => {
-    const node = document.createElement('input')
-    node.type = 'color'
-    node.value = initialColor
-
-    const { r, g, b } = hexToRGB(initialColor)
-    colorMatrix[0 + i] = r
-    colorMatrix[4 + i] = g
-    colorMatrix[8 + i] = b
-
-    rightControlPanel.appendChild(node)
-    node.addEventListener('input', () => {
-      // console.log(e.target!.value)
-      // index = 1
-      const { r, g, b } = hexToRGB(node.value)
-      colorMatrix[0 + i] = r
-      colorMatrix[4 + i] = g
-      colorMatrix[8 + i] = b
-
-      // let colorMatrix = mat3x3f(
-      //   // r, g, b
-      //   0, 1, 0, //
-      //   0, 0, 1, //
-      //   1, 0, 0 //
-      // );
-
-      // let colorMatrix = mat3x3f(
-      //   1, 0, 0, // 
-      //   0, 1, 0, // 
-      //   0, 0, 1 // 
-      // );
-
-
-
-      console.log(node.value)
-    })
-    // no
-    // <input type="color" id="body" name="body" value="#ff0000" />
-    // <label for="body">Body</label>
+  const startBtn = document.createElement('button')
+  startBtn.textContent = 'START'
+  const startBtnClickPromise = new Promise<void>(resolve => {
+    startBtn.addEventListener('click', () => resolve())
   })
+  rightControlPanel.appendChild(startBtn)
+
+
   viewElem.appendChild(rightControlPanel)
 
-  // <div>
-  //   <input type="color" id="body" name="body" value="#f6b73c" />
-  //   <label for="body">Body</label>
-  // </div>
-
-
+  /* canvas */
   const canvas = document.createElement('canvas')
   document.body.appendChild(canvas)
-
+  
+  /* clean the DOM and go to the next phase */
   Promise.all([startBtnClickPromise, getinitUniverse()])
     .then(([_, initUniverse]) => {
       styleElem.remove()
@@ -160,7 +122,7 @@ export default function openMapCreator(wasmModule: Universe) {
         MAP_WIDTH,
         MAP_HEIGHT,
         new Float32Array([
-          ...colorMatrix,
+          // ...colorMatrix,
           ...[
             0, 1, 0, 0,
             0, 0, 1, 0,

@@ -1,29 +1,4 @@
-import addDragableElement from "./addDragableElement"
 import { applyTransform } from "./css-transform-matrix3d"
-
-/**
- * 
- * @param parent element where new platform should be appended to
- * @returns two elements, first is root of platform, second is the element which should trigger drag on click
- */
-export function createPlatformElem(parent: HTMLElement): [HTMLElement, HTMLElement] {
-  const platformElem = addDragableElement(parent, 'platform', 100, 100)
-
-  const octagonElem = document.createElement('div')
-  octagonElem.classList.add('octagon')
-  platformElem.appendChild(octagonElem)
-
-  const bridgeAnchorsContainer = document.createElement('div')
-  for(let i = 0; i < 4; i++) {
-    const bridgeAnchorElem = document.createElement('div')
-    bridgeAnchorElem.classList.add('bridge-anchor')
-    bridgeAnchorsContainer.appendChild(bridgeAnchorElem)
-  }
-
-  platformElem.appendChild(bridgeAnchorsContainer)
-
-  return [platformElem, octagonElem]
-}
 
 let mapAreaElem: HTMLElement
 let anchorSource: HTMLElement | null = null
@@ -152,12 +127,11 @@ export function attachPlatformListeners(
   if (!octagonElem) throw Error('Invalid platform html element. No .octagon has been found within the element.')
 
   const bridgeAnchors = Array.from<HTMLElement>(platform.querySelectorAll('.bridge-anchor'));
-  if (bridgeAnchors.length !== 4) throw Error('Invalid platform html element. 4 elements of class bridhe-anchor should be present.')
+  if (bridgeAnchors.length !== 4) throw Error('Invalid platform html element. 4 elements of class bridge-anchor should be present.')
 
   // attaching bridge events
   bridgeAnchors.forEach(node => {
     node.addEventListener('mousedown', e => {
-      const { width, height } = (e.currentTarget as HTMLElement).getBoundingClientRect()
       anchorSource = node
 
       bridgePreview = document.createElement('div')
@@ -168,7 +142,7 @@ export function attachPlatformListeners(
 
     node.addEventListener('mouseenter', (e) => {
       const element = e.currentTarget as HTMLElement
-      if (!!anchorSource) {
+      if (anchorSource) {
         element.classList.add('accept')
         bridgePreviewEndSnap = element
       }
@@ -180,4 +154,8 @@ export function attachPlatformListeners(
       bridgePreviewEndSnap = null
     })
   })
+}
+
+export function getBridges(): Bridge[] {
+  return bridges
 }
