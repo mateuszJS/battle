@@ -15,6 +15,7 @@
     --size: 100px;
     --half-size: calc(var(--size) / 2);
     --o:calc(var(--half-size) * tan(-22.5deg));
+    --accent-color: 148, 0, 185;
   }
 
   .dragable {
@@ -67,54 +68,26 @@
     pointer-events: none;
   }
 
-  /* .octagon:before {
-    --size: 80px;
-    --half-size: calc(var(--size) / 2);
-    --o:calc(var(--half-size) * tan(-22.5deg));
-    content: "";
-    display: block;
-    background: var(--fill-color);
-  } */
-
   .octagon:hover {
     background: var(--border-color);
   }
 
   .bridge-anchor {
     --offset: calc(var(--half-size) + var(--o));
-    /* --thickness: 10px; */
 
     position: absolute;
-    /* top: calc((var(--size) - var(--thickness)) / 2); */
     top: calc(var(--size) / 2);
     left: var(--offset);
 
     display: flex;
     justify-content: space-between;
 
-    width: calc(var(--size) - 2* var(--offset));
-    /* height: var(--thickness); */
+    width: calc(var(--size) - 2 * var(--offset));
     height: 0;
     background: white;
-    /* transform:
-      rotate(var(--angle))
-      translate(0, calc(((var(--size) + var(--thickness)) / -2))); */
     transform:
       rotate(var(--angle))
-      translate(0, calc((var(--size) / -2)));
-
-    &:nth-of-type(1) {
-      --angle: 0;
-    }
-    &:nth-of-type(2) {
-      --angle: 90deg;
-    }
-    &:nth-of-type(3) {
-      --angle: 180deg;
-    }
-    &:nth-of-type(4) {
-      --angle: 270deg;
-    }
+      translate(0, calc((var(--size, 0px) / -2)));
 
     &.active {
       pointer-events: none;
@@ -139,29 +112,33 @@
     background: lime;
   }
 
-  .bridge-anchor-point {
-    width: 10px;
-    height: 10px;
-    margin: -5px;
-    border-radius: 50%;
-    background: rgb(220, 82, 255);
+  .anchor-point {
     z-index: 1;
     pointer-events: none;
+
+    &:before {
+      content: "";
+      display: block;
+      width: 10px;
+      height: 10px;
+      margin: -5px;
+      border-radius: 50%;
+      background: rgb(220, 82, 255);
+    }
   }
 
-  .bridge-anchor-cursor-catcher {
-    --color: 148, 0, 185;
+  .bridge-anchor-event-catcher {
     position: absolute;
     left: 0;
     right: 0;
     height: 14px;
     margin: -7px;
     border-radius: 7px;
-    color: rgb(var(--color));
+    color: rgb(var(--accent-color));
     background: currentColor;
 
     &:hover {
-      outline: solid 5px rgba(var(--color), 0.5);
+      outline: solid 5px rgba(var(--accent-color), 0.3);
     }
   }
 }

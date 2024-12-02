@@ -11,6 +11,7 @@ import { createInteractivePlatformElem, createStaticPlatformElem } from './platf
 import getinitUniverse from 'getInitUniverse'
 import hexToRGB from './hexToRgb'
 import { createHQ, createInteractiveHQElem } from './headquarters'
+import { setCoordsOrigin } from './getCoords'
 
 const platformCoords = getPlatformCoords()
 const bridgeWidth = (platformCoords[3].y - platformCoords[2].y) * mapDetails.scale
@@ -58,32 +59,33 @@ export default function openMapCreator(wasmModule: Universe) {
   toolbarElem.classList.add('toolbar')
   viewElem.appendChild(toolbarElem)
 
-  const mapAreaElem = document.createElement('main')
-  mapAreaElem.classList.add('map-area')
-  mapAreaElem.style.aspectRatio = `${mapDetails.width / mapDetails.height}`
-  viewElem.appendChild(mapAreaElem)
+  const mapElement = document.createElement('main')
+  mapElement.classList.add('map-area')
+  mapElement.style.aspectRatio = `${mapDetails.width / mapDetails.height}`
+  viewElem.appendChild(mapElement)
 
   document.body.appendChild(viewElem)
+  setCoordsOrigin(mapElement)
 
-  const mapAreaElemRect = mapAreaElem.getBoundingClientRect() 
-  mapAreaX = mapAreaElemRect.x
-  mapAreaY = mapAreaElemRect.y
 
-  setupBridgeEnv(mapAreaElem)
+  const mapElementRect = mapElement.getBoundingClientRect() 
+  mapAreaX = mapElementRect.x
+  mapAreaY = mapElementRect.y
+
+  setupBridgeEnv(mapElement)
 
   /** Fill the toolbar */
   const [platformToolElem] = createStaticPlatformElem(toolbarElem)
-  attachCreateEvent(platformToolElem, () => createInteractivePlatformElem(mapAreaElem, startDrag))
+  attachCreateEvent(platformToolElem, () => createInteractivePlatformElem(mapElement, startDrag, mapElement))
   
   const triggerCreateHQ = createHQ(toolbarElem)
-  attachCreateEvent(triggerCreateHQ, () => createInteractiveHQElem(mapAreaElem, startDrag))
+  attachCreateEvent(triggerCreateHQ, () => createInteractiveHQElem(mapElement, startDrag))
 
-  mapAreaElem.addEventListener('mousemove', (e) => {
+  mapElement.addEventListener('mousemove', (e) => {
     if (currDragElem) {
       updateDragElem(e, currDragElem)
-      updateBriges(currDragElem)
-    } else {
       updateBridgePreview(e)
+      // updateBriges(currDragElem)
     }
   })
 

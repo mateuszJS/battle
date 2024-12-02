@@ -1,4 +1,7 @@
+import BridgePreview from "./BridgePreview"
 import { applyTransform } from "./css-transform-matrix3d"
+import getCoords from "./getCoords"
+import { createBridgeEdge } from "./platform"
 
 let mapAreaElem: HTMLElement
 let anchorSource: HTMLElement | null = null
@@ -15,6 +18,8 @@ interface Bridge {
   to: BridgeAnchor
 }
 const bridges: Bridge[] = []
+
+let newBridgePreview: BridgePreview | null = null
 
 export function updateBriges(updatedPlatform: HTMLElement) {
   bridges.forEach(bridge => {
@@ -82,12 +87,15 @@ function updateBridge(bridgeElem: HTMLElement, fromElem: HTMLElement, to: HTMLEl
 }
 
 export function updateBridgePreview(event: MouseEvent) {
-  if (anchorSource && bridgePreview) { // actually one of those could be checked, but for TS safety...
-      const to: Point = {
-        x: event.clientX,
-        y: event.clientY,
-      }
-      updateBridge(bridgePreview, anchorSource, to)
+  // if (anchorSource && bridgePreview) { // actually one of those could be checked, but for TS safety...
+  //     const to: Point = {
+  //       x: event.clientX,
+  //       y: event.clientY,
+  //     }
+  //     updateBridge(bridgePreview, anchorSource, to)
+  // }
+  if (newBridgePreview) {
+    newBridgePreview.render()
   }
 }
 
@@ -122,25 +130,56 @@ export default function setupBridgeEnv(mapAreaElement: HTMLElement) {
 
 export function attachPlatformListeners(
   platform: HTMLElement,
+  startDrag: (el: HTMLElement, e: MouseEvent) => void,
+  mapElement: HTMLElement,
 ) {
   const octagonElem = platform.querySelector<HTMLElement>('.octagon')
   if (!octagonElem) throw Error('Invalid platform html element. No .octagon has been found within the element.')
 
-  const bridgeAnchors = Array.from<HTMLElement>(platform.querySelectorAll('.bridge-anchor'));
-  if (bridgeAnchors.length !== 4) throw Error('Invalid platform html element. 4 elements of class bridge-anchor should be present.')
+  const bridgeAnchorEventCatcherEls = Array.from<HTMLElement>(platform.querySelectorAll('.bridge-anchor-event-catcher'));
+  if (bridgeAnchorEventCatcherEls.length !== 4) throw Error('Invalid platform html element. 4 elements of class bridge-anchor-event-catcher should be present.')
 
   // attaching bridge events
-  bridgeAnchors.forEach(node => {
-    node.addEventListener('mousedown', e => {
-      anchorSource = node
+  bridgeAnchorEventCatcherEls.forEach(eventCatcherEl => {
+    const anchorPoints = eventCatcherEl
+      .parentElement!
+      .querySelectorAll<HTMLElement>('.anchor-point')
 
-      bridgePreview = document.createElement('div')
-      bridgePreview.classList.add('bridge-preview')
-      updateBridgePreview(e)
-      mapAreaElem.appendChild(bridgePreview)
+    eventCatcherEl.addEventListener('mousedown', e => {
+      const anchorWrapperEl = eventCatcherEl.parentElement!
+      const bridgeEdgePreview = createBridgeEdge(anchorWrapperEl.style.getPropertyValue('--angle'))
+      bridgeEdgePreview.style.width = getComputedStyle(anchorWrapperEl).width
+      const { x, y } = getCoords(eventCatcherEl.parentElement!)
+      bridgeEdgePreview.style.left = x + 'px'
+      bridgeEdgePreview.style.top = y + 'px'
+
+      mapElement.appendChild(bridgeEdgePreview)
+
+      startDrag(bridgeEdgePreview, e)
+
+      const previewAnchorPoints = bridgeEdgePreview.querySelectorAll<HTMLElement>('.anchor-point')
+      // console.log(previewAnchorPoints, anchorPoints)
+      const bridgeAnchorPoints = [
+        anchorPoints[1],
+        previewAnchorPoints[0],
+        anchorPoints[0],
+        previewAnchorPoints[1],
+      ]
+
+
+
+      newBridgePreview = new BridgePreview(bridgeAnchorPoints, mapAreaElem)
+
+      // const previewAnchors = 
+      // anchorSource = node
+
+      // bridgePreview = document.createElement('div')
+      // bridgePreview.classList.add('bridge-preview')
+      // updateBridgePreview(e)
+      // mapAreaElem.appendChild(bridgePreview)
     })
 
-    node.addEventListener('mouseenter', (e) => {
+    eventCatcherEl.addEventListener('mouseenter', (e) => {
       const element = e.currentTarget as HTMLElement
       if (anchorSource) {
         element.classList.add('accept')
@@ -148,10 +187,35 @@ export function attachPlatformListeners(
       }
     })
 
-    node.addEventListener('mouseleave', (e) => {
+    eventCatcherEl.addEventListener('mouseleave', (e) => {
       const element = e.currentTarget as HTMLElement
       element.classList.remove('accept')
       bridgePreviewEndSnap = null
+    })
+
+    eventCatcherEl.addEventListener('mouseup', (e) => {
+      if (anchorSource && bridgePreview) {
+  
+        if (bridgePreviewEndSnap) {
+          bridges.push({
+            elem: bridgePreview,
+            from: {
+              base: anchorSource.parentElement!.parentElement!,
+              anchor: anchorSource,
+            },
+            to: {
+              base: bridgePreviewEndSnap.parentElement!.parentElement!,
+              anchor: bridgePreviewEndSnap,
+            }
+          })
+        } else {
+          bridgePreview.remove()
+        }
+  
+        anchorSource = null
+        bridgePreview = null
+        bridgePreviewEndSnap = null
+      }
     })
   })
 }
