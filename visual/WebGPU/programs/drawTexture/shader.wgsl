@@ -1,18 +1,19 @@
 struct Vertex {
   @location(0) position: vec2f,
   @location(1) uv: vec2f,
-  @location(2) layer: u32,
+  @location(2) texLayerIndex: u32,
+  @location(3) colorMatrixIndex: u32,
 };
 
 struct Uniforms {
   matrix: mat3x3f,
-  colorMatricies: array<mat3x3f, 1>, /* 1 - factions number limit */
+  colorMatricies: array<mat3x3f, 2>, /* 1 - factions number limit */
 };
 
 struct VertexOutput {
   @builtin(position) position: vec4f,
-  @location(0) texcoord: vec2f,
-  @location(1) @interpolate(flat) layer : u32,
+  @location(0) texCoord: vec2f,
+  @location(1) @interpolate(flat) texLayerIndex : u32,
   @location(2) @interpolate(flat) colorMatrixIndex : u32
 };
 
@@ -25,20 +26,15 @@ struct VertexOutput {
 
   var out: VertexOutput;
   out.position = vec4f(clipSpace, 0.0, 1.0);
-  out.texcoord = vec2f(vert.uv.x, 1.0 - vert.uv.y);
-  out.layer = vert.layer;
-  out.colorMatrixIndex = 0;
+  out.texCoord = vec2f(vert.uv.x, 1.0 - vert.uv.y);
+  out.texLayerIndex = vert.texLayerIndex;
+  out.colorMatrixIndex = vert.colorMatrixIndex;
   return out;
 }
 
 @fragment fn fs(in: VertexOutput) -> @location(0) vec4f {
   let colorMatrix = u.colorMatricies[in.colorMatrixIndex];
-  // let colorMatrix = mat3x3f(
-  //   0, 1, 0,
-  //   0, 0, 1,
-  //   1, 0, 0
-  // );
-  let texel = textureSample(ourTexture, ourSampler, in.texcoord, in.layer);
+  let texel = textureSample(ourTexture, ourSampler, in.texCoord, in.texLayerIndex);
 
   return vec4f(
     texel.rgb * colorMatrix,

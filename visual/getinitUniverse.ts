@@ -11,7 +11,6 @@ import loadAssets from "loadAssetsIntoTextureArray/loadAssetsIntoTextureArray";
 import { UnitState } from "logic-contants";
 import mat3 from "WebGPU/m3";
 import { drawTexture } from "WebGPU/programs/initPrograms";
-import Rect from "Rect";
 import { getVertexData } from "WebGPU/getVertexData";
 import loadAssetsIntoTextureArray from "loadAssetsIntoTextureArray/loadAssetsIntoTextureArray";
 import AssetId from "AssetsDescriptor/AssetId";
@@ -37,7 +36,7 @@ export default async function getinitUniverse(): Promise<
     wasmModule: Universe,
     mapWidth: number,
     mapHeight: number,
-    colorMatrix: Float32Array
+    colorMatricies: Float32Array
   ) => void
 > {
   // const state = new State()
@@ -68,7 +67,7 @@ export default async function getinitUniverse(): Promise<
 
 
 
-  return function initUniverse (wasmModule, mapWidth, mapHeight, colorMatrix) {
+  return function initUniverse (wasmModule, mapWidth, mapHeight, colorMatricies) {
     const serializedMapInfo: SerializedMapInfo = PREDEFINED_MAP
     const factionVisualDetails: FactionVisualDetails[] = PREDEFINED_FACTION_VISUAL_DETAILS
     const matrix = getCanvasMatrix(canvas)
@@ -117,7 +116,7 @@ export default async function getinitUniverse(): Promise<
       const pass = encoder.beginRenderPass(descriptor)
       const vertexData = getVertexData(units)
 
-      drawTexture(pass, matrix, vertexData, texture2dArray, colorMatrix)
+      drawTexture(pass, matrix, vertexData, texture2dArray, colorMatricies)
 
       pass.end()
       const commandBuffer = encoder.finish();

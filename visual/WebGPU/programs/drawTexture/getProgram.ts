@@ -1,9 +1,5 @@
 import shaderCode from "./shader.wgsl"
 import { VertexData } from "WebGPU/getVertexData";
-import {
-  makeShaderDataDefinitions,
-  makeStructuredView,
-} from 'webgpu-utils';
  
 
 export default function getProgram(
@@ -45,6 +41,12 @@ export default function getProgram(
             {shaderLocation: 2, offset: 0, format: 'uint32'},  // source texture layer
           ] as const,
         },
+        {
+          arrayStride: (1) * 4,
+          attributes: [
+            {shaderLocation: 3, offset: 0, format: 'uint32'},  // index of color matrix
+          ] as const,
+        },
       ],
     },
     fragment: {
@@ -66,41 +68,30 @@ export default function getProgram(
     },
   });
 
-  const defs = makeShaderDataDefinitions(shaderCode);
+  const uniformBufferSize = (12/*projection matrix*/ + 2 * 12/*color matrix*/) * 4;
+  const uniformBuffer = device.createBuffer({
+    label: 'uniforms',
+    size: uniformBufferSize,
+    usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+  });
+
+  const uniformValues = new Float32Array(uniformBufferSize / 4);
+  const kMatrixOffset = 0;
+  const matrixValue = uniformValues.subarray(kMatrixOffset, kMatrixOffset + 12);
+
+
+  const kColorMatrixOffset = 12;
+  const colorMatrixValue = uniformValues.subarray(kColorMatrixOffset, kColorMatrixOffset + 2 * 12);
 
   return function drawTexture(
     pass: GPURenderPassEncoder,
     matrix: Float32Array,
     vertexData: VertexData,
     texture: GPUTexture,
-    colorMatrix: Float32Array
+    colorMatricies: Float32Array
   ) {
-    const myUniformValues = makeStructuredView(defs.uniforms.u);
 
-  // color, matrix
-  // const uniformBufferSize = (12/*projection matrix*/ + 12/*color matrix*/) * 4;
-  // const uniformBuffer = device.createBuffer({
-  //   label: 'uniforms',
-  //   size: uniformBufferSize,
-  //   usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-  // });
-
-  const uniformBuffer = device.createBuffer({
-    size: myUniformValues.arrayBuffer.byteLength,
-    usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-  });
-
-  // const uniformValues = new Float32Array(uniformBufferSize / 4);
-  // // offsets to the various uniform values in float32 indices
-  // const kMatrixOffset = 0;
-  // const matrixValue = uniformValues.subarray(kMatrixOffset, kMatrixOffset + 12);
-
-
-  // const kColorMatrixOffset = 12;
-  // const colorMatrixValue = uniformValues.subarray(kColorMatrixOffset, kColorMatrixOffset + 12);
-
-
-  const { destinationRect, sourceRect, index, layer } = vertexData.getBakedData()
+  const { destinationRect, sourceRect, index, layer, colorMatrixIdx } = vertexData.getBakedData()
 
   const vertexPositionBuffer = device.createBuffer({
     label: 'vertex buffer vertices',
@@ -123,6 +114,13 @@ export default function getProgram(
   });
   device.queue.writeBuffer(vertexLayerBuffer, 0, layer);
 
+  const vertexColorMatrixIndiciesBuffer = device.createBuffer({
+    label: 'vertex buffer color matrix index',
+    size: colorMatrixIdx.byteLength,
+    usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
+  });
+  device.queue.writeBuffer(vertexColorMatrixIndiciesBuffer, 0, colorMatrixIdx);
+
   const indexBuffer = device.createBuffer({
     label: 'index buffer',
     size: index.byteLength,
@@ -131,51 +129,31 @@ export default function getProgram(
   device.queue.writeBuffer(indexBuffer, 0, index);
 
 
-
-    // bind group should be pre-created and reuse instead of constantly initialized
-    const bindGroup = device.createBindGroup({
-      layout: pipeline.getBindGroupLayout(0),
-      entries: [
-        { binding: 0, resource: { buffer: uniformBuffer }},
-        { binding: 1, resource: sampler },
-        { binding: 2, resource: texture.createView() },
-      ],
-    });
-
+  // bind group should be pre-created and reuse instead of constantly initialized
+  const bindGroup = device.createBindGroup({
+    layout: pipeline.getBindGroupLayout(0),
+    entries: [
+      { binding: 0, resource: { buffer: uniformBuffer }},
+      { binding: 1, resource: sampler },
+      { binding: 2, resource: texture.createView() },
+    ],
+  });
 
 
     pass.setPipeline(pipeline);
     pass.setVertexBuffer(0, vertexPositionBuffer);
     pass.setVertexBuffer(1, vertexTexCoordBuffer);
     pass.setVertexBuffer(2, vertexLayerBuffer);
+    pass.setVertexBuffer(3, vertexColorMatrixIndiciesBuffer);
     pass.setIndexBuffer(indexBuffer, 'uint32');
-    // mat3.translate(matrixValue, [x, 0], matrixValue);
-    // matrixValue.set(matrix)
-    // colorMatrixValue.set(colorMatrix)
 
+    matrixValue.set(matrix)
+    colorMatrixValue.set(colorMatricies)
+  
 
-
-  myUniformValues.set({
-    matrix,
-    colorMatricies: [colorMatrix, colorMatrix],
-    // orientation: [1, 0, -1],
-    // size: 2,
-    // direction: [0, 1, 0],
-    // scale: 1.5,
-    // info: {
-    //   velocity: [2, 3, 4],
-    // },
-    // friction: 0.1,
-  });
-
-  // matrix: mat3x3f,
-  // colorMatrix: mat3x3f,
-
-    // device.queue.writeBuffer(uniformBuffer, 0, uniformValues);
-    device.queue.writeBuffer(uniformBuffer, 0, myUniformValues.arrayBuffer);
+    device.queue.writeBuffer(uniformBuffer, 0, uniformValues);
 
     pass.setBindGroup(0, bindGroup);
-    // pass.draw(4);  // call our vertex shader 6 times
     pass.drawIndexed(vertexData.instancesNum);
   }
 }

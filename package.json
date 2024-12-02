@@ -41,7 +41,6 @@
   "dependencies": {
     "debounce": "^1.2.0",
     "lodash": "^4.17.21",
-    "numeric": "^1.2.6",
-    "webgpu-utils": "^1.9.3"
+    "numeric": "^1.2.6"
   }
 }

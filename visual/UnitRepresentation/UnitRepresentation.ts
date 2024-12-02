@@ -76,6 +76,7 @@ export default class UnitRepresentation {
     destinationData: number[],
     sourceData: number[],
     indiciesData: number[],
+    colorMatrixIdxData: number[],
   ) {
     this.aSprites.forEach((aSprite, index) => {
       const lastUsedIndex = destinationData.length / 2
@@ -108,6 +109,8 @@ export default class UnitRepresentation {
         x + width,  y + height,
         x,          y + height
       )
+
+      colorMatrixIdxData.push(...Array(4).fill(0))
     })
   }
 }

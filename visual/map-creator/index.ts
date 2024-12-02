@@ -159,7 +159,14 @@ export default function openMapCreator(wasmModule: Universe) {
         wasmModule,
         MAP_WIDTH,
         MAP_HEIGHT,
-        new Float32Array(colorMatrix),
+        new Float32Array([
+          ...colorMatrix,
+          ...[
+            0, 1, 0, 0,
+            0, 0, 1, 0,
+            1, 0, 0, 0,
+          ]
+        ]),
       //   getSerializedMapInfo(nodes, connections, portals),
       //   factionVisualDetails,
       )

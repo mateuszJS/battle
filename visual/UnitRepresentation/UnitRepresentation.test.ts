@@ -24,12 +24,14 @@ test('addBufferData adds correct data', () => {
   const destinationData: number[] = []
   const sourceData: number[] = []
   const indiciesData: number[] = []
+  const colorMatrixData: number[] = []
 
   unit.addBufferData(
     textureLayersData,
     destinationData,
     sourceData,
-    indiciesData
+    indiciesData,
+    colorMatrixData
   )
 
   const ElephantHeadRunFrame = AssetsDescriptor[AssetId.ElephantHead][UnitState.RUN].frames[0]
@@ -78,7 +80,7 @@ test('when time passes, the addBufferData adds correct data with new frames', ()
   
   const sourceData: number[] = []
 
-  unit.addBufferData([], [], sourceData, [])
+  unit.addBufferData([], [], sourceData, [], [])
 
   expect(sourceData).toEqual([
     ...headRun.frames[1].sourceRect,
@@ -100,7 +102,7 @@ test('when angle changes, addBufferData adds correct data', () => {
 
   const sourceData: number[] = []
 
-  unit.addBufferData([], [], sourceData, [])
+  unit.addBufferData([], [], sourceData, [], [])
 
   // for the seak of simple tests, we check only sourceData
   // since they are most random(doesn't repeat between frames)
