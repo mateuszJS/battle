@@ -41,6 +41,7 @@ function attachCreateEvent(node: HTMLElement, createCallback: () => HTMLElement)
 
 function startDrag(elem: HTMLElement, event: MouseEvent) {
   const { x: toolX, y: toolY } = elem.getBoundingClientRect()
+  console.log(toolX, toolY)
   startOffset.x = toolX - event.clientX - mapAreaX
   startOffset.y = toolY - event.clientY - mapAreaY
 

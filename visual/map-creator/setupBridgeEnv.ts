@@ -146,18 +146,39 @@ export function attachPlatformListeners(
       .querySelectorAll<HTMLElement>('.anchor-point')
 
     eventCatcherEl.addEventListener('mousedown', e => {
-      const anchorWrapperEl = eventCatcherEl.parentElement!
-      const bridgeEdgePreview = createBridgeEdge(anchorWrapperEl.style.getPropertyValue('--angle'))
-      bridgeEdgePreview.style.width = getComputedStyle(anchorWrapperEl).width
-      const { x, y } = getCoords(eventCatcherEl.parentElement!)
-      bridgeEdgePreview.style.left = x + 'px'
-      bridgeEdgePreview.style.top = y + 'px'
 
-      mapElement.appendChild(bridgeEdgePreview)
+      const anchorPointRects = Array.from(anchorPoints).map(el => getCoords(el))
 
-      startDrag(bridgeEdgePreview, e)
+      /* time for CSS math :) */
+      const angle = -Math.atan2( // angle in transform works counter the math angle
+        anchorPointRects[0].y - anchorPointRects[1].y, // reversed because of CSS "cartesian" space
+        anchorPointRects[1].x - anchorPointRects[0].x,
+      ) * (180 / Math.PI)
 
-      const previewAnchorPoints = bridgeEdgePreview.querySelectorAll<HTMLElement>('.anchor-point')
+      const wrapper = document.createElement('div');
+
+      const bridgeEdgePreview = createBridgeEdge(
+        `${angle}deg`
+      )
+      bridgeEdgePreview.style.transformOrigin = '0 0'
+      wrapper.style.left = anchorPointRects[0].x + 'px'
+      wrapper.style.top = anchorPointRects[0].y + 'px'
+      wrapper.style.width = '0px'
+      wrapper.style.height = '0px'
+      wrapper.style.position = 'absolute'
+
+      bridgeEdgePreview.style.width = Math.hypot(
+        anchorPointRects[0].x - anchorPointRects[1].x,
+        anchorPointRects[0].y - anchorPointRects[1].y,
+      ) + 'px'
+
+      wrapper.appendChild(bridgeEdgePreview)
+
+      mapElement.appendChild(wrapper)
+
+      startDrag(wrapper, e)
+
+      const previewAnchorPoints = wrapper.querySelectorAll<HTMLElement>('.anchor-point')
       // console.log(previewAnchorPoints, anchorPoints)
       const bridgeAnchorPoints = [
         anchorPoints[1],
