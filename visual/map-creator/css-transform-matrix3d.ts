@@ -54,6 +54,7 @@ export function applyTransform(
     }
   }
 
+  // if matrix contains incorrect values (like NaN because it itposssible ot create a shape) then transform won't be applied
   element.style.transform = `matrix3d(${matrix.join(',')})`
 
   return callback?.(element, H)

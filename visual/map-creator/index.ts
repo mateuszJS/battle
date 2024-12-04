@@ -1,115 +1,153 @@
 import { MAP_HEIGHT, MAP_WIDTH } from './constants'
-import getPlatformCoords from 'consts/get-platform-coords'
-import getSerializedMapInfo from './get-serialized-map-info'
-import mapDetails from './map-details'
-import { createMenu, addNewFaction, FactionVisualDetails } from './menu'
 import { Universe } from 'Universe'
-import Rect from 'Rect'
-import addStyles from './addStyles'
-import setupBridgeEnv, { attachPlatformListeners, updateBridgePreview, updateBriges } from './setupBridgeEnv'
-import { createInteractivePlatformElem, createStaticPlatformElem } from './platform'
 import getinitUniverse from 'getInitUniverse'
-import hexToRGB from './hexToRgb'
-import { createHQ, createInteractiveHQElem } from './headquarters'
-import { setCoordsOrigin } from './getCoords'
+import getCoords, { setCoordsOrigin } from './getCoords'
+import setupUI from './setupUI'
+import creationConfig from './creationConfig'
+import { updateBridges } from './bridge'
 
-const platformCoords = getPlatformCoords()
-const bridgeWidth = (platformCoords[3].y - platformCoords[2].y) * mapDetails.scale
-let mapAreaX = 0
-let mapAreaY = 0
-
-const startOffset = { x: 0, y: 0 }
-let currDragElem: HTMLElement | null = null
-
-function updateDragElem(e: MouseEvent, currDragElem: HTMLElement) {
-  currDragElem.style.left = e.clientX + startOffset.x + 'px'
-  currDragElem.style.top = e.clientY + startOffset.y + 'px'
+interface DragInfo {
+  startOffset: Point
+  el: HTMLElement
 }
 
-function attachCreateEvent(node: HTMLElement, createCallback: () => HTMLElement) {
-  node.addEventListener('mousedown', e => {
-    const { x: toolX, y: toolY } = (e.currentTarget as HTMLElement).getBoundingClientRect()
-    startOffset.x = toolX - e.clientX - mapAreaX
-    startOffset.y = toolY - e.clientY - mapAreaY
+let currDragInfo: DragInfo | null = null
+let snapPoint: Point | null = null
 
-    const newElement = createCallback()
-
-    currDragElem = newElement
-    updateDragElem(e, newElement)
-  })
+function updateDragElem(e: MouseEvent, dragInfo: DragInfo) {
+  dragInfo.el.style.left = e.clientX + dragInfo.startOffset.x + 'px'
+  dragInfo.el.style.top = e.clientY + dragInfo.startOffset.y + 'px'
 }
 
-function startDrag(elem: HTMLElement, event: MouseEvent) {
-  const { x: toolX, y: toolY } = elem.getBoundingClientRect()
-  console.log(toolX, toolY)
-  startOffset.x = toolX - event.clientX - mapAreaX
-  startOffset.y = toolY - event.clientY - mapAreaY
+function getConfig(el: HTMLElement) {
+  const kind = el.getAttribute('kind')
+  /* it might be just event catcher, not the roto of the element */
+  if (!kind) throw Error('Element has reproduce attribute but no kind attribute')
 
-  currDragElem = elem
-  updateDragElem(event, elem)
+  const config = creationConfig[kind as keyof typeof creationConfig]
+  if (!config) throw Error(`No config for kind: ${kind}`)
+
+  return config
+}
+
+export function startDrag(
+  elem: HTMLElement,
+  event: MouseEvent,
+) {
+  const { x, y } = getCoords(elem)
+  elem.style.pointerEvents = 'none'
+
+  currDragInfo = {
+    startOffset: {
+      x: x - event.clientX,
+      y: y - event.clientY,
+    },
+    el: elem,
+  }
+  
+  updateDragElem(event, currDragInfo)
 }
 
 export default function openMapCreator(wasmModule: Universe) {
-  /** Add styles and main wrapper, page wrapper, toolbar wrapper and map area wrapper where element are dragable */
-  const styleElem = addStyles()
-  const viewElem = document.createElement('div')
-  viewElem.classList.add('map-creator')
-  
-  // css should scale map by itself to the size of the screen, without our input
-  const toolbarElem = document.createElement('aside')
-  toolbarElem.classList.add('toolbar')
-  viewElem.appendChild(toolbarElem)
+  const { mapElement, unmount, startBtnClickPromise, viewElem } = setupUI()
 
-  const mapElement = document.createElement('main')
-  mapElement.classList.add('map-area')
-  mapElement.style.aspectRatio = `${mapDetails.width / mapDetails.height}`
-  viewElem.appendChild(mapElement)
-
-  document.body.appendChild(viewElem)
   setCoordsOrigin(mapElement)
 
-
-  const mapElementRect = mapElement.getBoundingClientRect() 
-  mapAreaX = mapElementRect.x
-  mapAreaY = mapElementRect.y
-
-  setupBridgeEnv(mapElement)
-
-  /** Fill the toolbar */
-  const [platformToolElem] = createStaticPlatformElem(toolbarElem)
-  attachCreateEvent(platformToolElem, () => createInteractivePlatformElem(mapElement, startDrag, mapElement))
-  
-  const triggerCreateHQ = createHQ(toolbarElem)
-  attachCreateEvent(triggerCreateHQ, () => createInteractiveHQElem(mapElement, startDrag))
-
   mapElement.addEventListener('mousemove', (e) => {
-    if (currDragElem) {
-      updateDragElem(e, currDragElem)
-      updateBridgePreview(e)
-      // updateBriges(currDragElem)
+    if (currDragInfo) {
+      if (snapPoint) {
+          currDragInfo.el.style.left = snapPoint.x + 'px'
+          currDragInfo.el.style.top = snapPoint.y + 'px'
+      } else {
+        updateDragElem(e, currDragInfo)
+        const config = getConfig(currDragInfo.el)
+        config.onDrag?.(currDragInfo.el)
+      }
+
+      updateBridges()
     }
   })
 
-  window.document.body.addEventListener('mouseup', () => {
-    if (currDragElem) {
-      currDragElem.classList.remove('active') // for bridge we add active class
-      currDragElem = null
+  viewElem.addEventListener('mousedown', (e) => {
+    // we assume that each element has it's event catcher, and the element root is one above that
+    const elEventCatcherMaybe = (e.target as HTMLElement)
+
+    if (!elEventCatcherMaybe.hasAttribute('event-catcher')) return
+
+    const rootEl = (e.target as HTMLElement).parentElement!
+
+    let dragEl: HTMLElement
+    if (rootEl.hasAttribute('reproduce')) {
+      dragEl = rootEl.cloneNode(true) as HTMLElement
+      dragEl.removeAttribute('reproduce')
+      mapElement.appendChild(dragEl)
+  
+      const { x, y } = getCoords(rootEl)
+      dragEl.style.top = y + 'px'
+      dragEl.style.left = x + 'px'
+
+      const config = getConfig(dragEl)
+      config.onCreate?.(dragEl, rootEl)
+    } else {
+      dragEl = rootEl
     }
+
+    startDrag(dragEl, e)
+  })
+
+  let prevHoverEl = mapElement
+  viewElem.addEventListener('mouseover', (e) => {
+    snapPoint = null
+    if (!currDragInfo) return
+
+    prevHoverEl.classList.remove('valid-option')
+    const hoverEventCatcherEl = e.target as HTMLElement
+    const hoverRootEl = hoverEventCatcherEl.parentElement!
+
+    const config = getConfig(currDragInfo.el)
+
+    if (
+      config.validHover &&
+      hoverRootEl.getAttribute('kind') !== config.validHover
+    ) return
+    hoverRootEl.classList.add('valid-option')
+    prevHoverEl = hoverRootEl
+
+    if (config.snap) {
+      snapPoint = getCoords(hoverRootEl)
+      config.onSnap?.(currDragInfo.el, hoverRootEl)
+    }
+  })
+
+  viewElem.addEventListener('mouseup', () => {
+    if (currDragInfo) {
+      const config = getConfig(currDragInfo.el)
+      const validOptionEl = mapElement.querySelector<HTMLElement>('.valid-option')
+
+      const isValid = 
+        config.validHover ? validOptionEl : true
+
+      if (!isValid) {
+        currDragInfo.el.remove()
+        config.onDragEndFailure?.(currDragInfo.el)
+      } else {
+        config.onDragEndSuccess?.(currDragInfo.el, validOptionEl)
+      }
+
+      currDragInfo.el.style.pointerEvents = 'auto'
+      currDragInfo = null
+    }
+
+      // const selectorHoverValid = currDragElem.getAttribute('hoverValid')
+      // selectorHoverValid
+      // currDragElem.classList.remove('active') // for bridge we add active class
+
+      /*
+        1. Get isValid function, so tells if the currDragElem is in valid place
+
+      */
   })
  
-  /* eveyrthing right pane related */
-  const rightControlPanel = document.createElement('section')
-
-  const startBtn = document.createElement('button')
-  startBtn.textContent = 'START'
-  const startBtnClickPromise = new Promise<void>(resolve => {
-    startBtn.addEventListener('click', () => resolve())
-  })
-  rightControlPanel.appendChild(startBtn)
-
-
-  viewElem.appendChild(rightControlPanel)
-
   /* canvas */
   const canvas = document.createElement('canvas')
   document.body.appendChild(canvas)
@@ -117,8 +155,7 @@ export default function openMapCreator(wasmModule: Universe) {
   /* clean the DOM and go to the next phase */
   Promise.all([startBtnClickPromise, getinitUniverse()])
     .then(([_, initUniverse]) => {
-      styleElem.remove()
-      viewElem.remove()
+      unmount()
 
       initUniverse(
         wasmModule,

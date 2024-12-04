@@ -1,18 +1,18 @@
-import { applyTransform } from "./css-transform-matrix3d"
-import getCoords from "./getCoords"
+import { applyTransform } from "../css-transform-matrix3d"
+import getCoords from "../getCoords"
 
-export default class BridgePreview {
+export default class Bridge {
   private html: HTMLElement
 
-  constructor(private anchorPoints: HTMLElement[], parent: HTMLElement) {
+  constructor(
+    public anchorPoints: HTMLElement[],
+    parent: HTMLElement
+  ) {
     this.html = document.createElement('div')
     this.html.classList.add('bridge-preview')
     parent.appendChild(this.html)
   }
 
-  set updateAnchorPoints(points: HTMLElement[]) {
-    this.anchorPoints = points
-  }
 
   render() {
     const points = this.anchorPoints.map<Point>(el => getCoords(el))
@@ -42,11 +42,12 @@ export default class BridgePreview {
     })
     const sortedPoints = pointsWithAngles.sort((a, b) => a.angle - b.angle)
 
-    const targetPos = sortedPoints.map(p => {
-      console.log([p.x, p.y])
-      return [p.x, p.y]
-   })
+    const targetPos = sortedPoints.map(p => [p.x, p.y])
 
     applyTransform(this.html, originalPos, targetPos)
+  }
+
+  destory() {
+    this.html.remove()
   }
 }

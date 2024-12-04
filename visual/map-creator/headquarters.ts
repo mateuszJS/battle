@@ -1,3 +1,5 @@
+import { startDrag } from "map-creator"
+
 export function createHQ(parent: HTMLElement): HTMLElement {
   const element = document.createElement('div')
   element.classList.add('headquarter')
@@ -14,7 +16,6 @@ export function createHQ(parent: HTMLElement): HTMLElement {
  */
 export function createInteractiveHQElem(
   parent: HTMLElement,
-  startDrag: (el: HTMLElement, e: MouseEvent) => void
 ): HTMLElement {
   const el = createHQ(parent)
   el.classList.add('dragable')

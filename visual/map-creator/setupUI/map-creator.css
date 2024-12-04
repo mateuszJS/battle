@@ -1,0 +1,177 @@
+.map-creator {
+  background: #000;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+  gap: 20px;
+  display: grid;
+  grid-template: minmax(0, 1fr) / 100px minmax(0, 1fr) 100px;
+  /* same problem as flex minimum width/height: auto
+  instead of using min-width/height = 0 we can assign it here for grid-template*/
+
+  .platform-vars {
+    --size: 100px;
+    --half-size: calc(var(--size) / 2);
+    --o:calc(var(--half-size) * tan(-22.5deg)); /* vertical/horizontal distance from middle of octagon to closes corner */
+    --border-width: 10px;
+    --border-color: rgb(255, 132, 71);
+
+    --fill-color: #ddaf30;
+    --accent-color: rgb(148, 0, 185);
+  }
+  
+  [kind="platform"] {
+    position: relative;
+    width: var(--size);
+    height: var(--size);
+  }
+
+  .dragable {
+    position: absolute;
+    cursor: pointer;
+  }
+
+  .toolbar {
+    background: #222;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+
+    & > * {
+      cursor: pointer;
+      aspect-ratio: 1;
+      width: 100%;
+    }
+  }
+
+  .map-area {
+    background: #222;
+    position: relative;
+    max-width: 100%;
+    max-height: 100%;
+  }
+
+  .octagon, .octagon:before {
+    height: 100%;
+    width: 100%;
+    padding: var(--border-width);
+    
+    clip-path: polygon(
+      var(--o) var(--half-size),
+      var(--half-size) var(--o),
+      calc(100% - var(--o)) var(--half-size),
+      var(--half-size) calc(100% - var(--o))
+    );
+    background: var(--fill-color);
+  }
+
+  .octagon-inner {
+    --size: 80px;
+    pointer-events: none;
+  }
+
+  .octagon:hover {
+    background: var(--border-color);
+  }
+
+  [kind]:not([reproduce]) {
+    position: absolute;
+  }
+
+  [kind="bridge-edge"] {
+    --anchor-point-size: 10px;
+    --width: calc(-2 * var(--o));
+
+    position: absolute;
+
+    height: 0;
+    width: 0;
+
+    &.active {
+      pointer-events: none;
+      outline: 5px solid red;
+    }
+    &.accept { /* I dont think we need that, it's invisible, hidden behind other .active */
+      outline: 5px solid green;
+    }
+
+    .anchor-point {
+      z-index: 1;
+      pointer-events: none;
+      position: absolute;
+
+      &:nth-of-type(1) {
+        left: calc(var(--o) * -1);
+      }
+
+      &:nth-of-type(2) {
+        right: calc(var(--o) * -1);
+      }
+  
+      &:before {
+        content: "";
+        display: block;
+        width: var(--anchor-point-size);
+        height: var(--anchor-point-size);
+        margin: calc(var(--anchor-point-size) / -2);
+        border-radius: 50%;
+        background: rgb(220, 82, 255);
+      }
+    }
+  
+    [event-catcher] {
+      --padding: 3px;
+      --height: calc(var(--anchor-point-size) + 2 * var(--padding));
+
+      position: absolute;
+      width: calc(var(--width) + var(--anchor-point-size) + 2 * var(--padding));
+      height: var(--height);
+      translate: -50% -50%;
+      border-radius: calc(var(--height) / 2);
+      color: var(--accent-color);
+      background: currentColor;
+  
+      &:hover {
+        outline: solid 5px hsl(from var(--accent-color) calc(h + 10) calc(s * 1.2) calc(l * 1.2));
+      }
+    }
+
+    &.valid-option [event-catcher] {
+      outline: solid 8px greenyellow;
+    }
+  }
+
+  .bridge-edge-verticlar {
+    rotate: 90deg;
+    top: 50%;
+  }
+
+  .bridge-edge-horizontal {
+    rotate: 0deg; /* useful while copy styles during snapping */
+    left: 50%;
+  }
+
+  .bridge-edge-top { top: 0;  }
+  .bridge-edge-right {  right: 0 }
+  .bridge-edge-bottom { bottom: 0; }
+  .bridge-edge-left { left: 0 }
+
+
+  .bridge-preview {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100px;
+    width: 100px;
+    background: tomato;
+    pointer-events: none;
+  }
+
+  .headquarter {
+    background: lime;
+  }
+
+
+
+}

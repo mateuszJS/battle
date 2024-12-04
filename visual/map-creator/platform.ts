@@ -1,66 +1,29 @@
-import { attachPlatformListeners, updateBriges } from "./setupBridgeEnv"
+const domParser = new DOMParser()
+const mapIndexToPosition = ['top', 'right', 'bottom', 'left']
 
-export function createBridgeEdge(angleVar: string) {
-  const bridgeAnchorElem = document.createElement('span')
-  bridgeAnchorElem.classList.add('bridge-anchor')
-
-  const anchorEdgeEl = document.createElement('div')
-  anchorEdgeEl.classList.add('bridge-anchor-event-catcher')
-  bridgeAnchorElem.appendChild(anchorEdgeEl)
-  
-
-  for (let j = 0; j < 2; j++) {
-    const anchorEdgeEl = document.createElement('div')
-    anchorEdgeEl.classList.add('anchor-point')
-    bridgeAnchorElem.appendChild(anchorEdgeEl)
-  }
-
-  bridgeAnchorElem.style.setProperty('--angle', angleVar);
-
-  return bridgeAnchorElem
-}
-
-export function createStaticPlatformElem(parent: HTMLElement): [HTMLElement, HTMLElement] {
-  const platformElem = document.createElement('div')
-  platformElem.classList.add('platform')
-
-  parent.appendChild(platformElem)
-
-  const octagonElem = document.createElement('div')
-  octagonElem.classList.add('octagon')
-  platformElem.appendChild(octagonElem)
-
-  const innerOctagonElem = document.createElement('div')
-  innerOctagonElem.classList.add('octagon', 'octagon-inner')
-  octagonElem.appendChild(innerOctagonElem)
-
-  for(let i = 0; i < 4; i++) {
-    platformElem.appendChild(createBridgeEdge(`${90 * i}deg`))
-  }
-
-  return [platformElem, octagonElem]
-}
-
-/**
- * 
- * @param parent element where new platform should be appended to
- * @returns two elements, first is root of platform, second is the element which should trigger drag on click
- */
-export function createInteractivePlatformElem(
-  parent: HTMLElement,
-  startDrag: (el: HTMLElement, e: MouseEvent) => void,
-  mapElement: HTMLElement
-): HTMLElement {
-  const [platformElem, octagonElem] = createStaticPlatformElem(parent)
-  platformElem.classList.add('dragable')
-  platformElem.style.width = '100px'
-  platformElem.style.height = '100px'
-
-  attachPlatformListeners(platformElem, startDrag, mapElement)
-  octagonElem.addEventListener('mousedown', e => {
-    startDrag(platformElem, e)
-    updateBriges(platformElem)
-  })
-
-  return platformElem
+export function createPlatform(): HTMLElement {
+  return domParser.parseFromString(
+    `
+    <div kind="platform" class="platform-vars">
+      <div event-catcher class="octagon">
+        <div class="octagon octagon-inner platform-vars">
+        </div>
+      </div>
+      ${Array.from({ length: 4 }, (_, i) => (`
+        <span
+          kind="bridge-edge"
+          reproduce
+          class="platform-vars ${
+            i % 2 ? 'bridge-edge-verticlar' : 'bridge-edge-horizontal'
+          } bridge-edge-${mapIndexToPosition[i]}"
+        >
+          <div event-catcher></div>
+          <span class="anchor-point"></span>
+          <span class="anchor-point"></span>
+        </span>
+      `)).join('')}
+    </div>
+    `,
+    'text/html'
+  ).body.children[0] as HTMLElement
 }
