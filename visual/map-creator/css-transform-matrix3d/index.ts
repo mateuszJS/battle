@@ -24,12 +24,11 @@ function getTransform(from: Point[], to: Point[]) {
   return H
 }
 
-export function applyTransform(
-  element: HTMLElement,
+export function getMatrix3d(
   originalPos: number[][],
   targetPos: number[][],
-  callback?: (e: HTMLElement, H: number[][]) => void
 ) {
+  console.log(targetPos.map(points => `[${points.map(p => Math.round(p)).join(',')}]`).join(','))
   // All offsets were calculated relative to the document
   // Make them relative to (0, 0) of the element instead
   const from = originalPos.map(p => ({
@@ -46,7 +45,6 @@ export function applyTransform(
 
   // Apply the matrix3d as H transposed because matrix3d is column major order
   // Also need use toFixed because css doesn't allow scientific notation
-  element.style.transformOrigin = '0 0'
   const matrix = []
   for (let i = 0; i < 4; i++) {
     for (let j = 0; j < 4; j++) { // can be reversed j with i
@@ -54,8 +52,5 @@ export function applyTransform(
     }
   }
 
-  // if matrix contains incorrect values (like NaN because it itposssible ot create a shape) then transform won't be applied
-  element.style.transform = `matrix3d(${matrix.join(',')})`
-
-  return callback?.(element, H)
+  return `matrix3d(${matrix.join(',')})`
 }

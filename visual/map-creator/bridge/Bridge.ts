@@ -1,5 +1,24 @@
-import { applyTransform } from "../css-transform-matrix3d"
+import { getMatrix3d } from "../css-transform-matrix3d"
 import getCoords from "../getCoords"
+
+function sortPoints(points: Point[]) {
+  const center = points.reduce<Point>((acc, p) => ({
+    x: acc.x + p.x * 0.25,
+    y: acc.y + p.y * 0.25,
+  }), { x: 0, y: 0 })
+
+  const pointsWithAngle = points.map(p => {
+    const angle = Math.atan2(p.y - center.y, p.x - center.x)
+    return {
+      ...p,
+      angle: (angle + 2 * Math.PI) % 2 * Math.PI
+    }
+  })
+
+  pointsWithAngle.sort((a, b) => a.angle - b.angle)
+
+  return pointsWithAngle
+}
 
 export default class Bridge {
   private html: HTMLElement
@@ -18,33 +37,17 @@ export default class Bridge {
     const points = this.anchorPoints.map<Point>(el => getCoords(el))
     const originalPos = [
       [0, 0],
-      [0, 100],
       [100, 0],
       [100, 100],
+      [0, 100],
     ]
 
-    const center = points.reduce<Point>((acc, p) => ({
-      x: p.x * 0.25,
-      y: p.y * 0.25,
-    }), { x: 0, y: 0 })
-    
-    const pointsWithAngles = points.map(p => {
-      const cssY = p.y - center.y
-      const cartesianY = -cssY
-      const angle = Math.atan2(cartesianY, p.x - center.x)
-      const oppositeAngle = angle + Math.PI
-      const safeOppositeAngle = oppositeAngle % (Math.PI * 2)
+    const targetPos = sortPoints(points).map(p => [p.x, p.y])
 
-      return {
-        ...p,
-        angle: safeOppositeAngle
-      }
-    })
-    const sortedPoints = pointsWithAngles.sort((a, b) => a.angle - b.angle)
+    this.html.style.transformOrigin = '0 0'
 
-    const targetPos = sortedPoints.map(p => [p.x, p.y])
-
-    applyTransform(this.html, originalPos, targetPos)
+    // if matrix contains incorrect values (like NaN because it itposssible ot create a shape) then transform won't be applied
+    this.html.style.transform = getMatrix3d(originalPos, targetPos)
   }
 
   destory() {
