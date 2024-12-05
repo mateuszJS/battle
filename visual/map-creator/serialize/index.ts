@@ -1,4 +1,3 @@
-
 export default function serializeMap(mapNode: HTMLElement) {
   // const platformNodes = mapNode.querySelectorAll('.platform')
   // const bridges = getBridges()

@@ -18,7 +18,6 @@ export function createInteractiveHQElem(
   parent: HTMLElement,
 ): HTMLElement {
   const el = createHQ(parent)
-  el.classList.add('dragable')
   el.style.width = '100px'
   el.style.height = '100px'
 

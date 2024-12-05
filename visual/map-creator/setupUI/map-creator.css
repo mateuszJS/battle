@@ -10,6 +10,10 @@
   /* same problem as flex minimum width/height: auto
   instead of using min-width/height = 0 we can assign it here for grid-template*/
 
+  [event-catcher] {
+    cursor: pointer;
+  }
+
   .platform-vars {
     --size: 100px;
     --half-size: calc(var(--size) / 2);
@@ -27,11 +31,6 @@
     height: var(--size);
   }
 
-  .dragable {
-    position: absolute;
-    cursor: pointer;
-  }
-
   .toolbar {
     background: #222;
     display: flex;
@@ -39,7 +38,6 @@
     position: relative;
 
     & > * {
-      cursor: pointer;
       aspect-ratio: 1;
       width: 100%;
     }
@@ -121,6 +119,10 @@
     }
   
     [event-catcher] {
+      /* if we want to make event catcher bigger while snapping we need to:
+        1. Make everything poitner-events: none expect available kind option
+        2. Split visual part and event catcher into two separate elements
+      */
       --padding: 3px;
       --height: calc(var(--anchor-point-size) + 2 * var(--padding));
 
@@ -131,7 +133,7 @@
       border-radius: calc(var(--height) / 2);
       color: var(--accent-color);
       background: currentColor;
-  
+
       &:hover {
         outline: solid 5px hsl(from var(--accent-color) calc(h + 10) calc(s * 1.2) calc(l * 1.2));
       }

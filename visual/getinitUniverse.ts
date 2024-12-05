@@ -1,13 +1,6 @@
-import getMapPoints from "gameUtils/getMapPoints";
-import { SerializedMapInfo } from "map-creator/get-serialized-map-info";
-import { FactionVisualDetails } from "map-creator/menu";
-import { PREDEFINED_FACTION_VISUAL_DETAILS, PREDEFINED_MAP } from "predefined-maps/test-bridges";
 import { Universe } from "Universe";
 import canvasSizeObserver from "WebGPU/canvasSizeObserver";
 import setupWebGPU from "WebGPU/setupWebGPU";
-import imageSrc from '../assets/Fire.png'
-import { createTextureFromImage } from "WebGPU/getTexture";
-import loadAssets from "loadAssetsIntoTextureArray/loadAssetsIntoTextureArray";
 import { UnitState } from "logic-contants";
 import mat3 from "WebGPU/m3";
 import { drawTexture } from "WebGPU/programs/initPrograms";
@@ -68,8 +61,6 @@ export default async function getinitUniverse(): Promise<
 
 
   return function initUniverse (wasmModule, mapWidth, mapHeight, colorMatricies) {
-    const serializedMapInfo: SerializedMapInfo = PREDEFINED_MAP
-    const factionVisualDetails: FactionVisualDetails[] = PREDEFINED_FACTION_VISUAL_DETAILS
     const matrix = getCanvasMatrix(canvas)
 
     // const mapPoints = getMapPoints(mapWidth, mapHeight)

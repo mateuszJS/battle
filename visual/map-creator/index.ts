@@ -1,4 +1,3 @@
-import { MAP_HEIGHT, MAP_WIDTH } from './constants'
 import { Universe } from 'Universe'
 import getinitUniverse from 'getInitUniverse'
 import getCoords, { setCoordsOrigin } from './getCoords'
@@ -152,8 +151,8 @@ export default function openMapCreator(wasmModule: Universe) {
 
       initUniverse(
         wasmModule,
-        MAP_WIDTH,
-        MAP_HEIGHT,
+        1000, // should be readed from input(or make map resizable!)
+        1000,
         new Float32Array([
           // ...colorMatrix,
           ...[
