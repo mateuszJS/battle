@@ -14,11 +14,24 @@ export function updateBridges() {
   bridges.forEach(bridge => bridge.render())
 }
 
-export function addNewBridge(bridgeEdgeA: HTMLElement, bridgeEdgeB: HTMLElement) {
-  const mapElement = document.querySelector<HTMLElement>('main')! // jsut for testing
-  const anchorPoints = getAnchorPointEls(bridgeEdgeA, bridgeEdgeB)
-  const bridgePreview = new Bridge(anchorPoints, mapElement)
-  bridges.push(bridgePreview)
+export function addNewBridge(copyBridgeEdge: HTMLElement, triggerBridgeEdge: HTMLElement) {
+  const triggerAnchorPoint = getAnchorPointEls(triggerBridgeEdge)
+  const bridgeIndex = bridges.findIndex(b => b.anchorPoints.includes(triggerAnchorPoint[0]))  // we jsut need to test one, both is rendudant
+
+  if (bridgeIndex !== -1) {
+    const bridge = bridges[bridgeIndex]
+    bridge.anchorPoints = [
+      ...bridge.anchorPoints.filter(p => !triggerAnchorPoint.includes(p)), // remove points from where is trigger node is and use fake one instead
+      ...getAnchorPointEls(copyBridgeEdge)
+    ]
+    bridges.splice(bridgeIndex, 1) // most it to last position
+    bridges.push(bridge) // only last bridge can be in "preview"
+  } else {
+    const mapElement = document.querySelector<HTMLElement>('main')! // just for testing
+    const anchorPoints = getAnchorPointEls(copyBridgeEdge, triggerBridgeEdge)
+    const bridgePreview = new Bridge(anchorPoints, mapElement)
+    bridges.push(bridgePreview)
+  }
 }
 
 /** We assume that latest bridge can be only in preview */

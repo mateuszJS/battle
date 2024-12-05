@@ -1,5 +1,24 @@
 import numeric from 'numeric'
 
+function sortPoints(points: number[][]): number[][] {
+  const center = points.reduce<Point>((acc, p) => ({
+    x: acc.x + p[0] * 0.25,
+    y: acc.y + p[1] * 0.25,
+  }), { x: 0, y: 0 })
+
+  const pointsWithAngle = points.map(p => {
+    const angle = Math.atan2(center.y - p[1], p[0] - center.x) // y reversed because of CSS
+    return {
+      ...p,
+      angle: (angle + 2 * Math.PI) % (2 * Math.PI)
+    }
+  })
+
+  pointsWithAngle.sort((a, b) => a.angle - b.angle)
+
+  return pointsWithAngle
+}
+
 function getTransform(from: Point[], to: Point[]) {
   const A: number[][] = [] // 8x8
   for (let i = 0; i < 4; i++) {
@@ -26,9 +45,9 @@ function getTransform(from: Point[], to: Point[]) {
 
 export function getMatrix3d(
   originalPos: number[][],
-  targetPos: number[][],
+  unsortedTargetPos: number[][],
 ) {
-  console.log(targetPos.map(points => `[${points.map(p => Math.round(p)).join(',')}]`).join(','))
+  const targetPos = sortPoints(unsortedTargetPos)
   // All offsets were calculated relative to the document
   // Make them relative to (0, 0) of the element instead
   const from = originalPos.map(p => ({

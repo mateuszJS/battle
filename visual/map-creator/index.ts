@@ -134,18 +134,11 @@ export default function openMapCreator(wasmModule: Universe) {
         config.onDragEndSuccess?.(currDragInfo.el, validOptionEl)
       }
 
+      validOptionEl?.classList.remove('valid-option')
+
       currDragInfo.el.style.pointerEvents = 'auto'
       currDragInfo = null
     }
-
-      // const selectorHoverValid = currDragElem.getAttribute('hoverValid')
-      // selectorHoverValid
-      // currDragElem.classList.remove('active') // for bridge we add active class
-
-      /*
-        1. Get isValid function, so tells if the currDragElem is in valid place
-
-      */
   })
  
   /* canvas */
