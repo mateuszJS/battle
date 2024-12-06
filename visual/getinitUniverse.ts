@@ -3,7 +3,7 @@ import canvasSizeObserver from "WebGPU/canvasSizeObserver";
 import setupWebGPU from "WebGPU/setupWebGPU";
 import { UnitState } from "logic-contants";
 import mat3 from "WebGPU/m3";
-import { drawTexture } from "WebGPU/programs/initPrograms";
+import { drawLine, drawTexture } from "WebGPU/programs/initPrograms";
 import { getVertexData } from "WebGPU/getVertexData";
 import loadAssetsIntoTextureArray from "loadAssetsIntoTextureArray/loadAssetsIntoTextureArray";
 import AssetId from "AssetsDescriptor/AssetId";
@@ -108,6 +108,11 @@ export default async function getinitUniverse(): Promise<
       const vertexData = getVertexData(units)
 
       drawTexture(pass, matrix, vertexData, texture2dArray, colorMatricies)
+
+      drawLine(pass, matrix, [
+        { x: 100, y: 100 },
+        { x: 300, y: 300 },
+      ], 50)
 
       pass.end()
       const commandBuffer = encoder.finish();

@@ -7,6 +7,7 @@ import getBlur from "./blur/getProgram"
 import getBlurAdvanced from "./blurAdvanced/getProgram"
 import getDrawFullTexture from "./drawFullTexture/getProgram"
 import getDrawTexture from "./drawTexture/getProgram"
+import getDrawLine from "./drawLine/getProgram"
 
 export let drawTriangle: ReturnType<typeof getDrawTriangle>
 export let drawBezier: ReturnType<typeof getDrawBezier>
@@ -17,6 +18,7 @@ export let drawBlur: ReturnType<typeof getBlur>
 export let drawBlurAdvanced: ReturnType<typeof getBlurAdvanced>
 export let drawFullTexture: ReturnType<typeof getDrawFullTexture>
 export let drawTexture: ReturnType<typeof getDrawTexture>
+export let drawLine: ReturnType<typeof getDrawLine>
 
 export default function initPrograms(
   device: GPUDevice,
@@ -31,4 +33,5 @@ export default function initPrograms(
   drawFullTexture = getDrawFullTexture(device, presentationFormat)
   drawBlurAdvanced = getBlurAdvanced(device, presentationFormat)
   drawTexture = getDrawTexture(device, presentationFormat)
+  drawLine = getDrawLine(device, presentationFormat)
 }

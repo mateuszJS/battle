@@ -1,0 +1,105 @@
+import shaderCode from "./shader.wgsl"
+
+export default function getProgram(
+  device: GPUDevice,
+  presentationFormat: GPUTextureFormat
+) {
+  const module = device.createShaderModule({
+    label: 'draw line module',
+    code: shaderCode,
+  });
+
+  const pipeline = device.createRenderPipeline({
+    label: 'raw line pipeline',
+    layout: 'auto',
+    primitive: {
+      topology: `triangle-strip`,
+    },
+    vertex: {
+      module,
+      entryPoint: 'vs',
+      buffers: [
+        {
+          arrayStride: (2) * 4, // (2) floats, 4 bytes each
+          attributes: [
+            {shaderLocation: 0, offset: 0, format: 'float32x2'},  // destination position
+          ] as const,
+        },
+      ],
+    },
+    fragment: {
+      module,
+      entryPoint: 'fs',
+      targets: [{ format: presentationFormat }],
+    },
+  });
+
+  const uniformBufferSize = (12/*projection matrix*/) * 4;
+  const uniformBuffer = device.createBuffer({
+    label: 'uniforms',
+    size: uniformBufferSize,
+    usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+  });
+
+  const uniformValues = new Float32Array(uniformBufferSize / 4);
+  const kMatrixOffset = 0;
+  const matrixValue = uniformValues.subarray(kMatrixOffset, kMatrixOffset + 12);
+
+  return function drawTexture(
+    pass: GPURenderPassEncoder,
+    matrix: Float32Array,
+    points: Point[],
+    width: number
+  ) {
+    if (points.length < 2) throw Error('Line needs to have at least two points')
+
+    const vertexPositionData: number[] = []
+
+    points.forEach((p, i) => {
+      const siblingP = i === 0
+        ? points[i + 1]
+        : points[i - 1]
+
+      let perpendicularAngle = Math.atan2(p.y - siblingP.y, p.x - siblingP.x) + Math.PI / 2
+      if (i === 0) {
+        // to be sure we geenrate in same direction all lines
+        perpendicularAngle += Math.PI
+      }
+      const offsetX = Math.cos(perpendicularAngle) * width
+      const offsetY = Math.sin(perpendicularAngle) * width
+      vertexPositionData.push(
+        p.x + offsetX,
+        p.y + offsetY,
+        p.x - offsetX,
+        p.y - offsetY,
+      )
+    })
+
+    const vertexPosition = new Float32Array(vertexPositionData)
+    const vertexPositionBuffer = device.createBuffer({
+      label: 'vertex buffer vertices',
+      size: vertexPosition.byteLength,
+      usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
+    });
+    device.queue.writeBuffer(vertexPositionBuffer, 0, vertexPosition);
+
+    // bind group should be pre-created and reuse instead of constantly initialized
+    const bindGroup = device.createBindGroup({
+      layout: pipeline.getBindGroupLayout(0),
+      entries: [
+        { binding: 0, resource: { buffer: uniformBuffer }},
+      ],
+    });
+
+    pass.setPipeline(pipeline);
+    pass.setVertexBuffer(0, vertexPositionBuffer);
+    // pass.setIndexBuffer(indexBuffer, 'uint32');
+
+    matrixValue.set(matrix)
+  
+    device.queue.writeBuffer(uniformBuffer, 0, uniformValues);
+
+    pass.setBindGroup(0, bindGroup);
+    pass.draw(vertexPositionData.length / 2);
+  }
+}

@@ -159,36 +159,38 @@ export default function openMapCreator(wasmModule: Universe) {
   Promise.all([startBtnClickPromise, getinitUniverse()])
     .then(([_, initUniverse]) => {
       const output = serializeMap(mapElement)
-      console.log(output.map(v => v === null
-        ? null
-        : v.getAttribute('data-test')
-      ))
+ 
 
-      console.log(
-        bridges.map(
-          b => b.anchorPoints.map(
-            p => p.getAttribute('data-test')
-          ).join(',')
-        )
-      )
-      // unmount()
-
-
-      // initUniverse(
-      //   wasmModule,
-      //   1000, // should be readed from input(or make map resizable!)
-      //   1000,
-      //   new Float32Array([
-      //     // ...colorMatrix,
-      //     ...[
-      //       0, 1, 0, 0,
-      //       0, 0, 1, 0,
-      //       1, 0, 0, 0,
-      //     ]
-      //   ]),
-      // //   getSerializedMapInfo(nodes, connections, portals),
-      // //   factionVisualDetails,
+      // to print bridges data then to use them in tests
+      // console.log(output.map(v => v === null
+      //   ? null
+      //   : v.getAttribute('data-test')
+      // ))
+      // console.log(
+      //   bridges.map(
+      //     b => b.anchorPoints.map(
+      //       p => p.getAttribute('data-test')
+      //     ).join(',')
+      //   )
       // )
+      unmount()
+
+
+      initUniverse(
+        wasmModule,
+        1000, // should be readed from input(or make map resizable!)
+        1000,
+        new Float32Array([
+          // ...colorMatrix,
+          ...[
+            0, 1, 0, 0,
+            0, 0, 1, 0,
+            1, 0, 0, 0,
+          ]
+        ]),
+      //   getSerializedMapInfo(nodes, connections, portals),
+      //   factionVisualDetails,
+      )
     })
 }
 
