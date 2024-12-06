@@ -3,8 +3,42 @@ import getinitUniverse from 'getInitUniverse'
 import getCoords, { setCoordsOrigin } from './getCoords'
 import setupUI from './setupUI'
 import creationConfig from './creationConfig'
-import { bridges, updateBridges } from './bridge'
+import { getStoreBridges, restoreBridges, updateBridges } from './bridge'
 import serializeMap from './serializeMap'
+import { createPlatform } from './platform'
+
+const storedMap = '{"platforms":[{"x":95,"y":145},{"x":292,"y":145},{"x":91,"y":331},{"x":288,"y":508},{"x":292,"y":328}],"bridges":[[{"platformIndex":4,"bridgeEdgeIndex":2},{"platformIndex":3,"bridgeEdgeIndex":0}],[{"platformIndex":2,"bridgeEdgeIndex":1},{"platformIndex":4,"bridgeEdgeIndex":3}],[{"platformIndex":0,"bridgeEdgeIndex":2},{"platformIndex":2,"bridgeEdgeIndex":0}],[{"platformIndex":1,"bridgeEdgeIndex":3},{"platformIndex":0,"bridgeEdgeIndex":1}],[{"platformIndex":1,"bridgeEdgeIndex":2},{"platformIndex":4,"bridgeEdgeIndex":0}]]}'
+
+function getStoreMap(mapEl: HTMLElement) {
+  const platformEls = Array.from(mapEl.querySelectorAll<HTMLElement>('[kind="platform"]'))
+
+  const platforms = platformEls.map(el => getCoords(el))
+  const bridges = getStoreBridges(mapEl)
+
+  return {
+    platforms,
+    bridges
+  }
+}
+
+function retoreMap(mapEl: HTMLElement, data: {
+  platforms: Point[],
+  bridges: Array<Array<{ platformIndex: number, bridgeEdgeIndex: number }>>
+}) {
+  const platformEls = data.platforms.map(platformCoord => {
+    const el = createPlatform()
+    mapEl.appendChild(el)
+    const dragInfo: DragInfo = {
+      el,
+      startOffset: { x: 0, y: 0 }
+    }
+    updateDragElem(platformCoord, dragInfo)
+
+    return el
+  })
+
+  restoreBridges(platformEls, data.bridges)
+}
 
 interface DragInfo {
   startOffset: Point
@@ -14,9 +48,9 @@ interface DragInfo {
 let currDragInfo: DragInfo | null = null
 let snapPoint: Point | null = null
 
-function updateDragElem(e: MouseEvent, dragInfo: DragInfo) {
-  dragInfo.el.style.left = e.clientX + dragInfo.startOffset.x + 'px'
-  dragInfo.el.style.top = e.clientY + dragInfo.startOffset.y + 'px'
+function updateDragElem(pointer: Point, dragInfo: DragInfo) {
+  dragInfo.el.style.left = pointer.x + dragInfo.startOffset.x + 'px'
+  dragInfo.el.style.top = pointer.y + dragInfo.startOffset.y + 'px'
 }
 
 function getConfig(el: HTMLElement) {
@@ -30,9 +64,9 @@ function getConfig(el: HTMLElement) {
   return config
 }
 
-export function startDrag(
+function startDrag(
   elem: HTMLElement,
-  event: MouseEvent,
+  pointer: Point,
 ) {
   const { x, y } = getCoords(elem)
   elem.style.pointerEvents = 'none'
@@ -41,13 +75,13 @@ export function startDrag(
 
   currDragInfo = {
     startOffset: {
-      x: x - event.clientX,
-      y: y - event.clientY,
+      x: x - pointer.x,
+      y: y - pointer.y,
     },
     el: elem,
   }
   
-  updateDragElem(event, currDragInfo)
+  updateDragElem(pointer, currDragInfo)
 }
 
 export default function openMapCreator(wasmModule: Universe) {
@@ -61,7 +95,11 @@ export default function openMapCreator(wasmModule: Universe) {
           currDragInfo.el.style.left = snapPoint.x + 'px'
           currDragInfo.el.style.top = snapPoint.y + 'px'
       } else {
-        updateDragElem(e, currDragInfo)
+        const pointer = {
+          x: e.clientX,
+          y: e.clientY,
+        }
+        updateDragElem(pointer, currDragInfo)
         const config = getConfig(currDragInfo.el)
         config.onDrag?.(currDragInfo.el)
       }
@@ -102,7 +140,11 @@ export default function openMapCreator(wasmModule: Universe) {
       dragEl = rootEl
     }
 
-    startDrag(dragEl, e)
+    const pointer = {
+      x: e.clientX,
+      y: e.clientY,
+    }
+    startDrag(dragEl, pointer)
   })
 
   let prevHoverEl = mapElement
@@ -150,6 +192,8 @@ export default function openMapCreator(wasmModule: Universe) {
       currDragInfo = null
     }
   })
+
+  retoreMap(mapElement, JSON.parse(storedMap) as ReturnType<typeof getStoreMap>)
  
   /* canvas */
   const canvas = document.createElement('canvas')
@@ -158,6 +202,8 @@ export default function openMapCreator(wasmModule: Universe) {
   /* clean the DOM and go to the next phase */
   Promise.all([startBtnClickPromise, getinitUniverse()])
     .then(([_, initUniverse]) => {
+      console.log(JSON.stringify(getStoreMap(mapElement)))
+
       const serialziedMap = serializeMap(mapElement)
  
 

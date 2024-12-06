@@ -1,4 +1,4 @@
-import { startDrag } from "map-creator"
+// import { startDrag } from "map-creator"
 
 export function createHQ(parent: HTMLElement): HTMLElement {
   const element = document.createElement('div')
@@ -22,7 +22,7 @@ export function createInteractiveHQElem(
   el.style.height = '100px'
 
   el.addEventListener('mousedown', e => {
-    startDrag(el, e)
+    // startDrag(el, e)
   })
 
   return el

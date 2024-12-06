@@ -1,6 +1,4 @@
-import { startDrag } from "map-creator"
-import getCoords from "map-creator/getCoords"
-import { createHQ, createInteractiveHQElem } from "map-creator/headquarters"
+import { createHQ } from "map-creator/headquarters"
 import { createPlatform } from "map-creator/platform"
 import addStyles from "map-creator/setupUI/addStyles"
 import addSchemeSetting from "./schemeColor"

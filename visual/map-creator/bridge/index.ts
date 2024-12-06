@@ -81,3 +81,48 @@ export function adjustBirdgeEdgePreview(el: HTMLElement) {
 export function getBridge(anchorPoint: HTMLElement): Bridge | undefined {
   return bridges.find(bridge => bridge.anchorPoints.includes(anchorPoint))
 }
+
+function getElByIndex(platformEl: HTMLElement, index: number) {
+  return platformEl.querySelectorAll<HTMLElement>('[kind="bridge-edge"]')[index]
+}
+
+function getIndexByEl(el: HTMLElement, selector: string, searchInEL: HTMLElement) {
+  return Array.prototype.indexOf.call(
+    searchInEL.querySelectorAll(selector),
+    el
+  );
+}
+
+export function getStoreBridges(mapEl: HTMLElement) {
+
+
+  return bridges.map(bridge => {
+    const bridgeEdgeElPair = [...new Set(
+      bridge.anchorPoints.map(p => p.parentElement!)
+    )]
+
+    return [
+      {
+        platformIndex: getIndexByEl(bridgeEdgeElPair[0].parentElement!, '[kind="platform"]', mapEl),
+        bridgeEdgeIndex: getIndexByEl(bridgeEdgeElPair[0], '[kind="bridge-edge"]', bridgeEdgeElPair[0].parentElement!)
+      },
+      {
+        platformIndex: getIndexByEl(bridgeEdgeElPair[1].parentElement!, '[kind="platform"]', mapEl),
+        bridgeEdgeIndex: getIndexByEl(bridgeEdgeElPair[1], '[kind="bridge-edge"]', bridgeEdgeElPair[1].parentElement!)
+      },
+    ]
+  })
+}
+
+export function restoreBridges(
+  platforms: HTMLElement[],
+  bridgesData: Array<Array<{ platformIndex: number, bridgeEdgeIndex: number }>>
+) {
+  bridgesData.forEach(([dataEdgeA, dataEdgeB]) => {
+    addNewBridge(
+      getElByIndex(platforms[dataEdgeA.platformIndex], dataEdgeA.bridgeEdgeIndex),
+      getElByIndex(platforms[dataEdgeB.platformIndex], dataEdgeB.bridgeEdgeIndex),
+    )
+  })
+  updateBridges()
+}
