@@ -1,12 +1,12 @@
 struct Vertex {
-  @location(0) position: vec2f,
+  @location(0) position: vec4f,
   @location(1) uv: vec2f,
   @location(2) texLayerIndex: u32,
   @location(3) colorMatrixIndex: u32,
 };
 
 struct Uniforms {
-  matrix: mat3x3f,
+  matrix: mat4x4f,
   colorMatricies: array<mat3x3f, 2>, /* 1 - factions number limit */
 };
 
@@ -22,10 +22,8 @@ struct VertexOutput {
 @group(0) @binding(2) var ourTexture: texture_2d_array<f32>;
 
 @vertex fn vs(vert: Vertex) -> VertexOutput {
-  let clipSpace = (u.matrix * vec3f(vert.position, 1)).xy;
-
   var out: VertexOutput;
-  out.position = vec4f(clipSpace, 0.0, 1.0);
+  out.position = u.matrix * vert.position;
   out.texCoord = vec2f(vert.uv.x, 1.0 - vert.uv.y);
   out.texLayerIndex = vert.texLayerIndex;
   out.colorMatrixIndex = vert.colorMatrixIndex;

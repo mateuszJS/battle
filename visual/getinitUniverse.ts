@@ -8,6 +8,8 @@ import { getVertexData } from "WebGPU/getVertexData";
 import loadAssetsIntoTextureArray from "loadAssetsIntoTextureArray/loadAssetsIntoTextureArray";
 import AssetId from "AssetsDescriptor/AssetId";
 import UnitRepresentation from "UnitRepresentation/UnitRepresentation";
+import getWorldMatrix from "worldMatrix";
+import { SerializedMap } from "map-creator/serializeMap";
 // import runCreator from "Creator/run";
 
 function getCanvasMatrix(canvas: HTMLCanvasElement) {
@@ -27,8 +29,7 @@ function getCanvasMatrix(canvas: HTMLCanvasElement) {
 export default async function getinitUniverse(): Promise<
   (
     wasmModule: Universe,
-    mapWidth: number,
-    mapHeight: number,
+    serializedMap: SerializedMap,
     colorMatricies: Float32Array
   ) => void
 > {
@@ -60,8 +61,8 @@ export default async function getinitUniverse(): Promise<
 
 
 
-  return function initUniverse (wasmModule, mapWidth, mapHeight, colorMatricies) {
-    const matrix = getCanvasMatrix(canvas)
+  return function initUniverse (wasmModule, serializedMap, colorMatricies) {
+    // const matrix = getCanvasMatrix(canvas)
 
     // const mapPoints = getMapPoints(mapWidth, mapHeight)
 
@@ -107,12 +108,24 @@ export default async function getinitUniverse(): Promise<
       const pass = encoder.beginRenderPass(descriptor)
       const vertexData = getVertexData(units)
 
-      drawTexture(pass, matrix, vertexData, texture2dArray, colorMatricies)
+      // drawTexture(pass, wolrdMatrix, vertexData, texture2dArray, colorMatricies)
 
-      drawLine(pass, matrix, [
-        { x: 100, y: 100 },
-        { x: 300, y: 300 },
-      ], 50)
+      const wolrdMatrix = getWorldMatrix(canvas, { x: 500, y: 500 })
+
+      const obstacles: Point[][] = []
+
+      serializedMap.obstacles.forEach(p => {
+        if (p === null) {
+          obstacles.push([])
+        } else {
+          obstacles[obstacles.length - 1].push(p)
+        }
+      })
+      obstacles.forEach(pList => {
+        if (pList.length !== 0) {
+          drawLine(pass, wolrdMatrix,  pList, 10)
+        }
+      })
 
       pass.end()
       const commandBuffer = encoder.finish();

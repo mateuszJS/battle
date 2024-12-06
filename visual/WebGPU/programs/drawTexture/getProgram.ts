@@ -24,9 +24,9 @@ export default function getProgram(
       entryPoint: 'vs',
       buffers: [
         {
-          arrayStride: (2) * 4, // (2) floats, 4 bytes each
+          arrayStride: (4) * 4, // (2) floats, 4 bytes each
           attributes: [
-            {shaderLocation: 0, offset: 0, format: 'float32x2'},  // destination position
+            {shaderLocation: 0, offset: 0, format: 'float32x4'},  // destination position
           ] as const,
         },
         {
@@ -68,7 +68,7 @@ export default function getProgram(
     },
   });
 
-  const uniformBufferSize = (12/*projection matrix*/ + 2 * 12/*color matrix*/) * 4;
+  const uniformBufferSize = (16/*projection matrix*/ + 2 * 12/*color matrix*/) * 4;
   const uniformBuffer = device.createBuffer({
     label: 'uniforms',
     size: uniformBufferSize,
@@ -77,10 +77,10 @@ export default function getProgram(
 
   const uniformValues = new Float32Array(uniformBufferSize / 4);
   const kMatrixOffset = 0;
-  const matrixValue = uniformValues.subarray(kMatrixOffset, kMatrixOffset + 12);
+  const matrixValue = uniformValues.subarray(kMatrixOffset, kMatrixOffset + 16);
 
 
-  const kColorMatrixOffset = 12;
+  const kColorMatrixOffset = 16;
   const colorMatrixValue = uniformValues.subarray(kColorMatrixOffset, kColorMatrixOffset + 2 * 12);
 
   return function drawTexture(

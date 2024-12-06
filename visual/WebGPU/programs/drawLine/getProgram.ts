@@ -20,9 +20,9 @@ export default function getProgram(
       entryPoint: 'vs',
       buffers: [
         {
-          arrayStride: (2) * 4, // (2) floats, 4 bytes each
+          arrayStride: (4) * 4, // (2) floats, 4 bytes each
           attributes: [
-            {shaderLocation: 0, offset: 0, format: 'float32x2'},  // destination position
+            {shaderLocation: 0, offset: 0, format: 'float32x4'},  // destination position
           ] as const,
         },
       ],
@@ -34,7 +34,7 @@ export default function getProgram(
     },
   });
 
-  const uniformBufferSize = (12/*projection matrix*/) * 4;
+  const uniformBufferSize = (16/*projection matrix*/) * 4;
   const uniformBuffer = device.createBuffer({
     label: 'uniforms',
     size: uniformBufferSize,
@@ -43,9 +43,9 @@ export default function getProgram(
 
   const uniformValues = new Float32Array(uniformBufferSize / 4);
   const kMatrixOffset = 0;
-  const matrixValue = uniformValues.subarray(kMatrixOffset, kMatrixOffset + 12);
+  const matrixValue = uniformValues.subarray(kMatrixOffset, kMatrixOffset + 16);
 
-  return function drawTexture(
+  return function drawLine(
     pass: GPURenderPassEncoder,
     matrix: Float32Array,
     points: Point[],
@@ -69,9 +69,13 @@ export default function getProgram(
       const offsetY = Math.sin(perpendicularAngle) * width
       vertexPositionData.push(
         p.x + offsetX,
+        0,
         p.y + offsetY,
+        1,
         p.x - offsetX,
+        0,
         p.y - offsetY,
+        1,
       )
     })
 
@@ -100,6 +104,6 @@ export default function getProgram(
     device.queue.writeBuffer(uniformBuffer, 0, uniformValues);
 
     pass.setBindGroup(0, bindGroup);
-    pass.draw(vertexPositionData.length / 2);
+    pass.draw(vertexPositionData.length / 4);
   }
 }

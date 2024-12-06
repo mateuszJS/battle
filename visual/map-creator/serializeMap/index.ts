@@ -1,4 +1,11 @@
 import { getBridge } from "map-creator/bridge"
+import getCoords from "map-creator/getCoords";
+
+export interface SerializedMap {
+  width: number
+  height: number
+  obstacles: Array<Point | null>
+}
 
 function getChildElementIndex(el: HTMLElement) {
   return Array.prototype.indexOf.call(el.parentElement!.children, el);
@@ -45,7 +52,7 @@ function visitPlatform(
 }
 
 
-export default function serializeMap(mapNode: HTMLElement) {
+export default function serializeMap(mapNode: HTMLElement): SerializedMap {
   const platformEls = Array.from(mapNode.querySelectorAll<HTMLElement>('[kind="platform"]'))
   const visited: Array<HTMLElement | null> = [] // null is a sentinel value which indicates new shape
 
@@ -54,5 +61,14 @@ export default function serializeMap(mapNode: HTMLElement) {
     visitPlatform(el, 0, visited)
   })
 
-  return visited
+  const points = visited.map(p => p === null
+    ? null
+    : getCoords(p)
+  )
+
+  return {
+    width: 1000,
+    height: 1000,
+    obstacles: points
+  }
 }

@@ -1,9 +1,9 @@
 struct Vertex {
-  @location(0) position: vec2f,
+  @location(0) position: vec4f,
 };
 
 struct Uniforms {
-  matrix: mat3x3f,
+  matrix: mat4x4f,
 };
 
 struct VertexOutput {
@@ -13,10 +13,8 @@ struct VertexOutput {
 @group(0) @binding(0) var<uniform> u: Uniforms;
 
 @vertex fn vs(vert: Vertex) -> VertexOutput {
-  let clipSpace = (u.matrix * vec3f(vert.position, 1)).xy;
-
   var out: VertexOutput;
-  out.position = vec4f(clipSpace, 0.0, 1.0);
+  out.position = u.matrix * vert.position;
   return out;
 }
 

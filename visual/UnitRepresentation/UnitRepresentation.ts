@@ -104,10 +104,10 @@ export default class UnitRepresentation {
       const y = this.position.y + frame.destinationRect.y
   
       destinationData.push(
-        x,          y,
-        x + width,  y,
-        x + width,  y + height,
-        x,          y + height
+        x,          y,          1, 0,
+        x + width,  y,          1, 0,
+        x + width,  y + height, 1, 0,
+        x,          y + height, 1, 0,
       )
 
       colorMatrixIdxData.push(...Array(4).fill(0))

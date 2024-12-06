@@ -158,7 +158,7 @@ export default function openMapCreator(wasmModule: Universe) {
   /* clean the DOM and go to the next phase */
   Promise.all([startBtnClickPromise, getinitUniverse()])
     .then(([_, initUniverse]) => {
-      const output = serializeMap(mapElement)
+      const serialziedMap = serializeMap(mapElement)
  
 
       // to print bridges data then to use them in tests
@@ -178,8 +178,7 @@ export default function openMapCreator(wasmModule: Universe) {
 
       initUniverse(
         wasmModule,
-        1000, // should be readed from input(or make map resizable!)
-        1000,
+        serialziedMap,
         new Float32Array([
           // ...colorMatrix,
           ...[

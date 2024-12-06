@@ -257,12 +257,16 @@ describe("serialize map", () => {
   })
 
   test("returns correct list of visited points", () => {
-    const output = serializeMap(mapEl).map(el => (
-      el === null
-      ? null
-      : el.getAttribute('data-test')
-    ))
 
-    expect(output).toEqual([null, '0', '1', '2', '49', '32', '33', '34', '35', '36', '53', '26', '27', '28', '51', '10', '11', '12', '13', '14', '15', '50', '29', '30', '55', '20', '21', '22', '23', '56', '5', '6', '7', '3', '4', '57', '54', '31', '52', '37', '48', null, null, null, null])
+    const expectedOutputTestIds = [null, '0', '1', '2', '49', '32', '33', '34', '35', '36', '53', '26', '27', '28', '51', '10', '11', '12', '13', '14', '15', '50', '29', '30', '55', '20', '21', '22', '23', '56', '5', '6', '7', '3', '4', '57', '54', '31', '52', '37', '48', null, null, null, null]
+    const expectedOutputPoints = expectedOutputTestIds.map(id => {
+      if (id === null) return null
+      const el = mapEl.querySelector<HTMLElement>(`[data-test="${id}"]`)!
+      return {
+        x: 10, // Number.parseInt(el.style.left),
+        y: 10, // Number.parseInt(el.style.top),
+      }
+    })
+    expect(serializeMap(mapEl)).toEqual(expectedOutputPoints)
   })
 })
