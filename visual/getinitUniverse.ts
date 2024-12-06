@@ -121,9 +121,10 @@ export default async function getinitUniverse(): Promise<
           obstacles[obstacles.length - 1].push(p)
         }
       })
+
       obstacles.forEach(pList => {
         if (pList.length !== 0) {
-          drawLine(pass, wolrdMatrix,  pList, 10)
+          drawLine(pass, wolrdMatrix,  [...pList, pList[0]], 10)
         }
       })
 

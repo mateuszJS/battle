@@ -12,8 +12,7 @@ export function createPlatform(): HTMLElement {
     `
     <div kind="platform" class="platform-vars">
       <div event-catcher class="octagon">
-        <div class="octagon octagon-inner platform-vars">
-        </div>
+        <div class="octagon octagon-inner platform-vars"></div>
       </div>
       ${Array.from({ length: 4 }, (_, i) => (`
         <span

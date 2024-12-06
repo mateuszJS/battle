@@ -49,11 +49,7 @@ export default function getWorldMatrix(canvas: HTMLElement, targetPoints: Point)
   );
 
   const target = [targetPoints.x, 0, targetPoints.y];
-  // const target = [canvas.clientWidth / 2, canvas.clientHeight / 2, 0];
 
-  // Use matrix math to compute a position on a circle where
-  // the camera is
-  console.log(cameraSettings.cameraAngle[2])
   const cameraPos = [
     mat4.rotationX(cameraSettings.cameraAngle[0]),
     mat4.rotationY(cameraSettings.cameraAngle[1]),// 2. the nrotate!
@@ -71,10 +67,7 @@ export default function getWorldMatrix(canvas: HTMLElement, targetPoints: Point)
 
   const viewMatrix = mat4.lookAt(eye, target, up);
 
-  // combine the view and projection matrixes
-  const scaling = mat4.scaling([cameraSettings.scaleFactor, cameraSettings.scaleFactor,cameraSettings.scaleFactor])
   const viewProjectionMatrix = mat4.multiply(projection, viewMatrix);
-  // const scaledViewProjectionMatrix = mat4.multiply(scaling, viewProjectionMatrix);
 
   const world = mat4.identity();
 
