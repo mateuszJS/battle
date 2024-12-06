@@ -1,7 +1,7 @@
 import getCoords from "map-creator/getCoords"
 import Bridge from "./Bridge"
 
-const bridges: Bridge[] = []
+export const bridges: Bridge[] = []
 
 function getAnchorPointEls(bridgeEdgeA: HTMLElement, bridgeEdgeB?: HTMLElement): HTMLElement[] {
   return [
@@ -50,7 +50,8 @@ export function updateLastBridge(bridgeEdgeA: HTMLElement, bridgeEdgeB: HTMLElem
 
 /** We assume that latest bridge can be only in preview */
 export function removeBridgePreview() {
-  bridges[bridges.length - 1].destory()
+  const bridgePreview = bridges.pop()
+  bridgePreview?.destory()
 }
 
 export function onPreviewSnap(el: HTMLElement, snapTo: HTMLElement) {
@@ -75,4 +76,8 @@ export function adjustBirdgeEdgePreview(el: HTMLElement) {
   ) * -1 * 180 / Math.PI // -1 because of CSS
 
   el.style.rotate = `${angle + 90}deg`
+}
+
+export function getBridge(anchorPoint: HTMLElement): Bridge | undefined {
+  return bridges.find(bridge => bridge.anchorPoints.includes(anchorPoint))
 }

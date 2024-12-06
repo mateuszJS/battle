@@ -1,6 +1,12 @@
 const domParser = new DOMParser()
 const mapIndexToPosition = ['top', 'right', 'bottom', 'left']
-
+// export const testId = {
+//   value: 0
+// }
+/*for generating html to paste them i ntest, please use test ids for anchor points:
+<span class="anchor-point" data-test="${testId.value++}"></span>
+<span class="anchor-point" data-test="${testId.value++}"></span>
+*/
 export function createPlatform(): HTMLElement {
   return domParser.parseFromString(
     `

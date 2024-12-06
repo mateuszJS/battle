@@ -3,7 +3,8 @@ import getinitUniverse from 'getInitUniverse'
 import getCoords, { setCoordsOrigin } from './getCoords'
 import setupUI from './setupUI'
 import creationConfig from './creationConfig'
-import { updateBridges } from './bridge'
+import { bridges, updateBridges } from './bridge'
+import serializeMap from './serializeMap'
 
 interface DragInfo {
   startOffset: Point
@@ -35,6 +36,8 @@ export function startDrag(
 ) {
   const { x, y } = getCoords(elem)
   elem.style.pointerEvents = 'none'
+  
+  if (currDragInfo) debugger // we have an error where poitner events none is not removed from the element
 
   currDragInfo = {
     startOffset: {
@@ -78,6 +81,14 @@ export default function openMapCreator(wasmModule: Universe) {
     let dragEl: HTMLElement
     if (rootEl.hasAttribute('reproduce')) {
       dragEl = rootEl.cloneNode(true) as HTMLElement
+
+      /* this is only for geenrating HTML for tests
+        testId.value exists in import { testId } from './platform'
+      */
+      // Array.from(rootEl.querySelectorAll('[data-test]')).forEach(el => {
+      //   el.setAttribute('data-test', `${testId.value++}`)
+      // })
+
       dragEl.removeAttribute('reproduce')
       mapElement.appendChild(dragEl)
   
@@ -147,23 +158,37 @@ export default function openMapCreator(wasmModule: Universe) {
   /* clean the DOM and go to the next phase */
   Promise.all([startBtnClickPromise, getinitUniverse()])
     .then(([_, initUniverse]) => {
-      unmount()
+      const output = serializeMap(mapElement)
+      console.log(output.map(v => v === null
+        ? null
+        : v.getAttribute('data-test')
+      ))
 
-      initUniverse(
-        wasmModule,
-        1000, // should be readed from input(or make map resizable!)
-        1000,
-        new Float32Array([
-          // ...colorMatrix,
-          ...[
-            0, 1, 0, 0,
-            0, 0, 1, 0,
-            1, 0, 0, 0,
-          ]
-        ]),
-      //   getSerializedMapInfo(nodes, connections, portals),
-      //   factionVisualDetails,
+      console.log(
+        bridges.map(
+          b => b.anchorPoints.map(
+            p => p.getAttribute('data-test')
+          ).join(',')
+        )
       )
+      // unmount()
+
+
+      // initUniverse(
+      //   wasmModule,
+      //   1000, // should be readed from input(or make map resizable!)
+      //   1000,
+      //   new Float32Array([
+      //     // ...colorMatrix,
+      //     ...[
+      //       0, 1, 0, 0,
+      //       0, 0, 1, 0,
+      //       1, 0, 0, 0,
+      //     ]
+      //   ]),
+      // //   getSerializedMapInfo(nodes, connections, portals),
+      // //   factionVisualDetails,
+      // )
     })
 }
 
