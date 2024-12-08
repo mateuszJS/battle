@@ -314,6 +314,15 @@ const mat4 = {
   scale(m: Float32Array, scale: number[], dst?: Float32Array) {
     return mat4.multiply(m, mat4.scaling(scale), dst);
   },
+
+  vectorTimesMatrix(vec: number[], m: Float32Array): number[] {
+    return [
+      m[0] * vec[0] + m[4] * vec[1] + m[8]  * vec[2] + m[12] * vec[3],
+      m[1] * vec[0] + m[5] * vec[1] + m[9 ] * vec[2] + m[13] * vec[3],
+      m[2] * vec[0] + m[6] * vec[1] + m[10] * vec[2] + m[14] * vec[3],
+      m[3] * vec[0] + m[7] * vec[1] + m[11] * vec[2] + m[15] * vec[3]
+    ]
+  }
 };
 
 export default mat4

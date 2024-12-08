@@ -6,6 +6,9 @@ import creationConfig from './creationConfig'
 import { getStoreBridges, restoreBridges, updateBridges } from './bridge'
 import serializeMap from './serializeMap'
 import { createPlatform } from './platform'
+import getWorldMatrix from 'worldMatrix'
+import mat4 from 'utils/mat4'
+import startTransition from './transition'
 
 const storedMap = '{"platforms":[{"x":95,"y":145},{"x":292,"y":145},{"x":91,"y":331},{"x":288,"y":508},{"x":292,"y":328}],"bridges":[[{"platformIndex":4,"bridgeEdgeIndex":2},{"platformIndex":3,"bridgeEdgeIndex":0}],[{"platformIndex":2,"bridgeEdgeIndex":1},{"platformIndex":4,"bridgeEdgeIndex":3}],[{"platformIndex":0,"bridgeEdgeIndex":2},{"platformIndex":2,"bridgeEdgeIndex":0}],[{"platformIndex":1,"bridgeEdgeIndex":3},{"platformIndex":0,"bridgeEdgeIndex":1}],[{"platformIndex":1,"bridgeEdgeIndex":2},{"platformIndex":4,"bridgeEdgeIndex":0}]]}'
 
@@ -85,7 +88,11 @@ function startDrag(
 }
 
 export default function openMapCreator(wasmModule: Universe) {
-  const { mapElement, unmount, startBtnClickPromise, viewElem } = setupUI()
+  /* canvas - not needed for now, but to make correct order of HTML elements we do it here */
+  const canvas = document.createElement('canvas')
+  document.body.appendChild(canvas)
+
+  const { mapElement, unmount, startBtnClickPromise, viewElem, toolBarEl, controlPanelEl } = setupUI()
 
   setCoordsOrigin(mapElement)
 
@@ -195,17 +202,16 @@ export default function openMapCreator(wasmModule: Universe) {
 
   retoreMap(mapElement, JSON.parse(storedMap) as ReturnType<typeof getStoreMap>)
  
-  /* canvas */
-  const canvas = document.createElement('canvas')
-  document.body.appendChild(canvas)
+
   
   /* clean the DOM and go to the next phase */
   Promise.all([startBtnClickPromise, getinitUniverse()])
     .then(([_, initUniverse]) => {
+      const serializedMap = serializeMap(mapElement)
+
       console.log(JSON.stringify(getStoreMap(mapElement)))
 
-      const serialziedMap = serializeMap(mapElement)
- 
+
 
       // to print bridges data then to use them in tests
       // console.log(output.map(v => v === null
@@ -219,12 +225,9 @@ export default function openMapCreator(wasmModule: Universe) {
       //     ).join(',')
       //   )
       // )
-      unmount()
-
-
       initUniverse(
         wasmModule,
-        serialziedMap,
+        serializedMap,
         new Float32Array([
           // ...colorMatrix,
           ...[
@@ -236,6 +239,9 @@ export default function openMapCreator(wasmModule: Universe) {
       //   getSerializedMapInfo(nodes, connections, portals),
       //   factionVisualDetails,
       )
+
+      // viewElem.style.opacity = '.3'
+      startTransition(canvas, mapElement, toolBarEl, controlPanelEl,serializedMap.cameraTarget, unmount)
     })
 }
 

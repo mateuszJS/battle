@@ -5,6 +5,7 @@ export interface SerializedMap {
   width: number
   height: number
   obstacles: Array<Point | null>
+  cameraTarget: Point
 }
 
 function getChildElementIndex(el: HTMLElement) {
@@ -75,6 +76,7 @@ export default function serializeMap(mapNode: HTMLElement): SerializedMap {
   return {
     width: 1000,
     height: 1000,
+    cameraTarget: { x: 500, y: 500 },
     obstacles: points
   }
 }

@@ -66,15 +66,15 @@ export default function getProgram(
         perpendicularAngle += Math.PI
       }
       const offsetX = Math.cos(perpendicularAngle) * width
-      const offsetY = Math.sin(perpendicularAngle) * width
+      const offsetZ = Math.sin(perpendicularAngle) * width
       vertexPositionData.push(
         p.x + offsetX,
         0,
-        p.y + offsetY,
+        p.y + offsetZ,
         1,
         p.x - offsetX,
         0,
-        p.y - offsetY,
+        p.y - offsetZ,
         1,
       )
     })
@@ -104,6 +104,9 @@ export default function getProgram(
     device.queue.writeBuffer(uniformBuffer, 0, uniformValues);
 
     pass.setBindGroup(0, bindGroup);
+    // console.log('++++++++FIRST+++++++++++++')
+    // console.log(JSON.stringify(vertexPositionData.slice(0, 4))) // [124.296875,0,155,1]
+    // console.log(matrixValue) // 6.512547016143799, 0, 0, 0, 0, 0.11019019037485123, -1.0000977516174316, -0.9998476505279541, 0, -6.3127899169921875, -0.017456775531172752, -0.017452411353588104, -3256.2734375, 3156.39501953125, 3016.590576171875, 3016.83642578125
     pass.draw(vertexPositionData.length / 4);
   }
 }

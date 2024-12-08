@@ -8,6 +8,8 @@ import getBlurAdvanced from "./blurAdvanced/getProgram"
 import getDrawFullTexture from "./drawFullTexture/getProgram"
 import getDrawTexture from "./drawTexture/getProgram"
 import getDrawLine from "./drawLine/getProgram"
+import getComputeMatrix from "./computeMatrix/getProgram"
+import getComputeBuiltinVars from "./computeBuiltinVars/getProgram"
 
 export let drawTriangle: ReturnType<typeof getDrawTriangle>
 export let drawBezier: ReturnType<typeof getDrawBezier>
@@ -19,6 +21,8 @@ export let drawBlurAdvanced: ReturnType<typeof getBlurAdvanced>
 export let drawFullTexture: ReturnType<typeof getDrawFullTexture>
 export let drawTexture: ReturnType<typeof getDrawTexture>
 export let drawLine: ReturnType<typeof getDrawLine>
+export let computeMatrix: ReturnType<typeof getComputeMatrix>
+export let computeBuiltinVars: ReturnType<typeof getComputeBuiltinVars>
 
 export default function initPrograms(
   device: GPUDevice,
@@ -34,4 +38,6 @@ export default function initPrograms(
   drawBlurAdvanced = getBlurAdvanced(device, presentationFormat)
   drawTexture = getDrawTexture(device, presentationFormat)
   drawLine = getDrawLine(device, presentationFormat)
+  computeMatrix = getComputeMatrix(device)
+  computeBuiltinVars = getComputeBuiltinVars(device)
 }

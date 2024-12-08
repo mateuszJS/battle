@@ -1046,7 +1046,7 @@ class View {
     }
 }
 
-class Controller extends View {
+export class Controller extends View {
   #changeFns;
   #finishChangeFns;
   #parent;

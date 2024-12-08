@@ -3,7 +3,7 @@ import canvasSizeObserver from "WebGPU/canvasSizeObserver";
 import setupWebGPU from "WebGPU/setupWebGPU";
 import { UnitState } from "logic-contants";
 import mat3 from "WebGPU/m3";
-import { drawLine, drawTexture } from "WebGPU/programs/initPrograms";
+import { computeMatrix, drawLine, drawTexture } from "WebGPU/programs/initPrograms";
 import { getVertexData } from "WebGPU/getVertexData";
 import loadAssetsIntoTextureArray from "loadAssetsIntoTextureArray/loadAssetsIntoTextureArray";
 import AssetId from "AssetsDescriptor/AssetId";
@@ -98,19 +98,19 @@ export default async function getinitUniverse(): Promise<
         colorAttachments: [
           {
             view: canvasTexture.createView(),
-            clearValue: [0.3, 0, 0, 1],
+            clearValue: [0, 0, 0, 1],
             loadOp: "clear", // before rendering clear the texture to value "clear". Other option is "load" to load existing content of the texture into GPU so we can draw over it
             storeOp: "store", // to store the result of what we draw, other option is "discard"
           } as const,
         ],
       }
       const encoder = device.createCommandEncoder()
+      const worldMatrix = getWorldMatrix(canvas, serializedMap.cameraTarget, dt)
       const pass = encoder.beginRenderPass(descriptor)
       const vertexData = getVertexData(units)
 
       // drawTexture(pass, wolrdMatrix, vertexData, texture2dArray, colorMatricies)
 
-      const wolrdMatrix = getWorldMatrix(canvas, { x: 500, y: 500 })
 
       const obstacles: Point[][] = []
 
@@ -124,7 +124,7 @@ export default async function getinitUniverse(): Promise<
 
       obstacles.forEach(pList => {
         if (pList.length !== 0) {
-          drawLine(pass, wolrdMatrix,  [...pList, pList[0]], 10)
+          drawLine(pass, worldMatrix,  [...pList, pList[0]], 10)
         }
       })
 

@@ -19,32 +19,33 @@ export default function setupUI() {
   mapElement.classList.add('map-area')
   mapElement.style.aspectRatio = `${MAP_WIDTH / MAP_HEIGHT}`
 
-  viewElem.appendChild(setupToolbar())
+  const toolBarEl = setupToolbar()
+  viewElem.appendChild(toolBarEl)
 
   viewElem.appendChild(mapElement)
 
   document.body.appendChild(viewElem)
 
   /* eveyrthing right pane related */
-  const rightControlPanel = document.createElement('section')
+  const controlPanelEl = document.createElement('section')
 
   const startBtn = document.createElement('button')
   startBtn.textContent = 'START'
   const startBtnClickPromise = new Promise<void>(resolve => {
     startBtn.addEventListener('click', () => resolve())
   })
-  rightControlPanel.appendChild(startBtn)
+  controlPanelEl.appendChild(startBtn)
 
-  addSchemeSetting(rightControlPanel)
+  addSchemeSetting(controlPanelEl)
 
-  viewElem.appendChild(rightControlPanel)
+  viewElem.appendChild(controlPanelEl)
 
-    function unmount() {
-      styleElem.remove()
-      viewElem.remove()
-    }
+  function unmount() {
+    styleElem.remove()
+    viewElem.remove()
+  }
 
-  return { mapElement, unmount, startBtnClickPromise, viewElem }
+  return { mapElement, unmount, startBtnClickPromise, viewElem, toolBarEl, controlPanelEl }
 }
 
 function setupToolbar() {
