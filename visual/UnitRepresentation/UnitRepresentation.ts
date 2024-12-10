@@ -3,7 +3,8 @@ import AssetsDescriptor from "AssetsDescriptor"
 import mapAngleToIndex from "./mapAngleToIndex"
 import AssetId from "AssetsDescriptor/AssetId"
 import AnimatedSprite from "../WebGPU/AnimatedSprite/AnimatedSprite"
-
+import { getCameraAngle } from "worldMatrix"
+const firstRun = true
 export default class UnitRepresentation {
   private aSprites: AnimatedSprite[];
 
@@ -99,15 +100,36 @@ export default class UnitRepresentation {
       sourceData.push(...frame.sourceRect)
 
   
-      const { width, height } = frame.destinationRect
-      const x = this.position.x + frame.destinationRect.x
-      const y = this.position.y + frame.destinationRect.y
-  
+      const { width: rawWidth, height: rawHeight } = frame.destinationRect
+      const widthInCameraView = rawWidth * 0.7
+      const heightInCameraView = rawHeight * 0.7
+      const x = 0; //this.position.x// + frame.destinationRect.x * 0.7
+      const y = 0; //this.position.y// + frame.destinationRect.y * 0.7
+
+      const [cameraAxisX, cameraAngleY] = getCameraAngle()
+
+      const xAxisAngle = Math.PI / 2 + cameraAxisX
+      const zSize = heightInCameraView * -Math.cos(xAxisAngle)
+      const ySize = heightInCameraView * Math.sin(xAxisAngle)
+
+      /* adds y camera angle to the equation */
+      const yAxisAngle = -cameraAngleY
+      const hypot = widthInCameraView / 2
+      const modLeftX = Math.cos(yAxisAngle + Math.PI) * hypot
+      const modRightX = Math.cos(yAxisAngle) * hypot
+
+      const modLeftZ = Math.sin(yAxisAngle + Math.PI) * hypot
+      const modRightZ = Math.sin(yAxisAngle) * hypot
+
+      const yAxisAnglePerpendicular = yAxisAngle + Math.PI / 2
+      const modTopX = Math.cos(yAxisAnglePerpendicular) * zSize
+      const modTopZ = Math.sin(yAxisAnglePerpendicular) * zSize
+
       destinationData.push(
-        x,          y,          1, 0,
-        x + width,  y,          1, 0,
-        x + width,  y + height, 1, 0,
-        x,          y + height, 1, 0,
+        x + modRightX + modTopX,  ySize,  y + modTopZ + modRightZ,   1,
+        x + modLeftX + modTopX,   ySize,  y + modTopZ + modLeftZ,    1,
+        x + modLeftX,             0,      y + modLeftZ,              1,
+        x + modRightX,            0,      y + modRightZ,             1,
       )
 
       colorMatrixIdxData.push(...Array(4).fill(0))

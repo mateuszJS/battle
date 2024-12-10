@@ -68,16 +68,11 @@ export default function getProgram(
       const offsetX = Math.cos(perpendicularAngle) * width
       const offsetZ = Math.sin(perpendicularAngle) * width
       vertexPositionData.push(
-        p.x + offsetX,
-        0,
-        p.y + offsetZ,
-        1,
-        p.x - offsetX,
-        0,
-        p.y - offsetZ,
-        1,
+        p.x + offsetX, 0, p.y + offsetZ, 1,
+        p.x - offsetX, 0, p.y - offsetZ, 1,
       )
     })
+
 
     const vertexPosition = new Float32Array(vertexPositionData)
     const vertexPositionBuffer = device.createBuffer({

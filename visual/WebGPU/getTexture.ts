@@ -31,7 +31,7 @@ export function createTexture2dArrayFromSources(device: GPUDevice, sourceList: I
   sourceList.forEach((source, index) => {
 
     device.queue.copyExternalImageToTexture(
-      { source, flipY: true },
+      { source },
       { texture: textue2dArray, origin: { z: index } },
       { width: source.width, height: source.height },
     );

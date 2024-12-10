@@ -1,7 +1,8 @@
 import mat4 from "utils/mat4";
 import GUI from "./GUI";
 
-const startAngle = [-89, 0, 0]
+const startAngle = [-89.99, 0, 0] // bascially our mat4.lookAt tries to make sure object is oriented correctly,
+// and at -90 is totating object weirdly to keep in in the right orientation
 // const endAngle = [-89, 0, 0]
 const endAngle = [-27, -11, 0]
 
@@ -26,33 +27,30 @@ export const cameraSettings = {
 }; // to add more perspective, increase fieldofView and decrease translation.z
 const radToDegOptions = { min: -360, max: 360, step: 1, converters: GUI.converters.radToDeg };
 
-let gui: GUI | undefined;
 
 let time = 0
 
+const gui = new GUI();
+gui.add(cameraSettings, 'fieldOfView', {min: 1, max: 179, converters: GUI.converters.radToDeg});
+gui.add(cameraSettings, 'zNear', 1, 2000).name('zNear');
+gui.add(cameraSettings, 'zFar', 1, 4000).name('zFar');
+gui.add(cameraSettings, 'radius', 0, 10000).name('distance from target');
+gui.add(cameraSettings.cameraAngle, '0', radToDegOptions).name('rotation.x');
+gui.add(cameraSettings.cameraAngle, '1', radToDegOptions).name('rotation.y');
+gui.add(cameraSettings.cameraAngle, '2', radToDegOptions).name('rotation.z(no impact)');
+// gui.add(cameraSettings.rotation, '0', radToDegOptions).name('rotation.x');
+// gui.add(cameraSettings.rotation, '1', radToDegOptions).name('rotation.y');
+// gui.add(cameraSettings.rotation, '2', radToDegOptions).name('rotation.z');
+// gui.add(cameraSettings.scale, '0', -5, 5).name('scale.x');
+// gui.add(cameraSettings.scale, '1', -5, 5).name('scale.y');
+// gui.add(cameraSettings.scale, '2', -5, 5).name('scale.z');
+gui.add(cameraSettings, 'scaleFactor', -5, 5).name('scaleFactor');
+gui.add(cameraSettings.light, '0', -Math.PI, Math.PI).name('light.x');
+gui.add(cameraSettings.light, '1', -Math.PI, Math.PI).name('light.y');
+gui.add(cameraSettings.light, '2', -Math.PI, Math.PI).name('light.z');
+
 export default function getWorldMatrix(canvas: HTMLElement, targetPoints: Point, dt: number) {
   time += dt
-
-  if (!gui) {
-    gui = new GUI();
-    gui.add(cameraSettings, 'fieldOfView', {min: 1, max: 179, converters: GUI.converters.radToDeg});
-    gui.add(cameraSettings, 'zNear', 1, 2000).name('zNear');
-    gui.add(cameraSettings, 'zFar', 1, 4000).name('zFar');
-    gui.add(cameraSettings, 'radius', 0, 10000).name('distance from target');
-    gui.add(cameraSettings.cameraAngle, '0', radToDegOptions).name('rotation.x');
-    gui.add(cameraSettings.cameraAngle, '1', radToDegOptions).name('rotation.y');
-    gui.add(cameraSettings.cameraAngle, '2', radToDegOptions).name('rotation.z(no impact)');
-    // gui.add(cameraSettings.rotation, '0', radToDegOptions).name('rotation.x');
-    // gui.add(cameraSettings.rotation, '1', radToDegOptions).name('rotation.y');
-    // gui.add(cameraSettings.rotation, '2', radToDegOptions).name('rotation.z');
-    // gui.add(cameraSettings.scale, '0', -5, 5).name('scale.x');
-    // gui.add(cameraSettings.scale, '1', -5, 5).name('scale.y');
-    // gui.add(cameraSettings.scale, '2', -5, 5).name('scale.z');
-    gui.add(cameraSettings, 'scaleFactor', -5, 5).name('scaleFactor');
-    gui.add(cameraSettings.light, '0', -Math.PI, Math.PI).name('light.x');
-    gui.add(cameraSettings.light, '1', -Math.PI, Math.PI).name('light.y');
-    gui.add(cameraSettings.light, '2', -Math.PI, Math.PI).name('light.z');
-  }
 
   const aspect = canvas.clientWidth / canvas.clientHeight;
   const projection = mat4.perspective(
@@ -100,6 +98,7 @@ export default function getWorldMatrix(canvas: HTMLElement, targetPoints: Point,
   const eye = cameraPos.slice(12, 15);
 
   const up = [0, 1, 0];
+  // const up = [0, 1, 0];
 
   const viewMatrix = mat4.lookAt(eye, target, up);
 
@@ -111,4 +110,8 @@ export default function getWorldMatrix(canvas: HTMLElement, targetPoints: Point,
   const worldViewProjection = mat4.multiply(viewProjectionMatrix, world);
 
   return worldViewProjection
+}
+
+export function getCameraAngle(): number[] {
+  return cameraSettings.cameraAngle
 }

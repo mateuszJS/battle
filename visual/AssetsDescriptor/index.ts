@@ -21,9 +21,11 @@ export interface FrameDetails {
   textureIndex: number
 }
 
+const scaledUsedDuringSpriteSheetGeneration = 0.5
+
 export const centerPivot: Point = {
-  x: 995.7482,
-  y: 1155.8067,
+  x: 995.7482 * scaledUsedDuringSpriteSheetGeneration,
+  y: 1155.8067 * scaledUsedDuringSpriteSheetGeneration,
 } // for now we made all assets with one and same pivot point
 // would be greta to stic this wy
 

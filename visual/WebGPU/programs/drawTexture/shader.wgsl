@@ -23,8 +23,9 @@ struct VertexOutput {
 
 @vertex fn vs(vert: Vertex) -> VertexOutput {
   var out: VertexOutput;
+  // maybe we should pass offsets from the position instead of... position?
   out.position = u.matrix * vert.position;
-  out.texCoord = vec2f(vert.uv.x, 1.0 - vert.uv.y);
+  out.texCoord = vec2f(vert.uv.x, vert.uv.y);
   out.texLayerIndex = vert.texLayerIndex;
   out.colorMatrixIndex = vert.colorMatrixIndex;
   return out;

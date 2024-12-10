@@ -66,11 +66,13 @@ export default async function getinitUniverse(): Promise<
 
     // const mapPoints = getMapPoints(mapWidth, mapHeight)
 
+    const firstPoint = serializedMap.obstacles.find(Boolean) as Point
+
     const units = [
       new UnitRepresentation(
-        UnitState.RUN,
+        UnitState.IDLE,
         0,
-        { x: 1000, y: 1000 },
+        firstPoint,
         // [AssetId.RegularBody],
         [AssetId.RegularBody, AssetId.RegularAccesories, AssetId.ElephantHead],
         0
@@ -87,7 +89,7 @@ export default async function getinitUniverse(): Promise<
       const dt = now - lastFrameTime
       lastFrameTime = now
       units.forEach(unit => {
-        unit.update(window.angle, UnitState.FLY, dt)
+        unit.update(window.angle, UnitState.IDLE, dt)
       })
 
       // here we need to render that texture into canvas
@@ -109,7 +111,6 @@ export default async function getinitUniverse(): Promise<
       const pass = encoder.beginRenderPass(descriptor)
       const vertexData = getVertexData(units)
 
-      // drawTexture(pass, wolrdMatrix, vertexData, texture2dArray, colorMatricies)
 
 
       const obstacles: Point[][] = []
@@ -127,6 +128,7 @@ export default async function getinitUniverse(): Promise<
           drawLine(pass, worldMatrix,  [...pList, pList[0]], 10)
         }
       })
+      drawTexture(pass, worldMatrix, vertexData, texture2dArray, colorMatricies)
 
       pass.end()
       const commandBuffer = encoder.finish();
