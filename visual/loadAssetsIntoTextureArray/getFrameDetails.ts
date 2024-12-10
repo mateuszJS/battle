@@ -16,10 +16,10 @@ export default function getFrameDetails(
   const frameHeight = frameJson.rotated ? w : h
 
   const texPoints = [
-    0,               0,
-    0 + frameWidth,  0,
+    0,               0 + frameHeight,
     0 + frameWidth,  0 + frameHeight,
-    0,               0 + frameHeight
+    0 + frameWidth,  0,
+    0,               0,
   ]
 
   if (frameJson.rotated) {

@@ -4,6 +4,7 @@ import mapAngleToIndex from "./mapAngleToIndex"
 import AssetId from "AssetsDescriptor/AssetId"
 import AnimatedSprite from "../WebGPU/AnimatedSprite/AnimatedSprite"
 import { getCameraAngle } from "worldMatrix"
+import mat4 from "utils/mat4"
 const firstRun = true
 export default class UnitRepresentation {
   private aSprites: AnimatedSprite[];
@@ -99,38 +100,44 @@ export default class UnitRepresentation {
 
       sourceData.push(...frame.sourceRect)
 
-  
-      const { width: rawWidth, height: rawHeight } = frame.destinationRect
-      const widthInCameraView = rawWidth * 0.7
-      const heightInCameraView = rawHeight * 0.7
-      const x = 0; //this.position.x// + frame.destinationRect.x * 0.7
-      const y = 0; //this.position.y// + frame.destinationRect.y * 0.7
+      const [cameraAngleX, cameraAngleY] = getCameraAngle()
+      // const cameraAngleX  = -27 * Math.PI / 180
+      // const cameraAngleY  = -11 * Math.PI / 180
 
-      const [cameraAxisX, cameraAngleY] = getCameraAngle()
-
-      const xAxisAngle = Math.PI / 2 + cameraAxisX
-      const zSize = heightInCameraView * -Math.cos(xAxisAngle)
-      const ySize = heightInCameraView * Math.sin(xAxisAngle)
-
-      /* adds y camera angle to the equation */
-      const yAxisAngle = -cameraAngleY
-      const hypot = widthInCameraView / 2
-      const modLeftX = Math.cos(yAxisAngle + Math.PI) * hypot
-      const modRightX = Math.cos(yAxisAngle) * hypot
-
-      const modLeftZ = Math.sin(yAxisAngle + Math.PI) * hypot
-      const modRightZ = Math.sin(yAxisAngle) * hypot
-
-      const yAxisAnglePerpendicular = yAxisAngle + Math.PI / 2
-      const modTopX = Math.cos(yAxisAnglePerpendicular) * zSize
-      const modTopZ = Math.sin(yAxisAnglePerpendicular) * zSize
-
-      destinationData.push(
-        x + modRightX + modTopX,  ySize,  y + modTopZ + modRightZ,   1,
-        x + modLeftX + modTopX,   ySize,  y + modTopZ + modLeftZ,    1,
-        x + modLeftX,             0,      y + modLeftZ,              1,
-        x + modRightX,            0,      y + modRightZ,             1,
+      const matrix = [
+        mat4.rotationX(Math.PI / 2 + cameraAngleX),
+        mat4.rotationY(cameraAngleY),
+      ].reverse().reduce(
+        (acc, modMatrix) => mat4.multiply(acc, modMatrix),
+        mat4.identity()
       )
+
+      const { x, y, width, height } = frame.destinationRect
+
+      const SCALE = 0.7
+      ;[
+        { x,            y: y + height },
+        { x: x + width, y: y + height },
+        { x: x + width, y },
+        { x,            y },
+      ]
+      .map(p => ({ x: p.x * SCALE, y: p.y * SCALE}))
+      .map(p => {
+        const outputVec = mat4.vectorTimesMatrix([p.x, 0, p.y, 1], matrix)
+        return {
+          x: outputVec[0] / outputVec[3],
+          y: outputVec[1] / outputVec[3],
+          z: outputVec[2] / outputVec[3],
+        }
+      })
+      .map(p3d => ({
+        x: p3d.x + this.position.x,
+        y: p3d.y,
+        z: p3d.z + this.position.y,
+      }))
+      .forEach(p3d => {
+        destinationData.push(p3d.x, p3d.y, p3d.z, 1)
+      })
 
       colorMatrixIdxData.push(...Array(4).fill(0))
     })
