@@ -12,19 +12,19 @@ export default function getFrameDetails(
   imgBitmap: ImageBitmap,
 ): FrameDetails {
   const {x, y, w, h} = frameJson.frame
-  const frameWidth = frameJson.rotated ? h : w
-  const frameHeight = frameJson.rotated ? w : h
 
-  const texPoints = [
-    0,               0 + frameHeight,
-    0 + frameWidth,  0 + frameHeight,
-    0 + frameWidth,  0,
-    0,               0,
-  ]
-
-  if (frameJson.rotated) {
-    texPoints.push(...texPoints.splice(0, 2))
-  }
+  const texPoints = frameJson.rotated
+    ? [
+      0,      0,
+      0,      0 + w,
+      0 + h,  0 + w,
+      0 + h,  0,
+    ] : [
+      0,      0 + h,
+      0 + w,  0 + h,
+      0 + w,  0,
+      0,      0,
+    ]
   
   texPoints[0] += x
   texPoints[1] += y

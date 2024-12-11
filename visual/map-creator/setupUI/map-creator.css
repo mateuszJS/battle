@@ -161,6 +161,10 @@
   }
 }
 
+.control-panel {
+  align-self: end;
+}
+
 .anchor-point {
   pointer-events: none;
   position: absolute;

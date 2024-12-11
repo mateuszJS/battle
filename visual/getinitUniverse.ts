@@ -2,29 +2,13 @@ import { Universe } from "Universe";
 import canvasSizeObserver from "WebGPU/canvasSizeObserver";
 import setupWebGPU from "WebGPU/setupWebGPU";
 import { UnitState } from "logic-contants";
-import mat3 from "WebGPU/m3";
-import { computeMatrix, drawLine, drawTexture } from "WebGPU/programs/initPrograms";
+import { drawLine, drawTexture } from "WebGPU/programs/initPrograms";
 import { getVertexData } from "WebGPU/getVertexData";
 import loadAssetsIntoTextureArray from "loadAssetsIntoTextureArray/loadAssetsIntoTextureArray";
 import AssetId from "AssetsDescriptor/AssetId";
 import UnitRepresentation from "UnitRepresentation/UnitRepresentation";
-import getWorldMatrix from "worldMatrix";
+import getWorldMatrix, { getCameraAngle } from "worldMatrix";
 import { SerializedMap } from "map-creator/serializeMap";
-// import runCreator from "Creator/run";
-
-function getCanvasMatrix(canvas: HTMLCanvasElement) {
-  return mat3.projection(canvas.clientWidth, canvas.clientHeight)
-  // const projection = mat4.ortho(
-  //   0,                   // left
-  //   canvas.clientWidth,  // right
-  //   canvas.clientHeight, // bottom
-  //   0,                   // top
-  //   400,                 // near
-  //   -400,                // far
-  // );  
-
-  // return projection
-}
 
 export default async function getinitUniverse(): Promise<
   (
@@ -74,11 +58,12 @@ export default async function getinitUniverse(): Promise<
         0,
         firstPoint,
         // [AssetId.RegularBody],
+        // [AssetId.RegularBody],
         [AssetId.RegularBody, AssetId.RegularAccesories, AssetId.ElephantHead],
         0
       )
     ]
-    window.angle = Math.PI * 1
+    window.angle = 0
     // window.angle = Math.PI * 0
     // Error, make sure to write test for it, and then fix it!
 
@@ -88,8 +73,11 @@ export default async function getinitUniverse(): Promise<
     function tick(now: DOMHighResTimeStamp) {
       const dt = now - lastFrameTime
       lastFrameTime = now
+
+      const [_, cameraAngleY] = getCameraAngle()
+
       units.forEach(unit => {
-        unit.update(window.angle, UnitState.IDLE, dt)
+        unit.update(window.angle - cameraAngleY, UnitState.SHOOT, dt)
       })
 
       // here we need to render that texture into canvas
@@ -111,10 +99,7 @@ export default async function getinitUniverse(): Promise<
       const pass = encoder.beginRenderPass(descriptor)
       const vertexData = getVertexData(units)
 
-
-
       const obstacles: Point[][] = []
-
       serializedMap.obstacles.forEach(p => {
         if (p === null) {
           obstacles.push([])

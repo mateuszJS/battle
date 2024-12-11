@@ -2,8 +2,10 @@ import { UnitState } from "logic-contants"
 import AssetId from "AssetsDescriptor/AssetId"
 import UnitRepresentation from "./UnitRepresentation"
 import AssetsDescriptor from "AssetsDescriptor"
+import mat4 from "utils/mat4"
 
 jest.mock('AssetsDescriptor')
+jest.mock('worldMatrix/GUI')
 
 function getClearState() {
   return {
@@ -31,7 +33,8 @@ test('addBufferData adds correct data', () => {
     destinationData,
     sourceData,
     indiciesData,
-    colorMatrixData
+    colorMatrixData,
+    mat4.identity()
   )
 
   const ElephantHeadRunFrame = AssetsDescriptor[AssetId.ElephantHead][UnitState.RUN].frames[0]
@@ -80,7 +83,7 @@ test('when time passes, the addBufferData adds correct data with new frames', ()
   
   const sourceData: number[] = []
 
-  unit.addBufferData([], [], sourceData, [], [])
+  unit.addBufferData([], [], sourceData, [], [], mat4.identity())
 
   expect(sourceData).toEqual([
     ...headRun.frames[1].sourceRect,
@@ -102,7 +105,7 @@ test('when angle changes, addBufferData adds correct data', () => {
 
   const sourceData: number[] = []
 
-  unit.addBufferData([], [], sourceData, [], [])
+  unit.addBufferData([], [], sourceData, [], [], mat4.identity())
 
   // for the seak of simple tests, we check only sourceData
   // since they are most random(doesn't repeat between frames)

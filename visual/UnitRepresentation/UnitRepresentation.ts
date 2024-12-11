@@ -79,9 +79,10 @@ export default class UnitRepresentation {
     sourceData: number[],
     indiciesData: number[],
     colorMatrixIdxData: number[],
+    planeMatrix: Float32Array
   ) {
     this.aSprites.forEach((aSprite, index) => {
-      const lastUsedIndex = destinationData.length / 2
+      const lastUsedIndex = destinationData.length / 4
       // each point has x and y component so that's why divided by 2
       const nextIndicies = 
       [
@@ -100,21 +101,9 @@ export default class UnitRepresentation {
 
       sourceData.push(...frame.sourceRect)
 
-      const [cameraAngleX, cameraAngleY] = getCameraAngle()
-      // const cameraAngleX  = -27 * Math.PI / 180
-      // const cameraAngleY  = -11 * Math.PI / 180
-
-      const matrix = [
-        mat4.rotationX(Math.PI / 2 + cameraAngleX),
-        mat4.rotationY(cameraAngleY),
-      ].reverse().reduce(
-        (acc, modMatrix) => mat4.multiply(acc, modMatrix),
-        mat4.identity()
-      )
-
       const { x, y, width, height } = frame.destinationRect
 
-      const SCALE = 0.7
+      const SCALE = 0.5
       ;[
         { x,            y: y + height },
         { x: x + width, y: y + height },
@@ -123,7 +112,7 @@ export default class UnitRepresentation {
       ]
       .map(p => ({ x: p.x * SCALE, y: p.y * SCALE}))
       .map(p => {
-        const outputVec = mat4.vectorTimesMatrix([p.x, 0, p.y, 1], matrix)
+        const outputVec = mat4.vectorTimesMatrix([p.x, 0, p.y, 1], planeMatrix)
         return {
           x: outputVec[0] / outputVec[3],
           y: outputVec[1] / outputVec[3],
@@ -143,4 +132,3 @@ export default class UnitRepresentation {
     })
   }
 }
-

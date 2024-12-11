@@ -1046,7 +1046,7 @@ class View {
     }
 }
 
-export class Controller extends View {
+class Controller extends View {
   #changeFns;
   #finishChangeFns;
   #parent;
@@ -4039,5 +4039,6 @@ const helpers = {
     monitor,
 };
 
-export { ColorChooser, Direction, RadioGrid, Range, Select, Slider, TextNumber, Vec2, GUI as default, helpers };
+module.exports = { Controller, ColorChooser, Direction, RadioGrid, Range, Select, Slider, TextNumber, Vec2, helpers };
+module.exports.default = GUI
 //# sourceMappingURL=muigui.module.js.map

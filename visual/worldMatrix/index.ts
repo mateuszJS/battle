@@ -1,5 +1,7 @@
 import mat4 from "utils/mat4";
-import GUI from "./GUI";
+import ModuleGUI from "./GUI";
+
+const GUI = ModuleGUI.default
 
 const startAngle = [-89.99, 0, 0] // bascially our mat4.lookAt tries to make sure object is oriented correctly,
 // and at -90 is totating object weirdly to keep in in the right orientation

@@ -28,6 +28,7 @@ export default function setupUI() {
 
   /* eveyrthing right pane related */
   const controlPanelEl = document.createElement('section')
+  controlPanelEl.classList.add('control-panel')
 
   const startBtn = document.createElement('button')
   startBtn.textContent = 'START'

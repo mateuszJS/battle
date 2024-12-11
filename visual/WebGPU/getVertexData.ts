@@ -1,4 +1,5 @@
 import UnitRepresentation from "UnitRepresentation/UnitRepresentation"
+import getPlaneMatrix from "worldMatrix/planeMatrix"
 
 export class VertexData {
   private destinationRect: number[]
@@ -48,8 +49,17 @@ export function getVertexData(units: UnitRepresentation[]): VertexData {
   const indiciesData: number[] = []
   const colorMatrixIdxData: number[] = []
 
+  const planeMatrix = getPlaneMatrix()
+
   units.forEach((unit) => {
-    unit.addBufferData(textureLayersData, destinationData, sourceData, indiciesData, colorMatrixIdxData)
+    unit.addBufferData(
+      textureLayersData,
+      destinationData,
+      sourceData,
+      indiciesData,
+      colorMatrixIdxData,
+      planeMatrix
+    )
   })
 
   return new VertexData({
