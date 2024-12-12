@@ -1,6 +1,8 @@
 import mat4 from "utils/mat4"
 import { getCameraAngle } from "worldMatrix"
 
+const testCameraEndAngle = [(Math.PI / 180) * -27, (Math.PI / 180) * -11, 0]
+
 export default function getPlaneMatrix() {
   const [cameraAngleX, cameraAngleY] = getCameraAngle()
 

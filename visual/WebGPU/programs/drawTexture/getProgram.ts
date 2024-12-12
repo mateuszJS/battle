@@ -66,6 +66,9 @@ export default function getProgram(
         },
       }],
     },
+    primitive: {
+      cullMode: 'back',
+    },
   });
 
   const uniformBufferSize = (16/*projection matrix*/ + 2 * 12/*color matrix*/) * 4;

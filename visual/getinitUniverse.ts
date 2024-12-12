@@ -9,6 +9,7 @@ import AssetId from "AssetsDescriptor/AssetId";
 import UnitRepresentation from "UnitRepresentation/UnitRepresentation";
 import getWorldMatrix, { getCameraAngle } from "worldMatrix";
 import { SerializedMap } from "map-creator/serializeMap";
+import EnvironmentRepresentation from "EnvironmentRepresentation";
 
 export default async function getinitUniverse(): Promise<
   (
@@ -64,6 +65,8 @@ export default async function getinitUniverse(): Promise<
       )
     ]
     window.angle = 0
+
+    const envRepresentation = new EnvironmentRepresentation(serializedMap.platforms)
     // window.angle = Math.PI * 0
     // Error, make sure to write test for it, and then fix it!
 
@@ -97,7 +100,7 @@ export default async function getinitUniverse(): Promise<
       const encoder = device.createCommandEncoder()
       const worldMatrix = getWorldMatrix(canvas, serializedMap.cameraTarget, dt)
       const pass = encoder.beginRenderPass(descriptor)
-      const vertexData = getVertexData(units)
+      const vertexData = getVertexData(units, envRepresentation)
 
       const obstacles: Point[][] = []
       serializedMap.obstacles.forEach(p => {

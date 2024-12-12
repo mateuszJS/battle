@@ -6,6 +6,7 @@ export interface SerializedMap {
   height: number
   obstacles: Array<Point | null>
   cameraTarget: Point
+  platforms: Point[]
 }
 
 function getChildElementIndex(el: HTMLElement) {
@@ -59,9 +60,12 @@ function visitPlatform(
   }
 }
 
+export function getOffsetY(mapEl: HTMLElement) {
+  return -mapEl.getBoundingClientRect().height
+}
 
-export default function serializeMap(mapNode: HTMLElement): SerializedMap {
-  const platformEls = Array.from(mapNode.querySelectorAll<HTMLElement>('[kind="platform"]'))
+export default function serializeMap(mapEl: HTMLElement): SerializedMap {
+  const platformEls = Array.from(mapEl.querySelectorAll<HTMLElement>('[kind="platform"]'))
   const visited: Array<HTMLElement | null> = [null] // null is a sentinel value which indicates new shape
 
   platformEls.forEach(el => {
@@ -73,10 +77,23 @@ export default function serializeMap(mapNode: HTMLElement): SerializedMap {
     : getCoords(p)
   )
 
+  const offsetY = getOffsetY(mapEl)
+  const correctedPoints = points.map(p => (
+    p === null
+      ? null
+      : { x:  p.x, y: p.y + offsetY } // remember y is gonna be z coord
+  ))
+  const firstPoint = correctedPoints.find(Boolean) as Point
+
   return {
     width: 1000,
     height: 1000,
-    cameraTarget: { x: 500, y: 500 },
-    obstacles: points
+    cameraTarget: firstPoint,
+    obstacles: correctedPoints,
+    platforms: platformEls
+      .map(el => {
+        const coords = getCoords(el)
+        return { x: coords.x, y: coords.y + offsetY } // remember y is gonna be z coord
+    })
   }
 }

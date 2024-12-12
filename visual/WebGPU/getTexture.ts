@@ -72,7 +72,7 @@ function createTextureFromSource(device: GPUDevice, source: TextureSource, optio
 }
 
 function copySourceToTexture(device: GPUDevice, texture: GPUTexture, source: TextureSource, {flipY, depthOrArrayLayers}: Options = {}) {
-  console.log('depthOrArrayLayers', depthOrArrayLayers)
+
   device.queue.copyExternalImageToTexture(
     { source, flipY, },
     { texture,

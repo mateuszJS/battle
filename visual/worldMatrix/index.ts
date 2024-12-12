@@ -5,7 +5,7 @@ const GUI = ModuleGUI.default
 
 const startAngle = [-89.99, 0, 0] // bascially our mat4.lookAt tries to make sure object is oriented correctly,
 // and at -90 is totating object weirdly to keep in in the right orientation
-// const endAngle = [-89, 0, 0]
+// const endAngle = [...startAngle]
 const endAngle = [-27, -11, 0]
 
 function easeInOut(t: number){
@@ -77,14 +77,10 @@ export default function getWorldMatrix(canvas: HTMLElement, targetPoints: Point,
     const easeProgress = easeInOut(relativeProgress)
     matricies.push(mat4.rotationY(
       degToRad(startAngle[1] * (1 - easeProgress) + endAngle[1] * easeProgress)
-    ))// 2. the nrotate!
+    ))
     matricies.push(mat4.rotationX(
       degToRad(startAngle[0] * (1 - easeProgress) + endAngle[0] * easeProgress)
-    )) // 1.
-
-
-
-    // [degToRad(startAngle[0]), degToRad(startAngle[1]), degToRad(startAngle[2])],
+    ))
   }
 
   matricies.push(
