@@ -8,7 +8,7 @@ const startAngle = [-89.99, 0, 0] // bascially our mat4.lookAt tries to make sur
 // const endAngle = [...startAngle]
 const endAngle = [-27, -11, 0]
 
-function easeInOut(t: number){
+function easeInOut(t: number) {
   return t > 0.5 ? 4*Math.pow((t-1),3)+1 : 4*Math.pow(t,3);
 }
 
@@ -36,7 +36,7 @@ const gui = new GUI();
 gui.add(cameraSettings, 'fieldOfView', {min: 1, max: 179, converters: GUI.converters.radToDeg});
 gui.add(cameraSettings, 'zNear', 1, 2000).name('zNear');
 gui.add(cameraSettings, 'zFar', 1, 4000).name('zFar');
-gui.add(cameraSettings, 'radius', 0, 10000).name('distance from target');
+gui.add(cameraSettings, 'radius', -10000, 10000).name('distance from target');
 gui.add(cameraSettings.cameraAngle, '0', radToDegOptions).name('rotation.x');
 gui.add(cameraSettings.cameraAngle, '1', radToDegOptions).name('rotation.y');
 gui.add(cameraSettings.cameraAngle, '2', radToDegOptions).name('rotation.z(no impact)');
@@ -51,10 +51,12 @@ gui.add(cameraSettings.light, '0', -Math.PI, Math.PI).name('light.x');
 gui.add(cameraSettings.light, '1', -Math.PI, Math.PI).name('light.y');
 gui.add(cameraSettings.light, '2', -Math.PI, Math.PI).name('light.z');
 
-export default function getWorldMatrix(canvas: HTMLElement, targetPoints: Point, dt: number) {
+export default function getWorldMatrix(canvas: HTMLElement, targetPoint: Point, dt: number) {
   time += dt
 
   const aspect = canvas.clientWidth / canvas.clientHeight;
+
+  /* PERSPECTIVE MATRIX BY DEFAULT LOOKS INTO NEGATIVE Z DIRECTION */
   const projection = mat4.perspective(
       cameraSettings.fieldOfView,
       aspect,
@@ -62,14 +64,17 @@ export default function getWorldMatrix(canvas: HTMLElement, targetPoints: Point,
       cameraSettings.zFar,   // zFar
   );
 
-  const target = [targetPoints.x, 0, targetPoints.y];
+  const target = [targetPoint.x, 0, targetPoint.y];
 
   const matricies = [
      /* 1. Move away on z axis */
   ]
+
+
   const relativeProgress = Math.max(0, time - animationDelay) / (animationLength - animationDelay)
   if (time >= animationLength) {
     // ORDER MATTERS
+
     matricies.push(mat4.rotationY(cameraSettings.cameraAngle[1]))// 2. the nrotate!
     matricies.push(mat4.rotationX(cameraSettings.cameraAngle[0])) // 1.
     // we dont need Z, it's later calculated base on const up = [0, 1, 0]; and other axis, so it wont impact
@@ -82,32 +87,45 @@ export default function getWorldMatrix(canvas: HTMLElement, targetPoints: Point,
       degToRad(startAngle[0] * (1 - easeProgress) + endAngle[0] * easeProgress)
     ))
   }
-
   matricies.push(
-    mat4.translation([0, 0, cameraSettings.radius])
+    mat4.translation([0, 0, cameraSettings.radius]),
   )
+ 
+ 
+
+  // matricies.push(mat4.rotationZ(cameraSettings.cameraAngle[1]))// 2. the nrotate!
+
 
   const cameraPos = matricies.reduce(
     (matrix, rotationMatrix) => mat4.multiply(matrix, rotationMatrix),
     mat4.translation(target) // put camera at exact same palce as objwct to follow
   )
 
+  // const cameraPos = mat4.translate(matricies[0], target)
+  // const cameraPos = mat4.translate(matricies[0], [0, 0, cameraSettings.radius])
+
   // Get the camera's position from the matrix we computed
   const eye = cameraPos.slice(12, 15);
 
   const up = [0, 1, 0];
-  // const up = [0, 1, 0];
 
   const viewMatrix = mat4.lookAt(eye, target, up);
 
   const viewProjectionMatrix = mat4.multiply(projection, viewMatrix);
-
-  const world = mat4.identity();
-
-  // Combine the viewProjection and world matrices
-  const worldViewProjection = mat4.multiply(viewProjectionMatrix, world);
-
-  return worldViewProjection
+  // matricies.push(
+  //   mat4.scaling([1, 1, -1]),
+  // )
+  return viewProjectionMatrix
+  // const reflectedZ =  mat4.multiply(viewProjectionMatrix, mat4.scaling([1, 1, -1]))
+  // return mat4.multiply(reflectedZ, transl)
+  // return mat4.rotateY(
+  //   mat4.translate(
+  //     reflectedZ,
+  //     [0, -500]
+  //   ),
+  //   cameraSettings.cameraAngle[1]
+  // )
+  // return mat4.inverse(cameraPos)
 }
 
 export function getCameraAngle(): number[] {

@@ -1,4 +1,4 @@
-import EnvironmentRepresentation from "EnvironmentRepresentation"
+import EnvironmentRepresentation from "EnvRepresentation"
 import UnitRepresentation from "UnitRepresentation/UnitRepresentation"
 import getPlaneMatrix from "worldMatrix/planeMatrix"
 
@@ -52,6 +52,14 @@ export function getVertexData(units: UnitRepresentation[], envRepresentation: En
 
   const planeMatrix = getPlaneMatrix()
 
+  envRepresentation.addBufferData(
+    textureLayersData,
+    destinationData,
+    sourceData,
+    indiciesData,
+  )
+
+  
   units.forEach((unit) => {
     unit.addBufferData(
       textureLayersData,
@@ -63,12 +71,6 @@ export function getVertexData(units: UnitRepresentation[], envRepresentation: En
     )
   })
 
-  envRepresentation.addBufferData(
-    textureLayersData,
-    destinationData,
-    sourceData,
-    indiciesData,
-  )
 
   return new VertexData({
     destinationRect: destinationData,

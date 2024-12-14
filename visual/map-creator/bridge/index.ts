@@ -126,3 +126,7 @@ export function restoreBridges(
   })
   updateBridges()
 }
+
+export function getAllBridges() {
+  return bridges
+}

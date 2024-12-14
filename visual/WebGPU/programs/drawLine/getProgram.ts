@@ -67,10 +67,15 @@ export default function getProgram(
       }
       const offsetX = Math.cos(perpendicularAngle) * width
       const offsetZ = Math.sin(perpendicularAngle) * width
+
       vertexPositionData.push(
         p.x + offsetX, 0, p.y + offsetZ, 1,
         p.x - offsetX, 0, p.y - offsetZ, 1,
       )
+      // vertexPositionData.push(
+      //   p.x + offsetX, -p.y * 0.2, p.y + offsetZ, 1,
+      //   p.x - offsetX, -p.y * 0.2, p.y - offsetZ, 1,
+      // )
     })
 
 

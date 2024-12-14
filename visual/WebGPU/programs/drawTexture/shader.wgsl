@@ -25,7 +25,7 @@ struct VertexOutput {
   var out: VertexOutput;
   // maybe we should pass offsets from the position instead of... position?
   out.position = u.matrix * vert.position;
-  out.texCoord = vec2f(vert.uv.x, vert.uv.y);
+  out.texCoord = vert.uv;
   out.texLayerIndex = vert.texLayerIndex;
   out.colorMatrixIndex = vert.colorMatrixIndex;
   return out;
@@ -36,7 +36,7 @@ struct VertexOutput {
   let texel = textureSample(ourTexture, ourSampler, in.texCoord, in.texLayerIndex);
 
   return vec4f(
-    texel.rgb * colorMatrix,
-    texel.a
+    (texel.rgb * colorMatrix).rg, 1.0,
+    1.0
   );
 }

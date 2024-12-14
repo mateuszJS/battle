@@ -1,4 +1,3 @@
-import { getOffsetY } from "map-creator/serializeMap";
 import mat4 from "utils/mat4";
 import getWorldMatrix from "worldMatrix";
 
@@ -38,9 +37,8 @@ export default function startTransition(
     0,
   )
   const mapElRect = mapElement.getBoundingClientRect()
-  const offsetY = getOffsetY(mapElement)
-  const topLeftCorner = logicPointToCanvas(worldMatrix, [0, 0, offsetY, 1], canvas)
-  const topRightCorner = logicPointToCanvas(worldMatrix, [mapElRect.width, 0, offsetY, 1], canvas)
+  const topLeftCorner = logicPointToCanvas(worldMatrix, [0, 0, 0, 1], canvas)
+  const topRightCorner = logicPointToCanvas(worldMatrix, [mapElRect.width, 0, 0, 1], canvas)
 
   const widthMatrixed = Math.hypot(
     topLeftCorner.x - topRightCorner.x,

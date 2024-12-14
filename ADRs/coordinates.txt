@@ -1,0 +1,20 @@
+We are going to use same as WebGPU/WebGL axises in coordinate system:
+https://developer.mozilla.org/en-US/docs/Games/Techniques/3D_on_the_web/Basic_theory/mdn-games-3d-coordinate-system.png
+
+It's just to follow industry standards. Otherwise all already implemented matrix functions like aimAt works
+absolutely unpredictably and are the potential source of the cancer for the author of the code.
+
+The other option was to place elements on x, y:
+          ↑
+          |
+          |
+x -------------------→
+          |
+          |
+          |
+          y
+and rotate camera by x axis by around 4 degrees, so Z axis will be the "height" of objects.
+Unfortunately that brings tons of problems with matricies and camera angle rotations.
+
+The downside of our chosen approach that we will have to remember Z axis is not like Y axis
+in common carthesian space, it's reversed like in all computes sience graphics.

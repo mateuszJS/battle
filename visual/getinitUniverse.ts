@@ -9,7 +9,7 @@ import AssetId from "AssetsDescriptor/AssetId";
 import UnitRepresentation from "UnitRepresentation/UnitRepresentation";
 import getWorldMatrix, { getCameraAngle } from "worldMatrix";
 import { SerializedMap } from "map-creator/serializeMap";
-import EnvironmentRepresentation from "EnvironmentRepresentation";
+import EnvironmentRepresentation from "EnvRepresentation";
 
 export default async function getinitUniverse(): Promise<
   (
@@ -66,7 +66,7 @@ export default async function getinitUniverse(): Promise<
     ]
     window.angle = 0
 
-    const envRepresentation = new EnvironmentRepresentation(serializedMap.platforms)
+    const envRepresentation = new EnvironmentRepresentation(serializedMap.envVisuals)
     // window.angle = Math.PI * 0
     // Error, make sure to write test for it, and then fix it!
 
@@ -117,7 +117,6 @@ export default async function getinitUniverse(): Promise<
         }
       })
       drawTexture(pass, worldMatrix, vertexData, texture2dArray, colorMatricies)
-
       pass.end()
       const commandBuffer = encoder.finish();
       device.queue.submit([commandBuffer]);
