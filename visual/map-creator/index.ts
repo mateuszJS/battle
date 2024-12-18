@@ -207,7 +207,8 @@ export default function openMapCreator(wasmModule: Universe) {
   /* clean the DOM and go to the next phase */
   Promise.all([startBtnClickPromise, getinitUniverse()])
     .then(([_, initUniverse]) => {
-      const serializedMap = serializeMap(mapElement)
+      const scale = 3
+      const serializedMap = serializeMap(mapElement, scale)
 
       console.log(JSON.stringify(getStoreMap(mapElement)))
 
@@ -241,7 +242,7 @@ export default function openMapCreator(wasmModule: Universe) {
       )
 
       // viewElem.style.opacity = '.3'
-      startTransition(canvas, mapElement, toolBarEl, controlPanelEl,serializedMap.cameraTarget, unmount)
+      startTransition(canvas, mapElement, toolBarEl, controlPanelEl,serializedMap.cameraTarget, unmount, scale)
     })
 }
 

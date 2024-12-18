@@ -19,7 +19,7 @@ const degToRad = (d: number) => d * Math.PI / 180;
 export const cameraSettings = {
   fieldOfView: degToRad(18),
   zNear: 1,
-  zFar: 4000,
+  zFar: 10000,
   radius: 3008.11,
   cameraAngle: [degToRad(endAngle[0]), degToRad(endAngle[1]), degToRad(endAngle[2])],
   scale: [1, 1, 1],
@@ -30,7 +30,7 @@ export const cameraSettings = {
 const radToDegOptions = { min: -360, max: 360, step: 1, converters: GUI.converters.radToDeg };
 
 
-let time = 0
+const time = 0
 
 const gui = new GUI();
 gui.add(cameraSettings, 'fieldOfView', {min: 1, max: 179, converters: GUI.converters.radToDeg});
@@ -51,25 +51,31 @@ gui.add(cameraSettings.light, '0', -Math.PI, Math.PI).name('light.x');
 gui.add(cameraSettings.light, '1', -Math.PI, Math.PI).name('light.y');
 gui.add(cameraSettings.light, '2', -Math.PI, Math.PI).name('light.z');
 
-export default function getWorldMatrix(canvas: HTMLElement, targetPoint: Point, dt: number) {
-  time += dt
+let extraMatrix: Float32Array  | null = null
 
+export function setExtraMatrix(matrix: Float32Array | null) {
+  extraMatrix = matrix
+}
+
+function getProjMatrix(canvas: HTMLElement) {
   const aspect = canvas.clientWidth / canvas.clientHeight;
 
   /* PERSPECTIVE MATRIX BY DEFAULT LOOKS INTO NEGATIVE Z DIRECTION */
-  const projection = mat4.perspective(
+  return mat4.perspective(
       cameraSettings.fieldOfView,
       aspect,
       cameraSettings.zNear,      // zNear
       cameraSettings.zFar,   // zFar
   );
+}
+
+export default function getWorldMatrix(canvas: HTMLElement, targetPoint: Point, dt: number) {
+  // time += dt
+
 
   const target = [targetPoint.x, 0, targetPoint.y];
 
-  const matricies = [
-     /* 1. Move away on z axis */
-  ]
-
+  const matricies = []
 
   const relativeProgress = Math.max(0, time - animationDelay) / (animationLength - animationDelay)
   if (time >= animationLength) {
@@ -92,40 +98,25 @@ export default function getWorldMatrix(canvas: HTMLElement, targetPoint: Point, 
   )
  
  
-
-  // matricies.push(mat4.rotationZ(cameraSettings.cameraAngle[1]))// 2. the nrotate!
-
-
   const cameraPos = matricies.reduce(
     (matrix, rotationMatrix) => mat4.multiply(matrix, rotationMatrix),
     mat4.translation(target) // put camera at exact same palce as objwct to follow
   )
 
-  // const cameraPos = mat4.translate(matricies[0], target)
-  // const cameraPos = mat4.translate(matricies[0], [0, 0, cameraSettings.radius])
-
   // Get the camera's position from the matrix we computed
   const eye = cameraPos.slice(12, 15);
-
   const up = [0, 1, 0];
-
   const viewMatrix = mat4.lookAt(eye, target, up);
 
+  const projection = getProjMatrix(canvas)
+  if (extraMatrix) {
+    mat4.multiply(extraMatrix, projection, projection)
+  }
+
   const viewProjectionMatrix = mat4.multiply(projection, viewMatrix);
-  // matricies.push(
-  //   mat4.scaling([1, 1, -1]),
-  // )
+  // return viewProjectionMatrix
   return viewProjectionMatrix
-  // const reflectedZ =  mat4.multiply(viewProjectionMatrix, mat4.scaling([1, 1, -1]))
-  // return mat4.multiply(reflectedZ, transl)
-  // return mat4.rotateY(
-  //   mat4.translate(
-  //     reflectedZ,
-  //     [0, -500]
-  //   ),
-  //   cameraSettings.cameraAngle[1]
-  // )
-  // return mat4.inverse(cameraPos)
+
 }
 
 export function getCameraAngle(): number[] {

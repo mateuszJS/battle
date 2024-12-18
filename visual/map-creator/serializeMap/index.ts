@@ -9,9 +9,9 @@ export interface SerializedMap {
   envVisuals: EnvVisuals
 }
 
-export default function serializeMap(mapEl: HTMLElement): SerializedMap {
-  const obstacles = collectAllObstacles(mapEl)
-  const envVisuals = collectEnvVisuals(mapEl)
+export default function serializeMap(mapEl: HTMLElement, scale: number): SerializedMap {
+  const obstacles = collectAllObstacles(mapEl, scale)
+  const envVisuals = collectEnvVisuals(mapEl, scale)
   const firstPoint = obstacles[1] as Point
 
   return {

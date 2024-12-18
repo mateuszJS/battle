@@ -179,3 +179,26 @@
     background: rgb(220, 82, 255);
   }
 }
+
+#debug-panel {
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  width: calc(329px - 0px);
+  height: calc(36px - 0px);
+  background: gold;
+  opacity: .5;
+
+  &:before {
+    content: "";
+    display: block;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    width: calc(329px - 140px);
+    height: calc(36px - 20px);
+    background: tomato;
+  }
+}

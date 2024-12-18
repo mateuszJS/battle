@@ -12,6 +12,12 @@ const PLATFORM_INDICIES = [
   8, 0, 1,
 ]
 
+const texturePoints = [
+  [.0, .0],
+  [.1, .0],
+  [.1, .1],
+  [.0, .1],
+]
 
 export default class EnvRepresentation {
   private textureLayersData: number[] = []
@@ -20,20 +26,27 @@ export default class EnvRepresentation {
   private indiciesData: number[] = []
 
   constructor(envVisuals: EnvVisuals){
-    envVisuals.platforms.forEach((platformPoints => {
-      const nextIndicies = PLATFORM_INDICIES.map(i => (this.destinationData.length / 4) + i)
-      this.indiciesData.push(...nextIndicies)
+    const nextIndicies = [1, 0, 2].map(i => (this.destinationData.length / 4) + i)
+    this.indiciesData.push(...nextIndicies)
 
-      this.textureLayersData.push(...Array(platformPoints.length).fill(1))
+    this.textureLayersData.push(...Array(3).fill(1))
 
-      this.sourceData.push(
-        ...platformPoints.flatMap(p => [p.x, p.y])
-      )
+    // this.sourceData.push(
+    //   ...platformPoints.flatMap(p => [p.x, p.y])
+    // )
 
-      this.destinationData.push(
-        ...platformPoints.flatMap(p => [p.x, 0, p.y, 1])
-      )
-    }))
+    this.sourceData.push(
+      0, 0,
+      0, 1,
+      1, 1,
+    )
+
+    this.destinationData.push(
+      0, 0, 0, 1,
+      100, 0, 0, 1,
+      0, 0, 100, 1,
+    )
+    return
 
     envVisuals.bridges.forEach((points => {
       attachBridgeVertex(
@@ -44,6 +57,26 @@ export default class EnvRepresentation {
         points,
       ) 
     }))
+    return
+    envVisuals.platforms.forEach((platformPoints => {
+      const nextIndicies = PLATFORM_INDICIES.map(i => (this.destinationData.length / 4) + i)
+      this.indiciesData.push(...nextIndicies)
+
+      this.textureLayersData.push(...Array(platformPoints.length).fill(1))
+
+      // this.sourceData.push(
+      //   ...platformPoints.flatMap(p => [p.x, p.y])
+      // )
+
+      this.sourceData.push(
+        ...platformPoints.flatMap((p, i) => texturePoints[i % 4])
+      )
+
+      this.destinationData.push(
+        ...platformPoints.flatMap(p => [p.x, 0, p.y, 1])
+      )
+    }))
+
     // console.log('this.indiciesData', [...this.indiciesData])
     // console.log('this.textureLayersData', [...this.textureLayersData])
     // console.log('this.sourceData', [...this.sourceData])

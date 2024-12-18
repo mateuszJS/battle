@@ -1,0 +1,18 @@
+{
+	"frames": {
+		"bridge_top_0000.png":
+			{
+				"frame": {"x":0,"y":0,"w":1024,"h":2048},
+				"rotated": false,
+				"trimmed": false,
+				"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":2048}
+			},
+			"bridge_outside_0000.png":
+			{
+				"frame": {"x":1024,"y":0,"w":1024,"h":2048},
+				"rotated": true,
+				"trimmed": false,
+				"spriteSourceSize": {"x":1024,"y":0,"w":1024,"h":2048}
+			}
+	}
+}

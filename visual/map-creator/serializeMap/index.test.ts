@@ -267,6 +267,6 @@ describe("serialize map", () => {
         y: 10, // Number.parseInt(el.style.top),
       }
     })
-    expect(serializeMap(mapEl)).toEqual(expectedOutputPoints)
+    expect(serializeMap(mapEl, 1)).toEqual(expectedOutputPoints)
   })
 })

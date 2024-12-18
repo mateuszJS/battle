@@ -52,7 +52,7 @@ function collectObstacle(
   }
 }
 
-export default function collectAllObstacles(mapEl: HTMLElement) {
+export default function collectAllObstacles(mapEl: HTMLElement, scale: number) {
   const visited: Array<HTMLElement | null> = [null] // null is a sentinel value which indicates new shape
   const platformEls = Array.from(mapEl.querySelectorAll<HTMLElement>('[kind="platform"]'))
 
@@ -65,8 +65,8 @@ export default function collectAllObstacles(mapEl: HTMLElement) {
     
     const coords = getCoords(el)
     return {
-      x: coords.x,
-      y: coords.y,
+      x: coords.x * scale,
+      y: coords.y * scale,
     }
   })
   console.log('points', points)
