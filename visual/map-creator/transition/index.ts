@@ -1,6 +1,10 @@
 import mat4 from "utils/mat4";
 import getWorldMatrix, { setExtraMatrix } from "worldMatrix";
 
+function easeInOut(t: number) {
+  return t > 0.5 ? 4*Math.pow((t-1),3)+1 : 4*Math.pow(t,3);
+}
+
 function getWebGPUPoint(
   matrix: Float32Array,
   rawPoint: number[],
@@ -28,6 +32,28 @@ function logicPointToCanvas(
   return canvasPoint
 }
 
+function updateMapElementStyle(mapEl: HTMLElement, canvas: HTMLElement, cameraTarget: Point, mapElWidth: number, mapScale: number) {
+  const worldMatrix = getWorldMatrix(
+    canvas,
+    cameraTarget,
+    // { x: mapElStartPosition.width / 2, y: mapElStartPosition.height / 2 },
+    0,
+  )
+
+  const topLeftCorner = logicPointToCanvas(worldMatrix, [0, 0, 0, 1], canvas)
+  const topRightCorner = logicPointToCanvas(worldMatrix, [mapElWidth * mapScale, 0, 0, 1], canvas)
+  const widthMatrixed = Math.hypot(
+    topLeftCorner.x - topRightCorner.x,
+    topLeftCorner.y - topRightCorner.y,
+  )
+
+  const endScale = widthMatrixed / mapElWidth
+
+  mapEl.style.top = topLeftCorner.y + 'px'
+  mapEl.style.left = topLeftCorner.x + 'px'
+  mapEl.style.scale = endScale.toString()
+}
+
 export default function startTransition(
   canvas: HTMLElement,
   mapElement: HTMLElement,
@@ -38,13 +64,7 @@ export default function startTransition(
   mapScale: number
 ) {
   setExtraMatrix(null)
-  // canvas.style.width = 9000 + 'px'
-  // canvas.style.height = 6000 + 'px'
-  // const { width , height } = canvas.getBoundingClientRect()
 
-  // canvas.style.width = width * 6 + 'px'
-  // canvas.style.height = height * 6 + 'px'
-        
   const worldMatrix = getWorldMatrix(
     canvas,
     cameraTarget,
@@ -64,77 +84,49 @@ export default function startTransition(
 
   /* MAP ELEMENT ANIMATION */
 
-  const animationDetails = [
-    { top: mapElRect.y + 'px', left: mapElRect.x + 'px', scale: 1, opacity: 1 },
-    { top: topLeftCorner.y + 'px', left: topLeftCorner.x + 'px', scale: endScale, opacity: 1 },
-    // { top: topLeftCorner.y + 'px', left: topLeftCorner.x + 'px', scale: endScale, opacity: -1.5 },
-  ];
-
-  const animationTiming = {
-    duration: 2000,
-    iterations: 1,
-    easing: "ease-in"
-  };
-
   /* change from relative flow layout to aboslute position */
   mapElement.style.position = 'absolute'
   mapElement.style.top = mapElRect.y + 'px'
   mapElement.style.left = mapElRect.x + 'px'
-  Object.entries(animationDetails[0]).forEach(([name, value]) => {
-    mapElement.style[name as 'top'] = value as string
-  })
+
   const placeholderElement = document.createElement('div') // element just to fill gap of mapElement
   // otherwise elements in css grid would shift to fill that gap
   mapElement.parentElement!.insertBefore(placeholderElement, mapElement)
 
-  // const animation = mapElement.animate(animationDetails, animationTiming);
-  // animation.addEventListener('finish', () => {
-  //   cleanup()
-  // })
-  console.log(1/  endScale)
-  /* CANVAS ANIMATION */
-  canvas.style.transformOrigin = `${mapElRect.x}px ${mapElRect.y}px`
-  const animationDetailsCanvas = [
-    {
-      // top: (mapElRect.y - topLeftCorner.y) * (1 / endScale) + 'px',
-      // left: (mapElRect.x - topLeftCorner.x) * (1 / endScale) + 'px',
-      scale: `${1 / endScale}`
-    },
-    { top: '0px', left: '0px', scale: 1 },
-  ];
-  // Object.entries(animationDetailsCanvas[0]).forEach(([name, value]) => {
-  //   canvas.style[name as 'top'] = value as string
-  // })
-  
-      // Error, make sure to write test for it, and then fix it!
+
 
   const startTime = document.timeline.currentTime as number
   const animationTime = 2000
   /* not sure if type in TS is correct and and if nay browser supposrt currrentTime as CSSNumericValue */ 
 
   function tick(now: DOMHighResTimeStamp) {
-    const progress = 0 // Math.min((now - startTime) / animationTime, 1)
+    const progress = easeInOut(Math.min((now - startTime) / animationTime, 1))
 
     const worldOriginPoint = getWebGPUPoint(worldMatrix, [0, 0, 0, 0])
-    // const origin = logicPointToCanvas(worldMatrix, [140, 0, 20, 1], canvas)
-    // console.log('origin', origin)
-    console.log('topLeftCorner.x', topLeftCorner.x)
 
     const originTranslationM = mat4.translation([
       worldOriginPoint.x,
       worldOriginPoint.y,
       0,
     ])
-    const scaleM = mat4.scaling([1 / endScale, 1 / endScale, 1])
+
+    const scaleM = mat4.scaling([
+      (1 / endScale) * (1 - progress) + progress,
+      (1 / endScale) * (1 - progress) + progress,
+      1
+    ])
+
     const translateM = mat4.translation([
-      ((mapElRect.x - topLeftCorner.x) * endScale / canvas.clientWidth) * 2,
-      (-(mapElRect.y - topLeftCorner.y) * endScale / canvas.clientHeight) * 2,
+      ((mapElRect.x - topLeftCorner.x) * endScale / canvas.clientWidth) * 2 * (1 - progress),
+      (-(mapElRect.y - topLeftCorner.y) * endScale / canvas.clientHeight) * 2 * (1 - progress),
       0,
     ])
 
     const extraMatrix = [
       originTranslationM,
+      // newOriginM,
       scaleM,
+      // inverseNewOriginM,
       mat4.inverse(originTranslationM),
       translateM,
     ].reduce(
@@ -144,29 +136,42 @@ export default function startTransition(
 
     setExtraMatrix(extraMatrix)
 
+    updateMapElementStyle(
+      mapElement,
+      canvas,
+      cameraTarget,
+      mapElRect.width,
+      mapScale,
+    )
+
+    mapElement.style.opacity = `${(1 - progress) + progress * -1.5}`;
+
     if (progress < 1) {
       requestAnimationFrame(tick)
     } else {
+      cleanup()
       setExtraMatrix(null)
     }
   }
 
   requestAnimationFrame(tick)
 
-
-  // Object.entries(animationDetailsCanvas[0]).forEach(([name, value]) => {
-  //   canvas.style[name as 'top'] = value as string
-  // })
-  // canvas.animate(animationDetailsCanvas, animationTiming);
-
   /* TOOLBAR ANIMATION */
+
+  const animationTiming = {
+    duration: animationTime,
+    iterations: 1,
+    easing: "ease-in"
+  };
+
+
   const animationDetailsToolbar = [
     {
       transform: 'translateX(0px)',
       opacity: 1,
     },
     {
-      transform: 'translateX(-200px)',
+      transform: 'translateX(-400%)',
       opacity: 0
     },
   ];
@@ -181,7 +186,7 @@ export default function startTransition(
       opacity: 1,
     },
     {
-      transform: 'translateX(200px)',
+      transform: 'translateX(400%)',
       opacity: 0
     },
   ];

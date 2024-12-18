@@ -46,7 +46,6 @@ export default class EnvRepresentation {
       100, 0, 0, 1,
       0, 0, 100, 1,
     )
-    return
 
     envVisuals.bridges.forEach((points => {
       attachBridgeVertex(
@@ -57,7 +56,7 @@ export default class EnvRepresentation {
         points,
       ) 
     }))
-    return
+
     envVisuals.platforms.forEach((platformPoints => {
       const nextIndicies = PLATFORM_INDICIES.map(i => (this.destinationData.length / 4) + i)
       this.indiciesData.push(...nextIndicies)

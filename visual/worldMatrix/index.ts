@@ -30,7 +30,7 @@ export const cameraSettings = {
 const radToDegOptions = { min: -360, max: 360, step: 1, converters: GUI.converters.radToDeg };
 
 
-const time = 0
+let time = 0
 
 const gui = new GUI();
 gui.add(cameraSettings, 'fieldOfView', {min: 1, max: 179, converters: GUI.converters.radToDeg});
@@ -70,7 +70,7 @@ function getProjMatrix(canvas: HTMLElement) {
 }
 
 export default function getWorldMatrix(canvas: HTMLElement, targetPoint: Point, dt: number) {
-  // time += dt
+  time += dt
 
 
   const target = [targetPoint.x, 0, targetPoint.y];
