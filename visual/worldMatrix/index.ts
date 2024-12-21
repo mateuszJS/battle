@@ -1,6 +1,6 @@
 import mat4 from "utils/mat4";
 import ModuleGUI from "./GUI";
-import mat3 from "WebGPU/m3";
+import vec3 from "utils/vec3";
 
 const GUI = ModuleGUI.default
 
@@ -25,8 +25,7 @@ export const cameraSettings = {
   cameraAngle: [degToRad(endAngle[0]), degToRad(endAngle[1]), degToRad(endAngle[2])],
   scale: [1, 1, 1],
   scaleFactor: 1,
-  light: [.31, .46, -.16]
-  // light: [-0.5, -0.7, -1]
+  light: [-0.5, -1, -0.37]
 }; // to add more perspective, increase fieldofView and decrease translation.z
 const radToDegOptions = { min: -360, max: 360, step: 1, converters: GUI.converters.radToDeg };
 
@@ -41,16 +40,10 @@ gui.add(cameraSettings, 'radius', -10000, 10000).name('distance from target');
 gui.add(cameraSettings.cameraAngle, '0', radToDegOptions).name('rotation.x');
 gui.add(cameraSettings.cameraAngle, '1', radToDegOptions).name('rotation.y');
 gui.add(cameraSettings.cameraAngle, '2', radToDegOptions).name('rotation.z(no impact)');
-// gui.add(cameraSettings.rotation, '0', radToDegOptions).name('rotation.x');
-// gui.add(cameraSettings.rotation, '1', radToDegOptions).name('rotation.y');
-// gui.add(cameraSettings.rotation, '2', radToDegOptions).name('rotation.z');
-// gui.add(cameraSettings.scale, '0', -5, 5).name('scale.x');
-// gui.add(cameraSettings.scale, '1', -5, 5).name('scale.y');
-// gui.add(cameraSettings.scale, '2', -5, 5).name('scale.z');
 gui.add(cameraSettings, 'scaleFactor', -5, 5).name('scaleFactor');
-gui.add(cameraSettings.light, '0', -Math.PI, Math.PI).name('light.x');
-gui.add(cameraSettings.light, '1', -Math.PI, Math.PI).name('light.y');
-gui.add(cameraSettings.light, '2', -Math.PI, Math.PI).name('light.z');
+gui.add(cameraSettings.light, '0', -1, 1).name('light.x');
+gui.add(cameraSettings.light, '1', -1, 1).name('light.y');
+gui.add(cameraSettings.light, '2', -1, 1).name('light.z');
 
 let extraMatrix: Float32Array  | null = null
 
@@ -117,14 +110,9 @@ export default function getMatricies(canvas: HTMLElement, targetPoint: Point, dt
   const viewProjectionMatrix = mat4.multiply(projection, viewMatrix);
   // return viewProjectionMatrix
 
-  const xxx = matricies.slice(0, -1).reduce(
-    (matrix, rotationMatrix) => mat4.multiply(matrix, rotationMatrix),
-    mat4.identity() // put camera at exact same palce as objwct to follow
-  )
-
   return {
     worldMatrix: viewProjectionMatrix,
-    normalMatrix: mat3.fromMat4(mat4.transpose(mat4.inverse(xxx)))
+    lightDirection: vec3.normalize(cameraSettings.light)
   }
 
 }

@@ -9,7 +9,7 @@ struct Vertex {
 struct Uniforms {
   worldViewProjection: mat4x4f,
   colorMatricies: array<mat3x3f, NUM_OF_MATRICIES>, /* 1 - factions number limit */
-  normalMatrix: mat3x3f,
+  // normalMatrix: mat3x3f,
   lightDirection: vec3f,
 };
 
@@ -32,7 +32,9 @@ struct VertexOutput {
   out.texCoord = vert.uv;
   out.texLayerIndex = vert.texLayerIndex;
   out.colorMatrixIndex = vert.colorMatrixIndex;
-  out.normal = u.normalMatrix * vert.normal;
+  // out.normal = u.normalMatrix * vert.normal;
+  out.normal = vert.normal;
+  
   return out;
 }
 

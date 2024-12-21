@@ -10,6 +10,8 @@ import UnitRepresentation from "UnitRepresentation/UnitRepresentation";
 import getMatricies, { getCameraAngle } from "worldMatrix";
 import { SerializedMap } from "map-creator/serializeMap";
 import EnvironmentRepresentation from "EnvRepresentation";
+import vec3 from "utils/vec3";
+import DebugRepresentation from "debug/DebugRepresentation";
 
 let depthTexture: GPUTexture | undefined;
 
@@ -69,6 +71,7 @@ export default async function getinitUniverse(): Promise<
     window.angle = 0
 
     const envRepresentation = new EnvironmentRepresentation(serializedMap.envVisuals)
+    const debugRepresentation = new DebugRepresentation()
     // window.angle = Math.PI * 0
     // Error, make sure to write test for it, and then fix it!
 
@@ -117,13 +120,15 @@ export default async function getinitUniverse(): Promise<
           view: depthTexture.createView(), // placholder to calm down TS
           depthClearValue: 1.0,
           depthLoadOp: 'clear',
-          depthStoreOp: 'store',
+          depthStoreOp: 'discard', // change to 'store' if we ran more than one render,
         } as const,
       }
       const encoder = device.createCommandEncoder()
-      const {worldMatrix, normalMatrix} = getMatricies(canvas, serializedMap.cameraTarget, dt)
+
+      const {worldMatrix, lightDirection} = getMatricies(canvas, serializedMap.cameraTarget, dt)
       const pass = encoder.beginRenderPass(descriptor)
-      const vertexData = getVertexData(units, envRepresentation)
+      const fullLightAngle = [-lightDirection[0], -lightDirection[1], -lightDirection[2]]
+      const vertexData = getVertexData(units, envRepresentation, debugRepresentation, fullLightAngle)
 
       const obstacles: Point[][] = []
       serializedMap.obstacles.forEach(p => {
@@ -139,7 +144,7 @@ export default async function getinitUniverse(): Promise<
           drawLine(pass, worldMatrix,  [...pList, pList[0]], 10)
         }
       })
-      drawTexture(pass, worldMatrix, vertexData, texture2dArray, colorMatricies, normalMatrix)
+      drawTexture(pass, worldMatrix, vertexData, texture2dArray, colorMatricies, lightDirection)
       pass.end()
       const commandBuffer = encoder.finish();
       device.queue.submit([commandBuffer]);

@@ -1,3 +1,4 @@
+import DebugRepresentation from "debug/DebugRepresentation"
 import EnvironmentRepresentation from "EnvRepresentation"
 import UnitRepresentation from "UnitRepresentation/UnitRepresentation"
 import getPlaneMatrix from "worldMatrix/planeMatrix"
@@ -105,7 +106,12 @@ export class VertexData {
   }
 }
 
-export function getVertexData(units: UnitRepresentation[], envRepresentation: EnvironmentRepresentation): VertexData {
+export function getVertexData(
+  units: UnitRepresentation[],
+  envRepresentation: EnvironmentRepresentation,
+  debugRepresentation: DebugRepresentation,
+  fullLightAngle: number[],
+): VertexData {
   const textureLayersData: number[] = []
   const destinationData: number[] = []
   const sourceData: number[] = []
@@ -134,8 +140,19 @@ export function getVertexData(units: UnitRepresentation[], envRepresentation: En
       normalsData,
       indiciesData,
       planeMatrix,
+      fullLightAngle,
     )
   })
+
+  debugRepresentation.addBufferData(
+    textureLayersData,
+    destinationData,
+    sourceData,
+    colorMatrixIdxData,
+    normalsData,
+    indiciesData,
+    fullLightAngle,
+  )
 
 
   return new VertexData({

@@ -81,6 +81,7 @@ export default class UnitRepresentation {
     normalsData: number[],
     indiciesData: number[],
     planeMatrix: Float32Array,
+    fullLightAngle: number[],
   ) {
     this.aSprites.forEach((aSprite, index) => {
       const lastUsedIndex = destinationData.length / 4
@@ -93,8 +94,8 @@ export default class UnitRepresentation {
       indiciesData.push(...nextIndicies)
 
       normalsData.push(
-        0, 0, 1,
-        0, 0, 1,
+        ...fullLightAngle,
+        ...fullLightAngle,
       )
 
       const assetId = this.assets[index]
@@ -116,7 +117,14 @@ export default class UnitRepresentation {
       ]
       .map(p => ({ x: p.x * SCALE, y: p.y * SCALE}))
       .map(p => {
-        const outputVec = mat4.vectorTimesMatrix([p.x, 0, p.y, 1], planeMatrix)
+        const outputVec = mat4.vectorTimesMatrix([
+          p.x,
+          index * 1.5, // this is only to mitigate z fighting
+          // remember it's further divided by W component, so thats why is so big here
+          // value is selected purely base on visual testing
+          p.y,
+          1
+        ], planeMatrix)
         return {
           x: outputVec[0] / outputVec[3],
           y: outputVec[1] / outputVec[3],

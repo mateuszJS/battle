@@ -36,7 +36,8 @@ test('addBufferData adds correct data', () => {
     indiciesData,
     colorMatrixData,
     normalsData,
-    mat4.identity()
+    mat4.identity(),
+    [],
   )
 
   const ElephantHeadRunFrame = AssetsDescriptor[AssetId.ElephantHead][UnitState.RUN].frames[0]
@@ -85,7 +86,7 @@ test('when time passes, the addBufferData adds correct data with new frames', ()
   
   const sourceData: number[] = []
 
-  unit.addBufferData([], [], sourceData, [], [], [], mat4.identity())
+  unit.addBufferData([], [], sourceData, [], [], [], mat4.identity(), [])
 
   expect(sourceData).toEqual([
     ...headRun.frames[1].sourceRect,
@@ -107,7 +108,7 @@ test('when angle changes, addBufferData adds correct data', () => {
 
   const sourceData: number[] = []
 
-  unit.addBufferData([], [], sourceData, [], [], [], mat4.identity())
+  unit.addBufferData([], [], sourceData, [], [], [], mat4.identity(), [])
 
   // for the seak of simple tests, we check only sourceData
   // since they are most random(doesn't repeat between frames)

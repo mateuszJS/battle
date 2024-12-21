@@ -161,7 +161,8 @@ export default function startTransition(
   /* TOOLBAR ANIMATION */
 
   const animationTiming = {
-    duration: animationTime,
+    duration: animationTime + 1000, // if it's exact same(without + 1000) the sometimes elements blinks
+    // after animation is completed but elements are not removed yet
     iterations: 1,
     easing: "ease-in"
   };

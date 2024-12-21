@@ -78,7 +78,7 @@ export default function getProgram(
   const uniformBufferSize = (
     16/*projection matrix*/ +
     NUM_OF_MATRICIES * 12/*color matrix*/ +
-    12/*normal matrix*/ +
+    // 12/*normal matrix*/ +
     4/*light direction*/
   ) * 4;
   const uniformBuffer = device.createBuffer({
@@ -96,11 +96,12 @@ export default function getProgram(
   const colorMatrixValue = uniformValues.subarray(kColorMatrixOffset, kColorMatrixOffset + NUM_OF_MATRICIES * 12);
 
 
-  const kNormalMatrixOffset = kColorMatrixOffset + NUM_OF_MATRICIES * 12;
-  const normalMatrixValue = uniformValues.subarray(kNormalMatrixOffset, kNormalMatrixOffset + 12);
+  // const kNormalMatrixOffset = kColorMatrixOffset + NUM_OF_MATRICIES * 12;
+  // const normalMatrixValue = uniformValues.subarray(kNormalMatrixOffset, kNormalMatrixOffset + 12);
 
 
-  const kLightDirectionOffset =  kNormalMatrixOffset + 12;
+  // const kLightDirectionOffset =  kNormalMatrixOffset + 12;
+  const kLightDirectionOffset =  kColorMatrixOffset + NUM_OF_MATRICIES * 12;
   const lightDirectionValue = uniformValues.subarray(kLightDirectionOffset, kLightDirectionOffset + 4);
 
 
@@ -110,11 +111,11 @@ export default function getProgram(
     vertexData: VertexData,
     texture: GPUTexture,
     colorMatricies: Float32Array,
-    normalMatrix: Float32Array,
+    lightDirection: Float32Array,
   ) {
 
   const { verticiesData, numVertices } = vertexData.getBakedData()
-
+    console.log(verticiesData.length, numVertices)
   const vertexBuffer = device.createBuffer({
     label: 'vertex buffer vertices',
     size: verticiesData.byteLength,
@@ -139,9 +140,13 @@ export default function getProgram(
 
     matrixValue.set(worldProjectionMatrix)
     colorMatrixValue.set(colorMatricies)
-    normalMatrixValue.set(normalMatrix)
-    lightDirectionValue.set(vec3.normalize([-0.5, -0.5, -0.5, 0])) // 0 at the end is just padding
-  
+    // normalMatrixValue.set(normalMatrix)
+
+    /* The specific values for the light in the sample are x = -0.5 which is negative x but since
+      we’re looking in negative Z means the light is on the right pointing left.
+      y = -0.5 which is negative y means the light is above pointing down as down is -negative
+    */
+    lightDirectionValue.set(lightDirection)
 
     device.queue.writeBuffer(uniformBuffer, 0, uniformValues);
 

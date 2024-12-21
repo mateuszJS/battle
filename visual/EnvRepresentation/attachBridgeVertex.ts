@@ -28,7 +28,7 @@ const BRIDGE_INDICIES = [
 ]
 
 
-const BRIDGE_NORMALS = [
+const BRIDGE_NORMALS_TOP = [
   // that expanded bridge upper
   0, 1, 0,
   0, 1, 0,
@@ -39,21 +39,8 @@ const BRIDGE_NORMALS = [
 // top middle main part
   0, 1, 0,
   0, 1, 0,
-
-  //inner side
-  1, 0, 0,
-  1, 0, 0,
-
-  -1, 0, 0,
-  -1, 0, 0,
-
-  // outer side
-  1, 0, 0,
-  1, 0, 0,
-
-  -1, 0, 0,
-  -1, 0, 0,
 ]
+
 
 const texturePoints = [
   [0, 0],
@@ -81,11 +68,32 @@ export default function attachBridgeVertex(
   const nextIndicies = BRIDGE_INDICIES.map(i => (destinationData.length / 4) + i)
   indiciesData.push(...nextIndicies)
 
-  normalsData.push(...BRIDGE_NORMALS)
+  const bridgeDirection = Math.atan2(points[3].y - points[0].y, points[0].x - points[3].x)
+  const perpendicular = bridgeDirection + Math.PI / 2
+
+  normalsData.push(
+    ...BRIDGE_NORMALS_TOP,
+
+    // railing inner side
+    -Math.cos(perpendicular), 0, Math.sin(perpendicular),
+    -Math.cos(perpendicular), 0, Math.sin(perpendicular),
+
+    -Math.cos(perpendicular + Math.PI), 0, Math.sin(perpendicular + Math.PI),
+    -Math.cos(perpendicular + Math.PI), 0, Math.sin(perpendicular + Math.PI),
+
+    // railing outer side
+    -Math.cos(perpendicular), 0, Math.sin(perpendicular),
+    -Math.cos(perpendicular), 0, Math.sin(perpendicular),
+
+    -Math.cos(perpendicular + Math.PI), 0, Math.sin(perpendicular + Math.PI),
+    -Math.cos(perpendicular + Math.PI), 0, Math.sin(perpendicular + Math.PI),
+  )
 
   points.forEach((p, index) => {
     const siblingPoint = points[MAP_POINT_INDEX_TO_SIBLING_INDEX[index]]
     const angle = Math.atan2(p.y - siblingPoint.y, siblingPoint.x - p.x)
+
+
 
     RAILING_POINT_OFFSETS.forEach((offset, offsetIndex) => {
       destinationData.push(
@@ -99,4 +107,5 @@ export default function attachBridgeVertex(
       colorMatrixIdx.push(0)
     })
   })
+
 }
