@@ -56,6 +56,35 @@ const MAP_POINT_INDEX_TO_SIBLING_INDEX = [
   2
 ]
 
+const MAP_POINT_INDEX_TO_OPPOSITE_INDEX = [
+  3,
+  2,
+  1,
+  0
+]
+
+function getDestinationPoints(p: Point, index: number, points: Point[], offset: Point) {
+  const siblingPoint = points[MAP_POINT_INDEX_TO_SIBLING_INDEX[index]]
+  const siblingAngle = Math.atan2(p.y - siblingPoint.y, siblingPoint.x - p.x)
+
+  const correctionOffset = { x: 0, y: 0 }
+  // for second and third point we need to move it a bit closer to the center of avoid bridge_offsets.png
+  if (offset.x === 0) {
+    const oppositePoint = points[MAP_POINT_INDEX_TO_OPPOSITE_INDEX[index]]
+    const oppositeAngle = Math.atan2(p.y - oppositePoint.y, oppositePoint.x - p.x)
+
+    correctionOffset.x =  -Math.cos(oppositeAngle) * 10 // 10 is purely by visual testing
+    correctionOffset.y =  Math.sin(oppositeAngle) * 10
+  }
+
+  return [
+    p.x - Math.cos(siblingAngle) * offset.x + correctionOffset.x,
+    offset.y,
+    p.y + Math.sin(siblingAngle) * offset.x + correctionOffset.y,
+    1
+  ]
+}
+
 export default function attachBridgeVertex(
   textureLayersData: number[],
   destinationData: number[],
@@ -90,17 +119,9 @@ export default function attachBridgeVertex(
   )
 
   points.forEach((p, index) => {
-    const siblingPoint = points[MAP_POINT_INDEX_TO_SIBLING_INDEX[index]]
-    const angle = Math.atan2(p.y - siblingPoint.y, siblingPoint.x - p.x)
-
-
-
     RAILING_POINT_OFFSETS.forEach((offset, offsetIndex) => {
       destinationData.push(
-        p.x - Math.cos(angle) * offset.x,
-        offset.y,
-        p.y + Math.sin(angle) * offset.x,
-        1
+        ...getDestinationPoints(p, index, points, offset)
       )
       textureLayersData.push(10)
       sourceData.push(...texturePoints[offsetIndex])
@@ -108,4 +129,19 @@ export default function attachBridgeVertex(
     })
   })
 
+}
+
+export function getBridgePoint(point: Point, bridges: Point[][], railingPointOffset: Point): number[] | null {
+  let destinationPoint: number[] | null = null
+
+  bridges.some(bridgePoints => {
+    return bridgePoints.some((bp, index) => {
+      if (Math.hypot(bp.x - point.x, bp.y - point.y) < 1) {
+        destinationPoint = getDestinationPoints(bp, index, bridgePoints, railingPointOffset)
+        return true
+      }
+    })
+  })
+
+  return destinationPoint
 }

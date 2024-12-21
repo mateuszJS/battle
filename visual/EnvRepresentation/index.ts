@@ -21,6 +21,7 @@ export default class EnvRepresentation {
         this.normalsData,
         this.indiciesData,
         points,
+        envVisuals.bridges,
       ) 
     }))
 

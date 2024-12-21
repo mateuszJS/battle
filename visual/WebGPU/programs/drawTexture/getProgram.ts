@@ -115,7 +115,7 @@ export default function getProgram(
   ) {
 
   const { verticiesData, numVertices } = vertexData.getBakedData()
-    console.log(verticiesData.length, numVertices)
+
   const vertexBuffer = device.createBuffer({
     label: 'vertex buffer vertices',
     size: verticiesData.byteLength,

@@ -14,7 +14,7 @@ export default class DebugRepresentation {
     /* ============world origin arrow============ */
     const nextIndicies = [1, 0, 2].map(i => (destinationData.length / 4) + i)
     indiciesData.push(...nextIndicies)
-    textureLayersData.push(...Array(3).fill(1))
+    textureLayersData.push(...Array(3).fill(10))
     sourceData.push(
       0, 0,
       0, 1,
