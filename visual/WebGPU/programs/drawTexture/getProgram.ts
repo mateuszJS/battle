@@ -1,6 +1,8 @@
+import vec3 from "utils/vec3";
 import shaderCode from "./shader.wgsl"
 import { VertexData } from "WebGPU/getVertexData";
  
+const NUM_OF_MATRICIES = 2
 
 export default function getProgram(
   device: GPUDevice,
@@ -8,12 +10,13 @@ export default function getProgram(
 ) {
   const module = device.createShaderModule({
     label: 'texture module',
-    code: shaderCode,
+    code: shaderCode
+      .replace('NUM_OF_MATRICIES', NUM_OF_MATRICIES.toString()),
   });
 
   const sampler = device.createSampler({
-    minFilter: 'nearest',
-    magFilter: 'nearest',
+    minFilter: 'linear',
+    magFilter: 'linear',
   });
 
   const pipeline = device.createRenderPipeline({
@@ -24,27 +27,13 @@ export default function getProgram(
       entryPoint: 'vs',
       buffers: [
         {
-          arrayStride: (4) * 4, // (2) floats, 4 bytes each
+          arrayStride: (4 + 2 + 1 + 1 + 3) * 4,
           attributes: [
             {shaderLocation: 0, offset: 0, format: 'float32x4'},  // destination position
-          ] as const,
-        },
-        {
-          arrayStride: (2) * 4, // (2) floats, 4 bytes each
-          attributes: [
-            {shaderLocation: 1, offset: 0, format: 'float32x2'},  // source position
-          ] as const,
-        },
-        {
-          arrayStride: (1) * 4,
-          attributes: [
-            {shaderLocation: 2, offset: 0, format: 'uint32'},  // source texture layer
-          ] as const,
-        },
-        {
-          arrayStride: (1) * 4,
-          attributes: [
-            {shaderLocation: 3, offset: 0, format: 'uint32'},  // index of color matrix
+            {shaderLocation: 1, offset: 16, format: 'float32x2'},  // source position
+            {shaderLocation: 2, offset: 16 + 8, format: 'uint32'},  // source texture layer
+            {shaderLocation: 3, offset: 16 + 8 + 4, format: 'uint32'},  // index of color matrix
+            {shaderLocation: 4, offset: 16 + 8 + 4 + 4, format: 'float32x3'},  // index of color matrix
           ] as const,
         },
       ],
@@ -69,9 +58,29 @@ export default function getProgram(
     primitive: {
       cullMode: 'back',
     },
+    depthStencil: {
+      depthWriteEnabled: true,
+      depthCompare: 'less',
+      format: 'depth24plus',
+    },
   });
 
-  const uniformBufferSize = (16/*projection matrix*/ + 2 * 12/*color matrix*/) * 4;
+
+  /*
+          normalMatrix: mat3x3f,
+        worldViewProjection: mat4x4f,
+        color: vec4f,
+        lightDirection: vec3f,
+        */
+
+        // const uniformBufferSize = (12 + 16 + 4 + 4) * 4;
+
+  const uniformBufferSize = (
+    16/*projection matrix*/ +
+    NUM_OF_MATRICIES * 12/*color matrix*/ +
+    12/*normal matrix*/ +
+    4/*light direction*/
+  ) * 4;
   const uniformBuffer = device.createBuffer({
     label: 'uniforms',
     size: uniformBufferSize,
@@ -84,52 +93,34 @@ export default function getProgram(
 
 
   const kColorMatrixOffset = 16;
-  const colorMatrixValue = uniformValues.subarray(kColorMatrixOffset, kColorMatrixOffset + 2 * 12);
+  const colorMatrixValue = uniformValues.subarray(kColorMatrixOffset, kColorMatrixOffset + NUM_OF_MATRICIES * 12);
+
+
+  const kNormalMatrixOffset = kColorMatrixOffset + NUM_OF_MATRICIES * 12;
+  const normalMatrixValue = uniformValues.subarray(kNormalMatrixOffset, kNormalMatrixOffset + 12);
+
+
+  const kLightDirectionOffset =  kNormalMatrixOffset + 12;
+  const lightDirectionValue = uniformValues.subarray(kLightDirectionOffset, kLightDirectionOffset + 4);
+
 
   return function drawTexture(
     pass: GPURenderPassEncoder,
-    matrix: Float32Array,
+    worldProjectionMatrix: Float32Array,
     vertexData: VertexData,
     texture: GPUTexture,
-    colorMatricies: Float32Array
+    colorMatricies: Float32Array,
+    normalMatrix: Float32Array,
   ) {
 
-  const { destinationRect, sourceRect, index, layer, colorMatrixIdx } = vertexData.getBakedData()
+  const { verticiesData, numVertices } = vertexData.getBakedData()
 
-  const vertexPositionBuffer = device.createBuffer({
+  const vertexBuffer = device.createBuffer({
     label: 'vertex buffer vertices',
-    size: destinationRect.byteLength,
+    size: verticiesData.byteLength,
     usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
   });
-  device.queue.writeBuffer(vertexPositionBuffer, 0, destinationRect);
-
-  const vertexTexCoordBuffer = device.createBuffer({
-    label: 'vertex buffer vertices',
-    size: sourceRect.byteLength,
-    usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
-  });
-  device.queue.writeBuffer(vertexTexCoordBuffer, 0, sourceRect);
-
-  const vertexLayerBuffer = device.createBuffer({
-    label: 'vertex buffer layer',
-    size: layer.byteLength,
-    usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
-  });
-  device.queue.writeBuffer(vertexLayerBuffer, 0, layer);
-
-  const vertexColorMatrixIndiciesBuffer = device.createBuffer({
-    label: 'vertex buffer color matrix index',
-    size: colorMatrixIdx.byteLength,
-    usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
-  });
-  device.queue.writeBuffer(vertexColorMatrixIndiciesBuffer, 0, colorMatrixIdx);
-
-  const indexBuffer = device.createBuffer({
-    label: 'index buffer',
-    size: index.byteLength,
-    usage: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST,
-  });
-  device.queue.writeBuffer(indexBuffer, 0, index);
+  device.queue.writeBuffer(vertexBuffer, 0, verticiesData);
 
 
   // bind group should be pre-created and reuse instead of constantly initialized
@@ -144,19 +135,17 @@ export default function getProgram(
 
 
     pass.setPipeline(pipeline);
-    pass.setVertexBuffer(0, vertexPositionBuffer);
-    pass.setVertexBuffer(1, vertexTexCoordBuffer);
-    pass.setVertexBuffer(2, vertexLayerBuffer);
-    pass.setVertexBuffer(3, vertexColorMatrixIndiciesBuffer);
-    pass.setIndexBuffer(indexBuffer, 'uint32');
+    pass.setVertexBuffer(0, vertexBuffer);
 
-    matrixValue.set(matrix)
+    matrixValue.set(worldProjectionMatrix)
     colorMatrixValue.set(colorMatricies)
+    normalMatrixValue.set(normalMatrix)
+    lightDirectionValue.set(vec3.normalize([-0.5, -0.5, -0.5, 0])) // 0 at the end is just padding
   
 
     device.queue.writeBuffer(uniformBuffer, 0, uniformValues);
 
     pass.setBindGroup(0, bindGroup);
-    pass.drawIndexed(vertexData.instancesNum);
+    pass.draw(numVertices);
   }
 }

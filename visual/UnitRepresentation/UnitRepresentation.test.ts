@@ -27,6 +27,7 @@ test('addBufferData adds correct data', () => {
   const sourceData: number[] = []
   const indiciesData: number[] = []
   const colorMatrixData: number[] = []
+  const normalsData: number[] = []
 
   unit.addBufferData(
     textureLayersData,
@@ -34,6 +35,7 @@ test('addBufferData adds correct data', () => {
     sourceData,
     indiciesData,
     colorMatrixData,
+    normalsData,
     mat4.identity()
   )
 
@@ -83,7 +85,7 @@ test('when time passes, the addBufferData adds correct data with new frames', ()
   
   const sourceData: number[] = []
 
-  unit.addBufferData([], [], sourceData, [], [], mat4.identity())
+  unit.addBufferData([], [], sourceData, [], [], [], mat4.identity())
 
   expect(sourceData).toEqual([
     ...headRun.frames[1].sourceRect,
@@ -105,7 +107,7 @@ test('when angle changes, addBufferData adds correct data', () => {
 
   const sourceData: number[] = []
 
-  unit.addBufferData([], [], sourceData, [], [], mat4.identity())
+  unit.addBufferData([], [], sourceData, [], [], [], mat4.identity())
 
   // for the seak of simple tests, we check only sourceData
   // since they are most random(doesn't repeat between frames)

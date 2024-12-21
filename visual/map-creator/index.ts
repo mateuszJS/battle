@@ -230,11 +230,17 @@ export default function openMapCreator(wasmModule: Universe) {
         wasmModule,
         serializedMap,
         new Float32Array([
+          ...[
+            1, 0, 0, 0,
+            0, 1, 0, 0,
+            0, 0, 1, 0,
+          ],
           // ...colorMatrix,
           ...[
             0, 1, 0, 0,
             0, 0, 1, 0,
             1, 0, 0, 0,
+            // 0, 0, 0, 1 once we use alpha, we might uncomment it, and probably we need to use 1 in whole row(mathematic column)
           ]
         ]),
       //   getSerializedMapInfo(nodes, connections, portals),

@@ -7,9 +7,11 @@ import { getVertexData } from "WebGPU/getVertexData";
 import loadAssetsIntoTextureArray from "loadAssetsIntoTextureArray/loadAssetsIntoTextureArray";
 import AssetId from "AssetsDescriptor/AssetId";
 import UnitRepresentation from "UnitRepresentation/UnitRepresentation";
-import getWorldMatrix, { getCameraAngle } from "worldMatrix";
+import getMatricies, { getCameraAngle } from "worldMatrix";
 import { SerializedMap } from "map-creator/serializeMap";
 import EnvironmentRepresentation from "EnvRepresentation";
+
+let depthTexture: GPUTexture | undefined;
 
 export default async function getinitUniverse(): Promise<
   (
@@ -85,6 +87,21 @@ export default async function getinitUniverse(): Promise<
 
       // here we need to render that texture into canvas
       const canvasTexture = context.getCurrentTexture();
+
+      if (!depthTexture ||
+        depthTexture.width !== canvasTexture.width ||
+        depthTexture.height !== canvasTexture.height
+      ) {
+        if (depthTexture) {
+          depthTexture.destroy();
+        }
+        depthTexture = device.createTexture({
+          size: [canvasTexture.width, canvasTexture.height],
+          format: 'depth24plus',
+          usage: GPUTextureUsage.RENDER_ATTACHMENT,
+        });
+      }
+
       const descriptor = {
         // describe which textures we want to raw to and how use them
         label: "our render to canvas renderPass",
@@ -96,9 +113,15 @@ export default async function getinitUniverse(): Promise<
             storeOp: "store", // to store the result of what we draw, other option is "discard"
           } as const,
         ],
+        depthStencilAttachment: {
+          view: depthTexture.createView(), // placholder to calm down TS
+          depthClearValue: 1.0,
+          depthLoadOp: 'clear',
+          depthStoreOp: 'store',
+        } as const,
       }
       const encoder = device.createCommandEncoder()
-      const worldMatrix = getWorldMatrix(canvas, serializedMap.cameraTarget, dt)
+      const {worldMatrix, normalMatrix} = getMatricies(canvas, serializedMap.cameraTarget, dt)
       const pass = encoder.beginRenderPass(descriptor)
       const vertexData = getVertexData(units, envRepresentation)
 
@@ -116,7 +139,7 @@ export default async function getinitUniverse(): Promise<
           drawLine(pass, worldMatrix,  [...pList, pList[0]], 10)
         }
       })
-      drawTexture(pass, worldMatrix, vertexData, texture2dArray, colorMatricies)
+      drawTexture(pass, worldMatrix, vertexData, texture2dArray, colorMatricies, normalMatrix)
       pass.end()
       const commandBuffer = encoder.finish();
       device.queue.submit([commandBuffer]);

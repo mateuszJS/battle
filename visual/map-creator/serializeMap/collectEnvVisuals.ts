@@ -12,20 +12,13 @@ export default function collectEnvVisuals(mapEl: HTMLElement, scale: number): En
   const platforms = platformEls.map(el => {
     const pointEls = Array.from(el.querySelectorAll<HTMLElement>('.anchor-point'))
 
-    const points =  pointEls.map(pointEl => {
+    return pointEls.map(pointEl => {
       const coords = getCoords(pointEl)
       return {
         x: coords.x * scale,
         y: coords.y * scale,
       }
     })
-
-    const center = points.reduce((acc, p) => ({
-      x: acc.x + p.x / points.length,
-      y: acc.y + p.y / points.length,
-    }), { x: 0, y: 0 })
-
-    return [center, ...points]
   })
 
   const rawBridges = getAllBridges()
@@ -38,7 +31,7 @@ export default function collectEnvVisuals(mapEl: HTMLElement, scale: number): En
       }
     })
   ))
-  console.log(bridges)
+
   return {
     platforms,
     bridges,

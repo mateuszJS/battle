@@ -33,7 +33,7 @@ function logicPointToCanvas(
 }
 
 function updateMapElementStyle(mapEl: HTMLElement, canvas: HTMLElement, cameraTarget: Point, mapElWidth: number, mapScale: number) {
-  const worldMatrix = getWorldMatrix(
+  const {worldMatrix} = getWorldMatrix(
     canvas,
     cameraTarget,
     // { x: mapElStartPosition.width / 2, y: mapElStartPosition.height / 2 },
@@ -65,7 +65,7 @@ export default function startTransition(
 ) {
   setExtraMatrix(null)
 
-  const worldMatrix = getWorldMatrix(
+  const {worldMatrix} = getWorldMatrix(
     canvas,
     cameraTarget,
     // { x: mapElStartPosition.width / 2, y: mapElStartPosition.height / 2 },
@@ -145,6 +145,8 @@ export default function startTransition(
     )
 
     mapElement.style.opacity = `${(1 - progress) + progress * -1.5}`;
+
+    canvas.style.opacity = `${(1 - progress) * 0 + 3.5 * progress * 1}`;
 
     if (progress < 1) {
       requestAnimationFrame(tick)

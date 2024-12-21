@@ -1,0 +1,4 @@
+We are not drawing by indicies anymore because it limits us by specifying only one values per vertex.
+
+So for example fo lighting, where one corner can be a part of 3 walls, you won't set correct normals.
+Each wall needs normal of the wall, not of the vertex(if model is recangular of course).

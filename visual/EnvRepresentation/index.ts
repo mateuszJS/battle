@@ -1,16 +1,7 @@
 import { EnvVisuals } from "map-creator/serializeMap/collectEnvVisuals"
 import attachBridgeVertex from "./attachBridgeVertex"
+import attachPlatformVertex from "./attachPlatformVertex"
 
-const PLATFORM_INDICIES = [
-  1, 0, 2,
-  2, 0, 3,
-  3, 0, 4,
-  4, 0, 5,
-  5, 0, 6,
-  6, 0, 7,
-  7, 0, 8,
-  8, 0, 1,
-]
 
 const texturePoints = [
   [.0, .0],
@@ -24,57 +15,64 @@ export default class EnvRepresentation {
   private destinationData: number[] = []
   private sourceData: number[] = []
   private indiciesData: number[] = []
+  private colorMatrixIdx: number[] = []
+  private normalsData: number[] = []
 
   constructor(envVisuals: EnvVisuals){
+
+    /* ============world origin arrow============ */
     const nextIndicies = [1, 0, 2].map(i => (this.destinationData.length / 4) + i)
     this.indiciesData.push(...nextIndicies)
-
     this.textureLayersData.push(...Array(3).fill(1))
-
-    // this.sourceData.push(
-    //   ...platformPoints.flatMap(p => [p.x, p.y])
-    // )
-
     this.sourceData.push(
       0, 0,
       0, 1,
       1, 1,
     )
-
     this.destinationData.push(
       0, 0, 0, 1,
       100, 0, 0, 1,
       0, 0, 100, 1,
     )
+    this.colorMatrixIdx.push(0, 0, 0)
+    this.normalsData.push(0, 1, 0)
 
-    envVisuals.bridges.forEach((points => {
-      attachBridgeVertex(
+
+
+    /* ============platforms============ */
+    envVisuals.platforms.forEach((points => {
+      attachPlatformVertex(
         this.textureLayersData,
         this.destinationData,
         this.sourceData,
+        this.colorMatrixIdx,
+        this.normalsData,
         this.indiciesData,
         points,
       ) 
     }))
 
-    envVisuals.platforms.forEach((platformPoints => {
-      const nextIndicies = PLATFORM_INDICIES.map(i => (this.destinationData.length / 4) + i)
-      this.indiciesData.push(...nextIndicies)
+    // attachBridgeVertex(
+    //   this.textureLayersData,
+    //   this.destinationData,
+    //   this.sourceData,
+    //   this.colorMatrixIdx,
+    //   this.indiciesData,
+    //   envVisuals.bridges[2],
+    // ) 
 
-      this.textureLayersData.push(...Array(platformPoints.length).fill(1))
-
-      // this.sourceData.push(
-      //   ...platformPoints.flatMap(p => [p.x, p.y])
-      // )
-
-      this.sourceData.push(
-        ...platformPoints.flatMap((p, i) => texturePoints[i % 4])
-      )
-
-      this.destinationData.push(
-        ...platformPoints.flatMap(p => [p.x, 0, p.y, 1])
-      )
-    }))
+        /* ============birdges============ */
+        envVisuals.bridges.forEach((points => {
+          attachBridgeVertex(
+            this.textureLayersData,
+            this.destinationData,
+            this.sourceData,
+            this.colorMatrixIdx,
+            this.normalsData,
+            this.indiciesData,
+            points,
+          ) 
+        }))
 
     // console.log('this.indiciesData', [...this.indiciesData])
     // console.log('this.textureLayersData', [...this.textureLayersData])
@@ -86,11 +84,15 @@ export default class EnvRepresentation {
     textureLayersData: number[],
     destinationData: number[],
     sourceData: number[],
+    colorMatrixIdx: number[],
+    normalsData: number[],
     indiciesData: number[],
   ) {
     textureLayersData.push(...this.textureLayersData)
     destinationData.push(...this.destinationData)
     sourceData.push(...this.sourceData)
+    colorMatrixIdx.push(...this.colorMatrixIdx)
+    normalsData.push(...this.normalsData)
     indiciesData.push(...this.indiciesData.map(i => i + indiciesData.length))
   }
 }

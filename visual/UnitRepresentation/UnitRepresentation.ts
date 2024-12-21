@@ -77,9 +77,10 @@ export default class UnitRepresentation {
     textureLayersData: number[],
     destinationData: number[],
     sourceData: number[],
-    indiciesData: number[],
     colorMatrixIdxData: number[],
-    planeMatrix: Float32Array
+    normalsData: number[],
+    indiciesData: number[],
+    planeMatrix: Float32Array,
   ) {
     this.aSprites.forEach((aSprite, index) => {
       const lastUsedIndex = destinationData.length / 4
@@ -91,7 +92,10 @@ export default class UnitRepresentation {
       ].map(i => lastUsedIndex + i)
       indiciesData.push(...nextIndicies)
 
-
+      normalsData.push(
+        0, 0, 1,
+        0, 0, 1,
+      )
 
       const assetId = this.assets[index]
       const { frames } = AssetsDescriptor[assetId][this.state] // what if state is different for each asset??
@@ -128,7 +132,7 @@ export default class UnitRepresentation {
         destinationData.push(p3d.x, p3d.y, p3d.z, 1)
       })
 
-      colorMatrixIdxData.push(...Array(4).fill(0))
+      colorMatrixIdxData.push(...Array(4).fill(1))
     })
   }
 }

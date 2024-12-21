@@ -32,6 +32,11 @@ export default function getProgram(
       entryPoint: 'fs',
       targets: [{ format: presentationFormat }],
     },
+    depthStencil: {
+      depthWriteEnabled: true,
+      depthCompare: 'less',
+      format: 'depth24plus',
+    },
   });
 
   const uniformBufferSize = (16/*projection matrix*/) * 4;

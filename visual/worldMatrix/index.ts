@@ -1,5 +1,6 @@
 import mat4 from "utils/mat4";
 import ModuleGUI from "./GUI";
+import mat3 from "WebGPU/m3";
 
 const GUI = ModuleGUI.default
 
@@ -69,7 +70,7 @@ function getProjMatrix(canvas: HTMLElement) {
   );
 }
 
-export default function getWorldMatrix(canvas: HTMLElement, targetPoint: Point, dt: number) {
+export default function getMatricies(canvas: HTMLElement, targetPoint: Point, dt: number) {
   time += dt
 
 
@@ -115,7 +116,16 @@ export default function getWorldMatrix(canvas: HTMLElement, targetPoint: Point, 
 
   const viewProjectionMatrix = mat4.multiply(projection, viewMatrix);
   // return viewProjectionMatrix
-  return viewProjectionMatrix
+
+  const xxx = matricies.slice(0, -1).reduce(
+    (matrix, rotationMatrix) => mat4.multiply(matrix, rotationMatrix),
+    mat4.identity() // put camera at exact same palce as objwct to follow
+  )
+
+  return {
+    worldMatrix: viewProjectionMatrix,
+    normalMatrix: mat3.fromMat4(mat4.transpose(mat4.inverse(xxx)))
+  }
 
 }
 

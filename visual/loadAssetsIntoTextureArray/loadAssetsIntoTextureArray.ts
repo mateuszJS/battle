@@ -1,6 +1,6 @@
 import { FrameDetails, initializeAssetsDescriptor } from "AssetsDescriptor"
 import getFrameDetails from "./getFrameDetails"
-import { createTexture2dArrayFromSources, loadImageBitmap } from "WebGPU/getTexture"
+import { createTexture2dArrayFromSources, loadImageBitmap, TextureSlice } from "WebGPU/getTexture"
 
 const sources = [
   {
@@ -73,7 +73,7 @@ export interface SpriteSheetEntry {
 }
 
 export default async function loadAssetsIntoTextureArray(device: GPUDevice): Promise<GPUTexture> {
-  const sourceBitmapsList: ImageBitmap[] = []
+  const sourceBitmapsList: TextureSlice[] = []
 
   const spriteSheetPromises = sources.map<Promise<[ImageBitmap, SpriteSheetJson]>>(({ imgUrl, jsonUrl }) => {
     return Promise.all([
@@ -84,8 +84,11 @@ export default async function loadAssetsIntoTextureArray(device: GPUDevice): Pro
 
   const [...spriteSheets] = await Promise.all(spriteSheetPromises)
 
-  const frames = spriteSheets.flatMap<FrameDetails[]>(([imgBitmap, spriteSheetJson]) => {
-    sourceBitmapsList.push(imgBitmap)
+  const frames = spriteSheets.flatMap<FrameDetails[]>(([imgBitmap, spriteSheetJson], index) => {
+    sourceBitmapsList.push({
+      img: imgBitmap,
+      fakeMipmaps: false, //index === 10, // pass true to test mipmaps
+    })
 
     return Object.entries(spriteSheetJson.frames).map<FrameDetails>(([key, frameJson]) => ({
       name: key,
