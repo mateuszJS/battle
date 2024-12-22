@@ -15,7 +15,7 @@ import DebugRepresentation from "debug/DebugRepresentation";
 
 let depthTexture: GPUTexture | undefined;
 
-export default async function getinitUniverse(): Promise<
+export default async function getInitUniverse(): Promise<
   (
     wasmModule: Universe,
     serializedMap: SerializedMap,

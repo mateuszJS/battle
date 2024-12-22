@@ -1,5 +1,5 @@
 import { Universe } from 'Universe'
-import getinitUniverse from 'getInitUniverse'
+import getInitUniverse from 'getInitUniverse'
 import getCoords, { setCoordsOrigin } from './getCoords'
 import setupUI from './setupUI'
 import creationConfig from './creationConfig'
@@ -205,7 +205,7 @@ export default function openMapCreator(wasmModule: Universe) {
 
   
   /* clean the DOM and go to the next phase */
-  Promise.all([startBtnClickPromise, getinitUniverse()])
+  Promise.all([startBtnClickPromise, getInitUniverse()])
     .then(([_, initUniverse]) => {
       const scale = 3
       const serializedMap = serializeMap(mapElement, scale)
