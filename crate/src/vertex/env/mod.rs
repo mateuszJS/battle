@@ -1,7 +1,10 @@
+mod attach_bridge_vertex;
 mod attach_platform_vertex; // we should not expose this mod further
 mod consts;
 
 use super::VertexComponents;
+use attach_bridge_vertex::attachBridgeVertex;
+use attach_platform_vertex::attach_platform_vertex;
 
 pub struct EnvVertex {
     components: VertexComponents,
@@ -17,20 +20,19 @@ impl EnvVertex {
             color_matrix_idx: vec![],
             normals: vec![],
         };
-        log!("platforms len: {}", platforms.len());
 
         platforms.iter().for_each(|platform| {
-            log!("platform.len: {}", platform.len());
-            attach_platform_vertex::attach_platform_vertex(
+            attach_platform_vertex(
                 // this function si too big to be a part of envUI
                 &mut components,
-                platform, //&bridges[..],
-            )
+                platform,
+                &bridges,
+            );
         });
-        log!(
-            "components.destination len: {}",
-            components.destination.len()
-        );
+
+        bridges.iter().for_each(|bridge| {
+            attachBridgeVertex(&mut components, bridge);
+        });
 
         // bridges.for_each(|bridge: &Vec<f32>| attach_bridge_vertex(components, indicies, bridge));
 

@@ -1,3 +1,4 @@
+use super::attach_bridge_vertex::{getBridgePoint, is_bridge};
 use super::consts::RAILING_POINT_OFFSETS;
 use super::VertexComponents;
 use crate::constants::MATH_PI;
@@ -360,23 +361,19 @@ fn get_normals(top: bool, right: bool, bottom: bool, left: bool) -> Vec<f32> {
     return normals;
 }
 
-const texture_points: [(f32, f32); 4] = [(0.0, 0.0), (0.5, 0.0), (0.5, 1.0), (0.0, 1.0)];
-
+const TEXTURE_POINTS: [(f32, f32); 4] = [(0.0, 0.0), (0.5, 0.0), (0.5, 1.0), (0.0, 1.0)];
+const POINT_ZERO: (f32, f32) = (0.0, 0.0);
 pub fn attach_platform_vertex(
     components: &mut VertexComponents,
     points: &Vec<(f32, f32)>,
-    // bridges: &[Vec<(f32, f32)>],
+    bridges: &Vec<Vec<(f32, f32)>>,
 ) {
-    log!("points.len: {}", points.len());
-
-    // const closedGates = [
-    //   !getBridgePoint(points[0], bridges, {x:0,y:0}),
-    //   !getBridgePoint(points[2], bridges, {x:0,y:0}),
-    //   !getBridgePoint(points[4], bridges, {x:0,y:0}),
-    //   !getBridgePoint(points[6], bridges, {x:0,y:0}),
-    // ] as const
-    // const nextIndicies = getIndicies(...closedGates).map(i => (destinationData.length / 4) + i)
-    let closed_gates: Vec<bool> = vec![true, true, true, true];
+    let closed_gates = vec![
+        !is_bridge(&points[0], bridges, &POINT_ZERO),
+        !is_bridge(&points[2], bridges, &POINT_ZERO),
+        !is_bridge(&points[4], bridges, &POINT_ZERO),
+        !is_bridge(&points[6], bridges, &POINT_ZERO),
+    ];
     let last_destination = components.destination.len() / 4;
     let mut next_indicies = get_indicies(
         closed_gates[0],
@@ -422,8 +419,8 @@ pub fn attach_platform_vertex(
                 ]);
                 // }
                 components.texture_layers.push(10.0); // we might want to add like 0.1, just to make sure there isno correction while covnertin to integers
-                components.source.push(texture_points[offset_index].0);
-                components.source.push(texture_points[offset_index].1);
+                components.source.push(TEXTURE_POINTS[offset_index].0);
+                components.source.push(TEXTURE_POINTS[offset_index].1);
                 components.color_matrix_idx.push(0.0);
             })
     })

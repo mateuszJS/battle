@@ -9,6 +9,7 @@ macro_rules! log {
   ($( $t:tt )*) => (web_sys::console::log_1(&format!($($t)*).into()));
 }
 
+//to remove and replace with util
 macro_rules! angle_diff {
   ($beta:expr, $alpha:expr) => {{
     let phi = ($beta - $alpha).abs() % (2.0 * MATH_PI); // This is either the distance or 2*Math.PI - distance
