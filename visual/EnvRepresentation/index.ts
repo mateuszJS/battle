@@ -20,8 +20,8 @@ export default class EnvRepresentation {
         this.colorMatrixIdx,
         this.normalsData,
         this.indiciesData,
-        points,
-        envVisuals.bridges,
+        points as unknown as Point[],
+        envVisuals.bridges as unknown as Point[][],
       ) 
     }))
 
@@ -34,7 +34,7 @@ export default class EnvRepresentation {
         this.colorMatrixIdx,
         this.normalsData,
         this.indiciesData,
-        points,
+        points as unknown as Point[],
       ) 
     }))
   }

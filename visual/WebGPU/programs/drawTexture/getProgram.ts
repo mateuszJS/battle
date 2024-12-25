@@ -3,6 +3,7 @@ import shaderCode from "./shader.wgsl"
 import { VertexData } from "WebGPU/getVertexData";
  
 const NUM_OF_MATRICIES = 2
+const STRIDE = 4 + 2 + 1 + 1 + 4
 
 export default function getProgram(
   device: GPUDevice,
@@ -27,7 +28,7 @@ export default function getProgram(
       entryPoint: 'vs',
       buffers: [
         {
-          arrayStride: (4 + 2 + 1 + 1 + 3) * 4,
+          arrayStride: STRIDE * 4,
           attributes: [
             {shaderLocation: 0, offset: 0, format: 'float32x4'},  // destination position
             {shaderLocation: 1, offset: 16, format: 'float32x2'},  // source position
@@ -108,20 +109,20 @@ export default function getProgram(
   return function drawTexture(
     pass: GPURenderPassEncoder,
     worldProjectionMatrix: Float32Array,
-    vertexData: VertexData,
+    vertexData: Float32Array<ArrayBufferLike>,
     texture: GPUTexture,
     colorMatricies: Float32Array,
     lightDirection: Float32Array,
   ) {
 
-  const { verticiesData, numVertices } = vertexData.getBakedData()
+  const numVertices = Math.round(vertexData.length / STRIDE)
 
   const vertexBuffer = device.createBuffer({
     label: 'vertex buffer vertices',
-    size: verticiesData.byteLength,
+    size: vertexData.byteLength,
     usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
   });
-  device.queue.writeBuffer(vertexBuffer, 0, verticiesData);
+  device.queue.writeBuffer(vertexBuffer, 0, vertexData);
 
 
   // bind group should be pre-created and reuse instead of constantly initialized
@@ -136,7 +137,7 @@ export default function getProgram(
 
 
     pass.setPipeline(pipeline);
-    pass.setVertexBuffer(0, vertexBuffer);
+    pass.setVertexBuffer(0, vertexBuffer)
 
     matrixValue.set(worldProjectionMatrix)
     colorMatrixValue.set(colorMatricies)

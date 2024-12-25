@@ -25,101 +25,103 @@ COUPLE OF USEFUL RULES RELATED TO SETTING SIGNIFICATION
 */
 
 pub struct SignificationCalculator {
-  faction_id: u32,
-  attack_enemy_place_mod: f32,
-  already_involved_in_attack_enemy_place_mod: f32,
+    faction_id: u32,
+    attack_enemy_place_mod: f32,
+    already_involved_in_attack_enemy_place_mod: f32,
 }
 
 impl SignificationCalculator {
-  pub fn new(faction_id: u32) -> SignificationCalculator {
-    SignificationCalculator {
-      faction_id,
-      attack_enemy_place_mod: 1.2,
-      already_involved_in_attack_enemy_place_mod: 0.8,
+    pub fn new(faction_id: u32) -> SignificationCalculator {
+        SignificationCalculator {
+            faction_id,
+            attack_enemy_place_mod: 1.2,
+            already_involved_in_attack_enemy_place_mod: 0.8,
+        }
     }
-  }
 
-  pub fn base_signification_strategic_point(&self, strategic_point: Ref<Squad>) -> f32 {
-    if strategic_point
-      .all_faction_ids_around
-      .contains(&self.faction_id)
-      && strategic_point.id == STRATEGIC_POINT_EMPTY_OWNER
-    {
-      CAPTURE_POINT_SIGNIFICATION
-        + (1.0 - strategic_point.capturing_progress) * CAPTURE_POINT_MAX_ADDITIONAL_SIGNIFICATION
-    } else {
-      CAPTURE_POINT_SIGNIFICATION
+    pub fn base_signification_strategic_point(&self, strategic_point: Ref<Squad>) -> f32 {
+        if strategic_point
+            .all_faction_ids_around
+            .contains(&self.faction_id)
+            && strategic_point.id == STRATEGIC_POINT_EMPTY_OWNER
+        {
+            CAPTURE_POINT_SIGNIFICATION
+                + (1.0 - strategic_point.capturing_progress)
+                    * CAPTURE_POINT_MAX_ADDITIONAL_SIGNIFICATION
+        } else {
+            CAPTURE_POINT_SIGNIFICATION
+        }
     }
-  }
 
-  pub fn base_signification_enemy_squads_place(&self, place_influence: f32) -> f32 {
-    (place_influence * 0.02).min(ENEMY_SQUADS_MAX_BASE_SIGNIFICATION)
-  }
-
-  pub fn base_signification_enemy_portal(&self, portal_squad: &Ref<Squad>) -> f32 {
-    let portal_unit = portal_squad.members[0].borrow();
-
-    1.0 + (1.0 - portal_unit.hp / portal_squad.squad_details.hp) * 0.5 // <0, 1.5>
-  }
-
-  pub fn additional_signification_enemy_place_around_our_squad(
-    &self,
-    distance: f32,
-    max_distance_threshold: f32,
-    is_attacking_us: bool,
-  ) -> f32 {
-    if is_attacking_us {
-      MET_DANGER_PURPOSE_MAX_ADDITIONAL_SIGNIFICATION
-    } else {
-      MET_DANGER_PURPOSE_MAX_ADDITIONAL_SIGNIFICATION * 0.2
+    pub fn base_signification_enemy_squads_place(&self, place_influence: f32) -> f32 {
+        (place_influence * 0.02).min(ENEMY_SQUADS_MAX_BASE_SIGNIFICATION)
     }
-  }
 
-  pub fn additional_signification_enemy_place_around_our_portal(
-    &self,
-    distance: f32,
-    max_distance_threshold: f32,
-    is_attacking_us: bool,
-  ) -> f32 {
-    let normalized_distance = if is_attacking_us {
-      0.0
-    } else {
-      (distance / max_distance_threshold).powi(3)
-    };
-    (1.0 - normalized_distance) * ENEMY_PLACE_AROUND_OUR_BASE_MAX_ADDITIONAL_SIGNIFICATION
-  }
+    pub fn base_signification_enemy_portal(&self, portal_squad: &Ref<Squad>) -> f32 {
+        let portal_unit = portal_squad.members[0].borrow();
 
-  pub fn additional_signification_enemy_place_around_our_strategic_point(
-    &self,
-    distance: f32,
-    max_distance_threshold: f32,
-  ) -> f32 {
-    let normalized_distance = (distance / max_distance_threshold).powi(3);
-    (1.0 - normalized_distance) * ENEMY_PLACE_AROUND_STRATEGIC_POINT_MAX_ADDITIONAL_SIGNIFICATION
-  }
+        1.0 + (1.0 - portal_unit.hp / portal_squad.squad_details.hp) * 0.5 // <0, 1.5>
+    }
 
-  pub fn attack_influence_enemy_place(&self, enemy_place_influence: f32) -> f32 {
-    self.attack_enemy_place_mod * enemy_place_influence
-  }
+    pub fn additional_signification_enemy_place_around_our_squad(
+        &self,
+        _distance: f32,
+        _max_distance_threshold: f32,
+        is_attacking_us: bool,
+    ) -> f32 {
+        if is_attacking_us {
+            MET_DANGER_PURPOSE_MAX_ADDITIONAL_SIGNIFICATION
+        } else {
+            MET_DANGER_PURPOSE_MAX_ADDITIONAL_SIGNIFICATION * 0.2
+        }
+    }
 
-  pub fn already_involved_in_attack_influence_enemy_place(
-    &self,
-    enemy_place_influence: f32,
-  ) -> f32 {
-    self.already_involved_in_attack_enemy_place_mod * enemy_place_influence
-  }
+    pub fn additional_signification_enemy_place_around_our_portal(
+        &self,
+        distance: f32,
+        max_distance_threshold: f32,
+        is_attacking_us: bool,
+    ) -> f32 {
+        let normalized_distance = if is_attacking_us {
+            0.0
+        } else {
+            (distance / max_distance_threshold).powi(3)
+        };
+        (1.0 - normalized_distance) * ENEMY_PLACE_AROUND_OUR_BASE_MAX_ADDITIONAL_SIGNIFICATION
+    }
 
-  pub fn how_much_squad_fits_to_take_purpose(
-    &self,
-    purpose: &EnhancedPurpose,
-    our_squad: &Ref<Squad>,
-  ) -> f32 {
-    // just to make it bigger, if both squads got the same distance
-    let distance_to_purpose = ((purpose.place.x - our_squad.shared.center_point.0)
-      .hypot(purpose.place.y - our_squad.shared.center_point.1)
-      - our_squad.squad_details.weapon.range)
-      .max(1.0 / our_squad.id as f32); // should be zero, but to keep always the same order, used squad.id to calc small (< 1.0) diff
+    pub fn additional_signification_enemy_place_around_our_strategic_point(
+        &self,
+        distance: f32,
+        max_distance_threshold: f32,
+    ) -> f32 {
+        let normalized_distance = (distance / max_distance_threshold).powi(3);
+        (1.0 - normalized_distance)
+            * ENEMY_PLACE_AROUND_STRATEGIC_POINT_MAX_ADDITIONAL_SIGNIFICATION
+    }
 
-    -(distance_to_purpose / our_squad.squad_details.movement_speed)
-  }
+    pub fn attack_influence_enemy_place(&self, enemy_place_influence: f32) -> f32 {
+        self.attack_enemy_place_mod * enemy_place_influence
+    }
+
+    pub fn already_involved_in_attack_influence_enemy_place(
+        &self,
+        enemy_place_influence: f32,
+    ) -> f32 {
+        self.already_involved_in_attack_enemy_place_mod * enemy_place_influence
+    }
+
+    pub fn how_much_squad_fits_to_take_purpose(
+        &self,
+        purpose: &EnhancedPurpose,
+        our_squad: &Ref<Squad>,
+    ) -> f32 {
+        // just to make it bigger, if both squads got the same distance
+        let distance_to_purpose = ((purpose.place.x - our_squad.shared.center_point.0)
+            .hypot(purpose.place.y - our_squad.shared.center_point.1)
+            - our_squad.squad_details.weapon.range)
+            .max(1.0 / our_squad.id as f32); // should be zero, but to keep always the same order, used squad.id to calc small (< 1.0) diff
+
+        -(distance_to_purpose / our_squad.squad_details.movement_speed)
+    }
 }

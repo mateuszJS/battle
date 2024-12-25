@@ -121,38 +121,38 @@ export function getVertexData(
 
   const planeMatrix = getPlaneMatrix()
 
-  envRepresentation.addBufferData(
-    textureLayersData,
-    destinationData,
-    sourceData,
-    colorMatrixIdxData,
-    normalsData,
-    indiciesData,
-  )
+  // envRepresentation.addBufferData(
+  //   textureLayersData,
+  //   destinationData,
+  //   sourceData,
+  //   colorMatrixIdxData,
+  //   normalsData,
+  //   indiciesData,
+  // )
 
   
-  units.forEach((unit) => {
-    unit.addBufferData(
-      textureLayersData,
-      destinationData,
-      sourceData,
-      colorMatrixIdxData,
-      normalsData,
-      indiciesData,
-      planeMatrix,
-      fullLightAngle,
-    )
-  })
+  // units.forEach((unit) => {
+  //   unit.addBufferData(
+  //     textureLayersData,
+  //     destinationData,
+  //     sourceData,
+  //     colorMatrixIdxData,
+  //     normalsData,
+  //     indiciesData,
+  //     planeMatrix,
+  //     fullLightAngle,
+  //   )
+  // })
 
-  debugRepresentation.addBufferData(
-    textureLayersData,
-    destinationData,
-    sourceData,
-    colorMatrixIdxData,
-    normalsData,
-    indiciesData,
-    fullLightAngle,
-  )
+  // debugRepresentation.addBufferData(
+  //   textureLayersData,
+  //   destinationData,
+  //   sourceData,
+  //   colorMatrixIdxData,
+  //   normalsData,
+  //   indiciesData,
+  //   fullLightAngle,
+  // )
 
 
   return new VertexData({

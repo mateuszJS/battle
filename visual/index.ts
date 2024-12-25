@@ -33,9 +33,9 @@ const startGame = () => {
   Promise.all([
     goToMapCreatorPromise,
     wasmModulePromise
-  ]).then(([_, universe]) => {
+  ]).then(([_, Universe]) => {
     goToMapCreatorBtn.remove()
-    openMapCreator(universe)
+    openMapCreator(Universe)
   })
 }
 

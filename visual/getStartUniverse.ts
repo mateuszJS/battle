@@ -10,7 +10,6 @@ import UnitRepresentation from "UnitRepresentation/UnitRepresentation";
 import getMatricies, { getCameraAngle } from "worldMatrix";
 import { SerializedMap } from "map-creator/serializeMap";
 import EnvironmentRepresentation from "EnvRepresentation";
-import vec3 from "utils/vec3";
 import DebugRepresentation from "debug/DebugRepresentation";
 
 let depthTexture: GPUTexture | undefined;
@@ -50,14 +49,11 @@ export default async function getInitUniverse(): Promise<
 
 
 
-  return function initUniverse (wasmModule, serializedMap, colorMatricies) {
-    // const matrix = getCanvasMatrix(canvas)
+  return function initUniverse (universe, serializedMap, colorMatricies) {
+    const firstPoint = { x: 100, y: 100 }
+    // const firstPoint = serializedMap.obstacles.find(Boolean) as Point
 
-    // const mapPoints = getMapPoints(mapWidth, mapHeight)
-
-    const firstPoint = serializedMap.obstacles.find(Boolean) as Point
-
-    const units = [
+    const units = [  // to wasm
       new UnitRepresentation(
         UnitState.IDLE,
         0,
@@ -70,8 +66,8 @@ export default async function getInitUniverse(): Promise<
     ]
     window.angle = 0
 
-    const envRepresentation = new EnvironmentRepresentation(serializedMap.envVisuals)
-    const debugRepresentation = new DebugRepresentation()
+    // const envRepresentation = new EnvironmentRepresentation(serializedMap.envVisuals)  // to wasm
+    const debugRepresentation = new DebugRepresentation()  // to wasm
     // window.angle = Math.PI * 0
     // Error, make sure to write test for it, and then fix it!
 
@@ -84,7 +80,7 @@ export default async function getInitUniverse(): Promise<
 
       const [_, cameraAngleY] = getCameraAngle()
 
-      units.forEach(unit => {
+      units.forEach(unit => { // to wasm
         unit.update(window.angle - cameraAngleY, UnitState.SHOOT, dt)
       })
 
@@ -95,9 +91,7 @@ export default async function getInitUniverse(): Promise<
         depthTexture.width !== canvasTexture.width ||
         depthTexture.height !== canvasTexture.height
       ) {
-        if (depthTexture) {
-          depthTexture.destroy();
-        }
+        depthTexture?.destroy();
         depthTexture = device.createTexture({
           size: [canvasTexture.width, canvasTexture.height],
           format: 'depth24plus',
@@ -128,16 +122,17 @@ export default async function getInitUniverse(): Promise<
       const {worldMatrix, lightDirection} = getMatricies(canvas, serializedMap.cameraTarget, dt)
       const pass = encoder.beginRenderPass(descriptor)
       const fullLightAngle = [-lightDirection[0], -lightDirection[1], -lightDirection[2]]
-      const vertexData = getVertexData(units, envRepresentation, debugRepresentation, fullLightAngle)
+      // const vertexData = getVertexData(units, envRepresentation, debugRepresentation, fullLightAngle) // to wasm
+      const vertexData = universe.get_vertex_data();
 
       const obstacles: Point[][] = []
-      serializedMap.obstacles.forEach(p => {
-        if (p === null) {
-          obstacles.push([])
-        } else {
-          obstacles[obstacles.length - 1].push(p)
-        }
-      })
+      // serializedMap.obstacles.forEach(p => {
+      //   if (p === null) {
+      //     obstacles.push([])
+      //   } else {
+      //     obstacles[obstacles.length - 1].push(p)
+      //   }
+      // })
 
       obstacles.forEach(pList => {
         if (pList.length !== 0) {

@@ -1,5 +1,5 @@
 import { Universe } from 'Universe'
-import getInitUniverse from 'getInitUniverse'
+import getInitUniverse from 'getStartUniverse'
 import getCoords, { setCoordsOrigin } from './getCoords'
 import setupUI from './setupUI'
 import creationConfig from './creationConfig'
@@ -226,8 +226,16 @@ export default function openMapCreator(wasmModule: Universe) {
       //     ).join(',')
       //   )
       // )
+      
+      const universe = Universe.new(
+        new Float32Array(),
+        new Float32Array(serializedMap.obstacles),
+        new Float32Array(serializedMap.envVisuals.platforms),
+        new Float32Array(serializedMap.envVisuals.bridges),
+        new Float32Array(),
+      )
       initUniverse(
-        wasmModule,
+        universe,
         serializedMap,
         new Float32Array([
           ...[
