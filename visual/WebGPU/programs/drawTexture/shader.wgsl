@@ -60,7 +60,7 @@ struct VertexOutput {
 
 
   return vec4f(
-    (texel.rgb * colorMatrix).rgb * min(1.0, light), texel.a
+    (texel.rgb * colorMatrix).rgb * light, texel.a
   );
   // return vec4f(
   //   (texel.rgb * colorMatrix).rg, 1.0,

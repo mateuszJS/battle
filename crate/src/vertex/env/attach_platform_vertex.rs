@@ -1,4 +1,4 @@
-use super::attach_bridge_vertex::{getBridgePoint, is_bridge};
+use super::attach_bridge_vertex::{get_bridge_point, is_bridge};
 use super::consts::RAILING_POINT_OFFSETS;
 use super::VertexComponents;
 use crate::constants::MATH_PI;
@@ -17,7 +17,6 @@ fn get_indicies(top: bool, right: bool, bottom: bool, left: bool) -> Vec<usize> 
         27, 19, 3, //
     ];
 
-    //t's { vec_a.append(&mut vec_b); vec_a } :slight_smile:
     // top of railings
     if top {
         indicies.append(&mut vec![
@@ -400,24 +399,27 @@ pub fn attach_platform_vertex(
         (avg_x + x / points_len, avg_y + y / points_len)
     });
 
-    points.iter().for_each(|(x, y)| {
-        let angle = (y - center.1).atan2(center.0 - x);
+    points.iter().for_each(|p| {
+        let angle = (p.1 - center.1).atan2(center.0 - p.0);
 
         RAILING_POINT_OFFSETS
             .iter()
             .enumerate()
             .for_each(|(offset_index, offset)| {
-                // let bridge_destination_point = get_bridge_point(p, bridges, offset);
-                // if bridge_destination_point {
-                //    destinationData.push(...bridgeDestinationPoint)
-                // } else {
-                components.destination.append(&mut vec![
-                    x - angle.cos() * offset.0,
-                    offset.1,
-                    y + angle.sin() * offset.0,
-                    1.0,
-                ]);
-                // }
+                let maybe_bridge_destination_point = get_bridge_point(p, bridges, offset);
+                match maybe_bridge_destination_point {
+                    Some(point) => {
+                        components.destination.append(&mut point.to_vec());
+                    }
+                    None => {
+                        components.destination.append(&mut vec![
+                            p.0 - angle.cos() * offset.0,
+                            offset.1,
+                            p.1 + angle.sin() * offset.0,
+                            1.0,
+                        ]);
+                    }
+                }
                 components.texture_layers.push(10.0); // we might want to add like 0.1, just to make sure there isno correction while covnertin to integers
                 components.source.push(TEXTURE_POINTS[offset_index].0);
                 components.source.push(TEXTURE_POINTS[offset_index].1);

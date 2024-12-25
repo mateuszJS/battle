@@ -145,7 +145,7 @@ pub fn attachBridgeVertex(components: &mut VertexComponents, points: &Vec<(f32, 
 //   None => {}
 // }
 
-pub fn getBridgePoint(
+pub fn get_bridge_point(
     point: &(f32, f32),
     bridges: &Vec<Vec<(f32, f32)>>,
     railingPointOffset: &(f32, f32),
@@ -173,8 +173,8 @@ pub fn is_bridge(
     bridges: &Vec<Vec<(f32, f32)>>,
     railing_point_offset: &(f32, f32),
 ) -> bool {
-    match getBridgePoint(point, bridges, railing_point_offset) {
-        Some(point) => true,
+    match get_bridge_point(point, bridges, railing_point_offset) {
+        Some(_point) => true,
         None => false,
     }
 }

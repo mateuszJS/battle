@@ -97,13 +97,13 @@ impl Universe {
 
         let mut strategic_points = vec![];
         let mut i = 0;
-        while i < strategic_points_raw.len() {
-            strategic_points.push(StrategicPoint::new(
-                strategic_points_raw[i],
-                strategic_points_raw[i + 1],
-            ));
-            i += 2;
-        }
+        // while i < strategic_points_raw.len() {
+        //     strategic_points.push(StrategicPoint::new(
+        //         strategic_points_raw[i],
+        //         strategic_points_raw[i + 1],
+        //     ));
+        //     i += 2;
+        // }
 
         let world = World {
             squads_on_grid: HashMap::new(),
@@ -112,20 +112,20 @@ impl Universe {
         };
 
         let mut i = 0;
-        while i < factions_data.len() {
-            factions.push(Faction::new(
-                factions_data[i] as u32,
-                IdGenerator::generate_id(),
-                factions_data[i + 1],
-                factions_data[i + 2],
-                factions_data[i + 3],
-                i == 0,
-            ));
-            i += 4;
-        }
+        // while i < factions_data.len() {
+        //     factions.push(Faction::new(
+        //         factions_data[i] as u32,
+        //         IdGenerator::generate_id(),
+        //         factions_data[i + 1],
+        //         factions_data[i + 2],
+        //         factions_data[i + 3],
+        //         i == 0,
+        //     ));
+        //     i += 4;
+        // }
 
-        ObstaclesLazyStatics::init_and_get_obstacles_handler(Some(obstacles_shapes));
-        CalcPositions::get_is_point_inside_any_obstacle((0, 0), false);
+        // ObstaclesLazyStatics::init_and_get_obstacles_handler(Some(obstacles_shapes));
+        // CalcPositions::get_is_point_inside_any_obstacle((0, 0), false);
 
         let platforms = utils::get_grouped_points(platform_stream);
         let bridges = utils::get_grouped_points(bridges_stream);
