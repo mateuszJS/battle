@@ -16,7 +16,7 @@ export type FrameByState = Record<UnitState, {
 
 export interface FrameDetails {
   name: string // useful noyl during assigning frames, not later
-  sourceRect: number[]
+  sourceRect: [number, number, number, number, number, number, number, number]
   destinationRect: Rect,
   textureIndex: number
 }

@@ -14,9 +14,17 @@ import DebugRepresentation from "debug/DebugRepresentation";
 
 let depthTexture: GPUTexture | undefined;
 
+// this type cannot be imported from rust, because String and array are not compatilbe with wasm bindgen
+interface FrameDetails {
+  name: string, // useful noyl during assigning frames, not later
+  source_rect: [number, number, number, number, number, number, number, number],
+  destination_rect: [number, number, number, number],
+  texture_index: number,
+}
+
 export default async function getInitUniverse(): Promise<
   (
-    wasmModule: Universe,
+    universe: Universe,
     serializedMap: SerializedMap,
     colorMatricies: Float32Array
   ) => void
@@ -36,9 +44,17 @@ export default async function getInitUniverse(): Promise<
   // runCreator(state, canvas, context, device, presentationFormat)
 
   // initUI(state)
-  const texture2dArray = await loadAssetsIntoTextureArray(
+  const [texture2dArray, frames] = await loadAssetsIntoTextureArray(
     device
   )
+
+  // Universe.init_frame_descriptor({ x: 4, name: 'aaa', angles: 7, arr: [0, 0, 0, 0] })
+  Universe.init_frame_descriptor(frames.map<FrameDetails>(frame => ({
+    destination_rect: [frame.destinationRect.x, frame.destinationRect.y, frame.destinationRect.width, frame.destinationRect.height],
+    source_rect: frame.sourceRect,
+    name: frame.name,
+    texture_index: frame.textureIndex
+  })))
   // const assets = await loadAssets(
   //   device,
   //   (progress) => console.log(`assets loading progress: ${progress}`)

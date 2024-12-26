@@ -72,7 +72,7 @@ export interface SpriteSheetEntry {
   }
 }
 
-export default async function loadAssetsIntoTextureArray(device: GPUDevice): Promise<GPUTexture> {
+export default async function loadAssetsIntoTextureArray(device: GPUDevice): Promise<[GPUTexture, FrameDetails[]]> {
   const sourceBitmapsList: TextureSlice[] = []
 
   const spriteSheetPromises = sources.map<Promise<[ImageBitmap, SpriteSheetJson]>>(({ imgUrl, jsonUrl }) => {
@@ -97,7 +97,8 @@ export default async function loadAssetsIntoTextureArray(device: GPUDevice): Pro
     }))
   }).flat()
 
-  initializeAssetsDescriptor(frames)
-
-  return createTexture2dArrayFromSources(device, sourceBitmapsList, {flipY: true})
+  return [
+    createTexture2dArrayFromSources(device, sourceBitmapsList, {flipY: true}),
+    frames
+  ]
 }

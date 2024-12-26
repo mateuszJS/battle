@@ -42,10 +42,6 @@ struct VertexOutput {
   let colorMatrix = u.colorMatricies[in.colorMatrixIndex];
   let texel = textureSample(ourTexture, ourSampler, in.texCoord, 10);//in.texLayerIndex);
 
-
-
-
-
   // Because vsOut.normal is an inter-stage variable 
   // it's interpolated so it will not be a unit vector.
   // Normalizing it will make it a unit vector again
@@ -53,17 +49,10 @@ struct VertexOutput {
 
   // Compute the light by taking the dot product
   // of the normal to the light's reverse direction
-  let light = dot(normal, -u.lightDirection);
+  let light = 0.5 + dot(normal, -u.lightDirection) * 0.5;
 
   // Lets multiply just the color portion (not the alpha)
   // by the light
 
-
-  return vec4f(
-    (texel.rgb * colorMatrix).rgb * light, texel.a
-  );
-  // return vec4f(
-  //   (texel.rgb * colorMatrix).rg, 1.0,
-  //   1.0
-  // );
+  return vec4f(texel.rgb * colorMatrix * light, texel.a);
 }

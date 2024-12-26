@@ -23,6 +23,8 @@ macro_rules! angle_diff {
 
 // https://rustwasm.github.io/book/game-of-life/debugging.html fix debugging
 
+use gloo_utils::format::JsValueSerdeExt;
+use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 
@@ -846,4 +848,24 @@ impl Universe {
     pub fn get_vertex_data(&self) -> js_sys::Float32Array {
         js_sys::Float32Array::from(&self.vertex.get_vertex()[..])
     }
+
+    pub fn init_frame_descriptor(raw_frames: JsValue) {
+        let serde = raw_frames.into_serde();
+
+        let frames: Vec<FrameDetails> = if serde.is_ok() {
+            serde.unwrap()
+        } else {
+            panic!("division by zero"); // TODO: this panic doesnt panic actually!
+        };
+
+        vertex::initialize_assets_descriptor(frames);
+    }
+}
+
+#[derive(Serialize, Deserialize)]
+struct FrameDetails {
+    name: String, // useful noyl during assigning frames, not later
+    source_rect: [f32; 8],
+    destination_rect: [f32; 4], // maybe we should change it to [(f32, f32); 4]?
+    texture_index: usize,
 }

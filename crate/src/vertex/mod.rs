@@ -1,5 +1,10 @@
+mod animated_sprite;
+mod assets_descriptor;
 mod env;
+mod unit;
 
+use animated_sprite::AnimatedSprite;
+pub use assets_descriptor::initialize_assets_descriptor;
 use env::EnvVertex;
 
 pub struct VertexComponents {

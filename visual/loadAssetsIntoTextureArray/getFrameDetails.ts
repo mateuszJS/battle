@@ -3,7 +3,7 @@ import { SpriteSheetEntry } from "./loadAssetsIntoTextureArray"
 import { centerPivot } from "AssetsDescriptor"
 
 interface FrameDetails { 
-  sourceRect: number[]
+  sourceRect: [number, number, number, number, number, number, number, number]
   destinationRect: Rect
 }
 
@@ -13,7 +13,7 @@ export default function getFrameDetails(
 ): FrameDetails {
   const {x, y, w, h} = frameJson.frame
 
-  const texPoints = frameJson.rotated
+  const texPoints: [number, number, number, number, number, number, number, number] = frameJson.rotated
     ? [
       0,      0,
       0,      0 + w,

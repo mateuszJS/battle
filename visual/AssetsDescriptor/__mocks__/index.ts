@@ -9,7 +9,7 @@ const prng = initPRNG(2850771051)
 function getFrames(namePrefix: string, length: number) {
   return Array.from({ length }, (_, i) => ({
     name: `${namePrefix}_${i}`,
-    sourceRect: Array.from({ length: 8 }, () => prng()),
+    sourceRect: Array.from({ length: 8 }, () => prng()) as [number, number, number, number, number, number, number, number],
     destinationRect: new Rect(prng() * -2000, prng() * -2000, prng() * 300 | 0, prng() * 300 | 0),
     textureIndex: prng() * 7 | 0,
   }))
