@@ -1,15 +1,10 @@
 import { Universe } from "Universe";
 import canvasSizeObserver from "WebGPU/canvasSizeObserver";
 import setupWebGPU from "WebGPU/setupWebGPU";
-import { UnitState } from "logic-contants";
 import { drawLine, drawTexture } from "WebGPU/programs/initPrograms";
-import { getVertexData } from "WebGPU/getVertexData";
 import loadAssetsIntoTextureArray from "loadAssetsIntoTextureArray/loadAssetsIntoTextureArray";
-import AssetId from "AssetsDescriptor/AssetId";
-import UnitRepresentation from "UnitRepresentation/UnitRepresentation";
 import getMatricies, { getCameraAngle } from "worldMatrix";
 import { SerializedMap } from "map-creator/serializeMap";
-import EnvironmentRepresentation from "EnvRepresentation";
 import DebugRepresentation from "debug/DebugRepresentation";
 import getPlaneMatrix from "worldMatrix/planeMatrix"
 
@@ -30,7 +25,6 @@ export default async function getInitUniverse(): Promise<
     colorMatricies: Float32Array
   ) => void
 > {
-  // const state = new State()
   const {
     device,
     canvas,
@@ -42,9 +36,6 @@ export default async function getInitUniverse(): Promise<
     console.log('resive happened')
   });
 
-  // runCreator(state, canvas, context, device, presentationFormat)
-
-  // initUI(state)
   const [texture2dArray, frames] = await loadAssetsIntoTextureArray(
     device
   )
@@ -56,34 +47,9 @@ export default async function getInitUniverse(): Promise<
     name: frame.name,
     texture_index: frame.textureIndex
   })))
-  // const assets = await loadAssets(
-  //   device,
-  //   (progress) => console.log(`assets loading progress: ${progress}`)
-  // )
-
-  // const texture: GPUTexture = await createTextureFromImage(device, imageSrc, {})
-
-
-
 
   return function initUniverse (universe, serializedMap, colorMatricies) {
-    const firstPoint = { x: 100, y: 100 }
-    // const firstPoint = serializedMap.obstacles.find(Boolean) as Point
 
-    const units = [  // to wasm
-      new UnitRepresentation(
-        UnitState.IDLE,
-        0,
-        firstPoint,
-        // [AssetId.RegularBody],
-        // [AssetId.RegularBody],
-        [AssetId.RegularBody, AssetId.RegularAccesories, AssetId.ElephantHead],
-        0
-      )
-    ]
-    window.angle = 0
-
-    // const envRepresentation = new EnvironmentRepresentation(serializedMap.envVisuals)  // to wasm
     const debugRepresentation = new DebugRepresentation()  // to wasm
     // window.angle = Math.PI * 0
     // Error, make sure to write test for it, and then fix it!
@@ -96,10 +62,6 @@ export default async function getInitUniverse(): Promise<
       lastFrameTime = now
 
       const [_, cameraAngleY] = getCameraAngle()
-
-      units.forEach(unit => { // to wasm
-        unit.update(window.angle - cameraAngleY, UnitState.SHOOT, dt)
-      })
 
       // here we need to render that texture into canvas
       const canvasTexture = context.getCurrentTexture();

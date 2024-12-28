@@ -9,6 +9,11 @@ macro_rules! log {
   ($( $t:tt )*) => (web_sys::console::log_1(&format!($($t)*).into()));
 }
 
+macro_rules! err {
+  ($( $t:tt )*) => (web_sys::console::error_1(&format!($($t)*).into()); panic!(""));
+  // there is no way to specify panci message, so we need to do console.error and then panci any value
+}
+
 //to remove and replace with util
 macro_rules! angle_diff {
   ($beta:expr, $alpha:expr) => {{
@@ -26,6 +31,7 @@ macro_rules! angle_diff {
 use gloo_utils::format::JsValueSerdeExt;
 use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
+use std::panic;
 use std::rc::{Rc, Weak};
 
 mod constants;
@@ -883,7 +889,7 @@ impl Universe {
         let frames: Vec<FrameDetails> = if serde.is_ok() {
             serde.unwrap()
         } else {
-            panic!("division by zero"); // TODO: this panic doesnt panic actually!
+            err!("init_frame_descriptor received not copatible data from JS. Failed at conversion to Rust types.");
         };
 
         vertex::initialize_assets_descriptor(frames);
