@@ -9,12 +9,12 @@ use std::{collections::HashMap, sync::LazyLock, sync::Mutex};
 use super::unit::UnitState;
 pub use consts::AssetId;
 
-struct AnimationDetails {
+pub struct AnimationDetails {
     prefix: String,
-    animation_length: usize,
-    angles: usize,
-    time_per_frame: f32,
-    frames: Vec<FrameDetails>,
+    pub animation_length: usize,
+    pub angles: usize,
+    pub time_per_frame: f32,
+    pub frames: Vec<FrameDetails>,
 }
 
 const SCALE_USE_IN_TEXTURE_PACKER: f32 = 0.5;
@@ -24,7 +24,7 @@ const CENTER_PIVOT: (f32, f32) = (
 ); // for now we made all assets with one and same pivot point
    // would be greta to stic this wy
 
-static mut ASSETS_DESCRIPTOR: LazyLock<
+pub static mut ASSETS_DESCRIPTOR: LazyLock<
     Mutex<HashMap<AssetId, HashMap<UnitState, AnimationDetails>>>,
 > = LazyLock::new(|| {
     Mutex::new(HashMap::from([

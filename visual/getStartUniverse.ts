@@ -11,6 +11,7 @@ import getMatricies, { getCameraAngle } from "worldMatrix";
 import { SerializedMap } from "map-creator/serializeMap";
 import EnvironmentRepresentation from "EnvRepresentation";
 import DebugRepresentation from "debug/DebugRepresentation";
+import getPlaneMatrix from "worldMatrix/planeMatrix"
 
 let depthTexture: GPUTexture | undefined;
 
@@ -139,7 +140,12 @@ export default async function getInitUniverse(): Promise<
       const pass = encoder.beginRenderPass(descriptor)
       const fullLightAngle = [-lightDirection[0], -lightDirection[1], -lightDirection[2]]
       // const vertexData = getVertexData(units, envRepresentation, debugRepresentation, fullLightAngle) // to wasm
-      const vertexData = universe.get_vertex_data();
+      // console.log('cameraAngleY', cameraAngleY)
+      universe.tick(dt, -cameraAngleY);
+      const vertexData = universe.get_vertex_data(
+        getPlaneMatrix(),
+        new Float32Array(fullLightAngle),
+      );
 
       const obstacles: Point[][] = []
       // serializedMap.obstacles.forEach(p => {

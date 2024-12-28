@@ -1,8 +1,8 @@
 struct Vertex {
   @location(0) position: vec4f,
   @location(1) uv: vec2f,
-  @location(2) texLayerIndex: u32,
-  @location(3) colorMatrixIndex: u32,
+  @location(2) texLayerIndex: f32,
+  @location(3) colorMatrixIndex: f32,
   @location(4) normal: vec3f,
 };
 
@@ -30,8 +30,8 @@ struct VertexOutput {
   // maybe we should pass offsets from the position instead of... position?
   out.position = u.worldViewProjection * vert.position;
   out.texCoord = vert.uv;
-  out.texLayerIndex = vert.texLayerIndex;
-  out.colorMatrixIndex = vert.colorMatrixIndex;
+  out.texLayerIndex = u32(vert.texLayerIndex);
+  out.colorMatrixIndex = u32(vert.colorMatrixIndex);
   // out.normal = u.normalMatrix * vert.normal;
   out.normal = vert.normal;
   
@@ -40,7 +40,7 @@ struct VertexOutput {
 
 @fragment fn fs(in: VertexOutput) -> @location(0) vec4f {
   let colorMatrix = u.colorMatricies[in.colorMatrixIndex];
-  let texel = textureSample(ourTexture, ourSampler, in.texCoord, 10);//in.texLayerIndex);
+  let texel = textureSample(ourTexture, ourSampler, in.texCoord, in.texLayerIndex);
 
   // Because vsOut.normal is an inter-stage variable 
   // it's interpolated so it will not be a unit vector.

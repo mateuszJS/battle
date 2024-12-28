@@ -1,9 +1,9 @@
 use crate::utils::comparef32;
 
-struct AnimSpriteConfig {
-    first_frame: usize,
-    animation_length: usize,
-    time_per_frame: f32,
+pub struct AnimSpriteConfig {
+    pub first_frame: usize,
+    pub animation_length: usize,
+    pub time_per_frame: f32,
 }
 
 pub struct AnimatedSprite {
@@ -25,13 +25,15 @@ impl AnimatedSprite {
         }
     }
 
-    pub fn update_config(&mut self, config: AnimSpriteConfig) {
+    pub fn update_config(&mut self, config: AnimSpriteConfig, reset: bool) {
         self.config = config;
-        self.frame_local_index = 0;
+        if reset {
+            self.frame_local_index = 0;
+        }
         self.prev_dt_sum = 0.0;
     }
 
-    fn get_frame_ndex(&self) -> usize {
+    pub fn get_frame_index(&self) -> usize {
         self.config.first_frame + self.frame_local_index
     }
 

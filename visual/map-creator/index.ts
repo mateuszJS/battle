@@ -6,9 +6,9 @@ import creationConfig from './creationConfig'
 import { getStoreBridges, restoreBridges, updateBridges } from './bridge'
 import serializeMap from './serializeMap'
 import { createPlatform } from './platform'
-import getWorldMatrix from 'worldMatrix'
 import mat4 from 'utils/mat4'
 import startTransition from './transition'
+import { getCameraAngle } from "worldMatrix";
 
 const storedMap = '{"platforms":[{"x":95,"y":145},{"x":292,"y":145},{"x":91,"y":331},{"x":288,"y":508},{"x":292,"y":328}],"bridges":[[{"platformIndex":4,"bridgeEdgeIndex":2},{"platformIndex":3,"bridgeEdgeIndex":0}],[{"platformIndex":2,"bridgeEdgeIndex":1},{"platformIndex":4,"bridgeEdgeIndex":3}],[{"platformIndex":0,"bridgeEdgeIndex":2},{"platformIndex":2,"bridgeEdgeIndex":0}],[{"platformIndex":1,"bridgeEdgeIndex":3},{"platformIndex":0,"bridgeEdgeIndex":1}],[{"platformIndex":1,"bridgeEdgeIndex":2},{"platformIndex":4,"bridgeEdgeIndex":0}]]}'
 
@@ -233,7 +233,9 @@ export default function openMapCreator(wasmModule: Universe) {
         new Float32Array(serializedMap.envVisuals.platforms),
         new Float32Array(serializedMap.envVisuals.bridges),
         new Float32Array(),
+        -getCameraAngle()[1],
       )
+
       initUniverse(
         universe,
         serializedMap,

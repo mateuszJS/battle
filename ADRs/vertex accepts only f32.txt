@@ -1,0 +1,1 @@
+From rust we return Vec<f32>, and encoding of float32 and uint32 is different, so for WebGPU we might define all verticies as float32 and durign the runtime cast them to uint32.

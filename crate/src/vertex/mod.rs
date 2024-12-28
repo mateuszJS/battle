@@ -1,11 +1,18 @@
 mod animated_sprite;
 mod assets_descriptor;
 mod env;
+mod mat4;
 mod unit;
 
 use animated_sprite::AnimatedSprite;
 pub use assets_descriptor::initialize_assets_descriptor;
+use assets_descriptor::AssetId;
 use env::EnvVertex;
+use unit::UnitVertex;
+
+use crate::utils::comparef32;
+
+static mut DEBUG: bool = true;
 
 pub struct VertexComponents {
     texture_layers: Vec<f32>,
@@ -18,16 +25,45 @@ pub struct VertexComponents {
 
 pub struct Vertex {
     env: EnvVertex,
+    unit: UnitVertex,
+    last_sprites_angle_offset: f32,
 }
 
 impl Vertex {
-    pub fn new(platforms: Vec<Vec<(f32, f32)>>, bridges: Vec<Vec<(f32, f32)>>) -> Vertex {
+    pub fn new(
+        platforms: Vec<Vec<(f32, f32)>>,
+        bridges: Vec<Vec<(f32, f32)>>,
+        sprites_angle_offset: f32,
+    ) -> Vertex {
         Vertex {
             env: EnvVertex::new(platforms, bridges),
+            unit: UnitVertex::new(
+                unit::UnitState::RUN,
+                0.0,
+                (100.0, 100.0),
+                vec![
+                    AssetId::RegularBody,
+                    AssetId::RegularAccesories,
+                    AssetId::ElephantHead,
+                ],
+                0.0,
+            ),
+            last_sprites_angle_offset: sprites_angle_offset,
         }
     }
 
-    pub fn get_vertex(&self) -> Vec<f32> {
+    pub fn update(&mut self, dt: f32, sprites_angle_offset: f32) {
+        self.unit.update(
+            0.0,
+            unit::UnitState::RUN,
+            dt,
+            sprites_angle_offset,
+            !comparef32(sprites_angle_offset, self.last_sprites_angle_offset),
+        );
+        self.last_sprites_angle_offset = sprites_angle_offset;
+    }
+
+    pub fn get_vertex(&self, planeMatrix: [f32; 16], fullLightAngle: [f32; 3]) -> Vec<f32> {
         let mut components = VertexComponents {
             texture_layers: vec![],
             destination: vec![],
@@ -38,6 +74,9 @@ impl Vertex {
         };
 
         self.env.add_vertex(&mut components);
+
+        self.unit
+            .add_vertex(&mut components, planeMatrix, fullLightAngle);
 
         let stride: usize =
           4/*destination position*/ +
@@ -85,7 +124,7 @@ impl Vertex {
                 // offset += colorMatrixIndexSize
 
                 let normalsSize = 3;
-                let normalsNdx = ((i / 3) | 0) * normalsSize;
+                let normalsNdx = (i / 3) * normalsSize;
                 let normals = &components.normals[normalsNdx..normalsNdx + normalsSize];
                 output.extend_from_slice(normals);
                 output.push(0.0); //padding

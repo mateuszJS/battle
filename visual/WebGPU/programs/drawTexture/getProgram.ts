@@ -32,8 +32,8 @@ export default function getProgram(
           attributes: [
             {shaderLocation: 0, offset: 0, format: 'float32x4'},  // destination position
             {shaderLocation: 1, offset: 16, format: 'float32x2'},  // source position
-            {shaderLocation: 2, offset: 16 + 8, format: 'uint32'},  // source texture layer
-            {shaderLocation: 3, offset: 16 + 8 + 4, format: 'uint32'},  // index of color matrix
+            {shaderLocation: 2, offset: 16 + 8, format: 'float32'},  // source texture layer
+            {shaderLocation: 3, offset: 16 + 8 + 4, format: 'float32'},  // index of color matrix
             {shaderLocation: 4, offset: 16 + 8 + 4 + 4, format: 'float32x3'},  // index of color matrix
           ] as const,
         },

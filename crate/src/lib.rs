@@ -94,6 +94,7 @@ impl Universe {
         platform_stream: Vec<f32>,
         bridges_stream: Vec<f32>,
         strategic_points_raw: Vec<f32>,
+        sprites_angle_offset: f32,
     ) -> Universe {
         let mut factions: Vec<Faction> = vec![];
 
@@ -131,7 +132,7 @@ impl Universe {
 
         let platforms = utils::get_grouped_points(platform_stream);
         let bridges = utils::get_grouped_points(bridges_stream);
-        let vertex = Vertex::new(platforms, bridges);
+        let vertex = Vertex::new(platforms, bridges, sprites_angle_offset);
 
         Universe {
             factions,
@@ -845,8 +846,35 @@ impl Universe {
         js_sys::Float32Array::from(&serialized_output[..])
     }
 
-    pub fn get_vertex_data(&self) -> js_sys::Float32Array {
-        js_sys::Float32Array::from(&self.vertex.get_vertex()[..])
+    pub fn get_vertex_data(
+        &self,
+        raw_plane_matrix: Vec<f32>,
+        raw_full_light_angle: Vec<f32>,
+    ) -> js_sys::Float32Array {
+        let plane_matrix = [
+            raw_plane_matrix[0],
+            raw_plane_matrix[1],
+            raw_plane_matrix[2],
+            raw_plane_matrix[3],
+            raw_plane_matrix[4],
+            raw_plane_matrix[5],
+            raw_plane_matrix[6],
+            raw_plane_matrix[7],
+            raw_plane_matrix[8],
+            raw_plane_matrix[9],
+            raw_plane_matrix[10],
+            raw_plane_matrix[11],
+            raw_plane_matrix[12],
+            raw_plane_matrix[13],
+            raw_plane_matrix[14],
+            raw_plane_matrix[15],
+        ];
+        let full_light_angle = [
+            raw_full_light_angle[0],
+            raw_full_light_angle[1],
+            raw_full_light_angle[2],
+        ];
+        js_sys::Float32Array::from(&self.vertex.get_vertex(plane_matrix, full_light_angle)[..])
     }
 
     pub fn init_frame_descriptor(raw_frames: JsValue) {
@@ -859,6 +887,10 @@ impl Universe {
         };
 
         vertex::initialize_assets_descriptor(frames);
+    }
+
+    pub fn tick(&mut self, dt: f32, sprites_angle_offset: f32) {
+        self.vertex.update(dt, sprites_angle_offset);
     }
 }
 
