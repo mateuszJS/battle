@@ -101,6 +101,7 @@ impl Universe {
         bridges_stream: Vec<f32>,
         strategic_points_raw: Vec<f32>,
         sprites_angle_offset: f32,
+        raw_full_light_angle: Vec<f32>,
     ) -> Universe {
         let mut factions: Vec<Faction> = vec![];
 
@@ -138,7 +139,12 @@ impl Universe {
 
         let platforms = utils::get_grouped_points(platform_stream);
         let bridges = utils::get_grouped_points(bridges_stream);
-        let vertex = Vertex::new(platforms, bridges, sprites_angle_offset);
+        let full_light_angle: [f32; 3] = [
+            raw_full_light_angle[0],
+            raw_full_light_angle[1],
+            raw_full_light_angle[2],
+        ];
+        let vertex = Vertex::new(platforms, bridges, sprites_angle_offset, full_light_angle);
 
         Universe {
             factions,

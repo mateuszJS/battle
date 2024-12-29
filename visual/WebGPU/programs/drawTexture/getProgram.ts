@@ -1,6 +1,4 @@
-import vec3 from "utils/vec3";
 import shaderCode from "./shader.wgsl"
-import { VertexData } from "WebGPU/getVertexData";
  
 const NUM_OF_MATRICIES = 2
 const STRIDE = 4 + 2 + 1 + 1 + 4
