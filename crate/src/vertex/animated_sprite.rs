@@ -1,11 +1,13 @@
 use crate::utils::comparef32;
 
+#[derive(Clone)]
 pub struct AnimSpriteConfig {
     pub first_frame: usize,
     pub animation_length: usize,
     pub time_per_frame: f32,
 }
 
+#[derive(Clone)]
 pub struct AnimatedSprite {
     config: AnimSpriteConfig,
     frame_local_index: usize,
@@ -50,12 +52,6 @@ impl AnimatedSprite {
     }
 
     pub fn tick(&mut self, dt: f32) {
-        // const { timePerFrame, animationLength } = this.config
-
-        // if (typeof timePerFrame !== 'number') {
-        //   throw Error('This animation should only be updated by progress(), NOT tick()!')
-        // }
-
         let dt_sum = self.prev_dt_sum + dt;
         self.prev_dt_sum = dt_sum % self.config.time_per_frame;
 

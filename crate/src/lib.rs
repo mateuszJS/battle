@@ -886,7 +886,7 @@ impl Universe {
     pub fn init_frame_descriptor(raw_frames: JsValue) {
         let serde = raw_frames.into_serde();
 
-        let frames: Vec<FrameDetails> = if serde.is_ok() {
+        let frames: Vec<SetupFrameDetails> = if serde.is_ok() {
             serde.unwrap()
         } else {
             err!("init_frame_descriptor received not copatible data from JS. Failed at conversion to Rust types.");
@@ -901,8 +901,8 @@ impl Universe {
 }
 
 #[derive(Serialize, Deserialize)]
-struct FrameDetails {
-    name: String, // useful noyl during assigning frames, not later
+struct SetupFrameDetails {
+    name: String, // useful only during assigning frames, not later
     source_rect: [f32; 8],
     destination_rect: [f32; 4], // maybe we should change it to [(f32, f32); 4]?
     texture_index: usize,
