@@ -13,7 +13,7 @@ let depthTexture: GPUTexture | undefined;
 // this type cannot be imported from rust, because String and array are not compatilbe with wasm bindgen
 interface FrameDetails {
   name: string, // useful noyl during assigning frames, not later
-  source_rect: [number, number, number, number, number, number, number, number],
+  source_rect: [[number, number], [number, number], [number, number], [number, number]],
   destination_rect: [number, number, number, number],
   texture_index: number,
 }
@@ -43,7 +43,12 @@ export default async function getInitUniverse(): Promise<
   // Universe.init_frame_descriptor({ x: 4, name: 'aaa', angles: 7, arr: [0, 0, 0, 0] })
   Universe.init_frame_descriptor(frames.map<FrameDetails>(frame => ({
     destination_rect: [frame.destinationRect.x, frame.destinationRect.y, frame.destinationRect.width, frame.destinationRect.height],
-    source_rect: frame.sourceRect,
+    source_rect: [
+      [frame.sourceRect[0], frame.sourceRect[1]],
+      [frame.sourceRect[2], frame.sourceRect[3]],
+      [frame.sourceRect[4], frame.sourceRect[5]],
+      [frame.sourceRect[6], frame.sourceRect[7]],
+    ],
     name: frame.name,
     texture_index: frame.textureIndex
   })))

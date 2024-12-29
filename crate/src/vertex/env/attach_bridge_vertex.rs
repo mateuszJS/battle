@@ -1,8 +1,7 @@
-use super::consts::RAILING_POINT_OFFSETS;
+use super::{consts::RAILING_POINT_OFFSETS, VertexComponents};
 use crate::{
     constants::MATH_PI,
     utils::{comparef32, hypot},
-    vertex::VertexComponents,
 };
 
 const BRIDGE_INDICIES: [usize; 42] = [

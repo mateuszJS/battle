@@ -2,8 +2,8 @@ mod consts;
 
 use super::animated_sprite::AnimSpriteConfig;
 use super::assets_descriptor::{get_asset_descriptor, AnimationDetails, AssetId};
+use super::mat4;
 use super::AnimatedSprite;
-use super::{mat4, VertexComponents};
 use crate::constants::MATH_PI;
 pub use consts::UnitState;
 
@@ -98,7 +98,7 @@ impl UnitVertex {
 
     pub fn add_vertex(
         &self,
-        components: &mut VertexComponents,
+        buffer: &mut Vec<f32>,
         plane_matrix: [f32; 16],
         full_light_angle: [f32; 3],
     ) {
@@ -106,39 +106,27 @@ impl UnitVertex {
             .iter()
             .enumerate()
             .for_each(|(index, a_sprite)| {
-                let last_index = components.destination.len() / 4;
-
-                components.indicies.extend([
-                    0 + last_index,
-                    1 + last_index,
-                    2 + last_index,
-                    0 + last_index,
-                    2 + last_index,
-                    3 + last_index,
-                ]);
-
-                components.normals.extend(full_light_angle);
-                components.normals.extend(full_light_angle);
-                components.normals.extend(full_light_angle);
-                components.normals.extend(full_light_angle);
-                components.normals.extend(full_light_angle);
-                components.normals.extend(full_light_angle);
-
                 let asset_id = &self.assets[index];
                 let AnimationDetails { frames, .. } = get_asset_descriptor(asset_id, &self.state);
                 let frame = &frames[a_sprite.get_frame_index()];
 
-                components
-                    .texture_layers
-                    .append(&mut [frame.texture_index as f32; 4].to_vec());
-
-                components.source.extend(frame.source_rect);
-
                 let [x, y, width, height] = frame.destination_rect;
+                let sources = [
+                    frame.source_rect[0],
+                    frame.source_rect[1],
+                    frame.source_rect[2],
+                    //
+                    frame.source_rect[0],
+                    frame.source_rect[2],
+                    frame.source_rect[3],
+                ];
 
                 [
                     (x, y + height),
                     (x + width, y + height),
+                    (x + width, y),
+                    //
+                    (x, y + height),
                     (x + width, y),
                     (x, y),
                 ]
@@ -162,9 +150,24 @@ impl UnitVertex {
                     )
                 })
                 .map(|(x, y, z)| (x + self.position.0, y, z + self.position.1))
-                .for_each(|(x, y, z)| components.destination.append(&mut [x, y, z, 1.0].to_vec()));
-
-                components.color_matrix_idx.append(&mut [0.0; 4].to_vec());
+                .enumerate()
+                .for_each(|(index, (x, y, z))| {
+                    // components.normals.extend(full_light_angle);
+                    buffer.extend([
+                        x,
+                        y,
+                        z,
+                        1.0, // destination
+                        sources[index].0,
+                        sources[index].1,           // source
+                        frame.texture_index as f32, // texture slice index
+                        0.0,                        // color matrix indec
+                        full_light_angle[0],
+                        full_light_angle[1],
+                        full_light_angle[2],
+                        0.0, // padding for normal(its vec3)
+                    ]);
+                });
             });
     }
 }

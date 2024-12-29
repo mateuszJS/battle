@@ -13,7 +13,7 @@ use super::unit::UnitState;
 pub use consts::AssetId;
 
 pub struct FrameDetails {
-    pub source_rect: [f32; 8],
+    pub source_rect: [(f32, f32); 4],
     pub destination_rect: [f32; 4], // maybe we should change it to [(f32, f32); 4]?
     pub texture_index: usize,
 }

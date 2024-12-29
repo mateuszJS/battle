@@ -903,7 +903,7 @@ impl Universe {
 #[derive(Serialize, Deserialize)]
 struct SetupFrameDetails {
     name: String, // useful only during assigning frames, not later
-    source_rect: [f32; 8],
+    source_rect: [(f32, f32); 4],
     destination_rect: [f32; 4], // maybe we should change it to [(f32, f32); 4]?
     texture_index: usize,
 }

@@ -1,13 +1,23 @@
 mod attach_bridge_vertex;
 mod attach_platform_vertex; // we should not expose this mod further
+mod components_to_buffer;
 mod consts;
 
-use super::VertexComponents;
 use attach_bridge_vertex::attachBridgeVertex;
 use attach_platform_vertex::attach_platform_vertex;
+use components_to_buffer::components_to_buffer;
 
 pub struct EnvVertex {
-    components: VertexComponents,
+    pub buffer: Vec<f32>,
+}
+
+struct VertexComponents {
+    texture_layers: Vec<f32>,
+    destination: Vec<f32>,
+    source: Vec<f32>,
+    indicies: Vec<usize>,
+    color_matrix_idx: Vec<f32>,
+    normals: Vec<f32>,
 }
 
 impl EnvVertex {
@@ -34,20 +44,8 @@ impl EnvVertex {
             attachBridgeVertex(&mut components, bridge);
         });
 
-        // bridges.for_each(|bridge: &Vec<f32>| attach_bridge_vertex(components, indicies, bridge));
-
-        EnvVertex { components }
-    }
-
-    pub fn add_vertex(&self, components: &mut VertexComponents) {
-        let env = &self.components;
-        // maybe instead of concat we can do push with multiple items?
-        components.texture_layers.extend(&env.texture_layers[..]);
-        components.destination.extend(&env.destination[..]);
-        components.source = [&components.source[..], &env.source[..]].concat();
-        components.indicies = [&components.indicies[..], &env.indicies[..]].concat();
-        components.color_matrix_idx =
-            [&components.color_matrix_idx[..], &env.color_matrix_idx[..]].concat();
-        components.normals = [&components.normals[..], &env.normals[..]].concat();
+        EnvVertex {
+            buffer: components_to_buffer(components),
+        }
     }
 }
