@@ -7,6 +7,7 @@ import getMatricies, { getCameraAngle } from "worldMatrix";
 import { SerializedMap } from "map-creator/serializeMap";
 import DebugRepresentation from "debug/DebugRepresentation";
 import getPlaneMatrix from "worldMatrix/planeMatrix"
+import initMouseController from "mouseController";
 
 let depthTexture: GPUTexture | undefined;
 
@@ -61,10 +62,13 @@ export default async function getInitUniverse(): Promise<
 
     let lastFrameTime = document.timeline.currentTime as number
     /* not sure if type in TS is correct and and if nay browser supposrt currrentTime as CSSNumericValue */ 
+    const updateTarget = initMouseController(serializedMap.width, serializedMap.height)
 
     function tick(now: DOMHighResTimeStamp) {
       const dt = now - lastFrameTime
       lastFrameTime = now
+
+      updateTarget()
 
       const [_, cameraAngleY] = getCameraAngle()
 
@@ -103,9 +107,10 @@ export default async function getInitUniverse(): Promise<
       }
       const encoder = device.createCommandEncoder()
 
-      const {worldMatrix, lightDirection} = getMatricies(canvas, serializedMap.cameraTarget, dt)
+      const {worldMatrix, lightDirection} = getMatricies(canvas, dt)
       const pass = encoder.beginRenderPass(descriptor)
       const fullLightAngle = [-lightDirection[0], -lightDirection[1], -lightDirection[2]]
+
       // const vertexData = getVertexData(units, envRepresentation, debugRepresentation, fullLightAngle) // to wasm
       // console.log('cameraAngleY', cameraAngleY)
       universe.tick(dt, -cameraAngleY);

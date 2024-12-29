@@ -35,7 +35,6 @@ function logicPointToCanvas(
 function updateMapElementStyle(mapEl: HTMLElement, canvas: HTMLElement, cameraTarget: Point, mapElWidth: number, mapScale: number) {
   const {worldMatrix} = getWorldMatrix(
     canvas,
-    cameraTarget,
     // { x: mapElStartPosition.width / 2, y: mapElStartPosition.height / 2 },
     0,
   )
@@ -67,8 +66,6 @@ export default function startTransition(
 
   const {worldMatrix} = getWorldMatrix(
     canvas,
-    cameraTarget,
-    // { x: mapElStartPosition.width / 2, y: mapElStartPosition.height / 2 },
     0,
   )
   const mapElRect = mapElement.getBoundingClientRect()

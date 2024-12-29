@@ -13,8 +13,8 @@ export default function serializeMap(mapEl: HTMLElement, scale: number): Seriali
   const obstacles = collectAllObstacles(mapEl, scale)
   const envVisuals = collectEnvVisuals(mapEl, scale)
   const firstPoint = {
-    x: obstacles[1],
-    y: obstacles[2],
+    x: obstacles[1] + 500,
+    y: obstacles[2] + 500,
   }
 
   return {

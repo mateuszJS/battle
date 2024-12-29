@@ -63,11 +63,17 @@ function getProjMatrix(canvas: HTMLElement) {
   );
 }
 
-export default function getMatricies(canvas: HTMLElement, targetPoint: Point, dt: number) {
+let target: [number, number, number] = [0, 0, 0]
+
+export function setTarget(callback: (curr: [number, number, number]) => [number, number, number]) {
+  target = callback(target)
+}
+
+export default function getMatricies(canvas: HTMLElement, dt: number) {
   time += dt
 
 
-  const target = [targetPoint.x, 0, targetPoint.y];
+  // const target = [targetPoint.x, 0, targetPoint.y];
 
   const matricies = []
 
