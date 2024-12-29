@@ -20,8 +20,7 @@ const degToRad = (d: number) => d * Math.PI / 180;
 export const cameraSettings = {
   fieldOfView: degToRad(18),
   zNear: 1,
-  zFar: 10000,
-  radius: 3008.11,
+  zFar: 99999,
   cameraAngle: [degToRad(endAngle[0]), degToRad(endAngle[1]), degToRad(endAngle[2])],
   scale: [1, 1, 1],
   scaleFactor: 1,
@@ -36,7 +35,6 @@ const gui = new GUI();
 gui.add(cameraSettings, 'fieldOfView', {min: 1, max: 179, converters: GUI.converters.radToDeg});
 gui.add(cameraSettings, 'zNear', 1, 2000).name('zNear');
 gui.add(cameraSettings, 'zFar', 1, 4000).name('zFar');
-gui.add(cameraSettings, 'radius', -10000, 10000).name('distance from target');
 gui.add(cameraSettings.cameraAngle, '0', radToDegOptions).name('rotation.x');
 gui.add(cameraSettings.cameraAngle, '1', radToDegOptions).name('rotation.y');
 gui.add(cameraSettings.cameraAngle, '2', radToDegOptions).name('rotation.z(no impact)');
@@ -64,9 +62,18 @@ function getProjMatrix(canvas: HTMLElement) {
 }
 
 let target: [number, number, number] = [0, 0, 0]
-
 export function setTarget(callback: (curr: [number, number, number]) => [number, number, number]) {
   target = callback(target)
+}
+
+let radius = 3008
+export function setRadius(callback: (curr: number) => number) {
+  radius = callback(radius)
+}
+
+let angle = -0.19198621771937624
+export function setAngle(callback: (curr: number) => number) {
+  angle = callback(angle)
 }
 
 export default function getMatricies(canvas: HTMLElement, dt: number) {
@@ -81,7 +88,7 @@ export default function getMatricies(canvas: HTMLElement, dt: number) {
   if (time >= animationLength) {
     // ORDER MATTERS
 
-    matricies.push(mat4.rotationY(cameraSettings.cameraAngle[1]))// 2. the nrotate!
+    matricies.push(mat4.rotationY(angle))// 2. the nrotate!
     matricies.push(mat4.rotationX(cameraSettings.cameraAngle[0])) // 1.
     // we dont need Z, it's later calculated base on const up = [0, 1, 0]; and other axis, so it wont impact
   } else {
@@ -94,7 +101,7 @@ export default function getMatricies(canvas: HTMLElement, dt: number) {
     ))
   }
   matricies.push(
-    mat4.translation([0, 0, cameraSettings.radius]),
+    mat4.translation([0, 0, radius]),
   )
  
  
@@ -124,5 +131,5 @@ export default function getMatricies(canvas: HTMLElement, dt: number) {
 }
 
 export function getCameraAngle(): number[] {
-  return cameraSettings.cameraAngle
+  return [cameraSettings.cameraAngle[0], angle, cameraSettings.cameraAngle[2]]
 }

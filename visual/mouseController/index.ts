@@ -1,7 +1,8 @@
-import { getCameraAngle, setTarget } from "worldMatrix"
+import { getCameraAngle, setAngle, setRadius, setTarget } from "worldMatrix"
 
 const SCREEN_MOVE_THRESHOLD = 150
-const CAMERA_MAX_SPEED = 100
+const CAMERA_MAX_SPEED = 20
+const ANGLE_ROTATION_SPEED = 0.025
 
 export default function initMouseController(mapWidth: number, mapHeight: number) {
   const offset = { x: 0, y: 0 }
@@ -28,11 +29,33 @@ export default function initMouseController(mapWidth: number, mapHeight: number)
     offset.y = 0
   })
 
-  return () => {
+  let lastX = 0
+  function updateAngle(e: MouseEvent) {
+    setAngle(angle => angle + (lastX - e.clientX) * ANGLE_ROTATION_SPEED)
+    lastX = e.clientX
+  }
+  document.addEventListener('mousedown', e => {
+    if (e.button === 1) {
+      lastX = e.clientX
+      document.addEventListener('mousemove', updateAngle)
+    }
+  });
+
+  document.addEventListener('mouseup', e => {
+    document.removeEventListener('mousemove', updateAngle)
+  });
+
+  document.addEventListener("wheel", (event) => {
+    setRadius(radius => 
+      Math.clamp(radius + event.deltaY, 400, 20000)
+    )
+  });
+
+  return (dt: number) => {
     setTarget(currTarget => [
-      Math.clamp(currTarget[0] + offset.x, 0, mapWidth),
+      Math.clamp(currTarget[0] + offset.x * dt, 0, mapWidth),
       0,
-      Math.clamp(currTarget[2] + offset.y, 0, mapHeight),
+      Math.clamp(currTarget[2] + offset.y * dt, 0, mapHeight),
     ])
   }
 }

@@ -68,7 +68,7 @@ export default async function getInitUniverse(): Promise<
       const dt = now - lastFrameTime
       lastFrameTime = now
 
-      updateTarget()
+      updateTarget(dt)
 
       const [_, cameraAngleY] = getCameraAngle()
 
