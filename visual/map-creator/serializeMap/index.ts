@@ -16,10 +16,10 @@ export default function serializeMap(mapEl: HTMLElement, scale: number): Seriali
     x: obstacles[1] + 500,
     y: obstacles[2] + 500,
   }
-
+  
   return {
-    width: 1000,
-    height: 1000,
+    width: mapEl.clientWidth * scale,
+    height: mapEl.clientHeight * scale,
     cameraTarget: firstPoint,
     obstacles,
     envVisuals,
