@@ -18,7 +18,7 @@ struct VertexOutput {
   @location(0) texCoord: vec2f,
   @location(1) @interpolate(flat) texLayerIndex : u32,
   @location(2) @interpolate(flat) colorMatrixIndex : u32,
-  @location(3) normal : vec3f,
+  @location(3) light : f32,
 };
 
 @group(0) @binding(0) var<uniform> u: Uniforms;
@@ -32,8 +32,15 @@ struct VertexOutput {
   out.texCoord = vert.uv;
   out.texLayerIndex = u32(vert.texLayerIndex);
   out.colorMatrixIndex = u32(vert.colorMatrixIndex);
-  // out.normal = u.normalMatrix * vert.normal;
-  out.normal = vert.normal;
+
+  // Because vsOut.normal is an inter-stage variable 
+  // it's interpolated so it will not be a unit vector.
+  // Normalizing it will make it a unit vector again
+  let normal = normalize(vert.normal);
+
+  // Compute the light by taking the dot product
+  // of the normal to the light's reverse direction
+  out.light = 0.5 + dot(normal, -u.lightDirection) * 0.5;
   
   return out;
 }
@@ -42,17 +49,10 @@ struct VertexOutput {
   let colorMatrix = u.colorMatricies[in.colorMatrixIndex];
   let texel = textureSample(ourTexture, ourSampler, in.texCoord, in.texLayerIndex);
 
-  // Because vsOut.normal is an inter-stage variable 
-  // it's interpolated so it will not be a unit vector.
-  // Normalizing it will make it a unit vector again
-  let normal = normalize(in.normal);
 
-  // Compute the light by taking the dot product
-  // of the normal to the light's reverse direction
-  let light = 0.5 + dot(normal, -u.lightDirection) * 0.5;
 
   // Lets multiply just the color portion (not the alpha)
   // by the light
 
-  return vec4f(texel.rgb * colorMatrix * light, texel.a);
+  return vec4f(texel.rgb * colorMatrix * in.light, texel.a);
 }
