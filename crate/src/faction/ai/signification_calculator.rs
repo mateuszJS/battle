@@ -58,9 +58,10 @@ impl SignificationCalculator {
     }
 
     pub fn base_signification_enemy_portal(&self, portal_squad: &Ref<Squad>) -> f32 {
-        let portal_unit = portal_squad.members[0].borrow();
+        let portal_unit = &portal_squad.members[0];
 
-        1.0 + (1.0 - portal_unit.hp / portal_squad.squad_details.hp) * 0.5 // <0, 1.5>
+        1.0 + (1.0 - portal_unit.borrow().hp / portal_squad.squad_details.hp) * 0.5
+        // <0, 1.5>
     }
 
     pub fn additional_signification_enemy_place_around_our_squad(

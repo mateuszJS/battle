@@ -5,10 +5,10 @@ function getChildElementIndex(el: HTMLElement) {
   return Array.prototype.indexOf.call(el.parentElement!.children, el);
 }
 
-function collectObstacle(
+function getShape(
   platformEl: HTMLElement,
   startIndex: number,
-  visited: Array<HTMLElement | null>
+  shapes: HTMLElement[][]
 ) {
   const anchorPoints = platformEl.querySelectorAll<HTMLElement>('.anchor-point')
 
@@ -17,15 +17,15 @@ function collectObstacle(
     // just make sure full circle is completed
 
     const anchorPoint = anchorPoints[index]
-
-    if (visited.includes(anchorPoint)) {
-      if (visited[visited.length - 1] !== null) {
-        // if we havne't put sentinel(null) value that divides shapes, please put
-        visited.push(null)
+    const lastShape = shapes[shapes.length - 1]
+    if (anchorPoint.hasAttribute('used')) {
+      if (lastShape.length > 0) {
+        shapes.push([])
       }
       continue
     }
-    visited.push(anchorPoint)
+    lastShape.push(anchorPoint)
+    anchorPoint.setAttribute('used', '');
 
     if (index % 2 === 0) { // we analyze bridge only for edge first points(platform even points)
       const bridge = getBridge(anchorPoint)
@@ -40,10 +40,10 @@ function collectObstacle(
 
         const nextBridgePointIndex = getChildElementIndex(nextBridgePoint.parentElement!) - 1 // because there is a visual octagon before
         
-        collectObstacle(
+        getShape(
           nextBridgePoint.parentElement!.parentElement!, // UGLY AND FRAGILE
           nextBridgePointIndex * 2 + 1,
-          visited
+          shapes
         )
         
         // go to the netx platform
@@ -52,21 +52,21 @@ function collectObstacle(
   }
 }
 
-export default function collectAllObstacles(mapEl: HTMLElement, scale: number): number[] {
-  const visited: Array<HTMLElement | null> = [null] // null is a sentinel value which indicates new shape
+export default function getShapes(mapEl: HTMLElement, scale: number): [number, number][][] {
+  const shapes: HTMLElement[][] = [[]]
   const platformEls = Array.from(mapEl.querySelectorAll<HTMLElement>('[kind="platform"]'))
 
   platformEls.forEach(el => {
-    collectObstacle(el, 0, visited)
+    getShape(el, 0, shapes)
   })
 
-  return visited.flatMap(el => {
-    if (el === null) return [-1] // sentinel value which come prior to new shape
-    
-    const coords = getCoords(el)
-    return [
-      coords.x * scale,
-      coords.y * scale,
-    ]
-  })
+  return shapes.map(shape => (
+    shape.map(el => {
+      const coords = getCoords(el)
+      return [
+        coords.x * scale,
+        coords.y * scale,
+      ]
+    })
+  ))
 }

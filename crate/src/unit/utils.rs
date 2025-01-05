@@ -1,7 +1,7 @@
-use crate::constants::NORMAL_SQUAD_RADIUS;
+use crate::constants::{MATH_PI, NORMAL_SQUAD_RADIUS};
 use crate::position_utils::basic_utils::{BasicUtils, Line, Point};
 use crate::position_utils::calc_positions::CalcPositions;
-use crate::position_utils::obstacles_lazy_statics::ObstaclesLazyStatics;
+use crate::position_utils::map_terrain::TERRAIN_LINES;
 use crate::squad::SquadUnitSharedDataSet;
 pub const FLY_DECELERATION: f32 = 0.95;
 pub const FLY_MIN_SPEED: f32 = 0.035;
@@ -10,113 +10,125 @@ const FLY_DISTANCE_PRECISION: f32 = 3.0;
 pub struct Utils {}
 
 impl Utils {
-  pub fn get_fly_mods(angle: f32, x: f32, y: f32, strength: f32) -> (f32, f32) {
-    // https://socratic.org/questions/what-is-the-formula-for-time-from-a-changing-velocity#MathJax-Element-8-Frame
+    pub fn get_fly_mods(angle: f32, x: f32, y: f32, strength: f32) -> (f32, f32) {
+        // https://socratic.org/questions/what-is-the-formula-for-time-from-a-changing-velocity#MathJax-Element-8-Frame
 
-    // time = strength * 0.95.powi(x) < 0.035
-    let time = (FLY_MIN_SPEED / strength).log(FLY_DECELERATION).ceil();
+        // time = strength * 0.95.powi(x) < 0.035
+        let time = (FLY_MIN_SPEED / strength).log(FLY_DECELERATION).ceil();
 
-    if time <= std::f32::EPSILON {
-      return (0.0, 0.0); // to avoid dividing by zero let factor = distance / all_speeds_sum;
-    }
+        if time <= std::f32::EPSILON {
+            return (0.0, 0.0); // to avoid dividing by zero let factor = distance / all_speeds_sum;
+        }
 
-    // to calculate all_speeds_sum we are using geometric sequence
-    // all_speeds_sum = strength * (1 - 0.95.powi(time)) / (1 - 0.95)
-    let all_speeds_sum = strength * (1.0 - FLY_DECELERATION.powf(time)) / (1.0 - FLY_DECELERATION);
+        // to calculate all_speeds_sum we are using geometric sequence
+        // all_speeds_sum = strength * (1 - 0.95.powi(time)) / (1 - 0.95)
+        let all_speeds_sum =
+            strength * (1.0 - FLY_DECELERATION.powf(time)) / (1.0 - FLY_DECELERATION);
 
-    // average_speed = all_speeds_sum / time
-    // distance = average_speed * time
-    // BUT 🥁🥁🥁
-    // all_speeds_sum at the same time is the distance!
-    let mut distance = all_speeds_sum;
+        // average_speed = all_speeds_sum / time
+        // distance = average_speed * time
+        // BUT 🥁🥁🥁
+        // all_speeds_sum at the same time is the distance!
+        let mut distance = all_speeds_sum;
 
-    // in case if distance have to be shorted bc of the obstacles
-    let distance_portion = all_speeds_sum / FLY_DISTANCE_PRECISION;
+        // in case if distance have to be shorted bc of the obstacles
+        let distance_portion = all_speeds_sum / FLY_DISTANCE_PRECISION;
 
-    while distance > std::f32::EPSILON {
-      let x = (angle.sin() * distance + x) as i16;
-      let y = (-angle.cos() * distance + y) as i16;
-      if CalcPositions::get_is_point_inside_any_obstacle((x, y), false) {
-        distance -= distance_portion;
-      } else {
-        break;
-      }
-    }
+        while distance > std::f32::EPSILON {
+            let x = (angle.sin() * distance + x) as i16;
+            let y = (-angle.cos() * distance + y) as i16;
+            if CalcPositions::get_is_point_inside_any_obstacle((x, y), false) {
+                distance -= distance_portion;
+            } else {
+                break;
+            }
+        }
 
-    let factor = distance / all_speeds_sum;
-    if angle.is_nan() || strength.is_nan() || factor.is_nan() {
-      log!(
-        "get_fly_mods: {} * {} * {} * {} * {} * {} * {}",
-        angle,
-        strength,
-        factor,
-        time,
-        all_speeds_sum,
-        distance,
-        distance_portion
-      ); // index_bg.js?0d72:329 get_fly_mods: -0.7266991 - 0.03401947 - NaN
-    }
-    // used just strength * factor for simplicity, but to be more precise
-    // we should do reverse engineering up to the time calculation
-    (
-      angle.sin() * strength * factor,
-      -angle.cos() * strength * factor,
-    )
-  }
-
-  pub fn check_if_can_go_to_point(x: f32, y: f32, point: (f32, f32)) -> bool {
-    if x.is_nan() || y.is_nan() || point.0.is_nan() || point.1.is_nan() {
-      log!(
-        "check_if_can_go_to_point: {} - {} - {} - {}",
-        x,
-        y,
-        point.0,
-        point.1
-      );
-    }
-    // function used to check, if unit can run directly into next target
-    // (not current one, bc in most cases it's current position of the squad)
-    let obstacles_lines = ObstaclesLazyStatics::get_obstacles_lines();
-    let start_point = Point { id: 0, x, y };
-    let end_point = Point {
-      id: 0,
-      x: point.0,
-      y: point.1,
-    };
-    let line_to_next_track_point = Line {
-      p1: &start_point,
-      p2: &end_point,
-    };
-
-    !obstacles_lines
-      .iter()
-      .any(|obstacle_line| BasicUtils::check_intersection(&line_to_next_track_point, obstacle_line))
-  }
-
-  pub fn get_initial_track_index(
-    current_index: i8,
-    x: f32,
-    y: f32,
-    squad_shared_info: &SquadUnitSharedDataSet,
-  ) -> i8 {
-    let is_unit_close_to_squad_center = (squad_shared_info.center_point.0 - x)
-      .hypot(squad_shared_info.center_point.1 - y)
-      <= NORMAL_SQUAD_RADIUS + 10.0; // 10, in case if unit is little bit farther
-    if is_unit_close_to_squad_center && current_index == 0 {
-      1
-    } else {
-      let is_next_point_exists = squad_shared_info.track.len() as i8 != current_index + 1;
-      if is_next_point_exists
-        && Utils::check_if_can_go_to_point(
-          x,
-          y,
-          squad_shared_info.track[(current_index + 1) as usize],
+        let factor = distance / all_speeds_sum;
+        if angle.is_nan() || strength.is_nan() || factor.is_nan() {
+            log!(
+                "get_fly_mods: {} * {} * {} * {} * {} * {} * {}",
+                angle,
+                strength,
+                factor,
+                time,
+                all_speeds_sum,
+                distance,
+                distance_portion
+            ); // index_bg.js?0d72:329 get_fly_mods: -0.7266991 - 0.03401947 - NaN
+        }
+        // used just strength * factor for simplicity, but to be more precise
+        // we should do reverse engineering up to the time calculation
+        (
+            angle.sin() * strength * factor,
+            -angle.cos() * strength * factor,
         )
-      {
-        current_index + 1
-      } else {
-        current_index
-      }
     }
-  }
+
+    pub fn check_if_can_go_to_point(x: f32, y: f32, point: (f32, f32)) -> bool {
+        if x.is_nan() || y.is_nan() || point.0.is_nan() || point.1.is_nan() {
+            log!(
+                "check_if_can_go_to_point: {} - {} - {} - {}",
+                x,
+                y,
+                point.0,
+                point.1
+            );
+        }
+        // function used to check, if unit can run directly into next target
+        // (not current one, bc in most cases it's current position of the squad)
+        let obstacles_lines = &TERRAIN_LINES;
+        let start_point = Point { id: 0, x, y };
+        let end_point = Point {
+            id: 0,
+            x: point.0,
+            y: point.1,
+        };
+        let line_to_next_track_point = Line {
+            p1: &start_point,
+            p2: &end_point,
+        };
+
+        !obstacles_lines.iter().any(|obstacle_line| {
+            BasicUtils::check_intersection(&line_to_next_track_point, obstacle_line)
+        })
+    }
+
+    pub fn get_initial_track_index(
+        current_index: i8,
+        x: f32,
+        y: f32,
+        squad_shared_info: &SquadUnitSharedDataSet,
+    ) -> i8 {
+        let is_unit_close_to_squad_center = (squad_shared_info.center_point.0 - x)
+            .hypot(squad_shared_info.center_point.1 - y)
+            <= NORMAL_SQUAD_RADIUS + 10.0; // 10, in case if unit is little bit farther
+        if is_unit_close_to_squad_center && current_index == 0 {
+            1
+        } else {
+            let is_next_point_exists = squad_shared_info.track.len() as i8 != current_index + 1;
+            if is_next_point_exists
+                && Utils::check_if_can_go_to_point(
+                    x,
+                    y,
+                    squad_shared_info.track[(current_index + 1) as usize],
+                )
+            {
+                current_index + 1
+            } else {
+                current_index
+            }
+        }
+    }
+}
+
+const MAP_VERTICAL_MOD: f32 = 0.52;
+
+pub fn map_angle_to_index(angle: f32, num_of_angles: usize) -> usize {
+    let angle_slize = (1.0 / (num_of_angles as f32)) * MATH_PI * 2.0;
+    let top_view_angle = angle.sin().atan2(angle.cos() / MAP_VERTICAL_MOD);
+    let shifted_by_half = top_view_angle - angle_slize / 2.0;
+    let positive_angle = shifted_by_half + MATH_PI * 2.0;
+
+    (positive_angle / angle_slize).ceil() as usize % num_of_angles
 }

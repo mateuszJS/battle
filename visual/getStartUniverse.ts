@@ -113,8 +113,10 @@ export default async function getInitUniverse(): Promise<
 
       // const vertexData = getVertexData(units, envRepresentation, debugRepresentation, fullLightAngle) // to wasm
       // console.log('cameraAngleY', cameraAngleY)
-      universe.tick(dt, -cameraAngleY);
+      // universe.tick(dt, -cameraAngleY);
       const vertexData = universe.get_vertex_data(
+        dt,
+        -cameraAngleY,
         getPlaneMatrix(),
         new Float32Array(fullLightAngle),
       );

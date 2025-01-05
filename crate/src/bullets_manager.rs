@@ -144,8 +144,8 @@ impl BulletsManager {
                     && (weapon_details.is_hitting_allies
                         || squad.faction_id != bullet.owner_faction_id)
                 {
-                    squad.members.iter_mut().for_each(|ref_cell_unit| {
-                        let mut unit = ref_cell_unit.borrow_mut();
+                    squad.members.iter_mut().for_each(|ref_unit| {
+                        let mut unit = ref_unit.borrow_mut();
                         let distance = (unit.x - target.0).hypot(unit.y - target.1);
                         if distance <= weapon_details.explosion_range {
                             let angle = (unit.x - target.0).atan2(target.1 - unit.y);

@@ -1,13 +1,13 @@
-use std::{collections::HashMap, sync::LazyLock};
+use std::collections::HashMap;
 
-use crate::vertex::unit::UnitState;
+use crate::constants::State;
 
 use super::AnimationDetails;
 
-pub fn get() -> HashMap<UnitState, AnimationDetails> {
+pub fn get() -> HashMap<State, AnimationDetails> {
     HashMap::from([
         (
-            UnitState::RUN,
+            State::RUN,
             AnimationDetails {
                 prefix: "regular_rifle_run".to_owned(),
                 animation_length: 16,
@@ -17,7 +17,7 @@ pub fn get() -> HashMap<UnitState, AnimationDetails> {
             },
         ),
         (
-            UnitState::SHOOT,
+            State::SHOOT,
             AnimationDetails {
                 prefix: "regular_rifle_shoot".to_owned(),
                 animation_length: 7,
@@ -27,7 +27,7 @@ pub fn get() -> HashMap<UnitState, AnimationDetails> {
             },
         ),
         (
-            UnitState::IDLE,
+            State::IDLE,
             AnimationDetails {
                 prefix: "regular_rifle_idle".to_owned(),
                 animation_length: 1,

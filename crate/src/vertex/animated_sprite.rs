@@ -1,5 +1,7 @@
 use crate::utils::comparef32;
 
+use super::assets_descriptor::AssetId;
+
 #[derive(Clone)]
 pub struct AnimSpriteConfig {
     pub first_frame: usize,
@@ -9,14 +11,16 @@ pub struct AnimSpriteConfig {
 
 #[derive(Clone)]
 pub struct AnimatedSprite {
+    pub asset_id: &'static AssetId,
     config: AnimSpriteConfig,
     frame_local_index: usize,
     prev_dt_sum: f32,
 }
 
 impl AnimatedSprite {
-    pub fn new() -> AnimatedSprite {
+    pub fn new(asset_id: &'static AssetId) -> AnimatedSprite {
         AnimatedSprite {
+            asset_id,
             config: AnimSpriteConfig {
                 first_frame: 0,
                 animation_length: 0,

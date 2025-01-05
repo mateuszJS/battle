@@ -19,13 +19,13 @@ impl SquadsGridManager {
     pub fn create(factions: &Vec<Faction>) -> SquadsGrid {
         let mut grid: SquadsGrid = HashMap::new();
 
-        factions.iter().for_each(|faction| {
-            SquadsGridManager::grid_add_entry(&faction.portal_squad, &mut grid);
-            faction
-                .squads
-                .iter()
-                .for_each(|squad| SquadsGridManager::grid_add_entry(squad, &mut grid));
-        });
+        // factions.iter().for_each(|faction| {
+        //     SquadsGridManager::grid_add_entry(&faction.portal_squad, &mut grid);
+        //     faction
+        //         .squads
+        //         .iter()
+        //         .for_each(|squad| SquadsGridManager::grid_add_entry(squad, &mut grid));
+        // });
 
         grid
     }

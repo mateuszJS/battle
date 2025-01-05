@@ -15,13 +15,15 @@ use test::Bencher;
 
 #[bench]
 fn find_path_with_clone(b: &mut Bencher) {
-  Battle::position_utils::obstacles_lazy_statics::ObstaclesLazyStatics::init_and_get_obstacles_handler(Some(vec![
-    600.0, 100.0, 900.0, 100.0, 900.0, 300.0, 600.0, 300.0, // end here
-    700.0, 400.0, 900.0, 400.0, 900.0, 600.0, 700.0, 600.0, 600.0, 500.0,
-  ]));
-  // let n = test::black_box(1000);
-  Battle::position_utils::PositionUtils::get_track(100.0, 100.0, 950.0, 450.0);
-  b.iter(|| {
+    Battle::position_utils::map_terrain::ObstaclesLazyStatics::init_and_get_obstacles_handler(
+        Some(vec![
+            600.0, 100.0, 900.0, 100.0, 900.0, 300.0, 600.0, 300.0, // end here
+            700.0, 400.0, 900.0, 400.0, 900.0, 600.0, 700.0, 600.0, 600.0, 500.0,
+        ]),
+    );
+    // let n = test::black_box(1000);
     Battle::position_utils::PositionUtils::get_track(100.0, 100.0, 950.0, 450.0);
-  });
+    b.iter(|| {
+        Battle::position_utils::PositionUtils::get_track(100.0, 100.0, 950.0, 450.0);
+    });
 }

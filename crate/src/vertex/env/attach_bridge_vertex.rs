@@ -83,8 +83,8 @@ pub fn attachBridgeVertex(components: &mut VertexComponents, points: &Vec<(f32, 
         .indicies
         .append(&mut BRIDGE_INDICIES.iter().map(|i| verticies_num + i).collect());
 
-    let bridgeDirection = (points[3].1 - points[0].1).atan2(points[0].0 - points[3].0);
-    let perpendicular = bridgeDirection + MATH_PI / 2.0;
+    let bridge_direction = (points[3].1 - points[0].1).atan2(points[0].0 - points[3].0);
+    let perpendicular = bridge_direction + MATH_PI / 2.0;
 
     components.normals.extend(
         [

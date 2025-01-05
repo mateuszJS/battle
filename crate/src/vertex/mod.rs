@@ -4,22 +4,23 @@ mod consts;
 mod debug;
 mod env;
 mod mat4;
-mod unit;
+mod units;
 
-use animated_sprite::AnimatedSprite;
-pub use assets_descriptor::initialize_assets_descriptor;
-use assets_descriptor::AssetId;
+use std::cell::{Ref, RefCell};
+
+pub use animated_sprite::{AnimSpriteConfig, AnimatedSprite};
+pub use assets_descriptor::{
+    get_asset_descriptor, initialize_assets_descriptor, AnimationDetails, AssetId,
+};
 use debug::attach_debug;
 use env::attach_env_vertex;
-use unit::UnitVertex;
 
-use crate::utils::comparef32;
+use crate::{faction::Faction, unit::Unit, utils::comparef32, Universe};
 
 static mut DEBUG: bool = true;
 
 pub struct Vertex {
     const_buffer: Vec<f32>,
-    unit: UnitVertex,
     last_sprites_angle_offset: f32,
 }
 
@@ -35,38 +36,73 @@ impl Vertex {
         attach_debug(&mut const_buffer, full_light_angle);
         Vertex {
             const_buffer,
-            unit: UnitVertex::new(
-                unit::UnitState::RUN,
-                0.0,
-                (100.0, 100.0),
-                vec![
-                    AssetId::RegularBody,
-                    AssetId::RegularAccesories,
-                    AssetId::ElephantHead,
-                ],
-                0.0,
-            ),
             last_sprites_angle_offset: sprites_angle_offset,
         }
     }
 
-    pub fn update(&mut self, dt: f32, sprites_angle_offset: f32) {
-        self.unit.update(
-            0.0,
-            unit::UnitState::RUN,
-            dt,
-            sprites_angle_offset,
-            !comparef32(sprites_angle_offset, self.last_sprites_angle_offset),
-        );
-        self.last_sprites_angle_offset = sprites_angle_offset;
-    }
+    pub fn get_vertex(
+        &mut self,
+        factions: &mut Vec<Faction>,
+        dt: f32,
+        sprites_angle_offset: f32,
+        raw_plane_matrix: Vec<f32>,
+        raw_full_light_angle: Vec<f32>,
+    ) -> Vec<f32> {
+        let plane_matrix = [
+            raw_plane_matrix[0],
+            raw_plane_matrix[1],
+            raw_plane_matrix[2],
+            raw_plane_matrix[3],
+            raw_plane_matrix[4],
+            raw_plane_matrix[5],
+            raw_plane_matrix[6],
+            raw_plane_matrix[7],
+            raw_plane_matrix[8],
+            raw_plane_matrix[9],
+            raw_plane_matrix[10],
+            raw_plane_matrix[11],
+            raw_plane_matrix[12],
+            raw_plane_matrix[13],
+            raw_plane_matrix[14],
+            raw_plane_matrix[15],
+        ];
+        let full_light_angle = [
+            raw_full_light_angle[0],
+            raw_full_light_angle[1],
+            raw_full_light_angle[2],
+        ];
 
-    pub fn get_vertex(&self, plane_matrix: [f32; 16], full_light_angle: [f32; 3]) -> Vec<f32> {
-        // self.env.add_vertex(&mut components);
+        let force_sprites_update = comparef32(sprites_angle_offset, self.last_sprites_angle_offset);
+
+        self.last_sprites_angle_offset = sprites_angle_offset;
+
+        let units: Vec<Ref<Unit>> = factions
+            .iter()
+            .flat_map(|faction| {
+                faction
+                    .squads
+                    .iter()
+                    .flat_map(|squad| {
+                        squad
+                            .members
+                            .iter()
+                            .map(|ref_unit| {
+                                ref_unit.borrow_mut().update_sprites(
+                                    dt,
+                                    sprites_angle_offset,
+                                    force_sprites_update,
+                                );
+                                ref_unit.borrow()
+                            })
+                            .collect::<Vec<Ref<Unit>>>()
+                    })
+                    .collect::<Vec<Ref<Unit>>>()
+            })
+            .collect::<Vec<Ref<Unit>>>();
+
         let mut buffer = self.const_buffer.clone();
 
-        self.unit
-            .add_vertex(&mut buffer, plane_matrix, full_light_angle);
+        units::add_vertex(units, &mut buffer, plane_matrix, full_light_angle);
 
         buffer
     }

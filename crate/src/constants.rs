@@ -3,7 +3,7 @@ pub const MAX_NUMBER_ITEMS_IN_PRODUCTION_LINE: usize = 5;
 pub const NORMAL_SQUAD_RADIUS: f32 = 60.0;
 pub const MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS: f32 = NORMAL_SQUAD_RADIUS + 100.0;
 pub const THRESHOLD_MAX_UNIT_DISTANCE_FROM_SQUAD_CENTER: f32 =
-  MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS + 100.0; // above this distance squad is recognized as too far
+    MAX_SQUAD_SPREAD_FROM_CENTER_RADIUS + 100.0; // above this distance squad is recognized as too far
 
 pub const UPDATE_SQUAD_CENTER_PERIOD: u32 = 15;
 pub const CHECK_SQUADS_CORRECTNESS_PERIOD: u32 = 2 * UPDATE_SQUAD_CENTER_PERIOD;
@@ -27,3 +27,16 @@ pub const OBSTACLES_MAP_WIDTH: usize = (MAP_WIDTH * OBSTACLES_MAP_SCALE + 1.0) a
 pub const OBSTACLES_MAP_HEIGHT: usize = (MAP_HEIGHT * OBSTACLES_MAP_SCALE + 1.0) as usize;
 pub const OBSTACLES_MAP_SCALE_X: f32 = OBSTACLES_MAP_WIDTH as f32 / MAP_WIDTH;
 pub const OBSTACLES_MAP_SCALE_Y: f32 = OBSTACLES_MAP_HEIGHT as f32 / MAP_HEIGHT;
+
+#[derive(PartialEq, Eq, Hash, Clone, Copy, Debug)]
+pub enum State {
+    DEFAULT,
+    CHASING,
+    ABILITY,
+    FLY,
+    RUN,
+    SHOOT,
+    IDLE,
+    GETUP,
+    DIE,
+}

@@ -225,16 +225,24 @@ export default function openMapCreator(wasmModule: Universe) {
       //     ).join(',')
       //   )
       // )
+
+      interface UniverseInput {
+        shapes: [number, number][][],
+        platforms: [number, number][][],
+        bridges: [number, number][][],
+        full_light_angle: [number, number, number],
+        sprites_angle_offset: number,
+      }
+
       const {lightDirection} = getMatricies(canvas, 0)
-      const universe = Universe.new(
-        new Float32Array(),
-        new Float32Array(serializedMap.obstacles),
-        new Float32Array(serializedMap.envVisuals.platforms),
-        new Float32Array(serializedMap.envVisuals.bridges),
-        new Float32Array(),
-        -getCameraAngle()[1],
-        new Float32Array([-lightDirection[0], -lightDirection[1], -lightDirection[2]]),
-      )
+      const input: UniverseInput = {
+        shapes: serializedMap.shapes,
+        platforms: serializedMap.envVisuals.platforms,
+        bridges: serializedMap.envVisuals.bridges,
+        full_light_angle: [-lightDirection[0], -lightDirection[1], -lightDirection[2]],
+        sprites_angle_offset: -getCameraAngle()[1],
+      }
+      const universe = Universe.new(input)
 
       initUniverse(
         universe,
