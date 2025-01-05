@@ -47,6 +47,10 @@ const sources = [
     imgUrl:  new URL('assets/sprite_sheets/bridge.png', import.meta.url),
     jsonUrl: new URL('assets/sprite_sheets/bridge.json', import.meta.url),
   },
+  {
+    imgUrl:  new URL('assets/sprite_sheets/standard_portal.png', import.meta.url),
+    jsonUrl: null,
+  },
 ] as const
 
 
@@ -75,10 +79,10 @@ export interface SpriteSheetEntry {
 export default async function loadAssetsIntoTextureArray(device: GPUDevice): Promise<[GPUTexture, FrameDetails[]]> {
   const sourceBitmapsList: TextureSlice[] = []
 
-  const spriteSheetPromises = sources.map<Promise<[ImageBitmap, SpriteSheetJson]>>(({ imgUrl, jsonUrl }) => {
+  const spriteSheetPromises = sources.map<Promise<[ImageBitmap, SpriteSheetJson | null]>>(({ imgUrl, jsonUrl }) => {
     return Promise.all([
       loadImageBitmap(imgUrl.toString()),
-      fetch(jsonUrl.toString()).then(res => res.json() as unknown as SpriteSheetJson)
+      jsonUrl ? fetch(jsonUrl.toString()).then(res => res.json() as unknown as SpriteSheetJson) : null
     ])
   })
 
@@ -90,6 +94,8 @@ export default async function loadAssetsIntoTextureArray(device: GPUDevice): Pro
       fakeMipmaps: false, //index === 10, // pass true to test mipmaps
     })
 
+    if (!spriteSheetJson) return []
+    
     return Object.entries(spriteSheetJson.frames).map<FrameDetails>(([key, frameJson]) => ({
       name: key,
       textureIndex: sourceBitmapsList.length - 1,

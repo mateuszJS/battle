@@ -8,6 +8,7 @@ import { SerializedMap } from "map-creator/serializeMap";
 import DebugRepresentation from "debug/DebugRepresentation";
 import getPlaneMatrix from "worldMatrix/planeMatrix"
 import initMouseController from "mouseController";
+import ObjFile from 'obj-file-parser'
 
 let depthTexture: GPUTexture | undefined;
 
@@ -40,7 +41,54 @@ export default async function getInitUniverse(): Promise<
   const [texture2dArray, frames] = await loadAssetsIntoTextureArray(
     device
   )
+  // const portalObjFileContent = import('assets/standard_portal.obj')
+  const portalObjFileContent = await fetch(new URL('assets/standard_portal.obj', import.meta.url))
+  const portalObjText = await portalObjFileContent.text()
+  const portalObjModel = new ObjFile(portalObjText).parse()
+  const portalObjBuffer: number[] = []
+  console.log('portalObjText', portalObjText)
+  console.log('portalObjModel', portalObjModel)
 
+  const allVertexCoords: ObjFile.Vertex[] = []
+  const allTextureCoords: ObjFile.VertexTexture[] = []
+  const allNomals: ObjFile.Vertex[] = []
+
+  portalObjModel.models.forEach(model => {
+    allVertexCoords.push(...model.vertices)
+    allTextureCoords.push(...model.textureCoords)
+    allNomals.push(...model.vertexNormals)
+  })
+
+
+  portalObjModel.models.forEach(model => {
+
+    model.faces.forEach(face => {
+      face.vertices.forEach(vertex => {
+        if (!allVertexCoords[vertex.vertexIndex - 1]) debugger
+        portalObjBuffer.push(
+          allVertexCoords[vertex.vertexIndex - 1].x * 100,
+          allVertexCoords[vertex.vertexIndex - 1].y * 100,
+          allVertexCoords[vertex.vertexIndex - 1].z * 100,
+          1, // w of position
+          allTextureCoords[vertex.textureCoordsIndex - 1].u,
+          1 - allTextureCoords[vertex.textureCoordsIndex - 1].v,
+          11, // texture slice
+          0, // color matrix
+          allNomals[vertex.vertexNormalIndex - 1].x,
+          allNomals[vertex.vertexNormalIndex - 1].y,
+          allNomals[vertex.vertexNormalIndex - 1].z,
+          0, // because of vec3 padding
+        )
+
+// vertices: [
+//   { vertexIndex: 1, textureCoordsIndex: 1, vertexNormalIndex: 1 },
+//   ...
+// ]
+
+      })
+    })
+  })
+  console.log('portalObjBuffer', portalObjBuffer)
   // Universe.init_frame_descriptor({ x: 4, name: 'aaa', angles: 7, arr: [0, 0, 0, 0] })
   Universe.init_frame_descriptor(frames.map<FrameDetails>(frame => ({
     destination_rect: [frame.destinationRect.x, frame.destinationRect.y, frame.destinationRect.width, frame.destinationRect.height],
@@ -51,7 +99,7 @@ export default async function getInitUniverse(): Promise<
       [frame.sourceRect[6], frame.sourceRect[7]],
     ],
     name: frame.name,
-    texture_index: frame.textureIndex
+    texture_index: frame.textureIndex,
   })))
 
   return function initUniverse (universe, serializedMap, colorMatricies) {
@@ -114,12 +162,13 @@ export default async function getInitUniverse(): Promise<
       // const vertexData = getVertexData(units, envRepresentation, debugRepresentation, fullLightAngle) // to wasm
       // console.log('cameraAngleY', cameraAngleY)
       // universe.tick(dt, -cameraAngleY);
-      const vertexData = universe.get_vertex_data(
+      const _vertexData = universe.get_vertex_data(
         dt,
         -cameraAngleY,
         getPlaneMatrix(),
         new Float32Array(fullLightAngle),
       );
+      const vertexData = new Float32Array([...portalObjBuffer, ...Array.from(_vertexData)])
 
       const obstacles: Point[][] = []
       // serializedMap.obstacles.forEach(p => {

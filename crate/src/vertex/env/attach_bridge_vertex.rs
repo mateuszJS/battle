@@ -1,7 +1,7 @@
 use super::{consts::RAILING_POINT_OFFSETS, VertexComponents};
 use crate::{
     constants::MATH_PI,
-    utils::{comparef32, hypot},
+    utils::{hypot, is_equal_f32},
 };
 
 const BRIDGE_INDICIES: [usize; 42] = [
@@ -61,7 +61,7 @@ pub fn getDestinationPoints(
 
     let mut correctionOffset = (0.0, 0.0);
     // for second and third point we need to move it a bit closer to the center of avoid bridge_offsets.png
-    if comparef32(offset.0, 0.0) {
+    if is_equal_f32(offset.0, 0.0) {
         let oppositePoint = points[MAP_POINT_INDEX_TO_OPPOSITE_INDEX[index]];
         let oppositeAngle = (p.1 - oppositePoint.1).atan2(oppositePoint.0 - p.0);
 

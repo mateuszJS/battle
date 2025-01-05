@@ -1,4 +1,4 @@
-use crate::utils::comparef32;
+use crate::utils::is_equal_f32;
 
 use super::assets_descriptor::AssetId;
 
@@ -48,7 +48,7 @@ impl AnimatedSprite {
         //   throw Error('This animation should only be updated by tick(), NOT progress()!')
         // }
 
-        self.frame_local_index = if comparef32(progress, 0.0) {
+        self.frame_local_index = if is_equal_f32(progress, 0.0) {
             0
         } else {
             (progress * self.config.animation_length as f32).ceil() as usize - 1

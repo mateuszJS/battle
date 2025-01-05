@@ -15,7 +15,7 @@ pub use assets_descriptor::{
 use debug::attach_debug;
 use env::attach_env_vertex;
 
-use crate::{faction::Faction, unit::Unit, utils::comparef32, Universe};
+use crate::{faction::Faction, unit::Unit, utils::is_equal_f32, Universe};
 
 static mut DEBUG: bool = true;
 
@@ -72,8 +72,8 @@ impl Vertex {
             raw_full_light_angle[2],
         ];
 
-        let force_sprites_update = comparef32(sprites_angle_offset, self.last_sprites_angle_offset);
-
+        let force_sprites_update =
+            !is_equal_f32(sprites_angle_offset, self.last_sprites_angle_offset);
         self.last_sprites_angle_offset = sprites_angle_offset;
 
         let units: Vec<Ref<Unit>> = factions

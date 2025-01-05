@@ -33,7 +33,7 @@ use position_utils::map_terrain;
 use serde::{Deserialize, Serialize};
 use std::{borrow::Borrow, panic};
 use unit::Unit;
-use utils::comparef32;
+use utils::is_equal_f32;
 
 mod constants;
 mod faction;

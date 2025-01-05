@@ -1,8 +1,8 @@
-mod comparef32;
 mod hypot;
+mod is_equal_f32;
 
-pub use comparef32::comparef32;
 pub use hypot::hypot;
+pub use is_equal_f32::is_equal_f32;
 
 /*
 tests:
@@ -15,7 +15,7 @@ pub fn get_grouped_points(input: Vec<f32>) -> Vec<Vec<(f32, f32)>> {
     let mut output = vec![];
 
     while i < input.len() {
-        if comparef32(input[i], -1.0) {
+        if is_equal_f32(input[i], -1.0) {
             output.push(vec![]);
             i += 1;
         } else {
