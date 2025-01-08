@@ -4,6 +4,7 @@ mod consts;
 mod debug;
 mod env;
 mod mat4;
+mod objs;
 mod units;
 
 use std::cell::{Ref, RefCell};
@@ -14,6 +15,7 @@ pub use assets_descriptor::{
 };
 use debug::attach_debug;
 use env::attach_env_vertex;
+pub use objs::{init_objs, SetupObjs, OBJS};
 
 use crate::{faction::Faction, unit::Unit, utils::is_equal_f32, Universe};
 
@@ -22,6 +24,7 @@ static mut DEBUG: bool = true;
 pub struct Vertex {
     const_buffer: Vec<f32>,
     last_sprites_angle_offset: f32,
+    debug_time: f32,
 }
 
 impl Vertex {
@@ -37,6 +40,7 @@ impl Vertex {
         Vertex {
             const_buffer,
             last_sprites_angle_offset: sprites_angle_offset,
+            debug_time: 0.0,
         }
     }
 
@@ -103,6 +107,15 @@ impl Vertex {
         let mut buffer = self.const_buffer.clone();
 
         units::add_vertex(units, &mut buffer, plane_matrix, full_light_angle);
+        objs::add_obj(
+            &mut buffer,
+            objs::ObjType::StandardPortal,
+            0.0,
+            (200.0, 800.0),
+            self.debug_time,
+        );
+
+        self.debug_time += dt;
 
         buffer
     }

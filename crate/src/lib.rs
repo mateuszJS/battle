@@ -69,7 +69,7 @@ use squad::Squad;
 use squad_types::SquadType;
 use squads_grid_manager::{SquadsGrid, SquadsGridManager};
 use strategic_point::StrategicPoint;
-use vertex::Vertex;
+use vertex::{SetupObjs, Vertex};
 
 const INDEX_OF_USER_FACTION: usize = 0;
 
@@ -884,6 +884,18 @@ impl Universe {
         };
 
         vertex::initialize_assets_descriptor(frames);
+    }
+
+    pub fn init_objs(raw_objs: JsValue) {
+        let serde = raw_objs.into_serde();
+
+        let objs: SetupObjs = if serde.is_ok() {
+            serde.unwrap()
+        } else {
+            err!("init_objs received not copatible data from JS. Failed at conversion to Rust types.");
+        };
+
+        vertex::init_objs(Some(objs));
     }
 
     // pub fn tick(&mut self, dt: f32, sprites_angle_offset: f32) {

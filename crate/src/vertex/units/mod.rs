@@ -68,20 +68,18 @@ pub fn add_vertex(
                 .enumerate()
                 .for_each(|(index, (x, y, z))| {
                     // components.normals.extend(full_light_angle);
-                    buffer.extend([
-                        x,
-                        y,
-                        z,
-                        1.0, // destination
-                        sources[index].0,
-                        sources[index].1,           // source
-                        frame.texture_index as f32, // texture slice index
-                        0.0,                        // color matrix indec
-                        full_light_angle[0],
-                        full_light_angle[1],
-                        full_light_angle[2],
-                        0.0, // padding for normal(its vec3)
-                    ]);
+                    buffer.push(x);
+                    buffer.push(y);
+                    buffer.push(z);
+                    buffer.push(1.0); // destination
+                    buffer.push(sources[index].0);
+                    buffer.push(sources[index].1); // source
+                    buffer.push(frame.texture_index as f32); // texture slice index
+                    buffer.push(0.0); // color matrix indec
+                    buffer.push(full_light_angle[0]);
+                    buffer.push(full_light_angle[1]);
+                    buffer.push(full_light_angle[2]);
+                    buffer.push(0.0); // padding for normal(its vec3)
                 });
             });
     });

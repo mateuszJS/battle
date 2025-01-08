@@ -8,6 +8,7 @@ import serializeMap from './serializeMap'
 import { createPlatform } from './platform'
 import startTransition from './transition'
 import getMatricies, { getCameraAngle, setTarget } from "worldMatrix";
+import getObjs from 'objs'
 
 const storedMap = '{"platforms":[{"x":95,"y":145},{"x":292,"y":145},{"x":91,"y":331},{"x":288,"y":508},{"x":292,"y":328}],"bridges":[[{"platformIndex":4,"bridgeEdgeIndex":2},{"platformIndex":3,"bridgeEdgeIndex":0}],[{"platformIndex":2,"bridgeEdgeIndex":1},{"platformIndex":4,"bridgeEdgeIndex":3}],[{"platformIndex":0,"bridgeEdgeIndex":2},{"platformIndex":2,"bridgeEdgeIndex":0}],[{"platformIndex":1,"bridgeEdgeIndex":3},{"platformIndex":0,"bridgeEdgeIndex":1}],[{"platformIndex":1,"bridgeEdgeIndex":2},{"platformIndex":4,"bridgeEdgeIndex":0}]]}'
 
@@ -204,8 +205,8 @@ export default function openMapCreator(wasmModule: Universe) {
 
   
   /* clean the DOM and go to the next phase */
-  Promise.all([startBtnClickPromise, getInitUniverse()])
-    .then(([_, initUniverse]) => {
+  Promise.all([startBtnClickPromise, getInitUniverse(), getObjs()])
+    .then(([_, initUniverse, objs]) => {
       const scale = 3
       const serializedMap = serializeMap(mapElement, scale)
       setTarget(() => [serializedMap.cameraTarget.x, 0, serializedMap.cameraTarget.y])
@@ -242,6 +243,8 @@ export default function openMapCreator(wasmModule: Universe) {
         full_light_angle: [-lightDirection[0], -lightDirection[1], -lightDirection[2]],
         sprites_angle_offset: -getCameraAngle()[1],
       }
+
+      Universe.init_objs(objs)
       const universe = Universe.new(input)
 
       initUniverse(

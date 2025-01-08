@@ -48,7 +48,7 @@ const sources = [
     jsonUrl: new URL('assets/sprite_sheets/bridge.json', import.meta.url),
   },
   {
-    imgUrl:  new URL('assets/sprite_sheets/standard_portal.png', import.meta.url),
+    imgUrl:  new URL('assets/sprite_sheets/portal.png', import.meta.url),
     jsonUrl: null,
   },
 ] as const

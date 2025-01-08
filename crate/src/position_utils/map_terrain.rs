@@ -5,8 +5,6 @@ use std::sync::Mutex;
 
 pub type ObstaclesList = Vec<Vec<Point>>;
 
-// static mut TERRAIN_POINTS: LazyLock<Mutex<ObstaclesList>> = LazyLock::new(|| Mutex::new(vec![]));
-
 pub fn init_terrain_points(
     maybe_shapes: Option<Vec<Vec<(f32, f32)>>>,
 ) -> &'static Mutex<ObstaclesList> {
