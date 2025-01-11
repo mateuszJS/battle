@@ -5,7 +5,7 @@ use std::{collections::HashMap, hash::Hash, sync::Mutex};
 pub use consts::ObjType;
 use serde::{Deserialize, Serialize};
 
-use crate::utils::hypot;
+use crate::{constants::MATH_PI, utils::hypot};
 
 #[derive(Serialize, Deserialize)]
 pub struct SetupObjs {
@@ -29,13 +29,7 @@ lazy_static! {
     };
 }
 
-pub fn add_obj(
-    buffer: &mut Vec<f32>,
-    obj_type: ObjType,
-    angle_offset: f32,
-    position: (f32, f32),
-    time: f32,
-) {
+fn add_obj(buffer: &mut Vec<f32>, obj_type: &ObjType, angle: f32, x: f32, y: f32, time: f32) {
     /*
     SELF TIME
     1.33ms - 1.44ms
@@ -45,16 +39,16 @@ pub fn add_obj(
 
          */
     let modifier = (2.0f32).powf((time % 15000.0) * 0.001);
-    match &OBJS.get(&obj_type) {
+    match &OBJS.get(obj_type) {
         Some(verticies) => {
             let mut i = 0;
             while i < verticies.len() {
-                let position_angle = verticies[i + 0] + angle_offset; // + modifier * verticies[i + 2] / 100.0;
-                let norm_angle = verticies[i + 7] + angle_offset; // + modifier * verticies[i + 2] / 100.0;
+                let position_angle = verticies[i + 0] + angle; // + modifier * verticies[i + 2] / 100.0;
+                let norm_angle = verticies[i + 7] + angle; // + modifier * verticies[i + 2] / 100.0;
 
-                buffer.push(position_angle.cos() * verticies[i + 1] + position.0);
+                buffer.push(position_angle.cos() * verticies[i + 1] + x);
                 buffer.push(verticies[i + 2]);
-                buffer.push(-position_angle.sin() * verticies[i + 1] + position.1);
+                buffer.push(-position_angle.sin() * verticies[i + 1] + y);
                 buffer.push(1.0);
                 buffer.push(verticies[i + 3]);
                 buffer.push(verticies[i + 4]);
@@ -70,6 +64,39 @@ pub fn add_obj(
         }
         None => {
             err!("obj_type was not found in static OBJS");
+        }
+    }
+}
+
+pub fn add_complex_model(
+    buffer: &mut Vec<f32>,
+    obj_type: &ObjType,
+    angle: f32,
+    x: f32,
+    y: f32,
+    time: f32,
+) {
+    match obj_type {
+        ObjType::StandardPortal => {
+            let angle_perpendicular = angle + MATH_PI * 0.5;
+            let portal_gates_span = 40.0;
+            add_obj(
+                buffer,
+                obj_type,
+                angle + MATH_PI,
+                x + angle_perpendicular.cos() * portal_gates_span,
+                y - angle_perpendicular.sin() * portal_gates_span,
+                time,
+            );
+
+            add_obj(
+                buffer,
+                obj_type,
+                angle,
+                x + angle_perpendicular.cos() * -portal_gates_span,
+                y - angle_perpendicular.sin() * -portal_gates_span,
+                time,
+            );
         }
     }
 }

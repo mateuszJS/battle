@@ -14,3 +14,10 @@ export default function getCoords(el: HTMLElement): Point {
     y: y - origin.y,
   }
 }
+
+export function getMousePointer(e: MouseEvent): Point {
+  return {
+    x: e.clientX - origin.x,
+    y: e.clientY - origin.y,
+  }
+}

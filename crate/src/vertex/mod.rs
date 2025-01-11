@@ -80,9 +80,20 @@ impl Vertex {
             !is_equal_f32(sprites_angle_offset, self.last_sprites_angle_offset);
         self.last_sprites_angle_offset = sprites_angle_offset;
 
+        let mut buffer = self.const_buffer.clone();
+
         let units: Vec<Ref<Unit>> = factions
             .iter()
             .flat_map(|faction| {
+                objs::add_complex_model(
+                    &mut buffer,
+                    &objs::ObjType::StandardPortal,
+                    faction.factory.angle,
+                    faction.factory.x,
+                    faction.factory.y,
+                    self.debug_time,
+                );
+
                 faction
                     .squads
                     .iter()
@@ -104,16 +115,8 @@ impl Vertex {
             })
             .collect::<Vec<Ref<Unit>>>();
 
-        let mut buffer = self.const_buffer.clone();
-
+        // when you got more units, try to move adding verticies to loops, instead of combinign all units into a vector
         units::add_vertex(units, &mut buffer, plane_matrix, full_light_angle);
-        objs::add_obj(
-            &mut buffer,
-            objs::ObjType::StandardPortal,
-            0.0,
-            (200.0, 800.0),
-            self.debug_time,
-        );
 
         self.debug_time += dt;
 

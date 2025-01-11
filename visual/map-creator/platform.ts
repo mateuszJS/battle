@@ -10,15 +10,17 @@ const mapIndexToPosition = ['top', 'right', 'bottom', 'left']
 export function createPlatform(): HTMLElement {
   return domParser.parseFromString(
     `
-    <div kind="platform" class="platform-vars">
+    <div kind="platform" class="platform-vars size-var">
       <div event-catcher class="octagon">
-        <div class="octagon octagon-inner platform-vars"></div>
+        <div class="octagon-inner">
+          <div class="octagon platform-vars"></div>
+        </div>
       </div>
       ${Array.from({ length: 4 }, (_, i) => (`
         <span
           kind="bridge-edge"
           reproduce
-          class="platform-vars ${
+          class="platform-vars size-var ${//platform-vars need to be here because when we clone element whiel creating bridge, we dont't have a wrapper with platform-vars
             i % 2 ? 'bridge-edge-verticlar' : 'bridge-edge-horizontal'
           } bridge-edge-${mapIndexToPosition[i]}"
         >

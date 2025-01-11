@@ -1,6 +1,6 @@
 import { Universe } from 'Universe'
 import getInitUniverse from 'getStartUniverse'
-import getCoords, { setCoordsOrigin } from './getCoords'
+import getCoords, { getMousePointer, setCoordsOrigin } from './getCoords'
 import setupUI from './setupUI'
 import creationConfig from './creationConfig'
 import { getStoreBridges, restoreBridges, updateBridges } from './bridge'
@@ -9,8 +9,9 @@ import { createPlatform } from './platform'
 import startTransition from './transition'
 import getMatricies, { getCameraAngle, setTarget } from "worldMatrix";
 import getObjs from 'objs'
+import { createFactory } from './factory'
 
-const storedMap = '{"platforms":[{"x":95,"y":145},{"x":292,"y":145},{"x":91,"y":331},{"x":288,"y":508},{"x":292,"y":328}],"bridges":[[{"platformIndex":4,"bridgeEdgeIndex":2},{"platformIndex":3,"bridgeEdgeIndex":0}],[{"platformIndex":2,"bridgeEdgeIndex":1},{"platformIndex":4,"bridgeEdgeIndex":3}],[{"platformIndex":0,"bridgeEdgeIndex":2},{"platformIndex":2,"bridgeEdgeIndex":0}],[{"platformIndex":1,"bridgeEdgeIndex":3},{"platformIndex":0,"bridgeEdgeIndex":1}],[{"platformIndex":1,"bridgeEdgeIndex":2},{"platformIndex":4,"bridgeEdgeIndex":0}]]}'
+const storedMap = '{"platforms":[{"x":95,"y":145},{"x":292,"y":145},{"x":91,"y":331},{"x":288,"y":508},{"x":292,"y":328}],"bridges":[[{"platformIndex":4,"bridgeEdgeIndex":2},{"platformIndex":3,"bridgeEdgeIndex":0}],[{"platformIndex":2,"bridgeEdgeIndex":1},{"platformIndex":4,"bridgeEdgeIndex":3}],[{"platformIndex":0,"bridgeEdgeIndex":2},{"platformIndex":2,"bridgeEdgeIndex":0}],[{"platformIndex":1,"bridgeEdgeIndex":3},{"platformIndex":0,"bridgeEdgeIndex":1}],[{"platformIndex":1,"bridgeEdgeIndex":2},{"platformIndex":4,"bridgeEdgeIndex":0}]],"factories":[[119,168,74]]}'
 
 function getStoreMap(mapEl: HTMLElement) {
   const platformEls = Array.from(mapEl.querySelectorAll<HTMLElement>('[kind="platform"]'))
@@ -18,32 +19,60 @@ function getStoreMap(mapEl: HTMLElement) {
   const platforms = platformEls.map(el => getCoords(el))
   const bridges = getStoreBridges(mapEl)
 
+  const factoriesEls = Array.from(mapEl.querySelectorAll<HTMLElement>('[kind="factory"]'))
+  const factories = factoriesEls.map<[number, number, number]>(el => {
+    const arrowEl = el.querySelector<HTMLElement>('[kind="factory-arrow"]')!
+    const coords = getCoords(el)
+    return [
+      coords.x,
+      coords.y,
+      Number.parseInt(arrowEl.style.rotate)
+    ]
+  })
+
   return {
     platforms,
-    bridges
+    bridges,
+    factories
   }
 }
 
-function retoreMap(mapEl: HTMLElement, data: {
+function restoreMap(mapEl: HTMLElement, data: {
+  factories: [number, number, number][]
   platforms: Point[],
   bridges: Array<Array<{ platformIndex: number, bridgeEdgeIndex: number }>>
 }) {
   const platformEls = data.platforms.map(platformCoord => {
     const el = createPlatform()
     mapEl.appendChild(el)
+    const config = getConfig(el)
     const dragInfo: DragInfo = {
       el,
       startOffset: { x: 0, y: 0 }
     }
-    updateDragElem(platformCoord, dragInfo)
+    config.onDrag(platformCoord, dragInfo)
 
     return el
   })
 
   restoreBridges(platformEls, data.bridges)
+
+  data.factories.map(([x, y, angle]) => {
+    const el = createFactory(angle)
+    mapEl.appendChild(el)
+    const config = getConfig(el)
+    const dragInfo: DragInfo = {
+      el,
+      startOffset: { x: 0, y: 0 }
+    }
+    config.onDrag({x, y}, dragInfo)
+
+    return el
+  })
 }
 
-interface DragInfo {
+
+export interface DragInfo {
   startOffset: Point
   el: HTMLElement
 }
@@ -51,15 +80,9 @@ interface DragInfo {
 let currDragInfo: DragInfo | null = null
 let snapPoint: Point | null = null
 
-function updateDragElem(pointer: Point, dragInfo: DragInfo) {
-  dragInfo.el.style.left = pointer.x + dragInfo.startOffset.x + 'px'
-  dragInfo.el.style.top = pointer.y + dragInfo.startOffset.y + 'px'
-}
-
 function getConfig(el: HTMLElement) {
   const kind = el.getAttribute('kind')
-  /* it might be just event catcher, not the roto of the element */
-  if (!kind) throw Error('Element has reproduce attribute but no kind attribute')
+  if (!kind) throw Error('Element has no kind attribute')
 
   const config = creationConfig[kind as keyof typeof creationConfig]
   if (!config) throw Error(`No config for kind: ${kind}`)
@@ -83,8 +106,10 @@ function startDrag(
     },
     el: elem,
   }
-  
-  updateDragElem(pointer, currDragInfo)
+
+  // I don't think onDrga is needed ot beclaled here, it move by 0px
+  const config = getConfig(elem)
+  config.onDrag(pointer, currDragInfo)
 }
 
 export default function openMapCreator(wasmModule: Universe) {
@@ -102,16 +127,12 @@ export default function openMapCreator(wasmModule: Universe) {
           currDragInfo.el.style.left = snapPoint.x + 'px'
           currDragInfo.el.style.top = snapPoint.y + 'px'
       } else {
-        const pointer = {
-          x: e.clientX,
-          y: e.clientY,
-        }
-        updateDragElem(pointer, currDragInfo)
+        const pointer = getMousePointer(e)
         const config = getConfig(currDragInfo.el)
-        config.onDrag?.(currDragInfo.el)
+        config.onDrag(pointer, currDragInfo)
       }
 
-      updateBridges()
+      updateBridges() // maybe should be moved to onDrag callbacks for platform/bridge-edge
     }
   })
 
@@ -147,10 +168,7 @@ export default function openMapCreator(wasmModule: Universe) {
       dragEl = rootEl
     }
 
-    const pointer = {
-      x: e.clientX,
-      y: e.clientY,
-    }
+    const pointer = getMousePointer(e)
     startDrag(dragEl, pointer)
   })
 
@@ -200,7 +218,7 @@ export default function openMapCreator(wasmModule: Universe) {
     }
   })
 
-  retoreMap(mapElement, JSON.parse(storedMap) as ReturnType<typeof getStoreMap>)
+  restoreMap(mapElement, JSON.parse(storedMap) as ReturnType<typeof getStoreMap>)
  
 
   
@@ -233,6 +251,7 @@ export default function openMapCreator(wasmModule: Universe) {
         bridges: [number, number][][],
         full_light_angle: [number, number, number],
         sprites_angle_offset: number,
+        factories: [number, number, number][],
       }
 
       const {lightDirection} = getMatricies(canvas, 0)
@@ -242,6 +261,7 @@ export default function openMapCreator(wasmModule: Universe) {
         bridges: serializedMap.envVisuals.bridges,
         full_light_angle: [-lightDirection[0], -lightDirection[1], -lightDirection[2]],
         sprites_angle_offset: -getCameraAngle()[1],
+        factories: serializedMap.factories
       }
 
       Universe.init_objs(objs)

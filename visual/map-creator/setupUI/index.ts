@@ -1,4 +1,4 @@
-import { createHQ } from "map-creator/headquarters"
+import { createFactory } from "map-creator/factory"
 import { createPlatform } from "map-creator/platform"
 import addStyles from "map-creator/setupUI/addStyles"
 import addSchemeSetting from "./schemeColor"
@@ -49,18 +49,25 @@ export default function setupUI() {
   return { mapElement, unmount, startBtnClickPromise, viewElem, toolBarEl, controlPanelEl }
 }
 
+function wrapInBox(el: HTMLElement) {
+  const wrapperEl = document.createElement('div')
+  wrapperEl.classList.add('toolbar-box')
+  wrapperEl.appendChild(el)
+  return wrapperEl
+}
+
 function setupToolbar() {
-  const toolbarElem = document.createElement('aside')
-  toolbarElem.classList.add('toolbar')
+  const toolbarEl = document.createElement('aside')
+  toolbarEl.classList.add('toolbar')
 
   /** Fill the toolbar */
-  const platformToolElem = createPlatform()
-  platformToolElem.setAttribute('reproduce', '')
-  toolbarElem.appendChild(platformToolElem)
+  const platformToolEl = createPlatform()
+  platformToolEl.setAttribute('reproduce', '')
+  toolbarEl.appendChild(wrapInBox(platformToolEl))
   
-  const triggerCreateHQ = createHQ(toolbarElem)
-  triggerCreateHQ.setAttribute('reproduce', '')
-  toolbarElem.appendChild(triggerCreateHQ)
+  const factoryToolEl = createFactory()
+  factoryToolEl.setAttribute('reproduce', '')
+  toolbarEl.appendChild(wrapInBox(factoryToolEl))
 
-  return toolbarElem
+  return toolbarEl
 }

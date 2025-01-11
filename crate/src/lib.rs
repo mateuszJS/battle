@@ -97,6 +97,7 @@ pub struct UniverseInput {
     bridges: Vec<Vec<(f32, f32)>>,
     full_light_angle: [f32; 3],
     sprites_angle_offset: f32,
+    factories: Vec<[f32; 3]>,
 }
 
 #[wasm_bindgen]
@@ -114,9 +115,24 @@ impl Universe {
             bridges,
             full_light_angle,
             sprites_angle_offset,
+            factories,
         } = input;
 
-        let mut factions: Vec<Faction> = vec![];
+        let mut factions: Vec<Faction> = factories
+            .into_iter()
+            .enumerate()
+            .map(|(index, [x, y, angle])| {
+                Faction::new(
+                    index as u32,
+                    IdGenerator::generate_id(),
+                    x,
+                    y,
+                    angle,
+                    index == 0,
+                )
+            })
+            .collect();
+
         let mut strategic_points = vec![];
         let mut i = 0;
         // while i < strategic_points_raw.len() {
@@ -133,25 +149,9 @@ impl Universe {
             strategic_points,
         };
 
-        // let mut i = 0;
-        // while i < factions_data.len() {
-        let faction_id = IdGenerator::generate_id();
-        factions.push(Faction::new(
-            faction_id,
-            IdGenerator::generate_id(),
-            0.0,
-            0.0,
-            0.0,
-            i == 0,
-        ));
-
-        let mut squad = Squad::new(faction_id, IdGenerator::generate_id(), SquadType::Solider);
-
+        let mut squad = Squad::new(0, IdGenerator::generate_id(), SquadType::Solider);
         squad.add_member(0.0, 0.0);
-
         factions[0].squads.push(squad);
-        // i += 4;
-        // }
 
         map_terrain::init_terrain_points(Some(shapes));
         // CalcPositions::get_is_point_inside_any_obstacle((0, 0), false);

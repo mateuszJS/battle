@@ -1,5 +1,6 @@
-import getShapes from "./getShapes";
+import getShapes from "./getShapes"
 import collectEnvVisuals, { EnvVisuals } from "./collectEnvVisuals";
+import getFactories from "./getFactories";
 
 export interface SerializedMap {
   width: number
@@ -7,14 +8,17 @@ export interface SerializedMap {
   shapes: [number, number][][]
   cameraTarget: Point
   envVisuals: EnvVisuals
+  factories: [number, number, number][]
 }
 
 export default function serializeMap(mapEl: HTMLElement, scale: number): SerializedMap {
   const shapes = getShapes(mapEl, scale)
   const envVisuals = collectEnvVisuals(mapEl, scale)
+  const factories = getFactories(mapEl, scale)
+
   const firstPoint = {
-    x: 500,
-    y: 500,
+    x: factories[0][0],
+    y: factories[0][1],
   }
   
   return {
@@ -23,5 +27,6 @@ export default function serializeMap(mapEl: HTMLElement, scale: number): Seriali
     cameraTarget: firstPoint,
     shapes,
     envVisuals,
+    factories,
   }
 }

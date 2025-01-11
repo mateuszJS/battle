@@ -12,10 +12,13 @@
 
   [event-catcher] {
     cursor: pointer;
+
+    * {
+      pointer-events: none;
+    }
   }
 
   .platform-vars {
-    --size: 100px;
     --half-size: calc(var(--size) / 2);
     --o:calc(var(--half-size) * tan(-22.5deg)); /* vertical/horizontal distance from middle of octagon to closes corner */
     --border-width: 10px;
@@ -23,6 +26,8 @@
 
     --fill-color: #ddaf30;
     --accent-color: rgb(148, 0, 185);
+
+    --inner-size: calc(var(--size) - 2 * var(--border-width));
   }
   
   [kind="platform"] {
@@ -31,15 +36,23 @@
     height: var(--size);
   }
 
+  *:is([kind="platform"], [kind="bridge-edge"]).size-var {
+    --size: 100px;
+  }
+
   .toolbar {
     background: #222;
     display: flex;
     flex-direction: column;
     position: relative;
 
-    & > * {
-      aspect-ratio: 1;
-      width: 100%;
+    .toolbar-box {
+      height: 100px;
+      padding: 10px;
+
+      .size-var { /* this class is used only to override size variable */
+        --size: 80px; /* selector s very specific so overrides */
+      }
     }
   }
 
@@ -65,11 +78,11 @@
   }
 
   .octagon-inner {
-    --size: 80px;
-    pointer-events: none;
+    --size: var(--inner-size);
+    height: 100%;
   }
 
-  .octagon:hover {
+  [event-catcher].octagon:hover {
     background: var(--border-color);
   }
 
@@ -108,7 +121,7 @@
   
     [event-catcher] {
       /* if we want to make event catcher bigger while snapping we need to:
-        1. Make everything poitner-events: none expect available kind option
+        1. Make everything "pointer-events: none" expect available kind option
         2. Split visual part and event catcher into two separate elements
       */
       --padding: 3px;
@@ -155,10 +168,6 @@
     background: tomato;
     pointer-events: none;
   }
-
-  .headquarter {
-    background: lime;
-  }
 }
 
 .control-panel {
@@ -177,5 +186,59 @@
     margin: calc(var(--anchor-point-size) / -2);
     border-radius: 50%;
     background: rgb(220, 82, 255);
+  }
+}
+
+
+[kind="factory"] {
+  &.size-var {
+    --size: 50px;
+  }
+
+  position: relative;
+  width: var(--size);
+  height: var(--size);
+
+  .factory {
+    width: 100%;
+    height: 100%;
+    background-color: lime;
+    border-radius: 50%;
+  }
+
+  [kind="factory-arrow"] {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+  }
+
+  .factory-arrow {
+    --width: calc(var(--size) * .7);
+    --height: calc(var(--width) * 0.2);
+
+    position: relative;
+    top: calc(-1 * var(--height));
+    left: calc(-.5 * var(--height));
+    width: var(--width);
+    height: calc(var(--size) * 0.25);
+    border-radius: 10px;
+    background: #fff;;
+
+    &:before {
+      position: absolute;
+      right: calc(-.5 * var(--height));
+      top: calc(-1 * var(--height));
+
+      --head-size: calc(var(--height) * 2);
+      content: "";
+      display: block;
+      width: 0px;
+      height: 0px;
+      border-top: var(--head-size) solid transparent;
+      border-bottom: var(--head-size) solid transparent;
+      border-left: var(--head-size) solid #fff;
+    }
   }
 }
