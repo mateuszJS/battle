@@ -220,11 +220,11 @@ export default function openMapCreator(wasmModule: Universe) {
 
   restoreMap(mapElement, JSON.parse(storedMap) as ReturnType<typeof getStoreMap>)
  
-
-  
   /* clean the DOM and go to the next phase */
-  Promise.all([startBtnClickPromise, getInitUniverse(), getObjs()])
-    .then(([_, initUniverse, objs]) => {
+  // Promise.all([startBtnClickPromise, getInitUniverse(), getObjs()])
+  // .then(([_, initUniverse, objs]) => {
+  Promise.all([getInitUniverse(), getObjs()])
+    .then(([initUniverse, objs]) => {
       const scale = 3
       const serializedMap = serializeMap(mapElement, scale)
       setTarget(() => [serializedMap.cameraTarget.x, 0, serializedMap.cameraTarget.y])

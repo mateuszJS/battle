@@ -2,6 +2,7 @@ mod animated_sprite;
 mod assets_descriptor;
 mod consts;
 mod debug;
+mod effects;
 mod env;
 mod mat4;
 mod objs;
@@ -42,6 +43,23 @@ impl Vertex {
             last_sprites_angle_offset: sprites_angle_offset,
             debug_time: 0.0,
         }
+    }
+
+    pub fn get_effects_vertex(&self, factions: &Vec<Faction>, dt: f32) -> Vec<f32> {
+        let mut buffer = vec![];
+
+        factions.iter().for_each(|faction| {
+            effects::add_effect(
+                &mut buffer,
+                &effects::EffectType::StandardPortal,
+                faction.factory.x,
+                faction.factory.y,
+                faction.factory.angle,
+                self.debug_time,
+            );
+        });
+
+        buffer
     }
 
     pub fn get_vertex(

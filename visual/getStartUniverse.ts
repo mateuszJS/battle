@@ -1,13 +1,14 @@
 import { Universe } from "Universe";
 import canvasSizeObserver from "WebGPU/canvasSizeObserver";
 import setupWebGPU from "WebGPU/setupWebGPU";
-import { drawLine, drawTexture } from "WebGPU/programs/initPrograms";
+import { drawLine, drawPortal, drawTexture } from "WebGPU/programs/initPrograms";
 import loadAssetsIntoTextureArray from "loadAssetsIntoTextureArray/loadAssetsIntoTextureArray";
 import getMatricies, { getCameraAngle } from "worldMatrix";
 import { SerializedMap } from "map-creator/serializeMap";
 import DebugRepresentation from "debug/DebugRepresentation";
 import getPlaneMatrix from "worldMatrix/planeMatrix"
 import initMouseController from "mouseController";
+import { createTextureFromImage } from "WebGPU/getTexture";
 
 let depthTexture: GPUTexture | undefined;
 
@@ -53,6 +54,10 @@ export default async function getInitUniverse(): Promise<
     name: frame.name,
     texture_index: frame.textureIndex,
   })))
+
+  // const perlinTexture = await createTextureFromImage(device, new URL('assets/texture.png', import.meta.url).href, {})
+  const perlinTexture = await createTextureFromImage(device, new URL('assets/perlin.png', import.meta.url).href, {})
+  const voronoidTexture = await createTextureFromImage(device, new URL('assets/voronoid.png', import.meta.url).href, {})
 
   return function initUniverse (universe, serializedMap, colorMatricies) {
 
@@ -111,9 +116,6 @@ export default async function getInitUniverse(): Promise<
       const pass = encoder.beginRenderPass(descriptor)
       const fullLightAngle = [-lightDirection[0], -lightDirection[1], -lightDirection[2]]
 
-      // const vertexData = getVertexData(units, envRepresentation, debugRepresentation, fullLightAngle) // to wasm
-      // console.log('cameraAngleY', cameraAngleY)
-      // universe.tick(dt, -cameraAngleY);
       const vertexData = universe.get_vertex_data(
         dt,
         -cameraAngleY,
@@ -121,21 +123,13 @@ export default async function getInitUniverse(): Promise<
         new Float32Array(fullLightAngle),
       );
 
-      const obstacles: Point[][] = []
-      // serializedMap.obstacles.forEach(p => {
-      //   if (p === null) {
-      //     obstacles.push([])
-      //   } else {
-      //     obstacles[obstacles.length - 1].push(p)
-      //   }
-      // })
-
-      obstacles.forEach(pList => {
-        if (pList.length !== 0) {
-          drawLine(pass, worldMatrix,  [...pList, pList[0]], 10)
-        }
-      })
       drawTexture(pass, worldMatrix, vertexData, texture2dArray, colorMatricies, lightDirection)
+
+
+      const effectsVertexData = universe.get_effects_vertex_data(dt)
+      drawPortal(pass, worldMatrix, effectsVertexData, perlinTexture, voronoidTexture, now)
+
+
       pass.end()
       const commandBuffer = encoder.finish();
       device.queue.submit([commandBuffer]);

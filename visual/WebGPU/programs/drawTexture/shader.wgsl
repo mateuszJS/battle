@@ -9,7 +9,6 @@ struct Vertex {
 struct Uniforms {
   worldViewProjection: mat4x4f,
   colorMatricies: array<mat3x3f, NUM_OF_MATRICIES>, /* 1 - factions number limit */
-  // normalMatrix: mat3x3f,
   lightDirection: vec3f,
 };
 
@@ -48,8 +47,6 @@ struct VertexOutput {
 @fragment fn fs(in: VertexOutput) -> @location(0) vec4f {
   let colorMatrix = u.colorMatricies[in.colorMatrixIndex];
   let texel = textureSample(ourTexture, ourSampler, in.texCoord, in.texLayerIndex);
-
-
 
   // Lets multiply just the color portion (not the alpha)
   // by the light

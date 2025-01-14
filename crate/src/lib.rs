@@ -874,6 +874,14 @@ impl Universe {
         js_sys::Float32Array::from(&result[..])
     }
 
+    pub fn get_effects_vertex_data(&self, dt: f32) -> js_sys::Float32Array {
+        let Universe {
+            vertex, factions, ..
+        } = self;
+        let result = vertex.get_effects_vertex(factions, dt);
+        js_sys::Float32Array::from(&result[..])
+    }
+
     pub fn init_frame_descriptor(raw_frames: JsValue) {
         let serde = raw_frames.into_serde();
 

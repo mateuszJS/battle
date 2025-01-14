@@ -66,7 +66,7 @@ export function setTarget(callback: (curr: [number, number, number]) => [number,
   target = callback(target)
 }
 
-let radius = 3008
+let radius = 2000//3008
 export function setRadius(callback: (curr: number) => number) {
   radius = callback(radius)
 }

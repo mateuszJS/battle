@@ -37,6 +37,8 @@ const startGame = () => {
     goToMapCreatorBtn.remove()
     openMapCreator(Universe)
   })
+
+  goToMapCreatorBtn.click()
 }
 
 startGame()
