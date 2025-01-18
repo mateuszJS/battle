@@ -140,4 +140,73 @@ impl Vertex {
 
         buffer
     }
+
+    pub fn get_pick_vertex(
+        &mut self,
+        factions: &mut Vec<Faction>,
+        dt: f32,
+        sprites_angle_offset: f32,
+        raw_plane_matrix: Vec<f32>,
+        raw_full_light_angle: Vec<f32>,
+    ) -> Vec<f32> {
+        let plane_matrix = [
+            raw_plane_matrix[0],
+            raw_plane_matrix[1],
+            raw_plane_matrix[2],
+            raw_plane_matrix[3],
+            raw_plane_matrix[4],
+            raw_plane_matrix[5],
+            raw_plane_matrix[6],
+            raw_plane_matrix[7],
+            raw_plane_matrix[8],
+            raw_plane_matrix[9],
+            raw_plane_matrix[10],
+            raw_plane_matrix[11],
+            raw_plane_matrix[12],
+            raw_plane_matrix[13],
+            raw_plane_matrix[14],
+            raw_plane_matrix[15],
+        ];
+        let full_light_angle = [
+            raw_full_light_angle[0],
+            raw_full_light_angle[1],
+            raw_full_light_angle[2],
+        ];
+
+        let mut buffer = vec![];
+        // let mut buffer = self.const_buffer.clone();
+
+        let units: Vec<Ref<Unit>> = factions
+            .iter()
+            .flat_map(|faction| {
+                objs::add_pick_complex_model(
+                    &mut buffer,
+                    &objs::ObjType::StandardPortal,
+                    faction.factory.angle,
+                    faction.factory.x,
+                    faction.factory.y,
+                    self.debug_time,
+                );
+
+                faction
+                    .squads
+                    .iter()
+                    .flat_map(|squad| {
+                        squad
+                            .members
+                            .iter()
+                            .map(|ref_unit| ref_unit.borrow())
+                            .collect::<Vec<Ref<Unit>>>()
+                    })
+                    .collect::<Vec<Ref<Unit>>>()
+            })
+            .collect::<Vec<Ref<Unit>>>();
+
+        // when you got more units, try to move adding verticies to loops, instead of combinign all units into a vector
+        units::add_pick_vertex(units, &mut buffer, plane_matrix, full_light_angle);
+
+        self.debug_time += dt;
+
+        buffer
+    }
 }

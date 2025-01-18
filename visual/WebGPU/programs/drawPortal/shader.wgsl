@@ -32,12 +32,14 @@ struct VertexOutput {
 
   // let len = length(vec2f(in.texCoord.x - 0.5, in.texCoord.y - 0.5));
   // let smooth_len = smoothstep(0.0, 0.99, pow(0.5 - len, 0.5)) * 1.0;
-  let smooth_len = 1.0 - smoothstep(0.35, 0.5, abs(in.texCoord.y - 0.5));
 
   // let color = get_magenta(in) * 1.0 + get_white(in) * 1.2;
-  let color = get_blue(in) + get_magenta(in) * 0.8 + get_white(in) * 1.8;
+  let alpha_impactful = get_blue(in) * 0.4 + get_white(in) * 1.0;
+  let color = get_magenta(in) * 0.8 + alpha_impactful;
+  let smooth_len = 1.0 - smoothstep(0.35, 0.5, abs(in.texCoord.y - 0.5));
+  let improved_alpha = smooth_len + smoothstep(0.25, 1.0, alpha_impactful.r/3 + alpha_impactful.g/3 + alpha_impactful.b/3 + 0.2);
   
-  return vec4f(color.rgb * smooth_len, smooth_len);
+  return vec4f(color.rgb * improved_alpha, improved_alpha);
 }
 
 
@@ -56,7 +58,7 @@ fn get_blue(in: VertexOutput) -> vec4f {
 
   let light_magenta = vec3f(0.3, 1.0, 1.0);
   
-  let s = light_magenta * smoothstep(0.6, 1.0, v);
+  let s = light_magenta * smoothstep(0.5, 1.0, v);
 
   return vec4f(s.rgb, 1.0);
 }

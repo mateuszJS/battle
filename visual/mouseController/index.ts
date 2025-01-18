@@ -4,6 +4,8 @@ const SCREEN_MOVE_THRESHOLD = 150
 const CAMERA_MAX_SPEED = 20
 const ANGLE_ROTATION_SPEED = 0.025
 
+export const pointer = { x: 0, y: 0 }
+
 export default function initMouseController(mapWidth: number, mapHeight: number) {
   const offset = { x: 0, y: 0 }
 
@@ -29,20 +31,29 @@ export default function initMouseController(mapWidth: number, mapHeight: number)
     offset.y = 0
   })
 
-  let lastX = 0
+  let isUpdatingAngle = false
   function updateAngle(e: MouseEvent) {
-    setAngle(angle => angle + (lastX - e.clientX) * ANGLE_ROTATION_SPEED)
-    lastX = e.clientX
+    setAngle(angle => angle + (pointer.x - e.clientX) * ANGLE_ROTATION_SPEED)
   }
+
+  document.addEventListener('mousemove', e => {
+    if (isUpdatingAngle) {
+      updateAngle(e)
+    }
+
+    pointer.x = e.clientX
+    pointer.y = e.clientY
+  })
+
   document.addEventListener('mousedown', e => {
     if (e.button === 1) {
-      lastX = e.clientX
-      document.addEventListener('mousemove', updateAngle)
+      pointer.x = e.clientX // is it needed??
+      isUpdatingAngle = true
     }
   });
 
   document.addEventListener('mouseup', e => {
-    document.removeEventListener('mousemove', updateAngle)
+    isUpdatingAngle = false
   });
 
   document.addEventListener("wheel", (event) => {

@@ -117,6 +117,13 @@ export default function openMapCreator(wasmModule: Universe) {
   const canvas = document.createElement('canvas')
   document.body.appendChild(canvas)
 
+  /*
+  create center indicator
+  */
+  const indicatorEl = document.createElement('span')
+  indicatorEl.classList.add('center-indicator')
+  document.body.appendChild(indicatorEl)
+
   const { mapElement, unmount, startBtnClickPromise, viewElem, toolBarEl, controlPanelEl } = setupUI()
 
   setCoordsOrigin(mapElement)

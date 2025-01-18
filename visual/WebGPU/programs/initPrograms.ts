@@ -11,6 +11,7 @@ import getDrawLine from "./drawLine/getProgram"
 import getComputeMatrix from "./computeMatrix/getProgram"
 import getComputeBuiltinVars from "./computeBuiltinVars/getProgram"
 import getDrawPortal from "./drawPortal/getProgram"
+import getPickDrawTexture from "./pickDrawTexture/getProgram"
 
 export let drawTriangle: ReturnType<typeof getDrawTriangle>
 export let drawBezier: ReturnType<typeof getDrawBezier>
@@ -25,6 +26,7 @@ export let drawLine: ReturnType<typeof getDrawLine>
 export let computeMatrix: ReturnType<typeof getComputeMatrix>
 export let computeBuiltinVars: ReturnType<typeof getComputeBuiltinVars>
 export let drawPortal: ReturnType<typeof getDrawPortal>
+export let pickDrawTexture: ReturnType<typeof getPickDrawTexture>
 
 export default function initPrograms(
   device: GPUDevice,
@@ -43,4 +45,5 @@ export default function initPrograms(
   computeMatrix = getComputeMatrix(device)
   computeBuiltinVars = getComputeBuiltinVars(device)
   drawPortal = getDrawPortal(device, presentationFormat)
+  pickDrawTexture = getPickDrawTexture(device, presentationFormat)
 }

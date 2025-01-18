@@ -874,6 +874,26 @@ impl Universe {
         js_sys::Float32Array::from(&result[..])
     }
 
+    pub fn get_pick_vertex_data(
+        &mut self,
+        dt: f32,
+        sprites_angle_offset: f32,
+        raw_plane_matrix: Vec<f32>,
+        raw_full_light_angle: Vec<f32>,
+    ) -> js_sys::Float32Array {
+        let Universe {
+            vertex, factions, ..
+        } = self;
+        let result = vertex.get_pick_vertex(
+            factions,
+            dt,
+            sprites_angle_offset,
+            raw_plane_matrix,
+            raw_full_light_angle,
+        );
+        js_sys::Float32Array::from(&result[..])
+    }
+
     pub fn get_effects_vertex_data(&self, dt: f32) -> js_sys::Float32Array {
         let Universe {
             vertex, factions, ..
