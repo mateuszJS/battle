@@ -39,18 +39,7 @@ export default function getProgram(
       module,
       entryPoint: 'fs',
       targets: [{
-        format: presentationFormat,
-        // format: 'r32uint',
-        blend: { // it's needed because some of textures has lower depth but are transparent in soem pixels(most of spritessheets are like this)
-          color: {
-            srcFactor: 'one',
-            dstFactor: 'one-minus-src-alpha'
-          },
-          alpha: {
-            srcFactor: 'one',
-            dstFactor: 'one-minus-src-alpha'
-          },
-        },
+        format: 'r32uint',
       }],
     },
     primitive: {

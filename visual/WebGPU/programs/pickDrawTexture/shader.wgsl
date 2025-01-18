@@ -31,10 +31,11 @@ struct VertexOutput {
   return out;
 }
 
-@fragment fn fs(in: VertexOutput) -> @location(0) vec4<f32> {
-  return textureSample(ourTexture, ourSampler, in.texCoord, in.texLayerIndex);
+
+@fragment fn fs(in: VertexOutput) -> @location(0) u32 {
+  let alpha = textureSample(ourTexture, ourSampler, in.texCoord, in.texLayerIndex).a;
+  if (alpha < 0.1) {
+    discard; // r32uint doesn't support blending so only skipping pixels lefts
+  }
+  return u32(in.id);
 }
-// @fragment fn fs(in: VertexOutput) -> @location(0) u32 {
-//   let alpha = textureSample(ourTexture, ourSampler, in.texCoord, in.texLayerIndex).a;
-//   return u32(in.id * step(0.01, alpha));
-// }

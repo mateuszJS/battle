@@ -5,7 +5,6 @@ interface SetupWebGPUOutput {
   canvas: HTMLCanvasElement,
   context: GPUCanvasContext,
   device: GPUDevice,
-  presentationFormat: GPUTextureFormat,
 }
 
 export default async function setupWebGPU(): Promise<SetupWebGPUOutput> {
@@ -32,6 +31,5 @@ export default async function setupWebGPU(): Promise<SetupWebGPUOutput> {
     device,
     canvas,
     context,
-    presentationFormat,
   }
 }

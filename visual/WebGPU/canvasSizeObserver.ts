@@ -3,7 +3,7 @@ import m3 from './m3'
 export default function canvasSizeObserver(
   canvas: HTMLCanvasElement,
   device: GPUDevice,
-  callback: VoidFunction
+  callback?: VoidFunction
 ) {
   const observer = new ResizeObserver((entries) => {
     for (const entry of entries) {
@@ -18,7 +18,7 @@ export default function canvasSizeObserver(
         1,
         Math.min(height, device.limits.maxTextureDimension2D)
       );
-      callback()
+      callback?.()
     }
   });
   observer.observe(canvas);

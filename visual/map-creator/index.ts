@@ -1,5 +1,5 @@
 import { Universe } from 'Universe'
-import getInitUniverse from 'getStartUniverse'
+import getInitUniverse from 'main'
 import getCoords, { getMousePointer, setCoordsOrigin } from './getCoords'
 import setupUI from './setupUI'
 import creationConfig from './creationConfig'
