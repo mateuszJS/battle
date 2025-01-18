@@ -41,14 +41,24 @@ export default function getProgram(
       targets: [{
         format: presentationFormat,
         // format: 'r32uint',
+        blend: { // it's needed because some of textures has lower depth but are transparent in soem pixels(most of spritessheets are like this)
+          color: {
+            srcFactor: 'one',
+            dstFactor: 'one-minus-src-alpha'
+          },
+          alpha: {
+            srcFactor: 'one',
+            dstFactor: 'one-minus-src-alpha'
+          },
+        },
       }],
     },
     primitive: {
       cullMode: 'back',
     },
     depthStencil: {
-      depthWriteEnabled: false,// we dont need to write, sicne we use previous one!
-      depthCompare: 'less-equal',
+      depthWriteEnabled: true,
+      depthCompare: 'less',
       format: 'depth24plus',
     },
   });

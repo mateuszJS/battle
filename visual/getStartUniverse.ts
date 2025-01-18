@@ -58,16 +58,18 @@ function handlePicking(
     ],
     depthStencilAttachment: {
       view: passedDepthTexture.createView(), // placholder to calm down TS
-      depthLoadOp: 'load',
-      depthStoreOp: 'store', // change to 'store' if we ran more than one render,
+      depthLoadOp: 'clear',
+      depthClearValue: 1.0,
+      depthStoreOp: 'discard',
     } as const,
   }
   const tx = -(2 * (pointer.x / canvas.clientWidth) - 1)
   const ty = 2 * (pointer.y / canvas.clientHeight) - 1
 
   const extraMatrix = [
-    mat4.translation([tx * canvas.clientWidth, ty * canvas.clientHeight, 0]),
-    mat4.scaling([canvas.clientWidth, canvas.clientHeight, 1]),
+    mat4.translation([tx, ty, 0]),
+    // mat4.translation([tx * canvas.clientWidth, ty * canvas.clientHeight, 0]),
+    // mat4.scaling([canvas.clientWidth, canvas.clientHeight, 1]),
   ].reduce(
     (matrix, rotationMatrix) => mat4.multiply(matrix, rotationMatrix),
     mat4.identity() // put camera at exact same palce as objwct to follow
@@ -78,8 +80,8 @@ function handlePicking(
   setExtraMatrix(null)
 
   const pass = encoder.beginRenderPass(descriptor)
-  const width = 100
-  const height = 100
+  const width = canvas.clientWidth
+  const height = canvas.clientHeight
   pass.setViewport(0, 0, width, height, 0, 1);
   // Set the scissor rectangle to clip rendering to the 1x1 area
   pass.setScissorRect(0, 0, width, height);
@@ -214,7 +216,7 @@ export default async function getInitUniverse(): Promise<
           view: depthTexture.createView(), // placholder to calm down TS
           depthClearValue: 1.0,
           depthLoadOp: 'clear',
-          depthStoreOp: 'store',
+          depthStoreOp: 'discard',
         } as const,
       }
       const encoder = device.createCommandEncoder()
