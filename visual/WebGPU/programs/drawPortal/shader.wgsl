@@ -27,19 +27,56 @@ struct VertexOutput {
   return out;
 }
 
+const TOP_ALPHA_SLOPE = 0.8;
+const BOTTOM_ALPHA_SLOPE = 0.13;
+
 @fragment fn fs(in: VertexOutput) -> @location(0) vec4f {
     let unused = textureSample(voronoidTexture, noiseSampler, in.texCoord).r;
 
   // let len = length(vec2f(in.texCoord.x - 0.5, in.texCoord.y - 0.5));
   // let smooth_len = smoothstep(0.0, 0.99, pow(0.5 - len, 0.5)) * 1.0;
+  let blue = get_blue(in);
+  let white = get_white(in) * 2.0;
+  let higher_alpha_color = blue * 0.5 + white * 1.3;
+  // let color = get_magenta(in) * 0.8 + edge_alpha;
+  // let smooth_len = 1.0 - smoothstep(0.35, 0.5, abs(in.texCoord.y - 0.5));
 
-  // let color = get_magenta(in) * 1.0 + get_white(in) * 1.2;
-  let alpha_impactful = get_blue(in) * 0.4 + get_white(in) * 1.0;
-  let color = get_magenta(in) * 0.8 + alpha_impactful;
-  let smooth_len = 1.0 - smoothstep(0.35, 0.5, abs(in.texCoord.y - 0.5));
-  let improved_alpha = smooth_len + smoothstep(0.25, 1.0, alpha_impactful.r/3 + alpha_impactful.g/3 + alpha_impactful.b/3 + 0.2);
-  
-  return vec4f(color.rgb * improved_alpha, improved_alpha);
+  let top_edge_influence = max(0.0, in.texCoord.y - TOP_ALPHA_SLOPE) / (1.0 - TOP_ALPHA_SLOPE);
+  let vertical_partition = top_edge_influence
+  + max(0.0, (1.0 - in.texCoord.y) - (1.0 - BOTTOM_ALPHA_SLOPE)) / BOTTOM_ALPHA_SLOPE;// sign(in.texCoord.y - 0.35) * 0.65 + sign(1.0 - in.texCoord.y - 0.35) * 0.35;
+
+  let alpha_from_color = smoothstep(0.2, 1.0, 2.0 * max(max(higher_alpha_color.r, higher_alpha_color.g), higher_alpha_color.b));
+
+  let dist_from_center = 1.0 - smoothstep(0.0, 0.1, (0.5 - abs(in.texCoord.x - 0.5) - 0.35));
+  let dist_from_center_pow = pow(dist_from_center, 2.0);
+  // return vec4f(pow(dist_from_center, 3.0));
+  let alpha_factor = pow(1.0 - vertical_partition, 1.5);
+  // let alpha_factor = pow(1.0 - vertical_partition, 2.2);
+  let alpha = max(alpha_factor * alpha_from_color, alpha_factor);
+  let norm_alpha = min(alpha, 1.0);
+  // return vec4f(pow(alpha_factor, 1.0));
+
+  let magenta = get_magenta(in);
+  let alpha_from_colors = max((magenta.r - 0.5) * 3.0, max(blue.b, white.b) * 2.0) * alpha_factor;
+  let together_alpha = max(
+    pow(alpha_factor, 2.0),// - 0.09 * max(0.0, sign(top_edge_influence) * dist_from_center),
+    alpha_from_colors - max(0.0, sign(top_edge_influence) * dist_from_center_pow)
+  );
+  return vec4f((blue + white + magenta).rgb * together_alpha, together_alpha);
+
+  let magenta_alpha_trehsold = 0.3;
+  let magenta_alpha = smoothstep(0.0, 1.0 - magenta_alpha_trehsold, alpha_factor - magenta_alpha_trehsold);
+  let color = magenta * magenta_alpha;
+  // return color;
+  // return vec4f(vec3f(pow(alpha_factor, 1.5)), 1.0);
+  // return vec4f(alpha_factor, alpha_factor, alpha_factor, alpha_factor);
+  let b = alpha_from_color * alpha_factor;
+  let a = higher_alpha_color.rgb * alpha_factor;
+  return color + vec4f(a, b); // GOOD
+
+
+  return vec4f(color.rgb, alpha_factor);
+  // return vec4f(color.rgb * improved_alpha, improved_alpha);
 }
 
 
@@ -52,7 +89,7 @@ fn get_blue(in: VertexOutput) -> vec4f {
 
   let new_coords = rotateCoords + vec2f(
     factor,
-    factor + u.time * 0.00005,
+    factor + u.time * -0.00005,
   );
   let v = textureSample(voronoidTexture, noiseSampler, new_coords).r;
 
@@ -70,7 +107,7 @@ fn get_magenta(in: VertexOutput) -> vec4f {
 
   let new_coords = scaledCoords + vec2f(
     factor + u.time * 0.00006,
-    factor + u.time * 0.00003,
+    factor + u.time * -0.00003,
   );
 
   let dark_magenta = vec3f(0.463, 0.255, 0.921);
@@ -92,8 +129,8 @@ fn get_white(in: VertexOutput) -> vec4f {
   let factor = textureSample(noiseTexture, noiseSampler, scaledCoords).r * 0.3;
 
   let new_coords = scaledCoords + vec2f(
-    factor + u.time * 0.00008,
     factor + u.time * 0.00004,
+    factor + u.time * -0.00008,
   );
 
   let c = textureSample(noiseTexture, noiseSampler, new_coords).r;
